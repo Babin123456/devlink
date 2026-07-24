@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { projectsService } from "@/services";
-import { Card, TagChip, SectionHeader } from "@/components/shared/primitives";
+import { Card, TagChip, SectionHeader, NoProjectsEmptyState } from "@/components/shared/primitives";
 import { Star, GitFork, Users2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -201,16 +201,25 @@ function ProjectsPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="mb-3 grid h-12 w-12 place-items-center rounded-full bg-muted text-muted-foreground">🔍</div>
-          <p className="text-[14px] font-semibold text-foreground">No projects match your filters</p>
-          <p className="mt-1 text-[13px] text-muted-foreground">Try adjusting or resetting your filters.</p>
-          {hasActiveFilters && (
-            <button onClick={resetFilters} className="mt-3 text-[13px] font-medium text-primary hover:underline">
-              Reset filters
-            </button>
-          )}
-        </div>
+        <Card className="py-8">
+          <NoProjectsEmptyState
+            title={hasActiveFilters || q ? "No projects match your filters" : "No projects found"}
+            desc={hasActiveFilters || q ? "Try adjusting your search query or resetting your applied filters." : "There are no projects available right now. Be the first to create one!"}
+            action={
+              hasActiveFilters || q ? (
+                <button
+                  onClick={() => {
+                    setQ("");
+                    resetFilters();
+                  }}
+                  className="rounded-md border border-border bg-surface px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-muted"
+                >
+                  Reset search & filters
+                </button>
+              ) : undefined
+            }
+          />
+        </Card>
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((p) => (

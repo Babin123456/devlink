@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { buildersService } from "@/services";
-import { Card, TagChip, Avatar } from "@/components/shared/primitives";
+import { Card, TagChip, Avatar, NoConnectionsEmptyState } from "@/components/shared/primitives";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
@@ -64,28 +64,53 @@ function BuildersPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {filtered.map((b) => (
-          <Link key={b.id} to="/builders/$builderId" params={{ builderId: b.id }}>
-            <Card interactive className="p-4 text-center">
-              <div className="mx-auto w-fit">
-                <Avatar src={b.avatar} alt={b.name} size={64} online={b.online} />
-              </div>
-              <p className="mt-2 text-[14px] font-semibold text-foreground">{b.name}</p>
-              <p className="text-[12px] text-muted-foreground">{b.role}</p>
-              <p className="text-[11px] text-muted-foreground">{b.country} · {b.yearsExp} yrs</p>
-              <div className="mt-2 flex flex-wrap justify-center gap-1">
-                {b.skills.slice(0, 3).map((s) => <TagChip key={s}>{s}</TagChip>)}
-              </div>
-              <p className="mt-2 text-[12px] font-semibold text-success">{b.matchScore}% Match</p>
-              <div className="mt-2 flex gap-1.5">
-                <button className="flex-1 rounded-md bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground hover:opacity-90">Connect</button>
-                <button className="flex-1 rounded-md border border-border px-2 py-1 text-[11px] font-medium text-foreground hover:bg-muted">Message</button>
-              </div>
-            </Card>
-          </Link>
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <Card className="py-8">
+          <NoConnectionsEmptyState
+            title={q ? "No developers found" : tab === "connections" ? "No connections yet" : "No builders available"}
+            desc={
+              q
+                ? "No developers match your current search query. Try searching for a different skill or name."
+                : tab === "connections"
+                ? "You haven't connected with any developers yet. Discover builders to build your network!"
+                : "No builders found matching your criteria."
+            }
+            action={
+              q ? (
+                <button
+                  onClick={() => setQ("")}
+                  className="rounded-md border border-border bg-surface px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-muted"
+                >
+                  Clear search
+                </button>
+              ) : undefined
+            }
+          />
+        </Card>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filtered.map((b) => (
+            <Link key={b.id} to="/builders/$builderId" params={{ builderId: b.id }}>
+              <Card interactive className="p-4 text-center">
+                <div className="mx-auto w-fit">
+                  <Avatar src={b.avatar} alt={b.name} size={64} online={b.online} />
+                </div>
+                <p className="mt-2 text-[14px] font-semibold text-foreground">{b.name}</p>
+                <p className="text-[12px] text-muted-foreground">{b.role}</p>
+                <p className="text-[11px] text-muted-foreground">{b.country} · {b.yearsExp} yrs</p>
+                <div className="mt-2 flex flex-wrap justify-center gap-1">
+                  {b.skills.slice(0, 3).map((s) => <TagChip key={s}>{s}</TagChip>)}
+                </div>
+                <p className="mt-2 text-[12px] font-semibold text-success">{b.matchScore}% Match</p>
+                <div className="mt-2 flex gap-1.5">
+                  <button className="flex-1 rounded-md bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground hover:opacity-90">Connect</button>
+                  <button className="flex-1 rounded-md border border-border px-2 py-1 text-[11px] font-medium text-foreground hover:bg-muted">Message</button>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
