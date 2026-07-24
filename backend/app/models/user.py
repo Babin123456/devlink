@@ -12,7 +12,7 @@ from sqlalchemy import (
     JSON,
     func,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
@@ -74,6 +74,13 @@ class User(Base):
     # Profile
     # ------------------------------------------------------------------
 
+    badges: Mapped[list[str]] = mapped_column(
+        ARRAY(String),
+        default=list,
+        server_default="{}",
+        nullable=False,
+    )
+
     headline: Mapped[str | None] = mapped_column(
         String(150),
         nullable=True,
@@ -112,6 +119,11 @@ class User(Base):
 
     website: Mapped[str | None] = mapped_column(
         String(255),
+        nullable=True,
+    )
+
+    resume_url: Mapped[str | None] = mapped_column(
+        String(500),
         nullable=True,
     )
 
@@ -195,15 +207,15 @@ class User(Base):
     )
 
     last_seen: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
+    DateTime(timezone=True),
+    nullable=True,
     )
 
     last_active_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
+    DateTime(timezone=True),
+    default=datetime.utcnow,
+    nullable=True,
     )
-
     # ------------------------------------------------------------------
     # OAuth
     # ------------------------------------------------------------------
@@ -267,4 +279,4 @@ class User(Base):
     # ------------------------------------------------------------------
 
     def __repr__(self) -> str:
-        return f"<User(" f"username='{self.username}', " f"email='{self.email}'" f")>"
+        return f"<User(username='{self.username}', email='{self.email}')>"

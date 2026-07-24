@@ -55,6 +55,16 @@ class ProjectUpdate(BaseModel):
     is_published: Optional[bool] = None
 
 
+class SimilarProjectWarning(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    title: str
+    slug: str
+    title_similarity: float
+    description_similarity: float
+
+
 class ProjectStatsResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

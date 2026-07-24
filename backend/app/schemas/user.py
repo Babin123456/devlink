@@ -58,6 +58,7 @@ class UserBase(BaseModel):
     timezone: Optional[str] = None
 
     website: Optional[HttpUrl] = None
+    resume_url: Optional[str] = None
     portfolio_url: Optional[HttpUrl] = None
     github_url: Optional[HttpUrl] = None
     linkedin_url: Optional[HttpUrl] = None
@@ -101,6 +102,7 @@ class UserUpdate(BaseModel):
     public_email: Optional[EmailStr] = None
 
     website: Optional[HttpUrl] = None
+    resume_url: Optional[str] = None
     portfolio_url: Optional[HttpUrl] = None
     github_url: Optional[HttpUrl] = None
     linkedin_url: Optional[HttpUrl] = None
@@ -125,6 +127,7 @@ class UserResponse(UserBase):
 
     profile_image: Optional[str] = None
     cover_image: Optional[str] = None
+    badges: list[str] = Field(default_factory=list)
 
     is_active: bool
     is_verified: bool

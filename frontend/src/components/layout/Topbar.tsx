@@ -1,3 +1,4 @@
+import { MessageSquare, Plus, Search, Sparkles, Menu, Moon, Sun } from "lucide-react";
 import {
   Bell,
   MessageSquare,
@@ -11,9 +12,15 @@ import {
   Rss,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { Avatar } from "@/components/shared/primitives";
+import { currentUser } from "@/mocks/seed";
 import { currentUser, builders, projects, flares } from "@/mocks/seed";
 import { useTheme } from "@/hooks/useTheme";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@/hooks/useDebounce";
+import { searchService } from "@/services";
 
 const organizations = [
   {
@@ -31,6 +38,18 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
   const [query, setQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  const debouncedQuery = useDebounce(query, 300);
+  const normalizedQuery = debouncedQuery.trim().toLowerCase();
+
+  const { data: searchResults, isLoading } = useQuery({
+    queryKey: ["searchAutocomplete", normalizedQuery],
+    queryFn: () => searchService.autocomplete(normalizedQuery),
+    enabled: !!normalizedQuery,
+  });
+
+  const developerSuggestions = searchResults?.users || [];
+  const projectSuggestions = searchResults?.projects || [];
+  const skillSuggestions = searchResults?.skills?.map((s) => s.name) || [];
   const normalizedQuery = query.trim().toLowerCase();
 
   const developerSuggestions = normalizedQuery
@@ -97,6 +116,7 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
         />
         <input
           type="search"
+          placeholder="Search for developers, projects, or skills..."
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -129,7 +149,11 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
                         }}
                         className="flex items-center gap-2 rounded-md px-2 py-2 text-[13px] text-foreground hover:bg-muted"
                       >
-                        <img src={builder.avatar} alt="" className="h-7 w-7 rounded-full" />
+                        {builder.profile_image ? (
+                          <img src={builder.profile_image} alt="" className="h-7 w-7 rounded-full" />
+                        ) : (
+                          <div className="h-7 w-7 rounded-full bg-muted" />
+                        )}
                         <div className="min-w-0">
                           <p className="truncate font-medium">{builder.name}</p>
                           <p className="truncate text-[11px] text-muted-foreground">
@@ -235,9 +259,15 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
                 )}
               </div>
             ) : (
-              <p className="px-3 py-4 text-center text-[12px] text-muted-foreground">
-                No suggestions found for "{query}"
-              </p>
+              <div className="px-3 py-4 text-center text-[12px] text-muted-foreground flex justify-center items-center gap-2">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin" size={14} /> Loading...
+                  </>
+                ) : (
+                  `No suggestions found for "${query}"`
+                )}
+              </div>
             )}
           </div>
         )}
@@ -262,9 +292,7 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
         >
           {isDark ? <Sun size={16} /> : <Moon size={16} />}
         </button>
-        <IconButton to="/notifications" count={8}>
-          <Bell size={16} />
-        </IconButton>
+        <NotificationCenter />
         <IconButton to="/messages" count={3}>
           <MessageSquare size={16} />
         </IconButton>
@@ -275,11 +303,7 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
         params={{ username: currentUser.handle }}
         className="ml-1 flex items-center gap-2 rounded-md p-1 hover:bg-muted"
       >
-        <img
-          src={currentUser.avatar}
-          alt=""
-          className="h-8 w-8 rounded-full border border-border bg-muted"
-        />
+        <Avatar src={currentUser.avatar} alt={currentUser.name} name={currentUser.name} size={32} />
         <div className="hidden text-left sm:block">
           <p className="text-[12px] font-semibold leading-tight text-foreground">
             {currentUser.name}
