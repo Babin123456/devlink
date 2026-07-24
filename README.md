@@ -48,7 +48,7 @@ participate in hackathons, and launch products together.
 - [Overview](https://github.com/nensii21/devlink#overview)
 - [Why DevLink?](https://github.com/nensii21/devlink#why-devlink)
 - [Features](https://github.com/nensii21/devlink#features)
-- [Architecture](https://github.com/nensii21/devlink#architecture)
+- [Architecture](docs/architecture.md)
 - [Tech Stack](https://github.com/nensii21/devlink#tech-stack)
 - [Project Structure](https://github.com/nensii21/devlink#project-structure)
 - [Screenshots](https://github.com/nensii21/devlink#screenshots)
