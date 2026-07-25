@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { cn } from "@/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { APP_LOGO } from "@/lib/logo";

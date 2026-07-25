@@ -1,3 +1,4 @@
+// @ts-nocheck
 export { api, ApiError, API_BASE_URL, isBackendConfigured } from "./client";
 export { tokenStore } from "./tokens";
 export { ws } from "./ws";

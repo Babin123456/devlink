@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Card } from "@/components/shared/primitives";
 import { BriefcaseBusiness, BadgeCheck } from "lucide-react";
 

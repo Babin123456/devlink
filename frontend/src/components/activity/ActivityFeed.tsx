@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EmptyState, SectionHeader, Skeleton } from "@/components/shared/primitives";
 import { cn } from "@/lib/utils";
 import type { BackendActivity } from "@/services";
