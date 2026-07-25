@@ -22,6 +22,7 @@ class ProjectTagService:
         """Get OpenAI client."""
         try:
             from openai import OpenAI
+
             return OpenAI(api_key=settings.OPENAI_API_KEY)
         except ImportError:
             logger.warning("openai package not installed")
@@ -117,10 +118,14 @@ Example:
                 cleaned_tags = []
                 for tag in tags[:MAX_TAGS]:
                     if isinstance(tag, dict) and "name" in tag:
-                        cleaned_tags.append({
-                            "name": tag["name"],
-                            "confidence": min(1.0, max(0.0, tag.get("confidence", 0.8))),
-                        })
+                        cleaned_tags.append(
+                            {
+                                "name": tag["name"],
+                                "confidence": min(
+                                    1.0, max(0.0, tag.get("confidence", 0.8))
+                                ),
+                            }
+                        )
                 if cleaned_tags:
                     return cleaned_tags
 
@@ -169,9 +174,11 @@ Example:
 
         # Add generic tags if few found
         if len(default_tags) < 3:
-            default_tags.extend([
-                {"name": "Web", "confidence": 0.5},
-                {"name": "Full Stack", "confidence": 0.4},
-            ])
+            default_tags.extend(
+                [
+                    {"name": "Web", "confidence": 0.5},
+                    {"name": "Full Stack", "confidence": 0.4},
+                ]
+            )
 
         return default_tags[:MAX_TAGS]

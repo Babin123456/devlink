@@ -69,6 +69,8 @@ class RecommendationList(BaseModel):
 
     recommendations: list[ProjectRecommendation]
     total: int
+
+
 """
 Pydantic schemas for the AI-Powered Builder Recommendation System.
 """

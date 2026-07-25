@@ -13,6 +13,8 @@ from app.models.issue import IssueDifficulty, IssuePriority, IssueStatus
 class IssueBase(BaseModel):
     title: str
     description: str
+
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.issue import IssuePriority, IssueStatus
@@ -55,6 +57,8 @@ class DifficultyEstimateResponse(BaseModel):
     difficulty: IssueDifficulty
     confidence: float
     reasoning: str
+
+
 class IssueAuthorResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

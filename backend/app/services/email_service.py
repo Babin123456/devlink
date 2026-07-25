@@ -6,6 +6,7 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+
 class EmailService:
     @staticmethod
     def send_email(to_email: str, subject: str, html_content: str) -> bool:
@@ -32,18 +33,24 @@ class EmailService:
                 if settings.SMTP_USERNAME and settings.SMTP_PASSWORD:
                     server.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
                 server.sendmail(settings.EMAIL_FROM, to_email, msg.as_string())
-                
+
             logger.info(f"Email successfully sent to {to_email}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to send email to {to_email}: {e}")
             return False
 
     @staticmethod
-    def send_notification_email(to_email: str, title: str, message: str, action_url: str = None) -> bool:
+    def send_notification_email(
+        to_email: str, title: str, message: str, action_url: str = None
+    ) -> bool:
         """Helper to send a standard notification email format."""
-        action_html = f"<p><a href='{action_url}'>Click here to view</a></p>" if action_url else ""
+        action_html = (
+            f"<p><a href='{action_url}'>Click here to view</a></p>"
+            if action_url
+            else ""
+        )
         html = f"""
         <html>
             <body>

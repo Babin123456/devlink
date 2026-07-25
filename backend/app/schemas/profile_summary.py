@@ -8,11 +8,15 @@ from pydantic import BaseModel, Field
 
 class ProfileSummaryRequest(BaseModel):
     """Request to generate a profile summary."""
-    user_id: uuid.UUID = Field(..., description="ID of the user to generate summary for")
+
+    user_id: uuid.UUID = Field(
+        ..., description="ID of the user to generate summary for"
+    )
 
 
 class ProfileSummaryResponse(BaseModel):
     """Response containing the generated profile summary."""
+
     summary: str = Field(
         ...,
         max_length=500,

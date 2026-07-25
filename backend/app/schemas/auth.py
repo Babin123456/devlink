@@ -53,6 +53,7 @@ class GitHubLoginRequest(BaseModel):  # noqa: F811
 class GitHubLoginRequest(BaseModel):
     code: str
 
+
 # ==========================================================
 # JWT Tokens
 # ==========================================================

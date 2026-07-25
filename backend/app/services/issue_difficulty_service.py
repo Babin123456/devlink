@@ -80,7 +80,9 @@ Return only the JSON object, no markdown, no explanation."""
             DifficultyResult with difficulty, confidence, and reasoning
         """
         if not settings.OPENAI_API_KEY:
-            logger.warning("OPENAI_API_KEY not configured, returning default estimation")
+            logger.warning(
+                "OPENAI_API_KEY not configured, returning default estimation"
+            )
             return IssueDifficultyService._get_default_result()
 
         client = IssueDifficultyService._get_client()

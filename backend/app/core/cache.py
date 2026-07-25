@@ -122,8 +122,13 @@ def cached(ttl: int = 300, key_prefix: str = ""):
                 if "Session" in type(v).__name__ or "Request" in type(v).__name__:
                     continue
                 safe_kwargs[k] = str(v)
-            
-            safe_args = [str(a) for a in args if "Session" not in type(a).__name__ and "Request" not in type(a).__name__]
+
+            safe_args = [
+                str(a)
+                for a in args
+                if "Session" not in type(a).__name__
+                and "Request" not in type(a).__name__
+            ]
 
             # Generate a consistent cache key
             cache_key = f"{key_prefix}:{func.__name__}:{safe_args}:{safe_kwargs}"
@@ -158,15 +163,17 @@ def cached(ttl: int = 300, key_prefix: str = ""):
                         elif hasattr(item, "dict"):
                             processed_list.append(item.dict())
                         elif hasattr(item, "__dict__"):
-                            processed_list.append({
-                                k: str(v)
-                                for k, v in item.__dict__.items()
-                                if not k.startswith("_")
-                            })
+                            processed_list.append(
+                                {
+                                    k: str(v)
+                                    for k, v in item.__dict__.items()
+                                    if not k.startswith("_")
+                                }
+                            )
                         else:
                             processed_list.append(item)
                     store_value = processed_list
-                    
+
                 cache_manager.set(cache_key, store_value, ttl)
 
             return result
