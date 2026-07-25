@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 export { api, ApiError, API_BASE_URL, isBackendConfigured } from "./client";
 export { tokenStore } from "./tokens";

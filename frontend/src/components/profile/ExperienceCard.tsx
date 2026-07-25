@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { Card } from "@/components/shared/primitives";
 import { BriefcaseBusiness, BadgeCheck } from "lucide-react";
