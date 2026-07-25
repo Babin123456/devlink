@@ -144,6 +144,9 @@ class Issue(Base):
         Boolean,
         default=False,
         nullable=False,
+    )
+
+    # ----------------------------------------------------------
     # Embedding (stored as JSON array of floats)
     # ----------------------------------------------------------
 

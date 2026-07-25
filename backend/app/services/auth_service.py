@@ -47,24 +47,24 @@ class AuthService:
 
     def _save_password_history(self, user: User) -> None:
         history = PasswordHistory(
-           user_id=user.id,
-           password_hash=user.password_hash,
-    )
+            user_id=user.id,
+            password_hash=user.password_hash,
+        )
 
         self.db.add(history)
         self.db.flush()
 
         histories = (
             self.db.execute(
-               select(PasswordHistory)
-               .where(PasswordHistory.user_id == user.id)
-               .order_by(PasswordHistory.created_at.desc())
+                select(PasswordHistory)
+                .where(PasswordHistory.user_id == user.id)
+                .order_by(PasswordHistory.created_at.desc())
             )
             .scalars()
             .all()
         )
 
-        for old_history in histories[self.PASSWORD_HISTORY_LIMIT:]:
+        for old_history in histories[self.PASSWORD_HISTORY_LIMIT :]:
             self.db.delete(old_history)
 
         def _is_password_reused(
@@ -73,8 +73,8 @@ class AuthService:
             new_password: str,
         ) -> bool:
 
-           if verify_password(new_password, user.password_hash):
-               return True
+            if verify_password(new_password, user.password_hash):
+                return True
 
         histories = (
             self.db.execute(
@@ -92,7 +92,6 @@ class AuthService:
                 return True
 
         return False
-    
 
     # =====================================================
     # User Lookup Helpers
@@ -222,14 +221,18 @@ class AuthService:
     def github_login(self, github_user: dict, primary_email: str):
         from app.models.user import User
         from app.core.events import event_bus
-        from app.core.security import hash_password, create_access_token, create_refresh_token
+        from app.core.security import (
+            hash_password,
+            create_access_token,
+            create_refresh_token,
+        )
         from fastapi import HTTPException, status
         import secrets
         import string
         from datetime import datetime, timezone
 
         github_id = str(github_user.get("id"))
-        
+
         user = self.db.query(User).filter(User.github_id == github_id).first()
 
         if not user:
@@ -244,11 +247,13 @@ class AuthService:
                 self.db.refresh(user)
             else:
                 alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
-                random_password = ''.join(secrets.choice(alphabet) for i in range(16))
+                random_password = "".join(secrets.choice(alphabet) for i in range(16))
                 name_parts = (github_user.get("name") or "").split(" ")
-                first_name = name_parts[0] if len(name_parts) > 0 and name_parts[0] else "GitHub"
+                first_name = (
+                    name_parts[0] if len(name_parts) > 0 and name_parts[0] else "GitHub"
+                )
                 last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else "User"
-                
+
                 base_username = (github_user.get("login") or "github_user").lower()[:50]
                 username = base_username
                 counter = 1
@@ -256,7 +261,7 @@ class AuthService:
                     suffix = str(counter)
                     username = f"{base_username[:50 - len(suffix)]}{suffix}"
                     counter += 1
-                
+
                 user = User(
                     first_name=first_name,
                     last_name=last_name,
@@ -300,7 +305,6 @@ class AuthService:
             "token_type": "bearer",
             "user": user,
         }
-
 
     def github_login(self, github_user: dict, primary_email: str):
         from app.models.user import User
@@ -392,14 +396,18 @@ class AuthService:
     def github_login(self, github_user: dict, primary_email: str):
         from app.models.user import User
         from app.core.events import event_bus
-        from app.core.security import hash_password, create_access_token, create_refresh_token
+        from app.core.security import (
+            hash_password,
+            create_access_token,
+            create_refresh_token,
+        )
         from fastapi import HTTPException, status
         import secrets
         import string
         from datetime import datetime, timezone
 
         github_id = str(github_user.get("id"))
-        
+
         user = self.db.query(User).filter(User.github_id == github_id).first()
 
         if not user:
@@ -414,11 +422,13 @@ class AuthService:
                 self.db.refresh(user)
             else:
                 alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
-                random_password = ''.join(secrets.choice(alphabet) for i in range(16))
+                random_password = "".join(secrets.choice(alphabet) for i in range(16))
                 name_parts = (github_user.get("name") or "").split(" ")
-                first_name = name_parts[0] if len(name_parts) > 0 and name_parts[0] else "GitHub"
+                first_name = (
+                    name_parts[0] if len(name_parts) > 0 and name_parts[0] else "GitHub"
+                )
                 last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else "User"
-                
+
                 base_username = (github_user.get("login") or "github_user").lower()[:50]
                 username = base_username
                 counter = 1
@@ -426,7 +436,7 @@ class AuthService:
                     suffix = str(counter)
                     username = f"{base_username[:50 - len(suffix)]}{suffix}"
                     counter += 1
-                
+
                 user = User(
                     first_name=first_name,
                     last_name=last_name,
@@ -470,7 +480,6 @@ class AuthService:
             "token_type": "bearer",
             "user": user,
         }
-
 
     # =====================================================
 
@@ -579,14 +588,18 @@ class AuthService:
     def github_login(self, github_user: dict, primary_email: str):
         from app.models.user import User
         from app.core.events import event_bus
-        from app.core.security import hash_password, create_access_token, create_refresh_token
+        from app.core.security import (
+            hash_password,
+            create_access_token,
+            create_refresh_token,
+        )
         from fastapi import HTTPException, status
         import secrets
         import string
         from datetime import datetime, timezone
 
         github_id = str(github_user.get("id"))
-        
+
         user = self.db.query(User).filter(User.github_id == github_id).first()
 
         if not user:
@@ -601,11 +614,13 @@ class AuthService:
                 self.db.refresh(user)
             else:
                 alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
-                random_password = ''.join(secrets.choice(alphabet) for i in range(16))
+                random_password = "".join(secrets.choice(alphabet) for i in range(16))
                 name_parts = (github_user.get("name") or "").split(" ")
-                first_name = name_parts[0] if len(name_parts) > 0 and name_parts[0] else "GitHub"
+                first_name = (
+                    name_parts[0] if len(name_parts) > 0 and name_parts[0] else "GitHub"
+                )
                 last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else "User"
-                
+
                 base_username = (github_user.get("login") or "github_user").lower()[:50]
                 username = base_username
                 counter = 1
@@ -613,7 +628,7 @@ class AuthService:
                     suffix = str(counter)
                     username = f"{base_username[:50 - len(suffix)]}{suffix}"
                     counter += 1
-                
+
                 user = User(
                     first_name=first_name,
                     last_name=last_name,
@@ -657,7 +672,6 @@ class AuthService:
             "token_type": "bearer",
             "user": user,
         }
-
 
     # =====================================================
 
@@ -738,14 +752,18 @@ class AuthService:
     def github_login(self, github_user: dict, primary_email: str):
         from app.models.user import User
         from app.core.events import event_bus
-        from app.core.security import hash_password, create_access_token, create_refresh_token
+        from app.core.security import (
+            hash_password,
+            create_access_token,
+            create_refresh_token,
+        )
         from fastapi import HTTPException, status
         import secrets
         import string
         from datetime import datetime, timezone
 
         github_id = str(github_user.get("id"))
-        
+
         user = self.db.query(User).filter(User.github_id == github_id).first()
 
         if not user:
@@ -760,11 +778,13 @@ class AuthService:
                 self.db.refresh(user)
             else:
                 alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
-                random_password = ''.join(secrets.choice(alphabet) for i in range(16))
+                random_password = "".join(secrets.choice(alphabet) for i in range(16))
                 name_parts = (github_user.get("name") or "").split(" ")
-                first_name = name_parts[0] if len(name_parts) > 0 and name_parts[0] else "GitHub"
+                first_name = (
+                    name_parts[0] if len(name_parts) > 0 and name_parts[0] else "GitHub"
+                )
                 last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else "User"
-                
+
                 base_username = (github_user.get("login") or "github_user").lower()[:50]
                 username = base_username
                 counter = 1
@@ -772,7 +792,7 @@ class AuthService:
                     suffix = str(counter)
                     username = f"{base_username[:50 - len(suffix)]}{suffix}"
                     counter += 1
-                
+
                 user = User(
                     first_name=first_name,
                     last_name=last_name,
@@ -817,7 +837,6 @@ class AuthService:
             "user": user,
         }
 
-
     # =====================================================
     # Change Password
     # =====================================================
@@ -843,10 +862,10 @@ class AuthService:
         validate_password(new_password)
 
         if self._is_password_reused(user, new_password):
-           raise HTTPException(
-              status_code=status.HTTP_400_BAD_REQUEST,
-              detail="You cannot reuse one of your last 5 passwords.",
-           )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="You cannot reuse one of your last 5 passwords.",
+            )
 
         self._save_password_history(user)
 
@@ -952,7 +971,7 @@ class AuthService:
         user = self.get_current_user(user_id)
 
         if self._is_password_reused(user, new_password):
-           raise HTTPException(
+            raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="You cannot reuse one of your last 5 passwords.",
             )

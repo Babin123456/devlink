@@ -11,6 +11,7 @@ from app.schemas.recommendation import (
     RecommendationList,
     RecommendationProject,
 )
+
 """
 API router for the AI-Powered Builder Recommendation System
 and AI Tech Stack Recommendation.
@@ -94,6 +95,10 @@ def recommend_projects(
     return RecommendationList(
         recommendations=recommendations,
         total=total,
+    )
+
+
+@router.get(
     "/builders",
     response_model=RecommendationResponse,
     summary="Get recommended builders (collaborators)",

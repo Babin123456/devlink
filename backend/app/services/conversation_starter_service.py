@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class ConversationStarterService:
     """
     AI-powered conversation starter suggestions.
-    
+
     Generates context-aware conversation prompts based on user profiles,
     skills, and shared interests.
     """
@@ -28,6 +28,7 @@ class ConversationStarterService:
         """Get OpenAI client."""
         try:
             from openai import OpenAI
+
             return OpenAI(api_key=settings.OPENAI_API_KEY)
         except ImportError:
             logger.warning("openai package not installed")
@@ -80,7 +81,8 @@ class ConversationStarterService:
         current_skills_text = ""
         if current_user_context["skills"]:
             skills_list = [
-                f"{s['name']} ({s['level']})" for s in current_user_context["skills"][:5]
+                f"{s['name']} ({s['level']})"
+                for s in current_user_context["skills"][:5]
             ]
             current_skills_text = f"Your skills: {', '.join(skills_list)}"
 
@@ -122,12 +124,12 @@ Return as JSON array of strings, nothing else. Example:
     ) -> list[str]:
         """
         Generate conversation starters for messaging a potential collaborator.
-        
+
         Args:
             db: Database session
             current_user_id: The user who will send the message
             target_user_id: The user they want to message
-            
+
         Returns:
             List of 3-5 conversation starter suggestions
         """
@@ -143,7 +145,9 @@ Return as JSON array of strings, nothing else. Example:
             return ConversationStarterService._get_default_starters()
 
         # Build contexts
-        current_context = ConversationStarterService._build_user_context(db, current_user)
+        current_context = ConversationStarterService._build_user_context(
+            db, current_user
+        )
         target_context = ConversationStarterService._build_user_context(db, target_user)
 
         # Generate using OpenAI
@@ -152,7 +156,9 @@ Return as JSON array of strings, nothing else. Example:
             return ConversationStarterService._get_default_starters()
 
         try:
-            prompt = ConversationStarterService._build_prompt(current_context, target_context)
+            prompt = ConversationStarterService._build_prompt(
+                current_context, target_context
+            )
 
             response = client.chat.completions.create(
                 model="gpt-4o-mini",

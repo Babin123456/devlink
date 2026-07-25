@@ -6,14 +6,13 @@ from datetime import datetime
 from sqlalchemy import DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.orm import relationship 
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
 
 
 class PasswordHistory(Base):
-
     """
     Stores previous password hashes to prevent password reuse.
     """
@@ -46,6 +45,5 @@ class PasswordHistory(Base):
 
     user = relationship(
         "User",
-        back_populates = "password_history",
+        back_populates="password_history",
     )
-

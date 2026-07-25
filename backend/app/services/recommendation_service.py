@@ -184,6 +184,8 @@ def _project_sort_key(project: Project) -> float:
     (the outer sort uses descending order).
     """
     return project.created_at.timestamp() if project.created_at else 0.0
+
+
 """
 AI-Powered Builder Recommendation Service.
 
