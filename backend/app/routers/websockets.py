@@ -362,4 +362,4 @@ async def websocket_chat(websocket: WebSocket, user_id: str):
         manager.disconnect(websocket, user_id)
         await manager.broadcast_to_all(
             {"sender_id": user_id, "type": "status", "content": "offline"}
-                          )
+        )
