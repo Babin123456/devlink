@@ -19,6 +19,7 @@ import {
   authApi,
   collectionsApi,
   recommendationsApi,
+  searchApi,
 } from "@/api";
 import type { BookmarkCollection, BookmarkCollectionWithBookmarks, TechStackResponse } from "@/api";
 
@@ -176,6 +177,16 @@ export const techStackService = {
       () => recommendationsApi.recommendTechStack(projectIdea),
       null as TechStackResponse | null,
     ),
+export const searchService = {
+  autocomplete: (q: string) =>
+    withFallback(async () => {
+      const res = await searchApi.autocomplete(q);
+      return res;
+    }, {
+      users: [],
+      projects: [],
+      skills: []
+    }), // In fallback we could just return empty or mock data, but we'll handle mock logic in the component for offline mode, or we can add it here.
 };
 
 export const userService = {
@@ -191,6 +202,8 @@ export const userService = {
       };
     }, seed.currentUser),
 };
+
+export { teamMatchService } from "./teamMatch";
 
 export type {
   Builder,

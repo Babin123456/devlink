@@ -18,6 +18,27 @@ export { collectionsApi } from "./modules/collections";
 export { recommendationsApi } from "./modules/recommendations";
 export type { TechStackRecommendation, TechStackResponse } from "./modules/recommendations";
 export { bookmarksApi } from "./modules/bookmarks";
+export { issuesApi } from "./modules/issues";
+export type { Issue, DifficultyEstimateResponse } from "./modules/issues";
+export { profileSummaryApi } from "./modules/profileSummary";
+export type { ProfileSummaryResponse } from "./modules/profileSummary";
+export { conversationStartersApi } from "./modules/conversationStarters";
+export type { ConversationStarterResponse } from "./modules/conversationStarters";
+export { projectTagsApi } from "./modules/projectTags";
+export type { ProjectTagResponse } from "./modules/projectTags";
+export { teamMatchApi } from "./modules/teamMatch";
+export { contributorMatchingApi } from "./modules/contributorMatching";
+export type { ContributorMatchResponse, MatchedContributor } from "./modules/contributorMatching";
+export { bookmarksApi } from "./modules/bookmarks";
+export { repositoryQualityApi } from "./modules/repositoryQuality";
+export type {
+  RepositoryQualityResponse,
+  MetricScore,
+  ImprovementSuggestion,
+  RepositoryInfo,
+} from "./modules/repositoryQuality";
+export { exportApi } from "./modules/export";
+export type { UserExportData, ExportResponse } from "./modules/export";
 export type {
   BookmarkResponse as BookmarkItem,
   BookmarkCheckResponse,
@@ -28,3 +49,4 @@ export type {
   BookmarkCollectionWithBookmarks,
   Bookmark,
 } from "./modules/collections";
+export type { TeamMatchRequest, TeamMatchResponse } from "./modules/teamMatch";
