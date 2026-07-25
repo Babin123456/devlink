@@ -8,6 +8,10 @@ import { ApplicationStatusBadge } from "@/components/applications/ApplicationSta
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useWithdrawApplication } from "@/hooks/useApplications";
+
+export default function MyApplicationsPage() {
+  const [q, setQ] = useState("");
 import {
   Pagination,
   PaginationContent,

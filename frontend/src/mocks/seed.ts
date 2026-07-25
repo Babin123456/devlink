@@ -3,6 +3,8 @@
 
 export type ID = string;
 
+export type UserRole = "Developer" | "Founder" | "Designer" | "AI Engineer" | "Mentor";
+
 export interface Skill {
   name: string;
 }
@@ -10,7 +12,7 @@ export interface Builder {
   id: ID;
   name: string;
   handle: string;
-  role: string;
+  role: UserRole;
   avatar: string;
   country: string;
   yearsExp: number;
@@ -125,7 +127,7 @@ export const builders: Builder[] = [
     id: "b1",
     name: "Priya Sharma",
     handle: "priya_dev",
-    role: "Frontend Developer",
+    role: "Developer",
     avatar: AV("Priya"),
     country: "India",
     yearsExp: 3,
@@ -135,8 +137,6 @@ export const builders: Builder[] = [
     online: true,
     bio: "Loves accessible UIs and design systems.",
     interests: ["Web Dev", "Design Systems", "AI"],
-    online: true,
-    bio: "Loves accessible UIs and design systems.",
     lastActiveAt: ago(1),
     publicEmail: "priya@example.com",
   },
@@ -144,7 +144,7 @@ export const builders: Builder[] = [
     id: "b2",
     name: "Rahul Verma",
     handle: "rahul_v",
-    role: "Full Stack Developer",
+    role: "Developer",
     avatar: AV("Rahul"),
     country: "India",
     yearsExp: 4,
@@ -154,15 +154,13 @@ export const builders: Builder[] = [
     online: true,
     bio: "Builds end-to-end features fast.",
     interests: ["Backend", "Web Dev"],
-    online: true,
-    bio: "Builds end-to-end features fast.",
     lastActiveAt: ago(3),
   },
   {
     id: "b3",
     name: "Ankit Singh",
     handle: "ankit_be",
-    role: "Backend Developer",
+    role: "Developer",
     avatar: AV("Ankit"),
     country: "India",
     yearsExp: 2,
@@ -172,15 +170,13 @@ export const builders: Builder[] = [
     online: false,
     bio: "APIs, queues and Postgres tuning.",
     interests: ["Backend", "AI"],
-    online: false,
-    bio: "APIs, queues and Postgres tuning.",
     lastActiveAt: ago(120),
   },
   {
     id: "b4",
     name: "Sneha Iyer",
     handle: "sneha_ux",
-    role: "UI/UX Designer",
+    role: "Designer",
     avatar: AV("Sneha"),
     country: "India",
     yearsExp: 3,
@@ -190,15 +186,13 @@ export const builders: Builder[] = [
     online: true,
     bio: "Product design for early-stage teams.",
     interests: ["Design Systems", "Web Dev"],
-    online: true,
-    bio: "Product design for early-stage teams.",
     lastActiveAt: ago(5),
   },
   {
     id: "b5",
     name: "Vikram Mehta",
     handle: "vikram_fs",
-    role: "Full Stack Dev",
+    role: "Developer",
     avatar: AV("Vikram"),
     country: "India",
     yearsExp: 4,
@@ -208,15 +202,13 @@ export const builders: Builder[] = [
     online: false,
     bio: "Ships side-projects on weekends.",
     interests: ["Web Dev", "Frontend"],
-    online: false,
-    bio: "Ships side-projects on weekends.",
     lastActiveAt: ago(1440),
   },
   {
     id: "b6",
     name: "Aditya Rao",
     handle: "aditya_m",
-    role: "Mobile Developer",
+    role: "Developer",
     avatar: AV("Aditya"),
     country: "India",
     yearsExp: 3,
@@ -226,15 +218,13 @@ export const builders: Builder[] = [
     online: true,
     bio: "Cross-platform mobile since 2021.",
     interests: ["Mobile", "Web Dev"],
-    online: true,
-    bio: "Cross-platform mobile since 2021.",
     lastActiveAt: ago(10),
   },
   {
     id: "b7",
     name: "Sarah Chen",
     handle: "sarah_c",
-    role: "ML Engineer",
+    role: "AI Engineer",
     avatar: AV("Sarah"),
     country: "US",
     yearsExp: 5,
@@ -244,15 +234,13 @@ export const builders: Builder[] = [
     online: true,
     bio: "Recsys, embeddings, evals.",
     interests: ["AI", "Backend"],
-    online: true,
-    bio: "Recsys, embeddings, evals.",
     lastActiveAt: ago(30),
   },
   {
     id: "b8",
     name: "Alex Johnson",
     handle: "alex_j",
-    role: "DevOps",
+    role: "Developer",
     avatar: AV("Alex"),
     country: "UK",
     yearsExp: 6,
@@ -262,8 +250,6 @@ export const builders: Builder[] = [
     online: false,
     bio: "Infra as code, cost optimization.",
     interests: ["Backend", "AI"],
-    online: false,
-    bio: "Infra as code, cost optimization.",
     lastActiveAt: null,
   },
 ];

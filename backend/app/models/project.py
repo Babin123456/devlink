@@ -110,6 +110,34 @@ class Project(Base):
         Text,
     )
 
+    language: Mapped[str | None] = mapped_column(
+        String(100),
+        index=True,
+    )
+
+    experience: Mapped[str | None] = mapped_column(
+        String(50),
+        index=True,
+    )
+
+    is_remote: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        index=True,
+    )
+
+    is_paid: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        index=True,
+    )
+
+    is_open_source: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        index=True,
+    )
+
     tags: Mapped[list | None] = mapped_column(
         JSON,
         nullable=True,

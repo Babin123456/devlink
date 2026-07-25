@@ -110,6 +110,7 @@ function ProfilePage() {
         handle: currentUser.handle,
         avatar: currentUser.avatar,
         bio: "Product engineer. Ships fast, sleeps sometimes.",
+        role: "Developer",
         role: "Full Stack Developer",
         id: currentUser.id,
       }

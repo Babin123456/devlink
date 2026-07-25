@@ -18,9 +18,10 @@ import {
   analyticsApi,
   authApi,
   collectionsApi,
+  recommendationsApi,
   searchApi,
 } from "@/api";
-import type { BookmarkCollection, BookmarkCollectionWithBookmarks } from "@/api";
+import type { BookmarkCollection, BookmarkCollectionWithBookmarks, TechStackResponse } from "@/api";
 
 const delay = 120;
 const mock = <T>(v: T): Promise<T> => new Promise((r) => setTimeout(() => r(v), delay));
@@ -75,7 +76,8 @@ export interface BackendActivity {
 }
 
 export const projectsService = {
-  list: () => withFallback(() => projectsApi.list(), seed.projects),
+  list: (params?: Parameters<typeof projectsApi.list>[0]) => 
+    withFallback(() => projectsApi.list(params), seed.projects),
   get: (id: string) =>
     withFallback(() => projectsApi.get(id), seed.projects.find((p) => p.id === id) ?? null),
   trending: () =>
@@ -170,6 +172,12 @@ export const hackathonsService = {
   list: () => withFallback(() => hackathonsApi.list(), seed.hackathons),
 };
 
+export const techStackService = {
+  recommend: (projectIdea: string) =>
+    withFallback(
+      () => recommendationsApi.recommendTechStack(projectIdea),
+      null as TechStackResponse | null,
+    ),
 export const searchService = {
   autocomplete: (q: string) =>
     withFallback(async () => {
@@ -190,7 +198,7 @@ export const userService = {
         id: u.id,
         name: u.full_name ?? u.username,
         handle: u.username,
-        avatar: u.avatar ?? seed.currentUser.avatar,
+        avatar: u.profile_image ?? u.avatar ?? seed.currentUser.avatar,
         premium: (u as unknown as { premium?: boolean }).premium ?? false,
       };
     }, seed.currentUser),
