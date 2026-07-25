@@ -43,6 +43,7 @@ def setup_db():
 def _register_and_login(
     client: TestClient, email: str, username: str
 ) -> tuple[str, str]:
+
     # Register
     client.post(
         "/api/auth/register",

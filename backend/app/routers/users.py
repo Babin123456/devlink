@@ -3,6 +3,8 @@ from __future__ import annotations
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 # pyrefly: ignore [missing-import]
@@ -25,8 +27,8 @@ from app.schemas.user_report import (
 )
 from app.models.user_report import UserReport
 from app.core.security import hash_password
-from app.services.auth_service import AuthService
 from app.services.user_service import UserService
+from app.core.cache import cached
 from app.utils.validators import validate_username
 
 router = APIRouter(
@@ -118,6 +120,7 @@ def get_me(
     "/{user_id}",
     response_model=UserResponse,
 )
+@cached(ttl=120, key_prefix="users:get")
 def get_user(
     user_id: uuid.UUID,
     online_threshold: int | None = Query(
@@ -196,6 +199,33 @@ def update_me(
         current_user,
         user,
     )
+
+
+@router.post(
+    "/me/resume",
+    response_model=UserResponse,
+)
+async def upload_resume(
+    request: Request,
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+
+    contents = await file.read()
+    try:
+        validate_resume_upload(file.filename, file.content_type, len(contents))
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    resume_url = save_resume_upload(contents, file.filename, current_user.id)
+    current_user.resume_url = str(request.base_url).rstrip("/") + resume_url
+    db.commit()
+    db.refresh(current_user)
+
+    return current_user
 
 
 @router.delete(
