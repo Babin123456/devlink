@@ -13,6 +13,24 @@ export { notificationsApi } from "./modules/notifications";
 export { analyticsApi } from "./modules/analytics";
 export { hackathonsApi } from "./modules/hackathons";
 export { searchApi } from "./modules/search";
+export type {
+  SearchCategory,
+  SearchQuery,
+  SearchAutocompleteResponse,
+  SearchResponse,
+  SearchCounts,
+  SearchResultUser,
+  SearchResultProject,
+  SearchResultOrganization,
+  SearchResultSkill,
+  SearchResultTag,
+  SearchSuggestionUser,
+  SearchSuggestionProject,
+  SearchSuggestionOrganization,
+  SearchSuggestionSkill,
+  SearchSuggestionTag,
+  SEARCH_CATEGORIES,
+} from "./modules/search";
 export { activitiesApi } from "./modules/activities";
 export { collectionsApi } from "./modules/collections";
 export { recommendationsApi } from "./modules/recommendations";
