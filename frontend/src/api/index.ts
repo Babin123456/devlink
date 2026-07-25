@@ -15,7 +15,19 @@ export { hackathonsApi } from "./modules/hackathons";
 export { searchApi } from "./modules/search";
 export { activitiesApi } from "./modules/activities";
 export { collectionsApi } from "./modules/collections";
+export { teamMatchApi } from "./modules/teamMatch";
+export { contributorMatchingApi } from "./modules/contributorMatching";
+export type { ContributorMatchResponse, MatchedContributor } from "./modules/contributorMatching";
 export { bookmarksApi } from "./modules/bookmarks";
+export { repositoryQualityApi } from "./modules/repositoryQuality";
+export type {
+  RepositoryQualityResponse,
+  MetricScore,
+  ImprovementSuggestion,
+  RepositoryInfo,
+} from "./modules/repositoryQuality";
+export { exportApi } from "./modules/export";
+export type { UserExportData, ExportResponse } from "./modules/export";
 export type {
   BookmarkResponse as BookmarkItem,
   BookmarkCheckResponse,
@@ -26,3 +38,4 @@ export type {
   BookmarkCollectionWithBookmarks,
   Bookmark,
 } from "./modules/collections";
+export type { TeamMatchRequest, TeamMatchResponse } from "./modules/teamMatch";
