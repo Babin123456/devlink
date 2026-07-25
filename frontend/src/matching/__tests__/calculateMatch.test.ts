@@ -11,7 +11,7 @@ const baseDeveloper: Developer = {
   id: "dev-1",
   name: "Jane Doe",
   handle: "jane",
-  role: "Frontend Developer",
+  role: "Developer",
   avatar: "",
   country: "US",
   yearsExp: 4,
