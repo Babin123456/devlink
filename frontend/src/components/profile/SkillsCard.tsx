@@ -7,7 +7,11 @@ export interface SkillsCardProps {
   editable?: boolean;
   formValues?: ProfileSkill[];
   skillErrors?: Record<string, string>;
-  onSkillChange?: (index: number, field: "name" | "level" | "category" | "yearsOfExperience", value: string | number) => void;
+  onSkillChange?: (
+    index: number,
+    field: "name" | "level" | "category" | "yearsOfExperience",
+    value: string | number,
+  ) => void;
   onAddSkill?: () => void;
   onRemoveSkill?: (index: number) => void;
 }
@@ -20,7 +24,15 @@ function normalizeLevel(level?: string): (typeof levelOrder)[number] {
   return match ?? "Intermediate";
 }
 
-export function SkillsCard({ skills, editable = false, formValues = [], skillErrors = {}, onSkillChange, onAddSkill, onRemoveSkill }: SkillsCardProps) {
+export function SkillsCard({
+  skills,
+  editable = false,
+  formValues = [],
+  skillErrors = {},
+  onSkillChange,
+  onAddSkill,
+  onRemoveSkill,
+}: SkillsCardProps) {
   const groupedSkills = levelOrder
     .map((level) => ({
       level,
@@ -41,18 +53,29 @@ export function SkillsCard({ skills, editable = false, formValues = [], skillErr
               <p className="text-xs text-muted-foreground">Add and organize your skills</p>
             </div>
           </div>
-          <button type="button" onClick={onAddSkill} className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted">
+          <button
+            type="button"
+            onClick={onAddSkill}
+            className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
+          >
             <Plus size={12} /> Add
           </button>
         </div>
 
         <div className="mt-4 space-y-3">
-          {formValues.length === 0 ? <p className="text-sm text-muted-foreground">No skills added yet.</p> : null}
+          {formValues.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No skills added yet.</p>
+          ) : null}
           {formValues.map((skill, index) => (
-            <div key={`${skill.name}-${index}`} className="rounded-lg border border-border/70 bg-background/60 p-3">
+            <div
+              key={`${skill.name}-${index}`}
+              className="rounded-lg border border-border/70 bg-background/60 p-3"
+            >
               <div className="grid gap-3 md:grid-cols-[1.5fr_1fr_1fr_auto]">
                 <label className="text-sm">
-                  <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">Skill</span>
+                  <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                    Skill
+                  </span>
                   <input
                     value={skill.name}
                     onChange={(event) => onSkillChange?.(index, "name", event.target.value)}
@@ -61,7 +84,9 @@ export function SkillsCard({ skills, editable = false, formValues = [], skillErr
                   />
                 </label>
                 <label className="text-sm">
-                  <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">Level</span>
+                  <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                    Level
+                  </span>
                   <select
                     value={skill.level ?? "Intermediate"}
                     onChange={(event) => onSkillChange?.(index, "level", event.target.value)}
@@ -75,21 +100,31 @@ export function SkillsCard({ skills, editable = false, formValues = [], skillErr
                   </select>
                 </label>
                 <label className="text-sm">
-                  <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">Years</span>
+                  <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                    Years
+                  </span>
                   <input
                     type="number"
                     min="0"
                     value={skill.yearsOfExperience ?? 0}
-                    onChange={(event) => onSkillChange?.(index, "yearsOfExperience", Number(event.target.value))}
+                    onChange={(event) =>
+                      onSkillChange?.(index, "yearsOfExperience", Number(event.target.value))
+                    }
                     className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none ring-0 focus:border-primary"
                   />
                 </label>
-                <button type="button" onClick={() => onRemoveSkill?.(index)} className="self-end rounded-md border border-border bg-background p-2 text-muted-foreground hover:bg-muted">
+                <button
+                  type="button"
+                  onClick={() => onRemoveSkill?.(index)}
+                  className="self-end rounded-md border border-border bg-background p-2 text-muted-foreground hover:bg-muted"
+                >
                   <Trash2 size={14} />
                 </button>
               </div>
               <label className="mt-3 block text-sm">
-                <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">Category</span>
+                <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  Category
+                </span>
                 <input
                   value={skill.category ?? "general"}
                   onChange={(event) => onSkillChange?.(index, "category", event.target.value)}
@@ -97,10 +132,14 @@ export function SkillsCard({ skills, editable = false, formValues = [], skillErr
                   placeholder="frontend, backend, devops"
                 />
               </label>
-              {skillErrors?.[`${index}`] ? <p className="mt-2 text-xs text-red-500">{skillErrors[`${index}`]}</p> : null}
+              {skillErrors?.[`${index}`] ? (
+                <p className="mt-2 text-xs text-red-500">{skillErrors[`${index}`]}</p>
+              ) : null}
             </div>
           ))}
-          {skillErrors?.skills ? <p className="text-xs text-red-500">{skillErrors.skills}</p> : null}
+          {skillErrors?.skills ? (
+            <p className="text-xs text-red-500">{skillErrors.skills}</p>
+          ) : null}
         </div>
       </Card>
     );
@@ -129,9 +168,14 @@ export function SkillsCard({ skills, editable = false, formValues = [], skillErr
               </p>
               <div className="flex flex-wrap gap-2">
                 {group.items.map((skill) => (
-                  <TagChip key={`${group.level}-${skill.name}`} className="rounded-full px-2.5 py-1 text-[12px] text-foreground">
+                  <TagChip
+                    key={`${group.level}-${skill.name}`}
+                    className="rounded-full px-2.5 py-1 text-[12px] text-foreground"
+                  >
                     {skill.name}
-                    {typeof skill.yearsOfExperience === "number" ? ` · ${skill.yearsOfExperience}y` : ""}
+                    {typeof skill.yearsOfExperience === "number"
+                      ? ` · ${skill.yearsOfExperience}y`
+                      : ""}
                   </TagChip>
                 ))}
               </div>

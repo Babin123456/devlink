@@ -93,10 +93,13 @@ function ProjectsPage() {
   }
 
   const filtered = data.filter((p) => {
-    if (statusFilter !== "all" && p.status !== statusFilter) return false;
+    if (statusFilter !== "all" && (p.status as string) !== statusFilter) return false;
     if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false;
     if (langs.length > 0 && (!p.language || !langs.includes(p.language))) return false;
-    if (difficulties.length > 0 && (!p.difficulty || !difficulties.includes(p.difficulty)))
+    if (
+      difficulties.length > 0 &&
+      (!p.difficulty || !difficulties.includes(p.difficulty as string))
+    )
       return false;
     for (const f of boolFilters) {
       if (!p[f]) return false;
@@ -292,9 +295,9 @@ function ProjectsPage() {
                   {p.difficulty && (
                     <TagChip
                       className={cn(
-                        p.difficulty === "beginner"
+                        (p.difficulty as string).toLowerCase() === "beginner"
                           ? "border-success/30 bg-success/10 text-success"
-                          : p.difficulty === "intermediate"
+                          : (p.difficulty as string).toLowerCase() === "intermediate"
                             ? "border-warning/30 bg-warning/10 text-warning"
                             : "border-destructive/30 bg-destructive/10 text-destructive",
                       )}
@@ -324,9 +327,10 @@ function ProjectsPage() {
                   </span>
                   <span
                     className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
-                      p.status === "active"
+                      (p.status as string) === "active" || (p.status as string) === "recruiting"
                         ? "bg-success/10 text-success"
-                        : p.status === "planning"
+                        : (p.status as string) === "planning" ||
+                            (p.status as string) === "in-progress"
                           ? "bg-warning/10 text-warning"
                           : "bg-muted text-muted-foreground"
                     }`}

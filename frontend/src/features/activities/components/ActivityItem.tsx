@@ -62,7 +62,6 @@ const getActivityIcon = (type: Activity["activity_type"]) => {
 };
 
 export function ActivityItem({ activity }: ActivityItemProps) {
-  
   const metadata = (activity.metadata ?? {}) as {
     actor_name?: string;
     actor_avatar?: string;

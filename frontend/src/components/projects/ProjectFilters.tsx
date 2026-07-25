@@ -7,7 +7,19 @@ const EXPERIENCES = ["Beginner", "Intermediate", "Advanced"];
 const REMOTE_OPTIONS = ["All", "Remote", "Hybrid", "Onsite"];
 const PAID_OPTIONS = ["All", "Paid", "Unpaid"];
 const OPENSOURCE_OPTIONS = ["All", "Yes", "No"];
-const TECH_STACKS = ["React", "Next.js", "Node.js", "Express", "MongoDB", "PostgreSQL", "Prisma", "Docker", "AWS", "Python", "AI/ML"];
+const TECH_STACKS = [
+  "React",
+  "Next.js",
+  "Node.js",
+  "Express",
+  "MongoDB",
+  "PostgreSQL",
+  "Prisma",
+  "Docker",
+  "AWS",
+  "Python",
+  "AI/ML",
+];
 
 interface FilterSectionProps {
   title: string;
@@ -41,20 +53,23 @@ function FilterDropdown({ title, options, value, onChange }: FilterSectionProps)
 
 export function ProjectFilters() {
   const navigate = useNavigate({ from: "/projects" });
-  const search = useRouterState({ select: (state) => state.location.search as Record<string, string> });
+  const search = useRouterState({
+    select: (state) => state.location.search as Record<string, string>,
+  });
 
   const language = search.language || "All";
   const experience = search.experience || "";
   const remote = search.remote === "true" ? "Remote" : search.remote === "false" ? "Onsite" : "All";
   const paid = search.paid === "true" ? "Paid" : search.paid === "false" ? "Unpaid" : "All";
-  const opensource = search.opensource === "true" ? "Yes" : search.opensource === "false" ? "No" : "All";
+  const opensource =
+    search.opensource === "true" ? "Yes" : search.opensource === "false" ? "No" : "All";
   const tech = search.tech || "";
 
   const updateSearch = (newParams: Record<string, string | undefined>) => {
     navigate({
-      search: (prev: any) => {
-        const updated = { ...prev, ...newParams };
-        Object.keys(updated).forEach(key => {
+      search: (prev: Record<string, unknown>) => {
+        const updated: Record<string, unknown> = { ...prev, ...newParams };
+        Object.keys(updated).forEach((key) => {
           if (updated[key] === undefined || updated[key] === "" || updated[key] === "All") {
             delete updated[key];
           }
@@ -62,7 +77,7 @@ export function ProjectFilters() {
         if (newParams.remote === undefined) delete updated.remote;
         if (newParams.paid === undefined) delete updated.paid;
         if (newParams.opensource === undefined) delete updated.opensource;
-        
+
         return updated;
       },
       replace: true,
@@ -71,7 +86,7 @@ export function ProjectFilters() {
 
   const clearFilters = () => {
     navigate({
-      search: (prev: any) => {
+      search: (prev: Record<string, unknown>) => {
         const { language, experience, remote, paid, opensource, tech, ...rest } = prev;
         return rest;
       },
@@ -86,7 +101,7 @@ export function ProjectFilters() {
           Search Projects
         </h3>
       </div>
-      
+
       <div className="flex flex-wrap items-end">
         <FilterDropdown
           title="Language"
