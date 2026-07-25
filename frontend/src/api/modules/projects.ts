@@ -32,8 +32,18 @@ export type SimilarProjectWarning = {
 };
 
 export const projectsApi = {
-  list: (query?: { page?: number; limit?: number; status?: string; q?: string }) =>
-    api.get<Project[]>("/api/projects", { query }),
+  list: (query?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    q?: string;
+    language?: string;
+    experience?: string;
+    remote?: boolean | string;
+    paid?: boolean | string;
+    opensource?: boolean | string;
+    tech?: string;
+  }) => api.get<Project[]>("/api/projects", { query }),
   get: (id: string) => api.get<Project>(`/api/projects/${id}`),
   create: (body: Partial<Project>) => api.post<Project>("/api/projects", body),
   update: (id: string, body: Partial<Project>) => api.put<Project>(`/api/projects/${id}`, body),

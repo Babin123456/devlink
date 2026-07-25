@@ -76,7 +76,8 @@ export interface BackendActivity {
 }
 
 export const projectsService = {
-  list: () => withFallback(() => projectsApi.list(), seed.projects),
+  list: (params?: Parameters<typeof projectsApi.list>[0]) => 
+    withFallback(() => projectsApi.list(params), seed.projects),
   get: (id: string) =>
     withFallback(() => projectsApi.get(id), seed.projects.find((p) => p.id === id) ?? null),
   trending: () =>
