@@ -18,9 +18,10 @@ import {
   analyticsApi,
   authApi,
   collectionsApi,
+  recommendationsApi,
   searchApi,
 } from "@/api";
-import type { BookmarkCollection, BookmarkCollectionWithBookmarks } from "@/api";
+import type { BookmarkCollection, BookmarkCollectionWithBookmarks, TechStackResponse } from "@/api";
 
 const delay = 120;
 const mock = <T>(v: T): Promise<T> => new Promise((r) => setTimeout(() => r(v), delay));
@@ -170,6 +171,12 @@ export const hackathonsService = {
   list: () => withFallback(() => hackathonsApi.list(), seed.hackathons),
 };
 
+export const techStackService = {
+  recommend: (projectIdea: string) =>
+    withFallback(
+      () => recommendationsApi.recommendTechStack(projectIdea),
+      null as TechStackResponse | null,
+    ),
 export const searchService = {
   autocomplete: (q: string) =>
     withFallback(async () => {
