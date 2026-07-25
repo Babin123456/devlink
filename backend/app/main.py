@@ -56,6 +56,7 @@ from app.routers import (
     skills,
     users,
     search,
+    saved_searches,
 )
 
 
@@ -261,3 +262,4 @@ app.include_router(
 )
 app.include_router(health.router)
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
+app.include_router(saved_searches.router)
