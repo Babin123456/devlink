@@ -46,6 +46,7 @@ from app.routers import (
     messages,
     notifications,
     organizations,
+    profile_summary,
     project_tags,
     projects,
     recommendations,
@@ -227,6 +228,7 @@ app.include_router(bookmarks.router)
 app.include_router(bookmark_collections.router)
 app.include_router(activities.router)
 app.include_router(conversations.router)
+app.include_router(profile_summary.router, prefix="/api/profile-summary", tags=["Profile Summary"])
 app.include_router(conversation_starters.router, prefix="/api/conversation-starters", tags=["Conversation Starters"])
 app.include_router(project_tags.router, prefix="/api/project-tags", tags=["Project Tags"])
 app.include_router(

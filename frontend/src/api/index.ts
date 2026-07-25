@@ -15,6 +15,8 @@ export { hackathonsApi } from "./modules/hackathons";
 export { searchApi } from "./modules/search";
 export { activitiesApi } from "./modules/activities";
 export { collectionsApi } from "./modules/collections";
+export { profileSummaryApi } from "./modules/profileSummary";
+export type { ProfileSummaryResponse } from "./modules/profileSummary";
 export { conversationStartersApi } from "./modules/conversationStarters";
 export type { ConversationStarterResponse } from "./modules/conversationStarters";
 export { projectTagsApi } from "./modules/projectTags";
