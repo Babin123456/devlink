@@ -43,7 +43,12 @@ def _ilike_pattern(q: str) -> str:
     """Build a SQLAlchemy ILIKE pattern with wildcards on both ends."""
     # Escape SQL LIKE wildcards inside the user query so a literal '%' or '_'
     # in the search string does not act as a wildcard.
-    escaped = _normalize_query(q).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    escaped = (
+        _normalize_query(q)
+        .replace("\\", "\\\\")
+        .replace("%", "\\%")
+        .replace("_", "\\_")
+    )
     return f"%{escaped}%"
 
 
@@ -270,15 +275,21 @@ class SearchService:
                     name=o.name,
                     slug=o.slug,
                     logo_url=o.logo_url,
-                    organization_type=o.organization_type.value if o.organization_type else None,
+                    organization_type=(
+                        o.organization_type.value if o.organization_type else None
+                    ),
                     verified=o.verified,
                 )
                 for o in organizations
             ],
             skills=[
-                SearchSuggestionSkill(id=s.id, name=s.name, category=s.category) for s in skills
+                SearchSuggestionSkill(id=s.id, name=s.name, category=s.category)
+                for s in skills
             ],
-            tags=[SearchSuggestionTag(name=t.name, project_count=t.project_count) for t in tags],
+            tags=[
+                SearchSuggestionTag(name=t.name, project_count=t.project_count)
+                for t in tags
+            ],
         )
 
     @staticmethod
@@ -346,15 +357,21 @@ class SearchService:
             tags: Sequence[SearchResultTag] = []
 
             if cat == "developers":
-                users = search_users(db, q, limit=limit + offset)[offset : offset + limit]
+                users = search_users(db, q, limit=limit + offset)[
+                    offset : offset + limit
+                ]
             elif cat == "projects":
-                projects = search_projects(db, q, limit=limit + offset)[offset : offset + limit]
+                projects = search_projects(db, q, limit=limit + offset)[
+                    offset : offset + limit
+                ]
             elif cat == "organizations":
                 organizations = search_organizations(db, q, limit=limit + offset)[
                     offset : offset + limit
                 ]
             elif cat == "skills":
-                skills = search_skills(db, q, limit=limit + offset)[offset : offset + limit]
+                skills = search_skills(db, q, limit=limit + offset)[
+                    offset : offset + limit
+                ]
             elif cat == "tags":
                 tags = search_tags(db, q, limit=limit + offset)[offset : offset + limit]
             else:
@@ -409,7 +426,9 @@ class SearchService:
                     slug=o.slug,
                     description=o.description,
                     logo_url=o.logo_url,
-                    organization_type=o.organization_type.value if o.organization_type else None,
+                    organization_type=(
+                        o.organization_type.value if o.organization_type else None
+                    ),
                     location=o.location,
                     members_count=o.members_count or 0,
                     verified=o.verified,

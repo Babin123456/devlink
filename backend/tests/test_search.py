@@ -180,7 +180,9 @@ def test_search_empty_query_returns_empty_categories():
 def test_search_matches_users_by_name_and_username():
     client = TestClient(app)
     db = TestingSessionLocal()
-    _create_user(db, "alice@example.com", "alice", first_name="Alice", last_name="Wonder")
+    _create_user(
+        db, "alice@example.com", "alice", first_name="Alice", last_name="Wonder"
+    )
     _create_user(db, "bob@example.com", "bob", first_name="Bob", last_name="Builder")
     db.close()
 
@@ -359,7 +361,9 @@ def test_search_excludes_inactive_users():
     client = TestClient(app)
     db = TestingSessionLocal()
     _create_user(db, "active@example.com", "activeuser", first_name="Active")
-    inactive = _create_user(db, "inactive@example.com", "inactiveuser", first_name="Inactive")
+    inactive = _create_user(
+        db, "inactive@example.com", "inactiveuser", first_name="Inactive"
+    )
     inactive.is_active = False
     db.commit()
     db.close()

@@ -195,6 +195,8 @@ def get_recommended_projects(
         limit=limit,
         results=results,
     )
+
+
 @router.post(
     "/tech-stack",
     response_model=TechStackResponse,
