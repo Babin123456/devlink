@@ -161,11 +161,12 @@ def test_forgot_password(client: TestClient, register_and_login):
 
 def test_reset_password(client: TestClient, register_and_login):
     user_id, _ = register_and_login("reset@example.com", "resetuser", "OldPass1!")
-    client.post("/api/auth/forgot-password", json={"email": "reset@example.com"})
-
-    from datetime import timedelta
+    forgot = client.post(  # noqa: F841
+        "/api/auth/forgot-password", json={"email": "reset@example.com"}
+    )
 
     from app.core.security import _create_token
+    from datetime import timedelta
 
     reset_token = _create_token(str(user_id), timedelta(hours=1), "reset")
 

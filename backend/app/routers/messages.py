@@ -5,16 +5,13 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 # pyrefly: ignore [missing-import]
-from sqlalchemy import select
 
-# pyrefly: ignore [missing-import]
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_current_user, get_database
-from app.middleware.rate_limit import MESSAGE_LIMIT, SEARCH_LIMIT, limiter
-from app.models.conversation_member import ConversationMember
-from app.models.notification import NotificationType
+from app.dependencies import get_database
+from app.dependencies import get_current_user
+from app.middleware.rate_limit import limiter, MESSAGE_LIMIT, SEARCH_LIMIT
 from app.models.user import User
 from app.schemas.message import (
     MessageCreate,
@@ -22,6 +19,12 @@ from app.schemas.message import (
     MessageUpdate,
 )
 from app.services.message_service import MessageService
+
+# pyrefly: ignore [missing-import]
+from sqlalchemy import select
+
+from app.models.conversation_member import ConversationMember
+from app.models.notification import NotificationType
 from app.services.notification_service import NotificationService
 
 router = APIRouter(
@@ -140,6 +143,84 @@ def list_conversation_messages(
         conversation_id,
         limit,
     )
+
+
+# ------------------------------------------------------------------
+# Typing indicator  (issue #337)
+# ------------------------------------------------------------------
+
+
+@router.post(
+    "/conversation/{conversation_id}/typing",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+@limiter.limit("60/minute")
+def set_typing(
+    request: Request,
+    conversation_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    """Record that the current user is typing in a conversation.
+
+    Clients should call this on a debounce (e.g. every 1–2s while the
+    input has focus and is changing). The state expires automatically
+    after ``MessageService.TYPING_TTL_SECONDS`` if no further heartbeats
+    arrive, so there is no strict requirement to call the "stop" endpoint.
+    """
+    MessageService.set_typing(
+        conversation_id=conversation_id,
+        user_id=current_user.id,
+    )
+    return None
+
+
+@router.delete(
+    "/conversation/{conversation_id}/typing",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+@limiter.limit("60/minute")
+def stop_typing(
+    request: Request,
+    conversation_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    """Explicitly clear the current user's typing state.
+
+    Called when the user sends a message or blurs the input so the
+    indicator disappears immediately rather than waiting for the TTL.
+    """
+    MessageService.clear_typing(
+        conversation_id=conversation_id,
+        user_id=current_user.id,
+    )
+    return None
+
+
+@router.get(
+    "/conversation/{conversation_id}/typing",
+)
+@limiter.limit("60/minute")
+def get_typing(
+    request: Request,
+    conversation_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    """Return the list of user IDs currently typing in a conversation.
+
+    The requesting user is excluded so a client never sees its own
+    indicator echoed back.
+    """
+    typing_user_ids = MessageService.get_typing_users(
+        conversation_id=conversation_id,
+        exclude_user_id=current_user.id,
+    )
+    return {
+        "conversation_id": str(conversation_id),
+        "typing_user_ids": [str(uid) for uid in typing_user_ids],
+    }
 
 
 @router.get(

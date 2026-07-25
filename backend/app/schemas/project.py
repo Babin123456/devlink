@@ -18,6 +18,7 @@ class ProjectBase(BaseModel):
     stage: ProjectStage = ProjectStage.IDEA
     visibility: ProjectVisibility = ProjectVisibility.PUBLIC
     tech_stack: Optional[str] = None
+    tags: Optional[list[str]] = None
     repository_url: Optional[str] = None
     website_url: Optional[str] = None
     demo_url: Optional[str] = None
@@ -26,6 +27,9 @@ class ProjectBase(BaseModel):
     hiring: bool = True
     logo_url: Optional[str] = None
     banner_url: Optional[str] = None
+
+    scheduled_publish_at: Optional[datetime] = None
+    is_published: bool = True
 
 
 class ProjectCreate(ProjectBase):
@@ -40,6 +44,7 @@ class ProjectUpdate(BaseModel):
     stage: Optional[ProjectStage] = None
     visibility: Optional[ProjectVisibility] = None
     tech_stack: Optional[str] = None
+    tags: Optional[list[str]] = None
     repository_url: Optional[str] = None
     website_url: Optional[str] = None
     demo_url: Optional[str] = None
@@ -48,6 +53,19 @@ class ProjectUpdate(BaseModel):
     hiring: Optional[bool] = None
     logo_url: Optional[str] = None
     banner_url: Optional[str] = None
+
+    scheduled_publish_at: Optional[datetime] = None
+    is_published: Optional[bool] = None
+
+
+class SimilarProjectWarning(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    title: str
+    slug: str
+    title_similarity: float
+    description_similarity: float
 
 
 class ProjectStatsResponse(BaseModel):
@@ -65,10 +83,16 @@ class ProjectResponse(ProjectBase):
 
     id: uuid.UUID
     owner_id: uuid.UUID
+
     stars: int
     views: int
     applications_count: int
+
     is_featured: bool
     is_archived: bool
+
+    scheduled_publish_at: Optional[datetime]
+    is_published: bool
+
     created_at: datetime
     updated_at: datetime

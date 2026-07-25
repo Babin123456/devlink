@@ -8,7 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_current_user, get_database
+from app.dependencies import get_database
+from app.dependencies import get_current_user
 from app.models.user import User
 from app.schemas.conversation import (
     ConversationCreate,
@@ -29,42 +30,6 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
 )
 def create_conversation(
-    conversation: ConversationCreate,
-    db: Session = Depends(get_database),
-    current_user: User = Depends(get_current_user),
-):
-
-    return ConversationService.create_conversation(
-        db=db,
-        owner_id=current_user.id,
-        conversation=conversation,
-    )
-
-
-@router.post(
-    "/",
-    response_model=ConversationResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-def create_conversation(  # noqa: F811
-    conversation: ConversationCreate,
-    db: Session = Depends(get_database),
-    current_user: User = Depends(get_current_user),
-):
-
-    return ConversationService.create_conversation(
-        db=db,
-        owner_id=current_user.id,
-        conversation=conversation,
-    )
-
-
-@router.post(
-    "/",
-    response_model=ConversationResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-def create_conversation(  # noqa: F811
     conversation: ConversationCreate,
     db: Session = Depends(get_database),
     current_user: User = Depends(get_current_user),

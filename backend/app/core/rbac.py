@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import uuid
-
 from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
-from app.models.organization import Organization
-from app.models.organization_member import OrganizationMember, OrgMemberRole
-from app.models.project import Project
-from app.models.project_member import MemberRole, ProjectMember
 from app.models.user import User
+from app.models.organization_member import OrganizationMember, OrgMemberRole
+from app.models.project_member import ProjectMember, MemberRole
+from app.models.organization import Organization
+from app.models.project import Project
 
 # Define permission system actions
 # Org permissions
@@ -76,7 +75,7 @@ def has_org_permission(
         and_(
             OrganizationMember.organization_id == org_id,
             OrganizationMember.user_id == user_id,
-            OrganizationMember.is_active,
+            OrganizationMember.is_active == True,  # noqa: E712
         )
     )
     member = db.scalar(stmt)
@@ -123,7 +122,7 @@ def has_project_permission(
         and_(
             ProjectMember.project_id == project_id,
             ProjectMember.user_id == user_id,
-            ProjectMember.is_active,
+            ProjectMember.is_active == True,  # noqa: E712
         )
     )
     member = db.scalar(stmt)

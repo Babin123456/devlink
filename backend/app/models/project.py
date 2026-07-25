@@ -7,16 +7,14 @@ from enum import Enum
 from sqlalchemy import (
     Boolean,
     DateTime,
+    Enum as SqlEnum,
     ForeignKey,
     Integer,
     String,
     Text,
     func,
 )
-from sqlalchemy import (
-    Enum as SqlEnum,
-)
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
@@ -111,6 +109,12 @@ class Project(Base):
         Text,
     )
 
+    tags: Mapped[list | None] = mapped_column(
+        JSONB,
+        nullable=True,
+        default=list,
+    )
+
     repository_url: Mapped[str | None] = mapped_column(
         String(500),
     )
@@ -186,6 +190,19 @@ class Project(Base):
     is_archived: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
+        index=True,
+    )
+
+    scheduled_publish_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
+    )
+
+    is_published: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
         index=True,
     )
 

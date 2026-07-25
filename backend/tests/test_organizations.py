@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import pytest
-from app.database.base import Base
-from app.dependencies import get_database
-from app.main import app
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
+from app.database.base import Base
+from app.dependencies import get_database
+from app.main import app
 
 engine = create_engine(
     "sqlite://",

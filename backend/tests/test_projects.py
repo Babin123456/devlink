@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 import pytest
-from app.database.base import Base
-from app.dependencies import get_database
-from app.main import app
-from app.models.project import ProjectStage, ProjectVisibility
-from app.models.user import User
-from app.schemas.project import ProjectCreate
-from app.services.project_service import ProjectService
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
+from app.database.base import Base
+from app.dependencies import get_database
+from app.main import app
+from app.models.user import User
+from app.models.project import ProjectStage, ProjectVisibility
+from app.schemas.project import ProjectCreate
+from app.services.project_service import ProjectService
 
 engine = create_engine(
     "sqlite://",
@@ -161,9 +162,8 @@ def test_list_projects_does_not_increment_views():
     db.close()
 
 
-import uuid  # noqa: E402
-
 import pytest  # noqa: E402
+import uuid  # noqa: E402
 
 
 def test_create_project(client: TestClient, register_and_login):
