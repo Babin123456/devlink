@@ -15,7 +15,10 @@ export const Route = createFileRoute("/_app/messages")({
 });
 
 function MessagesIndex() {
-  const { data = [] } = useQuery({ queryKey: ["conversations"], queryFn: messagesService.conversations });
+  const { data = [] } = useQuery({
+    queryKey: ["conversations"],
+    queryFn: messagesService.conversations,
+  });
   return (
     <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
       <Card className="lg:h-[calc(100vh-8rem)] lg:overflow-y-auto">
@@ -23,7 +26,10 @@ function MessagesIndex() {
           <p className="text-[14px] font-semibold text-foreground">Conversations</p>
         </div>
         {data.length === 0 ? (
-          <NoMessagesEmptyState title="No conversations" desc="You don't have any open conversations yet." />
+          <NoMessagesEmptyState
+            title="No conversations"
+            desc="You don't have any open conversations yet."
+          />
         ) : (
           <ul className="divide-y divide-border">
             {data.map((c) => (
@@ -35,7 +41,9 @@ function MessagesIndex() {
                 >
                   <Avatar src={c.with.avatar} alt={c.with.name} size={40} online={c.with.online} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-semibold text-foreground">{c.with.name}</p>
+                    <p className="truncate text-[13px] font-semibold text-foreground">
+                      {c.with.name}
+                    </p>
                     <p className="truncate text-[12px] text-muted-foreground">{c.preview}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1">

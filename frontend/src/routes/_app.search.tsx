@@ -12,7 +12,10 @@ export const Route = createFileRoute("/_app/search")({
   head: () => ({
     meta: [
       { title: "Search — DevLink" },
-      { name: "description", content: "Global search across developers, projects, skills and flares." },
+      {
+        name: "description",
+        content: "Global search across developers, projects, skills and flares.",
+      },
     ],
   }),
   component: SearchPage,
@@ -22,9 +25,15 @@ function SearchPage() {
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<Tab>("Developers");
 
-  const devs = builders.filter((b) => (b.name + b.skills.join(" ")).toLowerCase().includes(q.toLowerCase()));
-  const projs = projects.filter((p) => (p.name + p.stack.join(" ")).toLowerCase().includes(q.toLowerCase()));
-  const skillSet = Array.from(new Set(builders.flatMap((b) => b.skills))).filter((s) => s.toLowerCase().includes(q.toLowerCase()));
+  const devs = builders.filter((b) =>
+    (b.name + b.skills.join(" ")).toLowerCase().includes(q.toLowerCase()),
+  );
+  const projs = projects.filter((p) =>
+    (p.name + p.stack.join(" ")).toLowerCase().includes(q.toLowerCase()),
+  );
+  const skillSet = Array.from(new Set(builders.flatMap((b) => b.skills))).filter((s) =>
+    s.toLowerCase().includes(q.toLowerCase()),
+  );
   const fls = flares.filter((f) => f.content.toLowerCase().includes(q.toLowerCase()));
 
   return (
@@ -62,7 +71,9 @@ function SearchPage() {
             onClick={() => setTab(t)}
             className={cn(
               "rounded px-3 py-1.5 text-[12px] font-medium transition-colors",
-              tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+              tab === t
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             {t}
@@ -75,7 +86,11 @@ function SearchPage() {
           <Card className="py-8">
             <NoSearchResultsEmptyState
               title="No developers found"
-              desc={q ? `No developers matching "${q}" were found.` : "Search for developers by name or skill."}
+              desc={
+                q
+                  ? `No developers matching "${q}" were found.`
+                  : "Search for developers by name or skill."
+              }
               action={
                 q ? (
                   <button
@@ -109,7 +124,11 @@ function SearchPage() {
           <Card className="py-8">
             <NoSearchResultsEmptyState
               title="No projects found"
-              desc={q ? `No projects matching "${q}" were found.` : "Search for projects by name or stack."}
+              desc={
+                q
+                  ? `No projects matching "${q}" were found.`
+                  : "Search for projects by name or stack."
+              }
               action={
                 q ? (
                   <button
@@ -128,10 +147,14 @@ function SearchPage() {
               <Link key={p.id} to="/projects/$projectId" params={{ projectId: p.id }}>
                 <Card interactive className="p-4">
                   <div className="flex items-start gap-3">
-                    <span className="grid h-10 w-10 place-items-center rounded-md bg-muted text-xl">{p.icon}</span>
+                    <span className="grid h-10 w-10 place-items-center rounded-md bg-muted text-xl">
+                      {p.icon}
+                    </span>
                     <div className="min-w-0">
                       <p className="truncate text-[13px] font-semibold text-foreground">{p.name}</p>
-                      <p className="truncate text-[12px] text-muted-foreground">{p.stack.join(" · ")}</p>
+                      <p className="truncate text-[12px] text-muted-foreground">
+                        {p.stack.join(" · ")}
+                      </p>
                     </div>
                   </div>
                 </Card>
@@ -145,7 +168,11 @@ function SearchPage() {
           <Card className="py-8">
             <NoSearchResultsEmptyState
               title="No skills found"
-              desc={q ? `No skills matching "${q}" were found.` : "Search for specific developer skills."}
+              desc={
+                q
+                  ? `No skills matching "${q}" were found.`
+                  : "Search for specific developer skills."
+              }
               action={
                 q ? (
                   <button
@@ -162,7 +189,9 @@ function SearchPage() {
           <Card className="p-4">
             <div className="flex flex-wrap gap-2">
               {skillSet.map((s) => (
-                <TagChip key={s} className="text-[12px]">{s}</TagChip>
+                <TagChip key={s} className="text-[12px]">
+                  {s}
+                </TagChip>
               ))}
             </div>
           </Card>
@@ -173,7 +202,11 @@ function SearchPage() {
           <Card className="py-8">
             <NoSearchResultsEmptyState
               title="No flares found"
-              desc={q ? `No community flares matching "${q}" were found.` : "Search community announcements and updates."}
+              desc={
+                q
+                  ? `No community flares matching "${q}" were found.`
+                  : "Search community announcements and updates."
+              }
               action={
                 q ? (
                   <button

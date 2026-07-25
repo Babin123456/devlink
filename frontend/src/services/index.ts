@@ -51,4 +51,13 @@ export const issuesService = {
   get: (projectId: string, issueId: string) => mock(null),
 };
 
-export type { Builder, Project, Activity, Flare, Conversation, Notification, Hackathon, Deadline } from "@/mocks/seed";
+export type {
+  Builder,
+  Project,
+  Activity,
+  Flare,
+  Conversation,
+  Notification,
+  Hackathon,
+  Deadline,
+} from "@/mocks/seed";
