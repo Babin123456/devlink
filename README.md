@@ -558,7 +558,7 @@ Special thanks to:
 
 ## ⭐ If you like DevLink, consider giving the repository a star!
 
-Made with by developers, for developers.
+Made by developers, for developers.
 
 Building the future of developer collaboration.
 
