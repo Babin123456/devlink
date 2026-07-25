@@ -44,6 +44,8 @@ class ProjectService:
             team_size=project.team_size,
             max_team_size=project.max_team_size,
             hiring=project.hiring,
+            scheduled_publish_at=project.scheduled_publish_at,
+            is_published=(project.scheduled_publish_at is None),
         )
 
         db.add(db_project)
@@ -108,6 +110,7 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
+            .where(Project.is_published.is_(True))
             .offset(skip)
             .limit(limit)
         )
@@ -137,6 +140,13 @@ class ProjectService:
     ) -> Project:
 
         data = project.model_dump(exclude_unset=True)
+
+        from datetime import datetime, timezone
+
+        if "scheduled_publish_at" in data and data["scheduled_publish_at"] is not None:
+            data["is_published"] = data["scheduled_publish_at"] <= datetime.now(
+                timezone.utc
+            )
 
         for key, value in data.items():
             setattr(db_project, key, value)

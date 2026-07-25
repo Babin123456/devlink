@@ -17,6 +17,7 @@ def override_github_config(monkeypatch):
     )
 
 
+def test_github_login_success_new_user(client: TestClient, db, override_github_config):
 def test_github_login_success_new_user(
     client: TestClient, db_session, override_github_config
     client: TestClient, db, override_github_config
@@ -133,9 +134,7 @@ def test_github_login_link_existing_account(
             user = (
                 db_session.query(User).filter_by(email="existing@example.com").first()
             db.expire_all()
-            user = (
-                db.query(User).filter(User.email == "existing@example.com").first()
-            )
+            user = db.query(User).filter(User.email == "existing@example.com").first()
             assert user.github_id == "987654"
             assert user.profile_image == "https://github.com/avatar2.png"
 

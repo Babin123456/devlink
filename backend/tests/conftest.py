@@ -5,7 +5,13 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from sqlalchemy.dialects.sqlite.base import SQLiteTypeCompiler
 import app.core.security
+
+def visit_ARRAY(self, type_, **kw):
+    return "JSON"
+SQLiteTypeCompiler.visit_ARRAY = visit_ARRAY
+
 
 
 class MockPwdContext:

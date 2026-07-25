@@ -37,22 +37,26 @@ from app.routers import (
     bookmark_collections,
     bookmarks,
     builder_flares,
+    conversation_starters,
     contributor_matching,
     conversations,
     export,
     followers,
     health,
+    issues,
     messages,
     notifications,
     organizations,
+    profile_summary,
+    project_tags,
     projects,
     recommendations,
     repositories,
+    repository_quality,
     skills,
     users,
     search,
 )
-
 
 
 @asynccontextmanager
@@ -225,6 +229,10 @@ app.include_router(bookmarks.router)
 app.include_router(bookmark_collections.router)
 app.include_router(activities.router)
 app.include_router(conversations.router)
+app.include_router(issues.router, prefix="/api/issues", tags=["Issues"])
+app.include_router(profile_summary.router, prefix="/api/profile-summary", tags=["Profile Summary"])
+app.include_router(conversation_starters.router, prefix="/api/conversation-starters", tags=["Conversation Starters"])
+app.include_router(project_tags.router, prefix="/api/project-tags", tags=["Project Tags"])
 app.include_router(
     contributor_matching.router,
     prefix="/api/contributor-matching",
@@ -236,7 +244,11 @@ app.include_router(applications.router)
 app.include_router(skills.router)
 app.include_router(users.router)
 from app.routers import websockets
+
 app.include_router(websockets.router)
 app.include_router(recommendations.router)
+app.include_router(
+    repository_quality.router, prefix="/api", tags=["Repository Quality"]
+)
 app.include_router(health.router)
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
