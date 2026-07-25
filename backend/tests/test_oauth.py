@@ -71,8 +71,9 @@ def test_github_login_success_new_user(
 
 
 def test_github_login_link_existing_account(
-    client: TestClient, db_session, override_github_config
-    client: TestClient, db, override_github_config
+    client: TestClient,
+    db,
+    override_github_config,
 ):
     # Pre-create a user with the same email but no github_id
     from app.core.security import hash_password
@@ -131,8 +132,6 @@ def test_github_login_link_existing_account(
             )  # Keeps original username
 
             # Verify DB state
-            user = (
-                db_session.query(User).filter_by(email="existing@example.com").first()
             db.expire_all()
             user = db.query(User).filter(User.email == "existing@example.com").first()
             assert user.github_id == "987654"
