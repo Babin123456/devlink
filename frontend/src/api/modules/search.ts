@@ -4,12 +4,7 @@ import { api } from "../client";
 // Search categories
 // ---------------------------------------------------------------------
 
-export type SearchCategory =
-  | "developers"
-  | "projects"
-  | "organizations"
-  | "skills"
-  | "tags";
+export type SearchCategory = "developers" | "projects" | "organizations" | "skills" | "tags";
 
 export const SEARCH_CATEGORIES: readonly SearchCategory[] = [
   "developers",

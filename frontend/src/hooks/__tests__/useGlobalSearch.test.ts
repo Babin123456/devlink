@@ -2,19 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 
 import { useGlobalSearch } from "@/hooks/useGlobalSearch";
-import type {
-  SearchAutocompleteResponse,
-  SearchResponse,
-} from "@/api/modules/search";
+import type { SearchAutocompleteResponse, SearchResponse } from "@/api/modules/search";
 
 // ---------------------------------------------------------------------
 // Mocks
 // ---------------------------------------------------------------------
 
 vi.mock("@/api/modules/search", async () => {
-  const actual = await vi.importActual<typeof import("@/api/modules/search")>(
-    "@/api/modules/search",
-  );
+  const actual =
+    await vi.importActual<typeof import("@/api/modules/search")>("@/api/modules/search");
   return {
     ...actual,
     searchApi: {
@@ -67,9 +63,7 @@ function makeEmptyAutocomplete(): SearchAutocompleteResponse {
 beforeEach(() => {
   vi.clearAllMocks();
   (searchApi.all as ReturnType<typeof vi.fn>).mockResolvedValue(makeEmptyResponse());
-  (searchApi.autocomplete as ReturnType<typeof vi.fn>).mockResolvedValue(
-    makeEmptyAutocomplete(),
-  );
+  (searchApi.autocomplete as ReturnType<typeof vi.fn>).mockResolvedValue(makeEmptyAutocomplete());
 });
 
 describe("useGlobalSearch", () => {
@@ -112,9 +106,7 @@ describe("useGlobalSearch", () => {
       await new Promise((r) => setTimeout(r, 150));
     });
 
-    expect(searchApi.all).toHaveBeenCalledWith(
-      expect.objectContaining({ q: "react", limit: 20 }),
-    );
+    expect(searchApi.all).toHaveBeenCalledWith(expect.objectContaining({ q: "react", limit: 20 }));
   });
 
   it("calls the full search API with the active category filter", async () => {
@@ -195,9 +187,7 @@ describe("useGlobalSearch", () => {
   });
 
   it("sets an error message when the full search call rejects", async () => {
-    (searchApi.all as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-      new Error("Network down"),
-    );
+    (searchApi.all as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("Network down"));
 
     const { result } = renderHook(() => useGlobalSearch({ debounceMs: 0 }));
 
@@ -229,9 +219,7 @@ describe("useGlobalSearch", () => {
       skills: [],
       tags: [],
     };
-    (searchApi.autocomplete as ReturnType<typeof vi.fn>).mockResolvedValueOnce(
-      mockAutocomplete,
-    );
+    (searchApi.autocomplete as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockAutocomplete);
 
     const { result } = renderHook(() => useGlobalSearch({ debounceMs: 0 }));
 
@@ -270,9 +258,7 @@ describe("useGlobalSearch", () => {
   });
 
   it("clear() resets query, results, suggestions, and error", async () => {
-    (searchApi.all as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-      new Error("fail"),
-    );
+    (searchApi.all as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("fail"));
 
     const { result } = renderHook(() => useGlobalSearch({ debounceMs: 0 }));
 

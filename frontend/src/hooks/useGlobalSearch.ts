@@ -55,15 +55,8 @@ export interface UseGlobalSearchReturn extends GlobalSearchState {
 // Hook
 // ---------------------------------------------------------------------
 
-export function useGlobalSearch(
-  options: UseGlobalSearchOptions = {},
-): UseGlobalSearchReturn {
-  const {
-    debounceMs = 250,
-    limit = 20,
-    minQueryLength = 1,
-    enableAutocomplete = true,
-  } = options;
+export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobalSearchReturn {
+  const { debounceMs = 250, limit = 20, minQueryLength = 1, enableAutocomplete = true } = options;
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<SearchCategory | null>(null);

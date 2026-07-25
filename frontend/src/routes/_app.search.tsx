@@ -391,7 +391,9 @@ function CategoryTab({
       onClick={onClick}
       className={cn(
         "flex items-center gap-1.5 rounded px-3 py-1.5 text-[12px] font-medium transition-colors",
-        active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+        active
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:text-foreground",
       )}
     >
       <Icon size={13} />
@@ -537,7 +539,12 @@ function SearchBody({
   }
   if (showAll || category === "skills") {
     sections.push(
-      <SkillsSection key="skills" skills={results.skills} query={debouncedQuery} showAll={showAll} />,
+      <SkillsSection
+        key="skills"
+        skills={results.skills}
+        query={debouncedQuery}
+        showAll={showAll}
+      />,
     );
   }
   if (showAll || category === "tags") {
@@ -640,7 +647,11 @@ function ProjectsSection({
               <div className="flex items-start gap-3">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-muted text-xl">
                   {p.logo_url ? (
-                    <img src={p.logo_url} alt="" className="h-full w-full rounded-md object-cover" />
+                    <img
+                      src={p.logo_url}
+                      alt=""
+                      className="h-full w-full rounded-md object-cover"
+                    />
                   ) : (
                     "🚀"
                   )}
@@ -694,7 +705,11 @@ function OrganizationsSection({
               <div className="flex items-start gap-3">
                 <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-muted text-xl">
                   {o.logo_url ? (
-                    <img src={o.logo_url} alt="" className="h-full w-full rounded-md object-cover" />
+                    <img
+                      src={o.logo_url}
+                      alt=""
+                      className="h-full w-full rounded-md object-cover"
+                    />
                   ) : (
                     <Building2 size={18} />
                   )}
@@ -811,4 +826,4 @@ function SearchSkeleton() {
       ))}
     </div>
   );
-                     }
+}
