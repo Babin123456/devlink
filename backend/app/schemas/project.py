@@ -106,3 +106,11 @@ class ProjectResponse(ProjectBase):
 
     created_at: datetime
     updated_at: datetime
+
+
+class ProjectDraftCreate(ProjectBase):
+    pass
+
+
+class ProjectDraftUpdate(ProjectUpdate):
+    pass

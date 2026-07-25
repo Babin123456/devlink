@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, AliasChoices
 
 from app.models.activity import ActivityType
 
@@ -25,7 +25,7 @@ class ActivityBase(BaseModel):
     description: Optional[str] = None
     target_id: Optional[uuid.UUID] = None
     target_type: Optional[str] = None
-    metadata_: Dict[str, Any] = Field(default_factory=dict, alias="metadata")
+    meta: Dict[str, Any] = Field(default_factory=dict, validation_alias=AliasChoices("meta", "metadata"), serialization_alias="metadata")
     icon: Optional[str] = None
     color: Optional[str] = None
 
@@ -39,7 +39,7 @@ class ActivityUpdate(BaseModel):
     description: Optional[str] = None
     icon: Optional[str] = None
     color: Optional[str] = None
-    metadata_: Optional[Dict[str, Any]] = Field(None, alias="metadata")
+    meta: Optional[Dict[str, Any]] = Field(None, validation_alias=AliasChoices("meta", "metadata"), serialization_alias="metadata")
 
 
 class ActivityResponse(ActivityBase):

@@ -1,8 +1,8 @@
+from __future__ import annotations
 """
 Pydantic schemas for the AI Repository Quality Analyzer.
 """
 
-from __future__ import annotations
 
 from enum import Enum
 

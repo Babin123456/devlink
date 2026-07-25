@@ -71,7 +71,8 @@ class ProjectService:
             activity_type=ActivityType.PROJECT_CREATED,
             title="Created project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="folder-plus",
             color="primary",
         )
@@ -181,7 +182,8 @@ class ProjectService:
             activity_type=ActivityType.PROJECT_UPDATED,
             title="Updated project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="pencil",
             color="info",
         )
@@ -205,7 +207,8 @@ class ProjectService:
             activity_type=ActivityType.PROJECT_ARCHIVED,
             title="Archived project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="archive",
             color="warning",
         )
@@ -321,40 +324,40 @@ class ProjectService:
         )
 
 
-@staticmethod
-def find_similar_projects(
-    db: Session,
-    title: str,
-    description: str,
-    title_threshold: float = 0.75,
-    description_threshold: float = 0.65,
-) -> list[SimilarProjectWarning]:
-    from difflib import SequenceMatcher
-
-    candidates = list(db.scalars(select(Project).where(Project.is_archived.is_(False))))
-
-    results = []
-    title_lower = title.lower()
-    desc_lower = description.lower()
-
-    for project in candidates:
-        title_sim = SequenceMatcher(None, title_lower, project.title.lower()).ratio()
-        desc_sim = SequenceMatcher(
-            None, desc_lower, project.description.lower()
-        ).ratio()
-
-        if title_sim >= title_threshold or desc_sim >= description_threshold:
-            results.append(
-                SimilarProjectWarning(
-                    id=project.id,
-                    title=project.title,
-                    slug=project.slug,
-                    title_similarity=round(title_sim, 2),
-                    description_similarity=round(desc_sim, 2),
+    @staticmethod
+    def find_similar_projects(
+        db: Session,
+        title: str,
+        description: str,
+        title_threshold: float = 0.75,
+        description_threshold: float = 0.65,
+    ) -> list[SimilarProjectWarning]:
+        from difflib import SequenceMatcher
+    
+        candidates = list(db.scalars(select(Project).where(Project.is_archived.is_(False))))
+    
+        results = []
+        title_lower = title.lower()
+        desc_lower = description.lower()
+    
+        for project in candidates:
+            title_sim = SequenceMatcher(None, title_lower, project.title.lower()).ratio()
+            desc_sim = SequenceMatcher(
+                None, desc_lower, project.description.lower()
+            ).ratio()
+    
+            if title_sim >= title_threshold or desc_sim >= description_threshold:
+                results.append(
+                    SimilarProjectWarning(
+                        id=project.id,
+                        title=project.title,
+                        slug=project.slug,
+                        title_similarity=round(title_sim, 2),
+                        description_similarity=round(desc_sim, 2),
+                    )
                 )
-            )
-
-    return results
+    
+        return results
 
     @staticmethod
     def delete_project(
@@ -475,7 +478,8 @@ def find_similar_projects(
             activity_type=ActivityType.PROJECT_CREATED,
             title="Published project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="folder-plus",
             color="primary",
         )

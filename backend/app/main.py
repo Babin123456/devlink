@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 # pyrefly: ignore [missing-import]
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 # pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
@@ -195,12 +196,9 @@ async def global_exception_handler(request, exc):
 
 from app.routers import (
     activities,
-    ai,
     applications,
     auth,
     bookmarks,
-    builder_flare,
-    builders,
     conversations,
     followers,
     messages,

@@ -74,9 +74,6 @@ class RecommendationList(BaseModel):
 """
 Pydantic schemas for the AI-Powered Builder Recommendation System.
 """
-
-from __future__ import annotations
-
 import uuid
 from typing import Optional
 
