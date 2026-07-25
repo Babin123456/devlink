@@ -22,42 +22,6 @@ export interface DifficultyEstimateResponse {
   reasoning: string;
 }
 
-export const issuesApi = {
-  create: (body: {
-    project_id: string;
-    title: string;
-    description: string;
-    priority?: string;
-    labels?: string;
-  }) => api.post<Issue>("/api/issues", body),
-
-  get: (id: string) => api.get<Issue>(`/api/issues/${id}`),
-
-  listByProject: (projectId: string) =>
-    api.get<Issue[]>(`/api/issues/project/${projectId}`),
-
-  update: (
-    id: string,
-    body: Partial<Pick<Issue, "title" | "description" | "status" | "priority" | "labels">>,
-  ) => api.patch<Issue>(`/api/issues/${id}`, body),
-
-  estimateDifficulty: (id: string) =>
-    api.post<DifficultyEstimateResponse>(`/api/issues/${id}/estimate`),
-
-  overrideDifficulty: (id: string, difficulty: string) =>
-    api.patch<Issue>(`/api/issues/${id}/difficulty`, { difficulty }),
-  labels: string | null;
-  is_duplicate_checked: boolean;
-  created_at: string;
-  updated_at: string;
-  author?: {
-    id: string;
-    username: string;
-    full_name: string | null;
-    avatar: string | null;
-  };
-}
-
 export interface DuplicateSuggestion {
   id: string;
   source_issue_id: string;

@@ -1,46 +1,12 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { projectsService } from "@/services";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Card, TagChip } from "@/components/shared/primitives";
-import { Star, GitFork, Users2, Plus, Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
+import { Card, TagChip, SectionHeader, NoProjectsEmptyState } from "@/components/shared/primitives";
+import { Star, GitFork, Users2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { getRecentlyViewedProjectIds } from "@/lib/recentlyViewedProjects";
-import { ProjectFilters } from "@/components/projects/ProjectFilters";
-
-type ProjectsSearch = {
-  page?: number;
-  q?: string;
-  language?: string;
-  experience?: string;
-  remote?: string;
-  paid?: string;
-  opensource?: string;
-  tech?: string;
-};
 
 export const Route = createFileRoute("/_app/projects")({
-  validateSearch: (search: Record<string, unknown>): ProjectsSearch => {
-    return {
-      page: search.page ? Number(search.page) : 1,
-      q: search.q as string | undefined,
-      language: search.language as string | undefined,
-      experience: search.experience as string | undefined,
-      remote: search.remote as string | undefined,
-      paid: search.paid as string | undefined,
-      opensource: search.opensource as string | undefined,
-      tech: search.tech as string | undefined,
-    };
-  },
   head: () => ({
     meta: [
       { title: "Projects — DevLink" },
@@ -50,60 +16,96 @@ export const Route = createFileRoute("/_app/projects")({
   component: ProjectsPage,
 });
 
+const LANGUAGES = ["JavaScript", "TypeScript", "Python", "Go", "Rust", "Java", "C++"];
+const DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
+const BOOL_FILTERS = [
+  "remote",
+  "paid",
+  "openSource",
+  "ai",
+  "web",
+  "mobile",
+  "backend",
+  "frontend",
+] as const;
+type BoolFilter = (typeof BOOL_FILTERS)[number];
+
+const BOOL_LABELS: Record<BoolFilter, string> = {
+  remote: "Remote",
+  paid: "Paid",
+  openSource: "Open Source",
+  ai: "AI",
+  web: "Web",
+  mobile: "Mobile",
+  backend: "Backend",
+  frontend: "Frontend",
+};
+
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "rounded-md border px-2.5 py-1 text-[12px] font-medium transition-colors",
+        active
+          ? "border-primary bg-primary/10 text-primary"
+          : "border-border bg-surface text-muted-foreground hover:border-primary/50 hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function toggle<T>(set: T[], val: T): T[] {
+  return set.includes(val) ? set.filter((v) => v !== val) : [...set, val];
+}
+
 function ProjectsPage() {
-  const search = Route.useSearch();
-  const page = search.page || 1;
-  const navigate = useNavigate({ from: "/projects" });
-  const ITEMS_PER_PAGE = 6;
-  
-  const [createOpen, setCreateOpen] = useState(false);
-  const [recentProjectIds, setRecentProjectIds] = useState<string[]>([]);
-  
-  // Use local state for q so we can type without lagging the URL update
-  const [q, setQ] = useState(search.q || "");
+  const [q, setQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "planning" | "shipped">(
+    "all",
+  );
+  const [showFilters, setShowFilters] = useState(false);
+  const [langs, setLangs] = useState<string[]>([]);
+  const [difficulties, setDifficulties] = useState<string[]>([]);
+  const [boolFilters, setBoolFilters] = useState<BoolFilter[]>([]);
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      navigate({
-        search: (prev: any) => ({ ...prev, q: q || undefined }),
-        replace: true,
-      });
-    }, 300);
-    return () => clearTimeout(timeoutId);
-  }, [q, navigate]);
-
-  useEffect(() => {
-    setRecentProjectIds(getRecentlyViewedProjectIds());
-  }, []);
-
-  // Pass API-supported params
   const { data = [], isLoading } = useQuery({
-    queryKey: ["projects", search],
-    queryFn: () => projectsService.list(search as any),
+    queryKey: ["projects"],
+    queryFn: projectsService.list,
   });
 
-  const recentlyViewed = recentProjectIds
-    .map((id) => data.find((project) => project.id === id))
-    .filter((project): project is NonNullable<typeof project> => Boolean(project));
+  const hasActiveFilters = langs.length > 0 || difficulties.length > 0 || boolFilters.length > 0;
 
-  // Local filter for search text (q) if backend doesn't support 'q' param natively for projects list yet
+  function resetFilters() {
+    setLangs([]);
+    setDifficulties([]);
+    setBoolFilters([]);
+  }
+
   const filtered = data.filter((p) => {
-    if (q && !p.name?.toLowerCase().includes(q.toLowerCase()) && !p.title?.toLowerCase().includes(q.toLowerCase())) return false;
+    if (statusFilter !== "all" && (p.status as string) !== statusFilter) return false;
+    if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false;
+    if (langs.length > 0 && (!p.language || !langs.includes(p.language))) return false;
+    if (
+      difficulties.length > 0 &&
+      (!p.difficulty || !difficulties.includes(p.difficulty as string))
+    )
+      return false;
+    for (const f of boolFilters) {
+      if (!p[f]) return false;
+    }
     return true;
   });
-
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
-
-  const resetFilters = () => {
-    setQ("");
-    navigate({
-      search: () => ({}),
-      replace: true,
-    });
-  };
-
-  const hasActiveFilters = Object.keys(search).filter(k => k !== 'page').length > 0 || q !== "";
 
   return (
     <div className="space-y-4">
@@ -114,57 +116,12 @@ function ProjectsPage() {
             Everything you're building, in one place.
           </p>
         </div>
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90"
-        >
+        <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90">
           <Plus size={14} /> New project
         </button>
-        <CreateProjectDialog open={createOpen} onOpenChange={setCreateOpen} />
       </div>
 
-      {recentlyViewed.length > 0 && (
-        <section className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[15px] font-semibold text-foreground">Recently Viewed Projects</h2>
-            <span className="text-[11px] text-muted-foreground">Your latest project visits</span>
-          </div>
-
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {recentlyViewed.map((project) => (
-              <a key={project.id} href={`/projects/${project.id}`} className="block">
-                <Card interactive className="p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-muted text-xl">
-                      {project.icon}
-                    </span>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[14px] font-semibold text-foreground">
-                        {project.name || project.title}
-                      </p>
-                      <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
-                        {project.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-1">
-                    {(project.stack || []).slice(0, 3).map((tech: string) => (
-                      <TagChip key={tech}>{tech}</TagChip>
-                    ))}
-                  </div>
-                </Card>
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Advanced Filters */}
-      <ProjectFilters />
-
-      <Card className="p-4">
+      <Card className="p-3">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative min-w-0 flex-1">
             <Search
@@ -174,11 +131,110 @@ function ProjectsPage() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search projects..."
+              placeholder="Search projects…"
               className="w-full rounded-md border border-border bg-surface py-[7px] pl-9 pr-3 text-[13px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
+          <div className="flex items-center gap-1 rounded-md border border-border bg-surface p-0.5">
+            {(["all", "active", "planning", "shipped"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setStatusFilter(f)}
+                className={`rounded px-2.5 py-1 text-[12px] font-medium capitalize transition-colors ${
+                  statusFilter === f
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setShowFilters((v) => !v)}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-[7px] text-[12px] font-medium transition-colors",
+              showFilters || hasActiveFilters
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border bg-surface text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <SlidersHorizontal size={13} />
+            Filters
+            {hasActiveFilters && (
+              <span className="grid h-4 w-4 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                {langs.length + difficulties.length + boolFilters.length}
+              </span>
+            )}
+          </button>
         </div>
+
+        {showFilters && (
+          <div className="mt-3 space-y-3 border-t border-border pt-3">
+            {/* Language */}
+            <div>
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Language
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {LANGUAGES.map((lang) => (
+                  <FilterChip
+                    key={lang}
+                    active={langs.includes(lang)}
+                    onClick={() => setLangs(toggle(langs, lang))}
+                  >
+                    {lang}
+                  </FilterChip>
+                ))}
+              </div>
+            </div>
+
+            {/* Difficulty */}
+            <div>
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Difficulty
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {DIFFICULTIES.map((d) => (
+                  <FilterChip
+                    key={d}
+                    active={difficulties.includes(d)}
+                    onClick={() => setDifficulties(toggle(difficulties, d))}
+                  >
+                    <span className="capitalize">{d}</span>
+                  </FilterChip>
+                ))}
+              </div>
+            </div>
+
+            {/* Boolean tags */}
+            <div>
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Tags
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {BOOL_FILTERS.map((f) => (
+                  <FilterChip
+                    key={f}
+                    active={boolFilters.includes(f)}
+                    onClick={() => setBoolFilters(toggle(boolFilters, f))}
+                  >
+                    {BOOL_LABELS[f]}
+                  </FilterChip>
+                ))}
+              </div>
+            </div>
+
+            {hasActiveFilters && (
+              <button
+                onClick={resetFilters}
+                className="inline-flex items-center gap-1 text-[12px] font-medium text-muted-foreground hover:text-foreground"
+              >
+                <X size={12} /> Reset filters
+              </button>
+            )}
+          </div>
+        )}
       </Card>
 
       {isLoading ? (
@@ -188,127 +244,104 @@ function ProjectsPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="mb-3 grid h-12 w-12 place-items-center rounded-full bg-muted text-muted-foreground">
-            🔍
-          </div>
-          <p className="text-[14px] font-semibold text-foreground">
-            No projects match your filters
-          </p>
-          <p className="mt-1 text-[13px] text-muted-foreground">
-            Try adjusting or resetting your filters.
-          </p>
-          {hasActiveFilters && (
-            <button
-              onClick={resetFilters}
-              className="mt-3 text-[13px] font-medium text-primary hover:underline inline-flex items-center gap-1"
-            >
-              <X size={13} /> Reset filters
-            </button>
-          )}
-        </div>
+        <Card className="py-8">
+          <NoProjectsEmptyState
+            title={hasActiveFilters || q ? "No projects match your filters" : "No projects found"}
+            desc={
+              hasActiveFilters || q
+                ? "Try adjusting your search query or resetting your applied filters."
+                : "There are no projects available right now. Be the first to create one!"
+            }
+            action={
+              hasActiveFilters || q ? (
+                <button
+                  onClick={() => {
+                    setQ("");
+                    resetFilters();
+                  }}
+                  className="rounded-md border border-border bg-surface px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-muted"
+                >
+                  Reset search & filters
+                </button>
+              ) : undefined
+            }
+          />
+        </Card>
       ) : (
-        <>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {paginated.map((p) => (
-              <a key={p.id} href={`/projects/${p.id}`} className="block">
-                <Card interactive className="p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-muted text-xl">
-                      {p.icon || '🚀'}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[14px] font-semibold text-foreground">{p.name || p.title}</p>
-                      <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
-                        {p.description}
-                      </p>
-                    </div>
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((p) => (
+            <Link
+              key={p.id}
+              to="/projects/$projectId"
+              params={{ projectId: p.id }}
+              className="block"
+            >
+              <Card interactive className="p-4">
+                <div className="flex items-start gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-muted text-xl">
+                    {p.icon}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[14px] font-semibold text-foreground">{p.name}</p>
+                    <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
+                      {p.description}
+                    </p>
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-1">
-                    {(p.stack || []).map((s: string) => (
-                      <TagChip key={s}>{s}</TagChip>
-                    ))}
-                    {p.difficulty && (
-                      <TagChip
-                        className={cn(
-                          p.difficulty === "beginner"
-                            ? "border-success/30 bg-success/10 text-success"
-                            : p.difficulty === "intermediate"
-                              ? "border-warning/30 bg-warning/10 text-warning"
-                              : "border-destructive/30 bg-destructive/10 text-destructive",
-                        )}
-                      >
-                        {p.difficulty}
-                      </TagChip>
-                    )}
-                  </div>
-                  <div className="mt-3">
-                    <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
-                      <span>Progress</span>
-                      <span>{p.progress || 0}%</span>
-                    </div>
-                    <div className="h-1 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full bg-primary" style={{ width: `${p.progress || 0}%` }} />
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span className="inline-flex items-center gap-1">
-                      <Users2 size={12} /> {p.members || p.team_size || 1}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <Star size={12} /> {p.stars || 0}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <GitFork size={12} /> {p.forks || 0}
-                    </span>
-                    <span
-                      className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
-                        p.status === "active" || p.status === "completed"
-                          ? "bg-success/10 text-success"
-                          : "bg-muted text-muted-foreground"
-                      }`}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {p.stack.map((s) => (
+                    <TagChip key={s}>{s}</TagChip>
+                  ))}
+                  {p.difficulty && (
+                    <TagChip
+                      className={cn(
+                        (p.difficulty as string).toLowerCase() === "beginner"
+                          ? "border-success/30 bg-success/10 text-success"
+                          : (p.difficulty as string).toLowerCase() === "intermediate"
+                            ? "border-warning/30 bg-warning/10 text-warning"
+                            : "border-destructive/30 bg-destructive/10 text-destructive",
+                      )}
                     >
-                      {p.status || "IDEA"}
-                    </span>
+                      {p.difficulty}
+                    </TagChip>
+                  )}
+                </div>
+                <div className="mt-3">
+                  <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span>Progress</span>
+                    <span>{p.progress}%</span>
                   </div>
-                </Card>
-              </a>
-            ))}
-          </div>
-
-          {totalPages > 1 && (
-            <div className="mt-8 flex justify-center">
-               <Pagination>
-                 <PaginationContent>
-                   <PaginationItem>
-                     <PaginationPrevious
-                       href={`/projects?page=${Math.max(1, page - 1)}`}
-                       aria-disabled={page === 1}
-                       className={page === 1 ? "pointer-events-none opacity-50" : ""}
-                     />
-                   </PaginationItem>
-                   {Array.from({ length: totalPages }).map((_, i) => (
-                     <PaginationItem key={i}>
-                       <PaginationLink
-                         href={`/projects?page=${i + 1}`}
-                         isActive={page === i + 1}
-                       >
-                         {i + 1}
-                       </PaginationLink>
-                     </PaginationItem>
-                   ))}
-                   <PaginationItem>
-                     <PaginationNext
-                       href={`/projects?page=${Math.min(totalPages, page + 1)}`}
-                       aria-disabled={page === totalPages}
-                       className={page === totalPages ? "pointer-events-none opacity-50" : ""}
-                     />
-                   </PaginationItem>
-                 </PaginationContent>
-               </Pagination>
-            </div>
-          )}
-        </>
+                  <div className="h-1 overflow-hidden rounded-full bg-muted">
+                    <div className="h-full bg-primary" style={{ width: `${p.progress}%` }} />
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <Users2 size={12} /> {p.members}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Star size={12} /> {p.stars}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <GitFork size={12} /> {p.forks}
+                  </span>
+                  <span
+                    className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
+                      (p.status as string) === "active" || (p.status as string) === "recruiting"
+                        ? "bg-success/10 text-success"
+                        : (p.status as string) === "planning" ||
+                            (p.status as string) === "in-progress"
+                          ? "bg-warning/10 text-warning"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {p.status}
+                  </span>
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
       )}
     </div>
   );

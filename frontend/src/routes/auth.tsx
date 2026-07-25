@@ -32,7 +32,6 @@ const signUpSchema = signInSchema
     message: "Passwords must match",
     path: ["confirmPassword"],
   });
-import { loginSchema as signInSchema, signupSchema as signUpSchema } from "@/lib/schemas/forms";
 
 type SignIn = z.infer<typeof signInSchema>;
 type SignUp = z.infer<typeof signUpSchema>;
