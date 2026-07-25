@@ -89,6 +89,10 @@ def recommend_projects(
     return RecommendationList(
         recommendations=recommendations,
         total=total,
+    )
+
+
+@router.get(
     "/builders",
     response_model=RecommendationResponse,
     summary="Get recommended builders (collaborators)",
