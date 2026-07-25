@@ -16,6 +16,5 @@ export interface ProjectTagRequest {
 }
 
 export const projectTagsApi = {
-  generate: (data: ProjectTagRequest) =>
-    api.post<ProjectTagResponse>("/api/project-tags", data),
+  generate: (data: ProjectTagRequest) => api.post<ProjectTagResponse>("/api/project-tags", data),
 };

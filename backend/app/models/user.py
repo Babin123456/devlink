@@ -75,9 +75,8 @@ class User(Base):
     # ------------------------------------------------------------------
 
     badges: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
+        JSON,
         default=list,
-        server_default="{}",
         nullable=False,
     )
 

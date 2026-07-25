@@ -58,9 +58,18 @@ export function validateBio(value?: string | null): string | undefined {
   return undefined;
 }
 
-export function validateSkillEntry(name: string, level: string, existingSkills: Array<{ name: string }>, currentName?: string): string | undefined {
+export function validateSkillEntry(
+  name: string,
+  level: string,
+  existingSkills: Array<{ name: string }>,
+  currentName?: string,
+): string | undefined {
   const normalizedName = name.trim().toLowerCase();
-  const hasDuplicate = existingSkills.some((skill) => skill.name.trim().toLowerCase() === normalizedName && skill.name.trim().toLowerCase() !== (currentName ?? "").trim().toLowerCase());
+  const hasDuplicate = existingSkills.some(
+    (skill) =>
+      skill.name.trim().toLowerCase() === normalizedName &&
+      skill.name.trim().toLowerCase() !== (currentName ?? "").trim().toLowerCase(),
+  );
 
   if (!name.trim()) {
     return "Skill name is required.";

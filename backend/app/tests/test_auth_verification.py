@@ -5,17 +5,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.core.config import settings
+from app.core.security import (
+    create_access_token,
+    create_refresh_token,
+    create_verification_token,
+    decode_token,
+)
 from app.database.base import Base
 from app.dependencies import get_database
 from app.main import app
 from app.models.user import User
-from app.core.config import settings
-from app.core.security import (
-    create_verification_token,
-    create_access_token,
-    create_refresh_token,
-    decode_token,
-)
 
 # Setup in-memory SQLite database
 engine = create_engine(

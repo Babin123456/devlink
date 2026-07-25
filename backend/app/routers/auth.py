@@ -8,15 +8,9 @@ from fastapi import (
     Request,
     status,
 )
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 import httpx
 from app.core.config import settings
-from app.core.security import (
-    decode_token,
-    is_refresh_token,
-    create_verification_token,
-)
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
@@ -24,26 +18,14 @@ from sqlalchemy.orm import Session
 from app.middleware.rate_limit import (
     limiter,
     LOGIN_LIMIT,
-    PASSWORD_RESET_LIMIT,
     REGISTER_LIMIT,
 )
 from app.dependencies import get_database
 from app.schemas.auth import (
     AuthResponse,
-    ForgotPasswordRequest,
     LoginRequest,
     RegisterRequest,
     GitHubLoginRequest,
-    RefreshTokenRequest,
-    LogoutResponse,
-    CurrentUserResponse,
-    ChangePasswordRequest,
-    ForgotPasswordResponse,
-    ResetPasswordRequest,
-    SuccessResponse,
-    VerifyEmailRequest,
-    VerifyEmailResponse,
-    ResendVerificationEmailRequest,
 )
 from app.schemas.user import CurrentUser
 from app.services.auth_service import AuthService
