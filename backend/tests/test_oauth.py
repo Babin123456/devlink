@@ -17,10 +17,10 @@ def override_github_config(monkeypatch):
     )
 
 
-def test_github_login_success_new_user(client: TestClient, db, override_github_config):
 def test_github_login_success_new_user(
-    client: TestClient, db_session, override_github_config
-    client: TestClient, db, override_github_config
+    client: TestClient,
+    db,
+    override_github_config,
 ):
     # Mock token exchange
     mock_post = AsyncMock()
