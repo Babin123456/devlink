@@ -4,7 +4,7 @@ import logging
 import uuid
 
 from app.core.celery_app import celery_app
-from app.database import session as db_session
+from app.database.session import SessionLocal
 from app.models.notification import NotificationType
 from app.services.notification_service import NotificationService
 from app.services.email_service import EmailService
@@ -26,7 +26,7 @@ def _to_uuid(value: str | None) -> uuid.UUID | None:
     acks_late=True,
 )
 def send_notification_task(self, payload: dict) -> str | None:
-    db = db_session.SessionLocal()
+    db = SessionLocal()
     try:
         notification = NotificationService.notify(
             db,
@@ -60,7 +60,6 @@ def send_notification_task(self, payload: dict) -> str | None:
                 action_url=payload.get("action_url"),
             )
 
-        db.commit()
         return str(notification.id) if notification else None
     except Exception as exc:
         db.rollback()

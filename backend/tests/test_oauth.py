@@ -1,12 +1,7 @@
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
-from fastapi.testclient import TestClient
 from app.models.user import User
+from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
-from app.models.user import User
-from fastapi.testclient import TestClient
 
 
 @pytest.fixture
@@ -17,11 +12,7 @@ def override_github_config(monkeypatch):
     )
 
 
-def test_github_login_success_new_user(
-    client: TestClient,
-    db,
-    override_github_config,
-):
+def test_github_login_success_new_user(client: TestClient, db, override_github_config):
     # Mock token exchange
     mock_post = AsyncMock()
     mock_response = MagicMock()
@@ -63,7 +54,6 @@ def test_github_login_success_new_user(
             assert data["user"]["username"] == "new_octocat"
 
             # Verify DB state
-            user = db.query(User).filter_by(email="octocat@example.com").first()
             user = db.query(User).filter(User.email == "octocat@example.com").first()
             assert user is not None
             assert user.github_id == "1234567"
@@ -71,9 +61,7 @@ def test_github_login_success_new_user(
 
 
 def test_github_login_link_existing_account(
-    client: TestClient,
-    db,
-    override_github_config,
+    client: TestClient, db, override_github_config
 ):
     # Pre-create a user with the same email but no github_id
     from app.core.security import hash_password
@@ -86,8 +74,6 @@ def test_github_login_link_existing_account(
         password_hash=hash_password("Password123!"),
         is_active=True,
     )
-    db.add(existing_user)
-    db.commit()
     db.add(existing_user)
     db.commit()
     db.refresh(existing_user)
