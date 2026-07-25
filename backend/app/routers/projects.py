@@ -138,13 +138,25 @@ def get_project_by_slug(
 def list_projects(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
+    language: str | None = Query(None),
+    experience: str | None = Query(None),
+    remote: bool | None = Query(None),
+    paid: bool | None = Query(None),
+    opensource: bool | None = Query(None),
+    tech: str | None = Query(None),
     db: Session = Depends(get_database),
 ):
 
     return ProjectService.list_projects(
         db,
-        skip,
-        limit,
+        skip=skip,
+        limit=limit,
+        language=language,
+        experience=experience,
+        remote=remote,
+        paid=paid,
+        opensource=opensource,
+        tech=tech,
     )
 
 

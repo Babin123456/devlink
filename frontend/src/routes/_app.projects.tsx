@@ -1,7 +1,6 @@
-import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { projectsService } from "@/services";
-import { Card, TagChip, SectionHeader } from "@/components/shared/primitives";
 import {
   Pagination,
   PaginationContent,
@@ -11,14 +10,37 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Card, TagChip } from "@/components/shared/primitives";
-import { Star, GitFork, Users2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
+import { Star, GitFork, Users2, Plus, Search, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
 import { cn } from "@/lib/utils";
 import { getRecentlyViewedProjectIds } from "@/lib/recentlyViewedProjects";
-import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { ProjectFilters } from "@/components/projects/ProjectFilters";
+
+type ProjectsSearch = {
+  page?: number;
+  q?: string;
+  language?: string;
+  experience?: string;
+  remote?: string;
+  paid?: string;
+  opensource?: string;
+  tech?: string;
+};
 
 export const Route = createFileRoute("/_app/projects")({
+  validateSearch: (search: Record<string, unknown>): ProjectsSearch => {
+    return {
+      page: search.page ? Number(search.page) : 1,
+      q: search.q as string | undefined,
+      language: search.language as string | undefined,
+      experience: search.experience as string | undefined,
+      remote: search.remote as string | undefined,
+      paid: search.paid as string | undefined,
+      opensource: search.opensource as string | undefined,
+      tech: search.tech as string | undefined,
+    };
+  },
   head: () => ({
     meta: [
       { title: "Projects — DevLink" },
@@ -28,118 +50,60 @@ export const Route = createFileRoute("/_app/projects")({
   component: ProjectsPage,
 });
 
-const LANGUAGES = ["JavaScript", "TypeScript", "Python", "Go", "Rust", "Java", "C++"];
-const DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
-const BOOL_FILTERS = [
-  "remote",
-  "paid",
-  "openSource",
-  "ai",
-  "web",
-  "mobile",
-  "backend",
-  "frontend",
-] as const;
-type BoolFilter = (typeof BOOL_FILTERS)[number];
-
-const BOOL_LABELS: Record<BoolFilter, string> = {
-  remote: "Remote",
-  paid: "Paid",
-  openSource: "Open Source",
-  ai: "AI",
-  web: "Web",
-  mobile: "Mobile",
-  backend: "Backend",
-  frontend: "Frontend",
-};
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "rounded-md border px-2.5 py-1 text-[12px] font-medium transition-colors",
-        active
-          ? "border-primary bg-primary/10 text-primary"
-          : "border-border bg-surface text-muted-foreground hover:border-primary/50 hover:text-foreground",
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
-function toggle<T>(set: T[], val: T): T[] {
-  return set.includes(val) ? set.filter((v) => v !== val) : [...set, val];
-}
-
 function ProjectsPage() {
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const search = useRouterState({ select: (state) => state.location.search as Record<string, unknown> });
-  const page = Number(search?.page) || 1;
+  const search = Route.useSearch();
+  const page = search.page || 1;
+  const navigate = useNavigate({ from: "/projects" });
   const ITEMS_PER_PAGE = 6;
+  
   const [createOpen, setCreateOpen] = useState(false);
-  const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "planning" | "shipped">(
-    "all",
-  );
-  const [statusFilter, setStatusFilter] = useState<
-    "all" | "recruiting" | "in-progress" | "completed" | "archived"
-  >("all");
-  const [showFilters, setShowFilters] = useState(false);
-  const [langs, setLangs] = useState<string[]>([]);
-  const [difficulties, setDifficulties] = useState<string[]>([]);
-  const [boolFilters, setBoolFilters] = useState<BoolFilter[]>([]);
   const [recentProjectIds, setRecentProjectIds] = useState<string[]>([]);
+  
+  // Use local state for q so we can type without lagging the URL update
+  const [q, setQ] = useState(search.q || "");
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      navigate({
+        search: (prev: any) => ({ ...prev, q: q || undefined }),
+        replace: true,
+      });
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [q, navigate]);
 
   useEffect(() => {
     setRecentProjectIds(getRecentlyViewedProjectIds());
   }, []);
+
+  // Pass API-supported params
   const { data = [], isLoading } = useQuery({
-    queryKey: ["projects"],
-    queryFn: projectsService.list,
+    queryKey: ["projects", search],
+    queryFn: () => projectsService.list(search as any),
   });
+
   const recentlyViewed = recentProjectIds
     .map((id) => data.find((project) => project.id === id))
     .filter((project): project is NonNullable<typeof project> => Boolean(project));
 
-  const chipFilterCount = langs.length + difficulties.length + boolFilters.length;
-  const hasActiveFilters = q !== "" || statusFilter !== "all" || chipFilterCount > 0;
-
-  if (pathname !== "/projects" && pathname !== "/projects/") {
-    return <Outlet />;
-  }
-
-  function clearFilters() {
-    setQ("");
-    setStatusFilter("all");
-    setLangs([]);
-    setDifficulties([]);
-    setBoolFilters([]);
-  }
-
+  // Local filter for search text (q) if backend doesn't support 'q' param natively for projects list yet
   const filtered = data.filter((p) => {
-    if (statusFilter !== "all" && p.status !== statusFilter) return false;
-    if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false;
-    if (langs.length > 0 && (!p.language || !langs.includes(p.language))) return false;
-    if (difficulties.length > 0 && (!p.difficulty || !difficulties.includes(p.difficulty)))
-      return false;
-    for (const f of boolFilters) {
-      if (!p[f]) return false;
-    }
+    if (q && !p.name?.toLowerCase().includes(q.toLowerCase()) && !p.title?.toLowerCase().includes(q.toLowerCase())) return false;
     return true;
   });
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
+  const resetFilters = () => {
+    setQ("");
+    navigate({
+      search: () => ({}),
+      replace: true,
+    });
+  };
+
+  const hasActiveFilters = Object.keys(search).filter(k => k !== 'page').length > 0 || q !== "";
 
   return (
     <div className="space-y-4">
@@ -158,6 +122,7 @@ function ProjectsPage() {
         </button>
         <CreateProjectDialog open={createOpen} onOpenChange={setCreateOpen} />
       </div>
+
       {recentlyViewed.length > 0 && (
         <section className="space-y-2">
           <div className="flex items-center justify-between">
@@ -176,7 +141,7 @@ function ProjectsPage() {
 
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[14px] font-semibold text-foreground">
-                        {project.name}
+                        {project.name || project.title}
                       </p>
                       <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
                         {project.description}
@@ -185,7 +150,7 @@ function ProjectsPage() {
                   </div>
 
                   <div className="mt-3 flex flex-wrap gap-1">
-                    {project.stack.slice(0, 3).map((tech) => (
+                    {(project.stack || []).slice(0, 3).map((tech: string) => (
                       <TagChip key={tech}>{tech}</TagChip>
                     ))}
                   </div>
@@ -195,6 +160,10 @@ function ProjectsPage() {
           </div>
         </section>
       )}
+
+      {/* Advanced Filters */}
+      <ProjectFilters />
+
       <Card className="p-4">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative min-w-0 flex-1">
@@ -205,133 +174,11 @@ function ProjectsPage() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search projects…"
+              placeholder="Search projects..."
               className="w-full rounded-md border border-border bg-surface py-[7px] pl-9 pr-3 text-[13px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
-          <div className="flex items-center gap-1 rounded-md border border-border bg-surface p-0.5">
-            {(["all", "recruiting", "in-progress", "completed", "archived"] as const).map((f) => (
-              <button
-                key={f
-                  .split("-")
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(" ")}
-                onClick={() => setStatusFilter(f)}
-                className={`rounded px-2.5 py-1 text-[12px] font-medium capitalize transition-colors ${
-                  statusFilter === f
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => setShowFilters((v) => !v)}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-[7px] text-[12px] font-medium transition-colors",
-              showFilters || hasActiveFilters
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-border bg-surface text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <SlidersHorizontal size={13} />
-            Filters
-            {chipFilterCount > 0 && (
-              <span className="grid h-4 w-4 place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                {chipFilterCount}
-              </span>
-            )}
-          </button>
-          {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-[7px] text-[12px] font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-destructive/20"
-              aria-label="Clear all active filters"
-            >
-              <X size={13} />
-              Clear filters
-            </button>
-          )}
         </div>
-
-        <BottomSheet
-          open={showFilters}
-          onOpenChange={setShowFilters}
-          title="Filters"
-          description={
-            chipFilterCount > 0
-              ? `${chipFilterCount} active filter${chipFilterCount !== 1 ? "s" : ""}`
-              : undefined
-          }
-          footer={
-            hasActiveFilters ? (
-              <button
-                onClick={clearFilters}
-                className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-border px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
-              >
-                <X size={13} /> Clear all filters
-              </button>
-            ) : undefined
-          }
-        >
-          <div className="space-y-3">
-            {/* Language */}
-            <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Language
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {LANGUAGES.map((lang) => (
-                  <FilterChip
-                    key={lang}
-                    active={langs.includes(lang)}
-                    onClick={() => setLangs(toggle(langs, lang))}
-                  >
-                    {lang}
-                  </FilterChip>
-                ))}
-              </div>
-            </div>
-
-            {/* Difficulty */}
-            <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Difficulty
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {DIFFICULTIES.map((d) => (
-                  <FilterChip
-                    key={d}
-                    active={difficulties.includes(d)}
-                    onClick={() => setDifficulties(toggle(difficulties, d))}
-                  >
-                    <span className="capitalize">{d}</span>
-                  </FilterChip>
-                ))}
-              </div>
-            </div>
-
-            {/* Boolean tags */}
-            <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Tags
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {BOOL_FILTERS.map((f) => (
-                  <FilterChip
-                    key={f}
-                    active={boolFilters.includes(f)}
-                    onClick={() => setBoolFilters(toggle(boolFilters, f))}
-                  >
-                    {BOOL_LABELS[f]}
-                  </FilterChip>
-                ))}
-              </div>
-            </div>
-          </div>
-        </BottomSheet>
       </Card>
 
       {isLoading ? (
@@ -354,13 +201,9 @@ function ProjectsPage() {
           {hasActiveFilters && (
             <button
               onClick={resetFilters}
-              className="mt-3 text-[13px] font-medium text-primary hover:underline"
+              className="mt-3 text-[13px] font-medium text-primary hover:underline inline-flex items-center gap-1"
             >
-              Reset filters
-              onClick={clearFilters}
-              className="mt-3 text-[13px] font-medium text-primary hover:underline"
-            >
-              Clear filters
+              <X size={13} /> Reset filters
             </button>
           )}
         </div>
@@ -372,36 +215,17 @@ function ProjectsPage() {
                 <Card interactive className="p-4">
                   <div className="flex items-start gap-3">
                     <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-muted text-xl">
-                      {p.icon}
+                      {p.icon || '🚀'}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[14px] font-semibold text-foreground">{p.name}</p>
+                      <p className="truncate text-[14px] font-semibold text-foreground">{p.name || p.title}</p>
                       <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
                         {p.description}
                       </p>
                     </div>
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((p) => (
-            <Link
-              key={p.id}
-              to="/projects/$projectId"
-              params={{ projectId: p.id }}
-              className="block"
-            >
-            <a key={p.id} href={`/projects/${p.id}`} className="block">
-              <Card interactive className="p-4">
-                <div className="flex items-start gap-3">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-muted text-xl">
-                    {p.icon}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[14px] font-semibold text-foreground">{p.name}</p>
-                    <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
-                      {p.description}
-                    </p>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1">
-                    {p.stack.map((s) => (
+                    {(p.stack || []).map((s: string) => (
                       <TagChip key={s}>{s}</TagChip>
                     ))}
                     {p.difficulty && (
@@ -421,37 +245,30 @@ function ProjectsPage() {
                   <div className="mt-3">
                     <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
                       <span>Progress</span>
-                      <span>{p.progress}%</span>
+                      <span>{p.progress || 0}%</span>
                     </div>
                     <div className="h-1 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full bg-primary" style={{ width: `${p.progress}%` }} />
+                      <div className="h-full bg-primary" style={{ width: `${p.progress || 0}%` }} />
                     </div>
                   </div>
                   <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
-                      <Users2 size={12} /> {p.members}
+                      <Users2 size={12} /> {p.members || p.team_size || 1}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <Star size={12} /> {p.stars}
+                      <Star size={12} /> {p.stars || 0}
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <GitFork size={12} /> {p.forks}
+                      <GitFork size={12} /> {p.forks || 0}
                     </span>
                     <span
                       className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
-                        p.status === "recruiting"
-                          ? "bg-primary/10 text-primary"
-                          : p.status === "in-progress"
-                            ? "bg-warning/10 text-warning"
-                            : p.status === "completed"
-                              ? "bg-success/10 text-success"
-                              : "bg-muted text-muted-foreground"
+                        p.status === "active" || p.status === "completed"
+                          ? "bg-success/10 text-success"
+                          : "bg-muted text-muted-foreground"
                       }`}
                     >
-                      {p.status
-                        .split("-")
-                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                        .join(" ")}
+                      {p.status || "IDEA"}
                     </span>
                   </div>
                 </Card>
@@ -461,77 +278,37 @@ function ProjectsPage() {
 
           {totalPages > 1 && (
             <div className="mt-8 flex justify-center">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href={`/projects?page=${Math.max(1, page - 1)}`}
-                      aria-disabled={page === 1}
-                      className={page === 1 ? "pointer-events-none opacity-50" : ""}
-                    />
-                  </PaginationItem>
-                  {Array.from({ length: totalPages }).map((_, i) => (
-                    <PaginationItem key={i}>
-                      <PaginationLink
-                        href={`/projects?page=${i + 1}`}
-                        isActive={page === i + 1}
-                      >
-                        {i + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                  <PaginationItem>
-                    <PaginationNext
-                      href={`/projects?page=${Math.min(totalPages, page + 1)}`}
-                      aria-disabled={page === totalPages}
-                      className={page === totalPages ? "pointer-events-none opacity-50" : ""}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+               <Pagination>
+                 <PaginationContent>
+                   <PaginationItem>
+                     <PaginationPrevious
+                       href={`/projects?page=${Math.max(1, page - 1)}`}
+                       aria-disabled={page === 1}
+                       className={page === 1 ? "pointer-events-none opacity-50" : ""}
+                     />
+                   </PaginationItem>
+                   {Array.from({ length: totalPages }).map((_, i) => (
+                     <PaginationItem key={i}>
+                       <PaginationLink
+                         href={`/projects?page=${i + 1}`}
+                         isActive={page === i + 1}
+                       >
+                         {i + 1}
+                       </PaginationLink>
+                     </PaginationItem>
+                   ))}
+                   <PaginationItem>
+                     <PaginationNext
+                       href={`/projects?page=${Math.min(totalPages, page + 1)}`}
+                       aria-disabled={page === totalPages}
+                       className={page === totalPages ? "pointer-events-none opacity-50" : ""}
+                     />
+                   </PaginationItem>
+                 </PaginationContent>
+               </Pagination>
             </div>
           )}
         </>
-                </div>
-                <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span className="inline-flex items-center gap-1">
-                    <Users2 size={12} /> {p.members}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Star size={12} /> {p.stars}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <GitFork size={12} /> {p.forks}
-                  </span>
-                  <span
-                    className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
-                      p.status === "active"
-                        ? "bg-success/10 text-success"
-                        : p.status === "planning"
-                          ? "bg-warning/10 text-warning"
-                          : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {p.status}
-                      p.status === "recruiting"
-                        ? "bg-primary/10 text-primary"
-                        : p.status === "in-progress"
-                          ? "bg-warning/10 text-warning"
-                          : p.status === "completed"
-                            ? "bg-success/10 text-success"
-                            : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {p.status
-                      .split("-")
-                      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                      .join(" ")}
-                  </span>
-                </div>
-              </Card>
-            </a>
-          ))}
-        </div>
       )}
     </div>
   );

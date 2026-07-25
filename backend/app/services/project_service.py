@@ -108,15 +108,34 @@ class ProjectService:
         db: Session,
         skip: int = 0,
         limit: int = 20,
+        language: str | None = None,
+        experience: str | None = None,
+        remote: bool | None = None,
+        paid: bool | None = None,
+        opensource: bool | None = None,
+        tech: str | None = None,
     ) -> list[Project]:
 
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
             .where(Project.is_published.is_(True))
-            .offset(skip)
-            .limit(limit)
         )
+
+        if language:
+            stmt = stmt.where(Project.language == language)
+        if experience:
+            stmt = stmt.where(Project.experience == experience)
+        if remote is not None:
+            stmt = stmt.where(Project.is_remote == remote)
+        if paid is not None:
+            stmt = stmt.where(Project.is_paid == paid)
+        if opensource is not None:
+            stmt = stmt.where(Project.is_open_source == opensource)
+        if tech:
+            stmt = stmt.where(Project.tech_stack.ilike(f"%{tech}%"))
+
+        stmt = stmt.offset(skip).limit(limit)
 
         return list(db.scalars(stmt))
 

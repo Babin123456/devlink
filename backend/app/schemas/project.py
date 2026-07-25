@@ -17,6 +17,11 @@ class ProjectBase(BaseModel):
     stage: ProjectStage = ProjectStage.IDEA
     visibility: ProjectVisibility = ProjectVisibility.PUBLIC
     tech_stack: Optional[str] = None
+    language: Optional[str] = None
+    experience: Optional[str] = None
+    is_remote: bool = False
+    is_paid: bool = False
+    is_open_source: bool = False
     tags: Optional[list[str]] = None
     repository_url: Optional[str] = None
     website_url: Optional[str] = None
@@ -43,6 +48,11 @@ class ProjectUpdate(BaseModel):
     stage: Optional[ProjectStage] = None
     visibility: Optional[ProjectVisibility] = None
     tech_stack: Optional[str] = None
+    language: Optional[str] = None
+    experience: Optional[str] = None
+    is_remote: Optional[bool] = None
+    is_paid: Optional[bool] = None
+    is_open_source: Optional[bool] = None
     tags: Optional[list[str]] = None
     repository_url: Optional[str] = None
     website_url: Optional[str] = None
