@@ -157,16 +157,16 @@ function AuthScreen() {
             <div className="mb-4 grid grid-cols-2 gap-3">
               <div>
                 <label className={lbl}>First name</label>
-                <input className={inp} {...signUpForm.register("first_name")} />
-                {signUpForm.formState.errors.first_name && (
-                  <p className={err}>{signUpForm.formState.errors.first_name.message}</p>
+                <input className={inp} {...signUpForm.register("firstName")} />
+                {signUpForm.formState.errors.firstName && (
+                  <p className={err}>{signUpForm.formState.errors.firstName.message}</p>
                 )}
               </div>
               <div>
                 <label className={lbl}>Last name</label>
-                <input className={inp} {...signUpForm.register("last_name")} />
-                {signUpForm.formState.errors.last_name && (
-                  <p className={err}>{signUpForm.formState.errors.last_name.message}</p>
+                <input className={inp} {...signUpForm.register("lastName")} />
+                {signUpForm.formState.errors.lastName && (
+                  <p className={err}>{signUpForm.formState.errors.lastName.message}</p>
                 )}
               </div>
             </div>
