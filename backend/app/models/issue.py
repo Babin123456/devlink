@@ -5,6 +5,7 @@ from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import (
+    Boolean,
     DateTime,
     Enum as SqlEnum,
     Float,
@@ -33,6 +34,13 @@ class IssuePriority(str, Enum):
     CRITICAL = "critical"
 
 
+class IssueDifficulty(str, Enum):
+    BEGINNER = "beginner"
+    INTERMEDIATE = "intermediate"
+    ADVANCED = "advanced"
+    EXPERT = "expert"
+
+
 class Issue(Base):
     """
     DevLink Issue Model
@@ -51,6 +59,7 @@ class Issue(Base):
     )
 
     # ----------------------------------------------------------
+    # Relationships
     # Project
     # ----------------------------------------------------------
 
@@ -77,6 +86,7 @@ class Issue(Base):
     author = relationship("User", backref="authored_issues")
 
     # ----------------------------------------------------------
+    # Issue Details
     # Basic Information
     # ----------------------------------------------------------
 
@@ -116,6 +126,24 @@ class Issue(Base):
     )
 
     # ----------------------------------------------------------
+    # AI Difficulty Estimation
+    # ----------------------------------------------------------
+
+    difficulty: Mapped[IssueDifficulty | None] = mapped_column(
+        SqlEnum(IssueDifficulty),
+        nullable=True,
+        index=True,
+    )
+
+    difficulty_confidence: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
+    difficulty_manual_override: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
     # Embedding (stored as JSON array of floats)
     # ----------------------------------------------------------
 
