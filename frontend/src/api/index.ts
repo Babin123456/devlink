@@ -15,6 +15,8 @@ export { hackathonsApi } from "./modules/hackathons";
 export { searchApi } from "./modules/search";
 export { activitiesApi } from "./modules/activities";
 export { collectionsApi } from "./modules/collections";
+export { projectTagsApi } from "./modules/projectTags";
+export type { ProjectTagResponse } from "./modules/projectTags";
 export { teamMatchApi } from "./modules/teamMatch";
 export { contributorMatchingApi } from "./modules/contributorMatching";
 export type { ContributorMatchResponse, MatchedContributor } from "./modules/contributorMatching";

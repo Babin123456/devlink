@@ -45,6 +45,7 @@ from app.routers import (
     messages,
     notifications,
     organizations,
+    project_tags,
     projects,
     recommendations,
     repositories,
@@ -225,6 +226,7 @@ app.include_router(bookmarks.router)
 app.include_router(bookmark_collections.router)
 app.include_router(activities.router)
 app.include_router(conversations.router)
+app.include_router(project_tags.router, prefix="/api/project-tags", tags=["Project Tags"])
 app.include_router(
     contributor_matching.router,
     prefix="/api/contributor-matching",
