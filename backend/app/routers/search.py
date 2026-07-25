@@ -1,99 +1,91 @@
+from __future__ import annotations
+
+from typing import List, Optional
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
 
-from app.database.session import get_db
 from app.dependencies import get_database
-from app.models.user import User
-from app.models.project import Project
-from app.models.skill import Skill
 from app.schemas.search import (
     SearchAutocompleteResponse,
-    SearchSuggestionUser,
-    SearchSuggestionProject,
-    SearchSuggestionSkill,
+    SearchResponse,
 )
+from app.services.search_service import SearchService
 
 router = APIRouter()
+
+
+# ---------------------------------------------------------------------
+# GET /api/search
+# ---------------------------------------------------------------------
+
+
+@router.get(
+    "",
+    response_model=SearchResponse,
+    summary="Global search across all categories",
+)
+def search(
+    q: str = Query("", min_length=0, max_length=200),
+    category: Optional[str] = Query(
+        None,
+        description="One of: developers, projects, organizations, skills, tags. "
+        "If omitted, returns top matches from every category.",
+    ),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_database),
+):
+    """Full paginated search across developers, projects, organizations,
+    skills, and tags.
+
+    Pass ``category`` to filter to a single category (paginated). Omit it to
+    get the top ``limit`` matches from every category.
+    """
+    return SearchService.search(db, q, category=category, page=page, limit=limit)
+
+
+# ---------------------------------------------------------------------
+# GET /api/search/autocomplete
+# ---------------------------------------------------------------------
 
 
 @router.get(
     "/autocomplete",
     response_model=SearchAutocompleteResponse,
-    summary="Global search autocomplete",
+    summary="Global search autocomplete (per-category suggestions)",
 )
 def autocomplete(
     q: str = Query("", min_length=0, max_length=100),
     db: Session = Depends(get_database),
 ):
-    if not q or not q.strip():
-        return SearchAutocompleteResponse(users=[], projects=[], skills=[])
+    """Lightweight autocomplete payload returning a few suggestions per
+    category (users, projects, organizations, skills, tags).
 
-    query_str = f"%{q.strip()}%"
+    Used by the frontend search bar dropdown. Returns empty lists for an
+    empty / whitespace-only query.
+    """
+    return SearchService.autocomplete(db, q)
 
-    # Search Users
-    users = (
-        db.query(User)
-        .filter(
-            or_(
-                User.username.ilike(query_str),
-                User.first_name.ilike(query_str),
-                User.last_name.ilike(query_str),
-                User.role.ilike(query_str),
-            )
-        )
-        .limit(3)
-        .all()
-    )
 
-    # Format Users (name combination)
-    formatted_users = [
-        SearchSuggestionUser(
-            id=u.id,
-            name=f"{u.first_name} {u.last_name}".strip(),
-            username=u.username,
-            role=u.role,
-            profile_image=u.profile_image,
-        )
-        for u in users
-    ]
+# ---------------------------------------------------------------------
+# GET /api/search/suggestions
+# ---------------------------------------------------------------------
 
-    # Search Projects
-    projects = (
-        db.query(Project)
-        .filter(
-            or_(
-                Project.title.ilike(query_str),
-                Project.tagline.ilike(query_str),
-                Project.description.ilike(query_str),
-            )
-        )
-        .limit(3)
-        .all()
-    )
 
-    formatted_projects = [
-        SearchSuggestionProject(
-            id=p.id,
-            title=p.title,
-            icon=p.logo_url or "🚀",  # Fallback to emoji or logo_url
-        )
-        for p in projects
-    ]
+@router.get(
+    "/suggestions",
+    response_model=List[str],
+    summary="Flat list of search suggestions",
+)
+def suggestions(
+    q: str = Query("", min_length=0, max_length=100),
+    limit: int = Query(8, ge=1, le=20),
+    db: Session = Depends(get_database),
+):
+    """Flat list of suggestion strings for keyboard-navigable dropdowns.
 
-    # Search Skills
-    skills = db.query(Skill).filter(Skill.name.ilike(query_str)).limit(3).all()
-
-    formatted_skills = [
-        SearchSuggestionSkill(
-            id=s.id,
-            name=s.name,
-        )
-        for s in skills
-    ]
-
-    return SearchAutocompleteResponse(
-        users=formatted_users,
-        projects=formatted_projects,
-        skills=formatted_skills,
-    )
+    Combines top matches across all categories into a single deduplicated
+    list, ordered: users → projects → organizations → skills → tags.
+    """
+    return SearchService.suggestions(db, q, limit=limit)
