@@ -23,6 +23,13 @@ export interface ProjectDraftResponse extends Project {
   is_draft: boolean;
   last_draft_save?: string | null;
 }
+export type SimilarProjectWarning = {
+  id: string;
+  title: string;
+  slug: string;
+  title_similarity: number;
+  description_similarity: number;
+};
 
 export const projectsApi = {
   list: (query?: { page?: number; limit?: number; status?: string; q?: string }) =>
@@ -40,4 +47,6 @@ export const projectsApi = {
   updateDraft: (id: string, body: Partial<ProjectDraftData>) =>
     api.patch<ProjectDraftResponse>(`/api/projects/${id}/draft`, body),
   publishDraft: (id: string) => api.post<Project>(`/api/projects/${id}/publish`),
+  checkSimilarity: (body: { title: string; description: string }) =>
+    api.post<SimilarProjectWarning[]>("/api/projects/check-similarity", body),
 };

@@ -16,6 +16,7 @@ from app.schemas.project import (
     ProjectDraftUpdate,
     ProjectStatsResponse,
     ProjectUpdate,
+    SimilarProjectWarning,
 )
 
 
@@ -46,6 +47,8 @@ class ProjectService:
             team_size=project.team_size,
             max_team_size=project.max_team_size,
             hiring=project.hiring,
+            scheduled_publish_at=project.scheduled_publish_at,
+            is_published=(project.scheduled_publish_at is None),
         )
 
         db.add(db_project)
@@ -110,6 +113,7 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
+            .where(Project.is_published.is_(True))
             .offset(skip)
             .limit(limit)
         )
@@ -139,6 +143,13 @@ class ProjectService:
     ) -> Project:
 
         data = project.model_dump(exclude_unset=True)
+
+        from datetime import datetime, timezone
+
+        if "scheduled_publish_at" in data and data["scheduled_publish_at"] is not None:
+            data["is_published"] = data["scheduled_publish_at"] <= datetime.now(
+                timezone.utc
+            )
 
         for key, value in data.items():
             setattr(db_project, key, value)
@@ -289,6 +300,42 @@ class ProjectService:
             accepted_members=accepted_members,
             bookmark_count=bookmark_count,
         )
+
+
+@staticmethod
+def find_similar_projects(
+    db: Session,
+    title: str,
+    description: str,
+    title_threshold: float = 0.75,
+    description_threshold: float = 0.65,
+) -> list[SimilarProjectWarning]:
+    from difflib import SequenceMatcher
+
+    candidates = list(db.scalars(select(Project).where(Project.is_archived.is_(False))))
+
+    results = []
+    title_lower = title.lower()
+    desc_lower = description.lower()
+
+    for project in candidates:
+        title_sim = SequenceMatcher(None, title_lower, project.title.lower()).ratio()
+        desc_sim = SequenceMatcher(
+            None, desc_lower, project.description.lower()
+        ).ratio()
+
+        if title_sim >= title_threshold or desc_sim >= description_threshold:
+            results.append(
+                SimilarProjectWarning(
+                    id=project.id,
+                    title=project.title,
+                    slug=project.slug,
+                    title_similarity=round(title_sim, 2),
+                    description_similarity=round(desc_sim, 2),
+                )
+            )
+
+    return results
 
     @staticmethod
     def delete_project(
