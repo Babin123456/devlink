@@ -2,7 +2,8 @@ import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import lottie from "lottie-web";
 
-import { AppShell } from "@/components/layout/AppShell";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { SidebarProvider } from "@/context/SidebarContext";
 import searchAnimation from "@/assets/404 Error - Doodle animation.json";
 import { ProfileCompletionChecklist } from "@/components/profile/ProfileCompletionChecklist";
 
@@ -26,7 +27,9 @@ function AppLayoutWithProfileChecklist() {
           }
         }}
       />
-      <AppShell />
+      <SidebarProvider>
+        <DashboardLayout />
+      </SidebarProvider>
     </div>
   );
 }

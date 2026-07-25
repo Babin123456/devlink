@@ -1,19 +1,21 @@
 import { Outlet, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
-import { Sidebar } from "./Sidebar";
-import { Topbar } from "./Topbar";
 import { AnimatePresence, motion } from "framer-motion";
+import { Sidebar } from "./Sidebar";
+import { MobileSidebar } from "./MobileSidebar";
+import { TopNavbar } from "./TopNavbar";
+import { RightPanel } from "./RightPanel";
 
-export function AppShell() {
-  const [open, setOpen] = useState(false);
+export function DashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-
+  
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <Sidebar open={open} onClose={() => setOpen(false)} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar onMenu={() => setOpen(true)} />
-        <main className="flex-1">
+    <div className="flex min-h-screen w-full bg-background overflow-hidden">
+      <Sidebar />
+      <MobileSidebar />
+      
+      <div className="flex min-w-0 flex-1 flex-col relative h-screen">
+        <TopNavbar />
+        <main className="flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
@@ -28,6 +30,8 @@ export function AppShell() {
           </AnimatePresence>
         </main>
       </div>
+      
+      <RightPanel />
     </div>
   );
 }
