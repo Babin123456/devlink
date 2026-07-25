@@ -11,6 +11,10 @@ import { BackButton } from "@/components/shared/BackButton";
 import { ShareProjectButton } from "@/components/shared/ShareProjectButton";
 import { projectTagsApi, type TagSuggestion } from "@/api";
 import { toast } from "sonner";
+import { BookmarkToggleButton } from "@/components/shared/BookmarkToggleButton";
+import { addRecentlyViewedProject } from "@/lib/recentlyViewedProjects";
+
+import { usePermissions } from "@/hooks/usePermissions";
 
 export const Route = createFileRoute("/_app/projects/$projectId")({
   head: ({ params }) => ({
@@ -50,6 +54,10 @@ function ProjectDetail() {
     onError: () => {
       toast.error("Failed to generate tags. Please try again.");
     },
+  // Integrate RBAC hook
+  const { can } = usePermissions(currentUser.id || "current-user-uuid");
+  const hasInvitePermission = can("project:invite", {
+    ownerId: p?.ownerId,
   });
 
   const toggleTag = (tagName: string) => {
@@ -103,6 +111,8 @@ function ProjectDetail() {
             )}
 
             <ShareProjectButton projectTitle={p.name} projectDescription={p.description} />
+
+            <BookmarkToggleButton projectId={p.id} />
 
             <div className="hidden gap-4 text-[12px] text-muted-foreground sm:flex">
               <span className="inline-flex items-center gap-1">
