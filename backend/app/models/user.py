@@ -75,9 +75,8 @@ class User(Base):
     # ------------------------------------------------------------------
 
     badges: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
+        JSON,
         default=list,
-        server_default="{}",
         nullable=False,
     )
 
@@ -209,14 +208,12 @@ class User(Base):
     last_seen: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
-    DateTime(timezone=True),
-    nullable=True,
     )
 
     last_active_at: Mapped[datetime | None] = mapped_column(
-    DateTime(timezone=True),
-    default=datetime.utcnow,
-    nullable=True,
+        DateTime(timezone=True),
+        default=datetime.utcnow,
+        nullable=True,
     )
     # ------------------------------------------------------------------
     # OAuth
