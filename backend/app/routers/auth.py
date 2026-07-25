@@ -19,6 +19,7 @@ from app.middleware.rate_limit import (
     limiter,
     LOGIN_LIMIT,
     REGISTER_LIMIT,
+    PASSWORD_RESET_LIMIT,
 )
 from app.dependencies import get_database
 from app.schemas.auth import (
