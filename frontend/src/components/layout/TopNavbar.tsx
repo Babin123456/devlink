@@ -1,4 +1,4 @@
-import { MessageSquare, Plus, Search, Sparkles, Menu, Moon, Sun } from "lucide-react";
+
 import {
   Bell,
   MessageSquare,
@@ -16,7 +16,7 @@ import {
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/hooks/useSidebar";
 import { Avatar } from "@/components/shared/primitives";
-import { currentUser } from "@/mocks/seed";
+
 import { currentUser, builders, projects, flares } from "@/mocks/seed";
 import { useTheme } from "@/hooks/useTheme";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
@@ -55,27 +55,7 @@ export function TopNavbar() {
   const developerSuggestions = searchResults?.users || [];
   const projectSuggestions = searchResults?.projects || [];
   const skillSuggestions = searchResults?.skills?.map((s) => s.name) || [];
-  const normalizedQuery = query.trim().toLowerCase();
 
-  const developerSuggestions = normalizedQuery
-    ? builders
-        .filter(
-          (builder) =>
-            builder.name.toLowerCase().includes(normalizedQuery) ||
-            builder.skills.some((skill) => skill.toLowerCase().includes(normalizedQuery)),
-        )
-        .slice(0, 3)
-    : [];
-
-  const projectSuggestions = normalizedQuery
-    ? projects
-        .filter(
-          (project) =>
-            project.name.toLowerCase().includes(normalizedQuery) ||
-            project.stack.some((tech) => tech.toLowerCase().includes(normalizedQuery)),
-        )
-        .slice(0, 3)
-    : [];
 
   const postSuggestions = normalizedQuery
     ? flares

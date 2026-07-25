@@ -1,7 +1,6 @@
 import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
 import { builders, currentUser, projects } from "@/mocks/seed";
-import { MapPin, Calendar, Link as LinkIcon, MessageCircle, Sparkles, Pencil, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -14,11 +13,12 @@ import {
   MessageCircle,
   Mail,
   AlertTriangle,
+  Sparkles,
+  Pencil,
+  RotateCw
 } from "lucide-react";
-import { toast } from "sonner";
 import { copyText } from "@/lib/clipboard";
 import { ReportUserModal } from "@/components/shared/ReportUserModal";
-import { useState } from "react";
 
 export const Route = createFileRoute("/_app/profile/$username")({
   head: ({ params }) => ({

@@ -10,10 +10,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Card, TagChip } from "@/components/shared/primitives";
 import { Star, GitFork, Users2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
+import { ProjectFilters } from "@/components/projects/ProjectFilters";
 import { cn } from "@/lib/utils";
 import { getRecentlyViewedProjectIds } from "@/lib/recentlyViewedProjects";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -28,90 +28,53 @@ export const Route = createFileRoute("/_app/projects")({
   component: ProjectsPage,
 });
 
-const LANGUAGES = ["JavaScript", "TypeScript", "Python", "Go", "Rust", "Java", "C++"];
-const DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
-const BOOL_FILTERS = [
-  "remote",
-  "paid",
-  "openSource",
-  "ai",
-  "web",
-  "mobile",
-  "backend",
-  "frontend",
-] as const;
-type BoolFilter = (typeof BOOL_FILTERS)[number];
 
-const BOOL_LABELS: Record<BoolFilter, string> = {
-  remote: "Remote",
-  paid: "Paid",
-  openSource: "Open Source",
-  ai: "AI",
-  web: "Web",
-  mobile: "Mobile",
-  backend: "Backend",
-  frontend: "Frontend",
-};
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "rounded-md border px-2.5 py-1 text-[12px] font-medium transition-colors",
-        active
-          ? "border-primary bg-primary/10 text-primary"
-          : "border-border bg-surface text-muted-foreground hover:border-primary/50 hover:text-foreground",
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
-function toggle<T>(set: T[], val: T): T[] {
-  return set.includes(val) ? set.filter((v) => v !== val) : [...set, val];
-}
 
 function ProjectsPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const search = useRouterState({ select: (state) => state.location.search as Record<string, unknown> });
+  const navigate = Route.useNavigate();
   const page = Number(search?.page) || 1;
   const ITEMS_PER_PAGE = 6;
   const [createOpen, setCreateOpen] = useState(false);
   const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "planning" | "shipped">(
-    "all",
-  );
+  
+  // Status filter state (keep for now as it's separate from ProjectFilters component)
   const [statusFilter, setStatusFilter] = useState<
     "all" | "recruiting" | "in-progress" | "completed" | "archived"
   >("all");
   const [showFilters, setShowFilters] = useState(false);
-  const [langs, setLangs] = useState<string[]>([]);
-  const [difficulties, setDifficulties] = useState<string[]>([]);
-  const [boolFilters, setBoolFilters] = useState<BoolFilter[]>([]);
   const [recentProjectIds, setRecentProjectIds] = useState<string[]>([]);
+
+  // Extracted URL filters
+  const language = (search?.language as string) || "";
+  const experience = (search?.experience as string) || "";
+  const remote = (search?.remote as string) || "";
+  const paid = (search?.paid as string) || "";
+  const openSource = (search?.opensource as string) || "";
+  const techStack = (search?.tech as string) || "";
 
   useEffect(() => {
     setRecentProjectIds(getRecentlyViewedProjectIds());
   }, []);
+
   const { data = [], isLoading } = useQuery({
-    queryKey: ["projects"],
-    queryFn: projectsService.list,
+    queryKey: ["projects", language, experience, remote, paid, openSource, techStack],
+    queryFn: () => projectsService.list({ 
+      language: language || undefined,
+      experience: experience || undefined,
+      remote: remote ? (remote.toLowerCase() === "yes" || remote.toLowerCase() === "true" ? "true" : "false") : undefined,
+      paid: paid ? (paid.toLowerCase() === "paid" || paid.toLowerCase() === "true" ? "true" : "false") : undefined,
+      opensource: openSource ? (openSource.toLowerCase() === "yes" || openSource.toLowerCase() === "true" ? "true" : "false") : undefined,
+      tech: techStack || undefined,
+    }),
   });
+
   const recentlyViewed = recentProjectIds
     .map((id) => data.find((project) => project.id === id))
     .filter((project): project is NonNullable<typeof project> => Boolean(project));
 
-  const chipFilterCount = langs.length + difficulties.length + boolFilters.length;
+  const chipFilterCount = [language, experience, remote, paid, openSource, techStack].filter(f => f !== "").length;
   const hasActiveFilters = q !== "" || statusFilter !== "all" || chipFilterCount > 0;
 
   if (pathname !== "/projects" && pathname !== "/projects/") {
@@ -121,20 +84,27 @@ function ProjectsPage() {
   function clearFilters() {
     setQ("");
     setStatusFilter("all");
-    setLangs([]);
-    setDifficulties([]);
-    setBoolFilters([]);
+    navigate({ search: { page: 1 } });
   }
+
+  const handleSetFilters = (newFilters: { language: string; experience: string; remote: string; paid: string; openSource: string; techStack: string }) => {
+    navigate({
+      search: (prev: any) => ({
+        ...prev,
+        page: 1,
+        language: newFilters.language || undefined,
+        experience: newFilters.experience || undefined,
+        remote: newFilters.remote || undefined,
+        paid: newFilters.paid || undefined,
+        opensource: newFilters.openSource || undefined,
+        tech: newFilters.techStack || undefined,
+      }),
+    });
+  };
 
   const filtered = data.filter((p) => {
     if (statusFilter !== "all" && p.status !== statusFilter) return false;
     if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false;
-    if (langs.length > 0 && (!p.language || !langs.includes(p.language))) return false;
-    if (difficulties.length > 0 && (!p.difficulty || !difficulties.includes(p.difficulty)))
-      return false;
-    for (const f of boolFilters) {
-      if (!p[f]) return false;
-    }
     return true;
   });
 
@@ -276,61 +246,17 @@ function ProjectsPage() {
             ) : undefined
           }
         >
-          <div className="space-y-3">
-            {/* Language */}
-            <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Language
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {LANGUAGES.map((lang) => (
-                  <FilterChip
-                    key={lang}
-                    active={langs.includes(lang)}
-                    onClick={() => setLangs(toggle(langs, lang))}
-                  >
-                    {lang}
-                  </FilterChip>
-                ))}
-              </div>
-            </div>
-
-            {/* Difficulty */}
-            <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Difficulty
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {DIFFICULTIES.map((d) => (
-                  <FilterChip
-                    key={d}
-                    active={difficulties.includes(d)}
-                    onClick={() => setDifficulties(toggle(difficulties, d))}
-                  >
-                    <span className="capitalize">{d}</span>
-                  </FilterChip>
-                ))}
-              </div>
-            </div>
-
-            {/* Boolean tags */}
-            <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Tags
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {BOOL_FILTERS.map((f) => (
-                  <FilterChip
-                    key={f}
-                    active={boolFilters.includes(f)}
-                    onClick={() => setBoolFilters(toggle(boolFilters, f))}
-                  >
-                    {BOOL_LABELS[f]}
-                  </FilterChip>
-                ))}
-              </div>
-            </div>
-          </div>
+          <ProjectFilters 
+            filters={{
+              language,
+              experience,
+              remote,
+              paid,
+              openSource,
+              techStack,
+            }}
+            setFilters={handleSetFilters}
+          />
         </BottomSheet>
       </Card>
 

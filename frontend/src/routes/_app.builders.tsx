@@ -1,4 +1,3 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   createFileRoute,
   Link,
@@ -22,11 +21,10 @@ import { LastActive } from "@/components/shared/LastActive";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-import { Search, Bookmark } from "lucide-react";
 import { Search, Sparkles, Calendar, Briefcase, Check, Bookmark } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants } from "@/lib/animations";
-import { useBookmarks } from "@/context/BookmarkContext";
+
 
 export const Route = createFileRoute("/_app/builders")({
   head: () => ({
@@ -61,7 +59,6 @@ function AIMatchCard({ builder }: { builder: Builder }) {
   const remainingCount = builder.skills.length - 3;
   const matchPercentage = `${builder.matchScore}%`;
   const experienceText = `${builder.yearsExp} Yrs`;
-  const availabilityText = "Full-time";
   const rawAvailability = (builder as Builder & { availability?: string }).availability;
   const availabilityText = rawAvailability ? rawAvailability.split(" (")[0] : "Full-time";
 
@@ -212,7 +209,6 @@ function BuildersPage() {
     queryFn: () => (tab === "matches" ? buildersService.matches() : buildersService.list()),
   });
 
-  const { toggleBookmark, isBookmarked } = useBookmarks();
 
   const [connections, setConnections] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];

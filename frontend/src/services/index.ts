@@ -20,6 +20,7 @@ import {
   collectionsApi,
   recommendationsApi,
   searchApi,
+  issuesApi,
 } from "@/api";
 import type { BookmarkCollection, BookmarkCollectionWithBookmarks, TechStackResponse } from "@/api";
 
@@ -147,6 +148,43 @@ export const flaresService = {
 export const messagesService = {
   conversations: () => withFallback(() => messagesApi.conversations(), seed.conversations),
   thread: (id: string) => withFallback(() => messagesApi.thread(id), seed.messages[id] ?? []),
+};
+
+export const issuesService = {
+  list: (projectId: string, params?: { status?: string; skip?: number; limit?: number }) =>
+    isBackendConfigured()
+      ? issuesApi.list(projectId, params)
+      : Promise.resolve([]),
+  
+  get: (projectId: string, issueId: string) =>
+    isBackendConfigured()
+      ? issuesApi.get(projectId, issueId)
+      : Promise.reject("Not implemented in mock"),
+
+  create: (projectId: string, body: any) =>
+    isBackendConfigured()
+      ? issuesApi.create(projectId, body)
+      : Promise.reject("Not implemented in mock"),
+
+  update: (projectId: string, issueId: string, body: any) =>
+    isBackendConfigured()
+      ? issuesApi.update(projectId, issueId, body)
+      : Promise.reject("Not implemented in mock"),
+
+  remove: (projectId: string, issueId: string) =>
+    isBackendConfigured()
+      ? issuesApi.remove(projectId, issueId)
+      : Promise.reject("Not implemented in mock"),
+
+  checkDuplicates: (projectId: string, body: any) =>
+    isBackendConfigured()
+      ? issuesApi.checkDuplicates(projectId, body)
+      : Promise.reject("Not implemented in mock"),
+
+  markAsDuplicate: (projectId: string, issueId: string, duplicateOfId: string) =>
+    isBackendConfigured()
+      ? issuesApi.markAsDuplicate(projectId, issueId, duplicateOfId)
+      : Promise.reject("Not implemented in mock"),
 };
 
 export const notificationsService = {

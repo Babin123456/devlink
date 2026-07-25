@@ -38,12 +38,7 @@ function SearchPage() {
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<Tab>("Developers");
 
-  const devs = builders.filter((b) =>
-    (b.name + b.skills.join(" ")).toLowerCase().includes(q.toLowerCase()),
-  );
-  const projs = projects.filter((p) =>
-    (p.name + p.stack.join(" ")).toLowerCase().includes(q.toLowerCase()),
-  );
+
   const skillSet = Array.from(new Set(builders.flatMap((b) => b.skills))).filter((s) =>
     s.toLowerCase().includes(q.toLowerCase()),
   );
