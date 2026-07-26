@@ -3,6 +3,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { APP_LOGO } from "@/lib/logo";
 import { motion } from "framer-motion";
 import { Sparkles, Users2, MessageSquare, Trophy, Github, ArrowRight, Check } from "lucide-react";
+import { Sun, Moon, X, Menu } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { useTheme } from "@/hooks/useTheme";
 
 export const Route = createFileRoute("/")({
   head: () => ({

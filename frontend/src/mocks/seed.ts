@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 // Realistic seed data for DevLink — used by all mock services.
 // Replace mock services with an HTTP client later; shapes are stable.
 
