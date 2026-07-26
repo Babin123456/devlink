@@ -75,7 +75,7 @@ class User(Base):
     # ------------------------------------------------------------------
 
     badges: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
+        ARRAY(String).with_variant(JSON, "sqlite"),
         default=list,
         server_default="{}",
         nullable=False,
