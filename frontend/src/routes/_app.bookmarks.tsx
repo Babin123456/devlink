@@ -4,12 +4,11 @@ import { Card, EmptyState, TagChip, Avatar } from "@/components/shared/primitive
 import { projects, flares } from "@/mocks/seed";
 
 import { Bookmark, FolderOpen, Trash2, MapPin, Briefcase, Users } from "lucide-react";
-import { FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CollectionSidebar } from "@/components/bookmarks/CollectionSidebar";
 import { CollectionDialog } from "@/components/bookmarks/CollectionDialog";
 import { AddToCollectionMenu } from "@/components/bookmarks/AddToCollectionMenu";
-import { useBookmarks } from "@/context/BookmarkContext";
+
 import { BookmarkToggleButton } from "@/components/shared/BookmarkToggleButton";
 import {
   useCreateCollection,
@@ -38,7 +37,10 @@ function BookmarksPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<BookmarkCollection | null>(null);
 
-  const { bookmarkedDevs, toggleBookmark } = useBookmarks();
+  const [bookmarkedDevs, setBookmarkedDevs] = useState<any[]>([]);
+  const toggleBookmark = useCallback((dev: any) => {
+    setBookmarkedDevs(prev => prev.some(d => d.id === dev.id) ? prev.filter(d => d.id !== dev.id) : [...prev, dev]);
+  }, []);
 
   const createCollection = useCreateCollection();
   const renameCollection = useRenameCollection();

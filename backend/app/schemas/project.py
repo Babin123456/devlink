@@ -33,6 +33,12 @@ class ProjectBase(BaseModel):
     logo_url: Optional[str] = None
     banner_url: Optional[str] = None
 
+    language: Optional[str] = None
+    experience_level: Optional[str] = None
+    is_remote: bool = False
+    is_paid: bool = False
+    is_opensource: bool = False
+
     scheduled_publish_at: Optional[datetime] = None
     is_published: bool = True
 
@@ -63,6 +69,12 @@ class ProjectUpdate(BaseModel):
     hiring: Optional[bool] = None
     logo_url: Optional[str] = None
     banner_url: Optional[str] = None
+
+    language: Optional[str] = None
+    experience_level: Optional[str] = None
+    is_remote: Optional[bool] = None
+    is_paid: Optional[bool] = None
+    is_opensource: Optional[bool] = None
 
     scheduled_publish_at: Optional[datetime] = None
     is_published: Optional[bool] = None
