@@ -13,7 +13,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
 
@@ -212,7 +212,6 @@ class User(Base):
 
     last_active_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
-        default=datetime.utcnow,
         nullable=True,
     )
     # ------------------------------------------------------------------
@@ -251,6 +250,12 @@ class User(Base):
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
+
+    password_history = relationship(
+        "PasswordHistory",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
     @property
     def is_online(self) -> bool:

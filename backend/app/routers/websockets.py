@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 websockets.py
 -------------
@@ -28,7 +29,6 @@ Architecture:
   receives the event on both.
 """
 
-from __future__ import annotations
 
 import json
 import logging
@@ -252,7 +252,6 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
 
             # ── Leave a project room ─────────────────────────────────────
             elif msg_type == "leave" and project_id:
-                manager.leave_room(project_id, user_id)
                 await manager.broadcast_to_room(
                     project_id,
                     _event(
@@ -261,6 +260,8 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
                         user_id=user_id,
                     ),
                 )
+                manager.leave_room(project_id, user_id)
+
                 logger.info("User %s left room %s", user_id, project_id)
 
             # ── New message in a project room ────────────────────────────

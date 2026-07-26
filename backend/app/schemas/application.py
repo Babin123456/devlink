@@ -21,7 +21,8 @@ class ApplicationBase(BaseModel):
 
 
 class ApplicationCreate(ApplicationBase):
-    pass
+    project_id: uuid.UUID
+    flare_id: uuid.UUID
 
 
 class ApplicationUpdate(BaseModel):

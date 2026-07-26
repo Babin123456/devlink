@@ -36,7 +36,7 @@ class ActivityService:
             description=activity.description,
             target_id=activity.target_id,
             target_type=activity.target_type,
-            metadata_=activity.metadata_,
+            meta=activity.meta,
             icon=activity.icon,
             color=activity.color,
         )
@@ -71,7 +71,7 @@ class ActivityService:
             description=description,
             target_id=target_id,
             target_type=target_type,
-            metadata_=metadata or {},
+            meta=metadata or {},
             icon=icon,
             color=color,
         )
@@ -173,9 +173,9 @@ class ActivityService:
         data = activity.model_dump(exclude_unset=True)
 
         for key, value in data.items():
-            if key == "metadata_":
+            if key == "meta":
                 # Merge metadata if provided
-                db_activity.metadata_ = {**db_activity.metadata_, **value}
+                db_activity.meta = {**db_activity.meta, **value}
             else:
                 setattr(db_activity, key, value)
 

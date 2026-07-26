@@ -16,9 +16,6 @@ from app.schemas.recommendation import (
 API router for the AI-Powered Builder Recommendation System
 and AI Tech Stack Recommendation.
 """
-
-from __future__ import annotations
-
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status

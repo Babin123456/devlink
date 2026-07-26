@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 # pyrefly: ignore [missing-import]
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import (
     APIRouter,
     Depends,
@@ -11,6 +12,7 @@ from fastapi import (
 
 import httpx
 from app.core.config import settings
+from app.core.security import create_verification_token, decode_token, is_refresh_token
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
@@ -19,6 +21,7 @@ from app.middleware.rate_limit import (
     limiter,
     LOGIN_LIMIT,
     REGISTER_LIMIT,
+    PASSWORD_RESET_LIMIT,
 )
 from app.dependencies import get_database
 from app.schemas.auth import (
@@ -26,6 +29,17 @@ from app.schemas.auth import (
     LoginRequest,
     RegisterRequest,
     GitHubLoginRequest,
+    LogoutResponse,
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
+    ResetPasswordRequest,
+    ChangePasswordRequest,
+    VerifyEmailRequest,
+    VerifyEmailResponse,
+    ResendVerificationEmailRequest,
+    SuccessResponse,
+    ErrorResponse,
+    RefreshTokenRequest,
 )
 from app.schemas.user import CurrentUser
 from app.services.auth_service import AuthService
@@ -90,196 +104,7 @@ def login(
 import httpx
 from app.schemas.auth import GitHubLoginRequest
 from app.core.config import settings
-
-
-@router.post(
-    "/github",
-    response_model=AuthResponse,
-    summary="GitHub OAuth Login",
-)
-async def github_login(
-    payload: GitHubLoginRequest,
-    db: Session = Depends(get_database),
-):
-    """
-    Authenticate a user via GitHub OAuth.
-    """
-    if not settings.GITHUB_CLIENT_ID or not settings.GITHUB_CLIENT_SECRET:
-        raise HTTPException(
-            status_code=status.HTTP_501_NOT_IMPLEMENTED,
-            detail="GitHub OAuth is not configured.",
-        )
-
-    # 1. Exchange code for access token
-    token_url = "https://github.com/login/oauth/access_token"
-    headers = {"Accept": "application/json"}
-    data = {
-        "client_id": settings.GITHUB_CLIENT_ID,
-        "client_secret": settings.GITHUB_CLIENT_SECRET,
-        "code": payload.code,
-    }
-
-    async with httpx.AsyncClient() as client:
-        token_res = await client.post(token_url, json=data, headers=headers)
-        if token_res.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Failed to exchange code for GitHub token.",
-            )
-
-        token_data = token_res.json()
-        if "error" in token_data:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=token_data.get("error_description", "Invalid GitHub code."),
-            )
-
-        access_token = token_data["access_token"]
-
-        # 2. Fetch user profile
-        user_res = await client.get(
-            "https://api.github.com/user",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        if user_res.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Failed to fetch GitHub profile.",
-            )
-        github_user = user_res.json()
-
-        # 3. Fetch user emails
-        emails_res = await client.get(
-            "https://api.github.com/user/emails",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        primary_email = None
-        if emails_res.status_code == 200:
-            emails = emails_res.json()
-            for email_obj in emails:
-                if email_obj.get("primary") and email_obj.get("verified"):
-                    primary_email = email_obj.get("email")
-                    break
-
-            if not primary_email:
-                for email_obj in emails:
-                    if email_obj.get("verified"):
-                        primary_email = email_obj.get("email")
-                        break
-
-    if not primary_email:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A verified primary email is required for GitHub login.",
-        )
-
-    auth_service = AuthService(db)
-    return auth_service.github_login(github_user, primary_email)
-
-
-import httpx  # noqa: E402
-from app.schemas.auth import GitHubLoginRequest  # noqa: E402
-from app.core.config import settings  # noqa: E402
-
-
-@router.post(
-    "/github",
-    response_model=AuthResponse,
-    summary="GitHub OAuth Login",
-)
-async def github_login(
-    payload: GitHubLoginRequest,
-    db: Session = Depends(get_database),
-):
-    """
-    Authenticate a user via GitHub OAuth.
-    """
-    if not settings.GITHUB_CLIENT_ID or not settings.GITHUB_CLIENT_SECRET:
-        raise HTTPException(
-            status_code=status.HTTP_501_NOT_IMPLEMENTED,
-            detail="GitHub OAuth is not configured.",
-        )
-
-    # 1. Exchange code for access token
-    token_url = "https://github.com/login/oauth/access_token"
-    headers = {"Accept": "application/json"}
-    data = {
-        "client_id": settings.GITHUB_CLIENT_ID,
-        "client_secret": settings.GITHUB_CLIENT_SECRET,
-        "code": payload.code,
-    }
-
-    async with httpx.AsyncClient() as client:
-        token_res = await client.post(token_url, json=data, headers=headers)
-        if token_res.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Failed to exchange code for GitHub token.",
-            )
-
-        token_data = token_res.json()
-        if "error" in token_data:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=token_data.get("error_description", "Invalid GitHub code."),
-            )
-
-        access_token = token_data["access_token"]
-
-        # 2. Fetch user profile
-        user_res = await client.get(
-            "https://api.github.com/user",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        if user_res.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Failed to fetch GitHub profile.",
-            )
-        github_user = user_res.json()
-
-        # 3. Fetch user emails
-        emails_res = await client.get(
-            "https://api.github.com/user/emails",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
-        primary_email = None
-        if emails_res.status_code == 200:
-            emails = emails_res.json()
-            for email_obj in emails:
-                if email_obj.get("primary") and email_obj.get("verified"):
-                    primary_email = email_obj.get("email")
-                    break
-
-            if not primary_email:
-                for email_obj in emails:
-                    if email_obj.get("verified"):
-                        primary_email = email_obj.get("email")
-                        break
-
-    if not primary_email:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A verified primary email is required for GitHub login.",
-        )
-
-    auth_service = AuthService(db)
-    return auth_service.github_login(github_user, primary_email)
-
-
-# pyrefly: ignore [missing-import]
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer  # noqa: E402
-
-from app.core.security import (  # noqa: E402
-    decode_token,
-    is_refresh_token,
-    create_verification_token,
-)
-from app.schemas.auth import (  # noqa: E402
-    RefreshTokenRequest,
-    LogoutResponse,
-    CurrentUserResponse,
-)
+from app.core.security import create_verification_token, decode_token, is_refresh_token
 
 
 @router.post(
@@ -377,6 +202,8 @@ security = HTTPBearer()
 # ==========================================================
 
 
+security = HTTPBearer()
+
 def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> str:
@@ -403,7 +230,7 @@ def get_current_user_id(
 
 @router.get(
     "/me",
-    response_model=CurrentUserResponse,
+    response_model=CurrentUser,
     summary="Current authenticated user",
 )
 @limiter.limit("30/minute")
@@ -477,14 +304,22 @@ def logout(
     return auth_service.logout(user_id)
 
 
-from app.schemas.auth import (  # noqa: E402
-    ChangePasswordRequest,
+from app.schemas.auth import (
+    AuthResponse,
+    LoginRequest,
+    RegisterRequest,
+    GitHubLoginRequest,
+    LogoutResponse,
+    ForgotPasswordRequest,
     ForgotPasswordResponse,
     ResetPasswordRequest,
-    SuccessResponse,
+    ChangePasswordRequest,
     VerifyEmailRequest,
     VerifyEmailResponse,
     ResendVerificationEmailRequest,
+    SuccessResponse,
+    ErrorResponse,
+    RefreshTokenRequest,
 )
 
 # ==========================================================

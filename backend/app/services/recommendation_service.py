@@ -217,7 +217,6 @@ Recommendation factors (per the issue)
 * Network           – Small boost for mutual-follow social proximity.
 """
 
-from __future__ import annotations
 
 import logging
 import math

@@ -65,7 +65,8 @@ def follow_user(
             message=f"{current_user.username} started following you.",
             action_url=f"/users/{current_user.id}",
         )
-    except Exception:
+    except Exception as e:
+        print(f'ENQUEUE ERROR: {e}')
         db.rollback()
 
     return follow

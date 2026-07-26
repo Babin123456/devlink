@@ -61,7 +61,7 @@ def send_message(
         ).all()
 
         for recipient_id in recipient_ids:
-            NotificationService.enqueue(
+            NotificationService.notify(
                 db,
                 recipient_id=recipient_id,
                 sender_id=current_user.id,
@@ -230,6 +230,7 @@ def get_typing(
 def get_message(
     message_id: uuid.UUID,
     db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
 ):
 
     message = MessageService.get_message(
