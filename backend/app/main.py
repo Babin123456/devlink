@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 # pyrefly: ignore [missing-import]
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 # pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
@@ -56,6 +57,7 @@ from app.routers import (
     skills,
     users,
     search,
+    saved_searches,
 )
 
 
@@ -195,12 +197,9 @@ async def global_exception_handler(request, exc):
 
 from app.routers import (
     activities,
-    ai,
     applications,
     auth,
     bookmarks,
-    builder_flare,
-    builders,
     conversations,
     followers,
     messages,
@@ -261,3 +260,4 @@ app.include_router(
 )
 app.include_router(health.router)
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
+app.include_router(saved_searches.router)

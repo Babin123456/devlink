@@ -66,7 +66,8 @@ class OrganizationService:
             activity_type=ActivityType.ORGANIZATION_CREATED,
             title="Created organization",
             description=db_organization.name,
-            organization_id=db_organization.id,
+            target_id=db_organization.id,
+            target_type="organization",
             icon="building-2",
             color="primary",
         )

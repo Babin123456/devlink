@@ -15,6 +15,13 @@ import {
   ArrowDown,
   Sparkles,
 } from "lucide-react";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { Card, TagChip, Avatar, NoSearchResultsEmptyState } from "@/components/shared/primitives";
+import { builders, projects, flares } from "@/mocks/seed";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { Search, X } from "lucide-react";
+import { SkillSuggestionDropdown } from "@/components/search/SkillSuggestionDropdown";
 
 import { Avatar, Card, NoSearchResultsEmptyState, TagChip } from "@/components/shared/primitives";
 import { HighlightText } from "@/components/shared/HighlightText";
@@ -36,7 +43,19 @@ import {
   type SearchResultUser,
 } from "@/api/modules/search";
 
+interface SearchParams {
+  q?: string;
+  tab?: Tab;
+}
+
 export const Route = createFileRoute("/_app/search")({
+  validateSearch: (search: Record<string, unknown>): SearchParams => ({
+    q: typeof search.q === "string" ? search.q : undefined,
+    tab:
+      typeof search.tab === "string" && tabs.includes(search.tab as Tab)
+        ? (search.tab as Tab)
+        : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Search — DevLink" },
@@ -93,6 +112,25 @@ function SearchPage() {
     setCategory,
     clear,
   } = useGlobalSearch({ debounceMs: 250, limit: 20, enableAutocomplete: true });
+  const searchParams = useSearch({ from: "/_app/search" }) as SearchParams;
+  const [q, setQ] = useState(searchParams.q || "");
+  const [tab, setTab] = useState<Tab>(searchParams.tab || "Developers");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.q !== undefined) {
+      setQ(searchParams.q);
+    }
+    if (searchParams.tab !== undefined) {
+      setTab(searchParams.tab);
+    }
+  }, [searchParams.q, searchParams.tab]);
+
+  const handleSelectSkill = (skillName: string) => {
+    setQ(skillName);
+    setTab("Skills");
+    setIsDropdownOpen(false);
+  };
 
   // Keyboard navigation state — index into the flat list of suggestion rows.
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -209,7 +247,7 @@ function SearchPage() {
       <div className="relative">
         <Search
           size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground z-10"
         />
         <input
           ref={inputRef}
@@ -217,6 +255,13 @@ function SearchPage() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Search DevLink… (developers, projects, orgs, skills, tags)"
+          value={q}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setIsDropdownOpen(true);
+          }}
+          onFocus={() => setIsDropdownOpen(true)}
+          placeholder="Search DevLink…"
           className="w-full rounded-md border border-border bg-surface py-2.5 pl-10 pr-10 text-[14px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           autoFocus
           aria-label="Global search"
@@ -239,6 +284,8 @@ function SearchPage() {
               inputRef.current?.focus();
             }}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            onClick={() => setQ("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-10"
             aria-label="Clear search"
           >
             <X size={16} />
@@ -295,6 +342,12 @@ function SearchPage() {
             </div>
           </div>
         )}
+        <SkillSuggestionDropdown
+          query={q}
+          isOpen={isDropdownOpen}
+          onSelectSkill={handleSelectSkill}
+          onClose={() => setIsDropdownOpen(false)}
+        />
       </div>
 
       {/* Backend not configured banner */}

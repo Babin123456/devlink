@@ -111,7 +111,7 @@ def cached(ttl: int = 300, key_prefix: str = ""):
         def wrapper(*args, **kwargs):
             import sys
 
-            if "pytest" in sys.modules:
+            if cache_manager._is_testing:
                 return func(*args, **kwargs)
 
             # Filter kwargs to remove non-serializable FastAPI objects
@@ -177,7 +177,7 @@ def cached(ttl: int = 300, key_prefix: str = ""):
 
                 cache_manager.set(cache_key, store_value, ttl)
 
-            return result
+            return store_value if result is not None else result
 
         return wrapper
 

@@ -63,7 +63,7 @@ def test_github_login_success_new_user(
             assert data["user"]["username"] == "new_octocat"
 
             # Verify DB state
-            user = db_session.query(User).filter_by(email="octocat@example.com").first()
+            user = db.query(User).filter_by(email="octocat@example.com").first()
             user = db.query(User).filter(User.email == "octocat@example.com").first()
             assert user is not None
             assert user.github_id == "1234567"
@@ -86,8 +86,8 @@ def test_github_login_link_existing_account(
         password_hash=hash_password("Password123!"),
         is_active=True,
     )
-    db_session.add(existing_user)
-    db_session.commit()
+    db.add(existing_user)
+    db.commit()
     db.add(existing_user)
     db.commit()
     db.refresh(existing_user)
