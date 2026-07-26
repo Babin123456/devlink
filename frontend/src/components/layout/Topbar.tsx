@@ -1,10 +1,28 @@
+import { useState } from "react";
 import { Bell, MessageSquare, Plus, Search, Sparkles, Menu, Moon, Sun } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { currentUser } from "@/mocks/seed";
 import { useTheme } from "@/hooks/useTheme";
+import { SkillSuggestionDropdown } from "@/components/search/SkillSuggestionDropdown";
 
 export function Topbar({ onMenu }: { onMenu: () => void }) {
   const { isDark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSelectSkill = (skillName: string) => {
+    setQuery(skillName);
+    setIsOpen(false);
+    navigate({ to: "/search", search: { q: skillName, tab: "Skills" } });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && query.trim() && !isOpen) {
+      navigate({ to: "/search", search: { q: query.trim() } });
+    }
+  };
+
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border bg-surface/80 px-4 backdrop-blur">
       <button
@@ -22,8 +40,21 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
         />
         <input
           type="search"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => setIsOpen(true)}
+          onKeyDown={handleKeyDown}
           placeholder="Search developers, projects, skills…"
           className="w-full rounded-md border border-border bg-surface py-[7px] pl-9 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+        />
+        <SkillSuggestionDropdown
+          query={query}
+          isOpen={isOpen}
+          onSelectSkill={handleSelectSkill}
+          onClose={() => setIsOpen(false)}
         />
       </div>
 
