@@ -14,6 +14,13 @@ export interface Issue {
   difficulty_manual_override: boolean;
   created_at: string;
   updated_at: string;
+  is_duplicate_checked?: boolean;
+  author?: {
+    id: string;
+    username: string;
+    full_name: string | null;
+    avatar: string | null;
+  };
 }
 
 export interface DifficultyEstimateResponse {
@@ -21,6 +28,7 @@ export interface DifficultyEstimateResponse {
   confidence: number;
   reasoning: string;
 }
+
 
 export interface DuplicateSuggestion {
   id: string;

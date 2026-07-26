@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 # pyrefly: ignore [missing-import]
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import (
     APIRouter,
     Depends,
@@ -9,10 +8,15 @@ from fastapi import (
     Request,
     status,
 )
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 import httpx
 from app.core.config import settings
-from app.core.security import create_verification_token, decode_token, is_refresh_token
+from app.core.security import (
+    decode_token,
+    is_refresh_token,
+    create_verification_token,
+)
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
@@ -20,26 +24,26 @@ from sqlalchemy.orm import Session
 from app.middleware.rate_limit import (
     limiter,
     LOGIN_LIMIT,
-    REGISTER_LIMIT,
     PASSWORD_RESET_LIMIT,
+    REGISTER_LIMIT,
 )
 from app.dependencies import get_database
 from app.schemas.auth import (
     AuthResponse,
+    ForgotPasswordRequest,
     LoginRequest,
     RegisterRequest,
     GitHubLoginRequest,
+    RefreshTokenRequest,
     LogoutResponse,
-    ForgotPasswordRequest,
+    CurrentUserResponse,
+    ChangePasswordRequest,
     ForgotPasswordResponse,
     ResetPasswordRequest,
-    ChangePasswordRequest,
+    SuccessResponse,
     VerifyEmailRequest,
     VerifyEmailResponse,
     ResendVerificationEmailRequest,
-    SuccessResponse,
-    ErrorResponse,
-    RefreshTokenRequest,
 )
 from app.schemas.user import CurrentUser
 from app.services.auth_service import AuthService
@@ -101,10 +105,8 @@ def login(
     return auth_service.login(payload)
 
 
-import httpx
-from app.schemas.auth import GitHubLoginRequest
-from app.core.config import settings
-from app.core.security import create_verification_token, decode_token, is_refresh_token
+import httpx  # noqa: E402
+from app.schemas.auth import GitHubLoginRequest  # noqa: E402
 
 
 @router.post(
@@ -163,26 +165,24 @@ async def github_login(
             )
         github_user = user_res.json()
 
-        # 3. Fetch user emails if primary email not public
-        primary_email = github_user.get("email")
-        if not primary_email:
-            emails_res = await client.get(
-                "https://api.github.com/user/emails",
-                headers={"Authorization": f"Bearer {access_token}"},
-            )
-            if emails_res.status_code == 200:
-                emails = emails_res.json()
+        # 3. Fetch user emails
+        emails_res = await client.get(
+            "https://api.github.com/user/emails",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        primary_email = None
+        if emails_res.status_code == 200:
+            emails = emails_res.json()
+            for email_obj in emails:
+                if email_obj.get("primary") and email_obj.get("verified"):
+                    primary_email = email_obj.get("email")
+                    break
+
+            if not primary_email:
                 for email_obj in emails:
-                    if email_obj.get("primary") and email_obj.get("verified"):
+                    if email_obj.get("verified"):
                         primary_email = email_obj.get("email")
                         break
-
-                # Fallback to any verified email if no primary verified email is found
-                if not primary_email:
-                    for email_obj in emails:
-                        if email_obj.get("verified"):
-                            primary_email = email_obj.get("email")
-                            break
 
     if not primary_email:
         raise HTTPException(
@@ -201,8 +201,6 @@ security = HTTPBearer()
 # Current Authenticated User Dependency
 # ==========================================================
 
-
-security = HTTPBearer()
 
 def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(security),
@@ -230,7 +228,7 @@ def get_current_user_id(
 
 @router.get(
     "/me",
-    response_model=CurrentUser,
+    response_model=CurrentUserResponse,
     summary="Current authenticated user",
 )
 @limiter.limit("30/minute")
@@ -304,22 +302,14 @@ def logout(
     return auth_service.logout(user_id)
 
 
-from app.schemas.auth import (
-    AuthResponse,
-    LoginRequest,
-    RegisterRequest,
-    GitHubLoginRequest,
-    LogoutResponse,
-    ForgotPasswordRequest,
+from app.schemas.auth import (  # noqa: E402
+    ChangePasswordRequest,
     ForgotPasswordResponse,
     ResetPasswordRequest,
-    ChangePasswordRequest,
+    SuccessResponse,
     VerifyEmailRequest,
     VerifyEmailResponse,
     ResendVerificationEmailRequest,
-    SuccessResponse,
-    ErrorResponse,
-    RefreshTokenRequest,
 )
 
 # ==========================================================
