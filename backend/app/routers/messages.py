@@ -82,7 +82,9 @@ def send_message(
     "/me",
     response_model=list[MessageResponse],
 )
+@limiter.limit(MESSAGE_LIMIT)
 def my_messages(
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
 ):
@@ -97,7 +99,9 @@ def my_messages(
     "/search/{conversation_id}",
     response_model=list[MessageResponse],
 )
+@limiter.limit(SEARCH_LIMIT)
 def search_messages(
+    request: Request,
     conversation_id: uuid.UUID,
     keyword: str = Query(...),
     db: Session = Depends(get_database),
@@ -113,7 +117,9 @@ def search_messages(
 @router.get(
     "/conversation/{conversation_id}/count",
 )
+@limiter.limit(MESSAGE_LIMIT)
 def count_messages(
+    request: Request,
     conversation_id: uuid.UUID,
     db: Session = Depends(get_database),
 ):
@@ -227,7 +233,9 @@ def get_typing(
     "/{message_id}",
     response_model=MessageResponse,
 )
+@limiter.limit(MESSAGE_LIMIT)
 def get_message(
+    request: Request,
     message_id: uuid.UUID,
     db: Session = Depends(get_database),
     current_user: User = Depends(get_current_user),

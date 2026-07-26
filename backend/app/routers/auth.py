@@ -114,7 +114,9 @@ from app.schemas.auth import GitHubLoginRequest  # noqa: E402
     response_model=AuthResponse,
     summary="GitHub OAuth Login",
 )
+@limiter.limit(LOGIN_LIMIT)
 async def github_login(
+    request: Request,
     payload: GitHubLoginRequest,
     db: Session = Depends(get_database),
 ):
