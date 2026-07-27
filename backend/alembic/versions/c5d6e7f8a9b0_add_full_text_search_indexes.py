@@ -10,7 +10,6 @@ from typing import Sequence, Union
 
 from alembic import op
 
-
 revision: str = "c5d6e7f8a9b0"
 down_revision: Union[str, None] = "b1c2d3e4f5a6"
 branch_labels: Union[str, Sequence[str], None] = None
@@ -19,8 +18,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # PostgreSQL GIN functional indexes on to_tsvector for full-text search
-    op.execute(
-        """
+    op.execute("""
         CREATE INDEX IF NOT EXISTS idx_users_fts ON users USING gin(
             to_tsvector('english',
                 coalesce(username, '') || ' ' ||
@@ -30,11 +28,9 @@ def upgrade() -> None:
                 coalesce(headline, '')
             )
         );
-        """
-    )
+        """)
 
-    op.execute(
-        """
+    op.execute("""
         CREATE INDEX IF NOT EXISTS idx_projects_fts ON projects USING gin(
             to_tsvector('english',
                 coalesce(title, '') || ' ' ||
@@ -43,11 +39,9 @@ def upgrade() -> None:
                 coalesce(tech_stack, '')
             )
         );
-        """
-    )
+        """)
 
-    op.execute(
-        """
+    op.execute("""
         CREATE INDEX IF NOT EXISTS idx_organizations_fts ON organizations USING gin(
             to_tsvector('english',
                 coalesce(name, '') || ' ' ||
@@ -56,11 +50,9 @@ def upgrade() -> None:
                 coalesce(location, '')
             )
         );
-        """
-    )
+        """)
 
-    op.execute(
-        """
+    op.execute("""
         CREATE INDEX IF NOT EXISTS idx_skills_fts ON skills USING gin(
             to_tsvector('english',
                 coalesce(name, '') || ' ' ||
@@ -69,8 +61,7 @@ def upgrade() -> None:
                 coalesce(description, '')
             )
         );
-        """
-    )
+        """)
 
 
 def downgrade() -> None:

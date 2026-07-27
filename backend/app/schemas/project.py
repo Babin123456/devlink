@@ -5,11 +5,11 @@ from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+
 # pyrefly: ignore [missing-import]
 from pydantic import BaseModel, ConfigDict
 
 from app.models.project import ProjectStage, ProjectVisibility
-
 
 # ==========================================================
 # Base Project Schema

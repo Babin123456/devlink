@@ -103,13 +103,13 @@ class OrganizationService:
         slug: str,
     ) -> Organization | None:
 
-        stmt = select(Organization).where(
-            Organization.slug == slug,
-            Organization.deleted_at.is_(None),
         stmt = (
             select(Organization)
             .options(selectinload(Organization.owner))
-            .where(Organization.slug == slug)
+            .where(
+                Organization.slug == slug,
+                Organization.deleted_at.is_(None),
+            )
         )
 
         return db.scalar(stmt)
@@ -138,13 +138,13 @@ class OrganizationService:
         owner_id: uuid.UUID,
     ) -> list[Organization]:
 
-        stmt = select(Organization).where(
-            Organization.owner_id == owner_id,
-            Organization.deleted_at.is_(None),
         stmt = (
             select(Organization)
             .options(selectinload(Organization.owner))
-            .where(Organization.owner_id == owner_id)
+            .where(
+                Organization.owner_id == owner_id,
+                Organization.deleted_at.is_(None),
+            )
         )
 
         return list(db.scalars(stmt))
@@ -155,13 +155,13 @@ class OrganizationService:
         keyword: str,
     ) -> list[Organization]:
 
-        stmt = select(Organization).where(
-            Organization.name.ilike(f"%{keyword}%"),
-            Organization.deleted_at.is_(None),
         stmt = (
             select(Organization)
             .options(selectinload(Organization.owner))
-            .where(Organization.name.ilike(f"%{keyword}%"))
+            .where(
+                Organization.name.ilike(f"%{keyword}%"),
+                Organization.deleted_at.is_(None),
+            )
         )
 
         return list(db.scalars(stmt))

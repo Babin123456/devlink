@@ -65,12 +65,7 @@ class UserService:
         skip: int = 0,
         limit: int = 20,
     ) -> list[User]:
-        stmt = (
-            select(User)
-            .where(User.deleted_at.is_(None))
-            .offset(skip)
-            .limit(limit)
-        )
+        stmt = select(User).where(User.deleted_at.is_(None)).offset(skip).limit(limit)
         return list(db.scalars(stmt))
 
     @staticmethod

@@ -497,6 +497,7 @@ def hard_delete_project(
     ProjectService.hard_delete_project(
         db,
         project,
+    )
     from app.models.project_member import ProjectMember, MemberRole
 
     # pyrefly: ignore [missing-import]

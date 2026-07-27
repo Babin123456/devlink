@@ -5,11 +5,11 @@ from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+
 # pyrefly: ignore [missing-import]
 from pydantic import BaseModel, ConfigDict
 
 from app.models.organization import OrganizationType
-
 
 # ==========================================================
 # Base Organization Schema
@@ -96,10 +96,9 @@ class OrganizationUpdate(BaseModel):
     twitter_url: Optional[HttpUrl] = None
     hiring: Optional[bool] = None
 
-
-# ==========================================================
-# Organization Response
-# ==========================================================
+    # ==========================================================
+    # Organization Response
+    # ==========================================================
     website: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
