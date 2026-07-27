@@ -11,7 +11,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Star, GitFork, Users2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
 import { ProjectFilters } from "@/components/projects/ProjectFilters";
 import { cn } from "@/lib/utils";
@@ -70,12 +70,28 @@ function ProjectsPage() {
     }),
   });
 
-  const recentlyViewed = recentProjectIds
-    .map((id) => data.find((project) => project.id === id))
-    .filter((project): project is NonNullable<typeof project> => Boolean(project));
+  const recentlyViewed = useMemo(
+    () =>
+      recentProjectIds
+        .map((id) => data.find((project) => project.id === id))
+        .filter((project): project is NonNullable<typeof project> => Boolean(project)),
+    [recentProjectIds, data],
+  );
 
-  const chipFilterCount = [language, experience, remote, paid, openSource, techStack].filter(f => f !== "").length;
+  const chipFilterCount = [language, experience, remote, paid, openSource, techStack].filter(
+    (f) => f !== "",
+  ).length;
   const hasActiveFilters = q !== "" || statusFilter !== "all" || chipFilterCount > 0;
+
+  const filtered = useMemo(
+    () =>
+      data.filter((p) => {
+        if (statusFilter !== "all" && p.status !== statusFilter) return false;
+        if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false;
+        return true;
+      }),
+    [data, statusFilter, q],
+  );
 
   if (pathname !== "/projects" && pathname !== "/projects/") {
     return <Outlet />;
@@ -101,12 +117,6 @@ function ProjectsPage() {
       }),
     });
   };
-
-  const filtered = data.filter((p) => {
-    if (statusFilter !== "all" && p.status !== statusFilter) return false;
-    if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
-  });
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);

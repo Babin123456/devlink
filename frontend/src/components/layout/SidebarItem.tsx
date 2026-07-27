@@ -20,6 +20,7 @@ export function SidebarItem({ label, to, icon, badge }: SidebarItemProps) {
     <li title={isCollapsed ? label : undefined}>
       <Link
         to={to.split("?")[0]}
+        preload="intent"
         onClick={closeMobile}
         className={cn(
           "mt-1 flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
