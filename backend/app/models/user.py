@@ -75,9 +75,9 @@ class User(Base):
     # ------------------------------------------------------------------
 
     badges: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
+        JSON().with_variant(ARRAY(String), "postgresql"),
         default=list,
-        server_default="{}",
+        server_default="[]",
         nullable=False,
     )
 

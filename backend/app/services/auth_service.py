@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 
@@ -26,6 +24,7 @@ from app.schemas.auth import (
     LoginRequest,
     RegisterRequest,
 )
+from app.services.refresh_token_service import RefreshTokenService
 from app.utils.validators import (
     validate_email,
     validate_name,
@@ -158,7 +157,12 @@ class AuthService:
     # Login
     # =====================================================
 
-    def login(self, payload: LoginRequest):
+    def login(
+        self,
+        payload: LoginRequest,
+        user_agent: str | None = None,
+        ip_address: str | None = None,
+    ):
 
         payload.email = validate_email(payload.email)
 
@@ -203,6 +207,17 @@ class AuthService:
         )
 
         refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=refresh_token,
+            expires_at=expires_at,
+            user_agent=user_agent,
+            ip_address=ip_address,
+        )
+        self.db.commit()
 
         event_bus.publish(
             "USER_LOGIN",
@@ -453,23 +468,70 @@ class AuthService:
 
         return user
 
-    # =====================================================
-    # Refresh Token
-    # =====================================================
+    def refresh_token(
+        self,
+        token_str: str,
+        user_agent: str | None = None,
+        ip_address: str | None = None,
+    ):
+        db_token = RefreshTokenService.get_token(self.db, token_str)
+        now = datetime.now(timezone.utc)
 
-    def refresh_token(self, user_id: str):
+        if db_token and db_token.is_revoked:
+            # Token reuse detected! Revoke all tokens for this user for security.
+            RefreshTokenService.revoke_all_tokens(self.db, db_token.user_id)
+            self.db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token has already been revoked or reused. All sessions revoked for security.",
+            )
 
-        user = self.get_current_user(user_id)
+        if not db_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired refresh token.",
+            )
 
-        access_token = create_access_token(
+        expires_at = db_token.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+        if expires_at < now:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired refresh token.",
+            )
+
+        user = self.get_current_user(str(db_token.user_id))
+
+        # Rotate refresh token
+        db_token.is_revoked = True
+        db_token.revoked_at = now
+        db_token.last_used_at = now
+
+        new_access_token = create_access_token(
             str(user.id),
             {
                 "username": user.username,
                 "email": user.email,
             },
         )
+        new_refresh_token = create_refresh_token(str(user.id))
+        new_expires_at = now + timedelta(days=7)
 
-        refresh_token = create_refresh_token(str(user.id))
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=new_refresh_token,
+            expires_at=new_expires_at,
+            user_agent=user_agent or db_token.user_agent,
+            ip_address=ip_address or db_token.ip_address,
+            device_name=db_token.device_name,
+            device_type=db_token.device_type,
+            browser=db_token.browser,
+            operating_system=db_token.operating_system,
+        )
+        self.db.commit()
 
         event_bus.publish(
             "ACCESS_TOKEN_REFRESHED",
@@ -479,8 +541,8 @@ class AuthService:
         return {
             "success": True,
             "message": "Token refreshed successfully.",
-            "access_token": access_token,
-            "refresh_token": refresh_token,
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
             "token_type": "bearer",
             "user": user,
         }
@@ -563,9 +625,15 @@ class AuthService:
     # Logout
     # =====================================================
 
-    def logout(self, user_id: str):
+    def logout(self, user_id: str, refresh_token_str: str | None = None):
 
         user = self.get_current_user(user_id)
+        if refresh_token_str:
+            db_token = RefreshTokenService.get_token(self.db, refresh_token_str)
+            if db_token and str(db_token.user_id) == str(user.id):
+                RefreshTokenService.revoke_token(self.db, db_token)
+                self.db.commit()
+
         event_bus.publish(
             "USER_LOGOUT",
             email=user.email,

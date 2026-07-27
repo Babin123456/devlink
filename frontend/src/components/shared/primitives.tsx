@@ -201,3 +201,21 @@ export function Avatar({
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cn("animate-pulse rounded-xl bg-muted/70", className)} />;
 }
+
+export function NoMessagesEmptyState() {
+  return (
+    <EmptyState
+      title="No conversations yet"
+      desc="Start a conversation with other developers or project owners."
+    />
+  );
+}
+
+export function NoNotificationsEmptyState() {
+  return (
+    <EmptyState
+      title="No notifications"
+      desc="You're all caught up! Check back later for updates."
+    />
+  );
+}
