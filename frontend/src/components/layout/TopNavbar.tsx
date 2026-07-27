@@ -12,6 +12,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   BadgeCheck,
+  Loader2,
 } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -117,7 +118,6 @@ export function TopNavbar() {
           onFocus={() => {
             if (query.trim()) setShowSuggestions(true);
           }}
-          placeholder="Search developers, projects, posts, organizations…"
           className="w-full rounded-md border border-border bg-surface py-[7px] pl-9 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
         {showSuggestions && normalizedQuery && (
