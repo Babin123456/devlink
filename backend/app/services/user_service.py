@@ -14,7 +14,8 @@ from app.models.follower import Follower
 from app.models.project import Project
 from app.core.cache import cached
 from app.schemas.user import UserStats
-
+from app.models.user_report import UserReport
+from app.schemas.user_report import UserReportCreate
 
 class UserService:
     """
@@ -284,9 +285,43 @@ class UserService:
         db_user: User,
     ) -> User:
 
-        db_user.is_verified = True
+db_user.is_verified = True
 
         db.flush()
         db.refresh(db_user)
 
         return db_user
+
+    @staticmethod
+    def update_resume_url(
+        db: Session,
+        user: User,
+        resume_url: str,
+    ) -> User:
+        user.resume_url = resume_url
+
+        db.commit()
+        db.refresh(user)
+
+        return user
+
+    @staticmethod
+    def create_user_report(
+        db: Session,
+        reporter_id: uuid.UUID,
+        reported_id: uuid.UUID,
+        report: UserReportCreate,
+    ) -> UserReport:
+        db_report = UserReport(
+            reporter_id=reporter_id,
+            reported_id=reported_id,
+            reason=report.reason,
+            description=report.description,
+            status="pending",
+        )
+
+        db.add(db_report)
+        db.commit()
+        db.refresh(db_report)
+
+        return db_report
