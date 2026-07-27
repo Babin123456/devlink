@@ -205,7 +205,8 @@ function AIMatchCard({ builder }: { builder: Builder }) {
 
 function BuildersPage() {
   const childMatches = useChildMatches();
-  const { tab } = Route.useSearch();
+  const search = Route.useSearch() as { tab?: string };
+  const tab = search.tab;
   const navigate = useNavigate({ from: Route.fullPath });
   const [q, setQ] = useState("");
   const { data = [], isLoading } = useQuery({
@@ -261,7 +262,6 @@ function BuildersPage() {
           {tabs.map((t) => (
             <button
               key={t.k}
-              onClick={() => setTab(t.k)}
               type="button"
               onClick={() => navigate({ search: (prev) => ({ ...prev, tab: t.k }) })}
               className={cn(

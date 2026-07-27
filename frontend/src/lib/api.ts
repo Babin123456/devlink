@@ -198,6 +198,13 @@ export async function acceptApplication(id: UUID): Promise<ApplicationResponse> 
   });
 }
 
+export async function getProjectApplications(projectId: UUID): Promise<ApplicationResponse[]> {
+  return requestJson<ApplicationResponse[]>({
+    url: `/projects/${projectId}/applications`,
+    method: "GET",
+  });
+}
+
 export async function applyToFlare(
   flareId: UUID,
   projectId: UUID,

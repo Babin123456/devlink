@@ -77,7 +77,7 @@ export interface BackendActivity {
 }
 
 export const projectsService = {
-  list: () => withFallback(() => projectsApi.list(), seed.projects),
+  list: (params?: any) => withFallback(() => projectsApi.list(params), seed.projects),
   get: (id: string) =>
     withFallback(() => projectsApi.get(id), seed.projects.find((p) => p.id === id) ?? null),
   trending: () =>
@@ -159,12 +159,12 @@ export const issuesService = {
       ? issuesApi.get(projectId, issueId)
       : Promise.reject("Not implemented in mock"),
 
-  create: (projectId: string, body: unknown) =>
+  create: (projectId: string, body: any) =>
     isBackendConfigured()
       ? issuesApi.create(projectId, body)
       : Promise.reject("Not implemented in mock"),
 
-  update: (projectId: string, issueId: string, body: unknown) =>
+  update: (projectId: string, issueId: string, body: any) =>
     isBackendConfigured()
       ? issuesApi.update(projectId, issueId, body)
       : Promise.reject("Not implemented in mock"),
@@ -174,7 +174,7 @@ export const issuesService = {
       ? issuesApi.remove(projectId, issueId)
       : Promise.reject("Not implemented in mock"),
 
-  checkDuplicates: (projectId: string, body: unknown) =>
+  checkDuplicates: (projectId: string, body: any) =>
     isBackendConfigured()
       ? issuesApi.checkDuplicates(projectId, body)
       : Promise.reject("Not implemented in mock"),
@@ -226,6 +226,8 @@ export const searchService = {
         users: [],
         projects: [],
         skills: [],
+        organizations: [],
+        tags: [],
       },
     ), // In fallback we could just return empty or mock data, but we'll handle mock logic in the component for offline mode, or we can add it here.
 };

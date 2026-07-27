@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { projectsService } from "@/services";
 import { Card, TagChip, SectionHeader } from "@/components/shared/primitives";
@@ -268,17 +268,7 @@ function ProjectsPage() {
             ) : undefined
           }
         >
-          <ProjectFilters
-            filters={{
-              language,
-              experience,
-              remote,
-              paid,
-              openSource,
-              techStack,
-            }}
-            setFilters={handleSetFilters}
-          />
+          <ProjectFilters />
         </BottomSheet>
       </Card>
 
@@ -337,9 +327,9 @@ function ProjectsPage() {
                     {p.difficulty && (
                       <TagChip
                         className={cn(
-                          p.difficulty === "beginner"
+                          p.difficulty === "Beginner"
                             ? "border-success/30 bg-success/10 text-success"
-                            : p.difficulty === "intermediate"
+                            : p.difficulty === "Intermediate"
                               ? "border-warning/30 bg-warning/10 text-warning"
                               : "border-destructive/30 bg-destructive/10 text-destructive",
                         )}

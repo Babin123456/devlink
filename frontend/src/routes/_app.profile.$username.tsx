@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
-import { builders, currentUser, projects } from "@/mocks/seed";
+import { builders, currentUser, projects, type Builder } from "@/mocks/seed";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -34,6 +34,13 @@ export const Route = createFileRoute("/_app/profile/$username")({
   component: ProfilePage,
 });
 
+type ProfileSkill = {
+  name: string;
+  level?: string;
+  category?: string;
+  yearsOfExperience?: number;
+};
+
 type ProfileFormValues = {
   headline: string;
   bio: string;
@@ -66,12 +73,12 @@ function mapBuilderToFormValues(builder: Builder): ProfileFormValues {
     experienceLevel: builder.experienceLevel ?? "",
     company: builder.company ?? "",
     profileSkills: builder.profileSkills?.length
-      ? builder.profileSkills.map((skill) => ({
+      ? builder.profileSkills.map((skill: ProfileSkill) => ({
           ...skill,
           level: skill.level ?? "Intermediate",
           yearsOfExperience: skill.yearsOfExperience ?? 0,
         }))
-      : builder.skills.map((skill) => ({
+      : builder.skills.map((skill: string) => ({
           name: skill,
           level: "Intermediate",
           category: "general",
@@ -118,7 +125,6 @@ function ProfilePage() {
         handle: currentUser.handle,
         avatar: currentUser.avatar,
         bio: "Product engineer. Ships fast, sleeps sometimes.",
-        role: "Developer",
         role: "Full Stack Developer",
         id: currentUser.id,
       }

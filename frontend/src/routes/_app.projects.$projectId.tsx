@@ -20,7 +20,7 @@ import { builders, activity, currentUser } from "@/mocks/seed";
 import { Markdown } from "@/components/shared/Markdown";
 import { BackButton } from "@/components/shared/BackButton";
 import { ShareProjectButton } from "@/components/shared/ShareProjectButton";
-import { projectTagsApi, type TagSuggestion } from "@/api";
+import { projectTagsApi } from "@/api";
 import { toast } from "sonner";
 import { BookmarkToggleButton } from "@/components/shared/BookmarkToggleButton";
 import { addRecentlyViewedProject } from "@/lib/recentlyViewedProjects";

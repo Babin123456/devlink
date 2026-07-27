@@ -26,8 +26,6 @@ export const Route = createFileRoute("/_app/search")({
       { title: "Search — DevLink" },
       {
         name: "description",
-        content: "Global search across developers, projects, skills and flares.",
-        content: "Global search across developers, projects, posts and organizations.",
       },
     ],
   }),
@@ -163,18 +161,6 @@ function SearchPage() {
           )}
         </div>
       )}
-      {tab === "Skills" && (
-        <Card className="p-4">
-          <div className="flex flex-wrap gap-2">
-            {skillSet.map((s) => (
-              <TagChip key={s} className="text-[12px]">
-                {s}
-              </TagChip>
-            ))}
-          </div>
-        </Card>
-      )}
-
       {tab === "Posts" && (
         <div className="space-y-4">
           {posts.length === 0 ? (

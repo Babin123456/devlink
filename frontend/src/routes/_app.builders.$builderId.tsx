@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { buildersService } from "@/services";
 import { Card, TagChip, Avatar, EmptyState, Skeleton } from "@/components/shared/primitives";
@@ -15,6 +15,7 @@ import {
   GitFork,
   FolderOpen,
   Activity as ActivityIcon,
+  ArrowLeft,
 } from "lucide-react";
 import { BackButton } from "@/components/shared/BackButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

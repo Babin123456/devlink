@@ -182,7 +182,7 @@ export function TopNavbar() {
                           {project.icon}
                         </span>
 
-                        <span className="truncate font-medium">{project.name}</span>
+                        <span className="truncate font-medium">{project.title}</span>
                       </Link>
                     ))}
                   </div>
