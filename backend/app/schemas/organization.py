@@ -5,6 +5,8 @@ from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+# pyrefly: ignore [missing-import]
+from pydantic import BaseModel, ConfigDict
 
 from app.models.organization import OrganizationType
 
@@ -52,6 +54,23 @@ class OrganizationBase(BaseModel):
 # ==========================================================
 
 
+class OrganizationBase(BaseModel):
+    name: str
+    slug: str
+    description: Optional[str] = None
+    organization_type: OrganizationType = OrganizationType.STARTUP
+    website: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    logo_url: Optional[str] = None
+    banner_url: Optional[str] = None
+    location: Optional[str] = None
+    github_url: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    twitter_url: Optional[str] = None
+    hiring: bool = False
+
+
 class OrganizationCreate(OrganizationBase):
     pass
 
@@ -81,6 +100,17 @@ class OrganizationUpdate(BaseModel):
 # ==========================================================
 # Organization Response
 # ==========================================================
+    website: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    logo_url: Optional[str] = None
+    banner_url: Optional[str] = None
+    location: Optional[str] = None
+    github_url: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    twitter_url: Optional[str] = None
+    hiring: Optional[bool] = None
+    active: Optional[bool] = None
 
 
 class OrganizationResponse(OrganizationBase):
@@ -102,3 +132,11 @@ class OrganizationResponse(OrganizationBase):
 
     deleted_at: Optional[datetime] = None
     deleted_by_id: Optional[uuid.UUID] = None
+    owner_id: uuid.UUID
+    members_count: int
+    projects_count: int
+    followers_count: int
+    verified: bool
+    active: bool
+    created_at: datetime
+    updated_at: datetime

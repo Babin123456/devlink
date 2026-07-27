@@ -4,12 +4,17 @@ import uuid
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, selectinload
 
+from app.core.cache import cached
+from app.models.activity import ActivityType
 from app.models.organization import Organization
 from app.schemas.organization import (
     OrganizationCreate,
     OrganizationUpdate,
 )
+from app.services.activity_service import ActivityService
 
 
 class OrganizationService:
@@ -43,8 +48,31 @@ class OrganizationService:
         )
 
         db.add(db_organization)
-        db.commit()
+        db.flush()
         db.refresh(db_organization)
+
+        # Create OrganizationMember record for owner
+        from app.models.organization_member import OrganizationMember, OrgMemberRole
+
+        member = OrganizationMember(
+            organization_id=db_organization.id,
+            user_id=owner_id,
+            role=OrgMemberRole.OWNER,
+            is_active=True,
+        )
+        db.add(member)
+        db.commit()
+        ActivityService.record_activity(
+            db=db,
+            actor_id=owner_id,
+            activity_type=ActivityType.ORGANIZATION_CREATED,
+            title="Created organization",
+            description=db_organization.name,
+            target_id=db_organization.id,
+            target_type="organization",
+            icon="building-2",
+            color="primary",
+        )
 
         return db_organization
 
@@ -69,6 +97,7 @@ class OrganizationService:
         return db.get(Organization, organization_id)
 
     @staticmethod
+    @cached(ttl=300, key_prefix="org")
     def get_by_slug(
         db: Session,
         slug: str,
@@ -77,11 +106,16 @@ class OrganizationService:
         stmt = select(Organization).where(
             Organization.slug == slug,
             Organization.deleted_at.is_(None),
+        stmt = (
+            select(Organization)
+            .options(selectinload(Organization.owner))
+            .where(Organization.slug == slug)
         )
 
         return db.scalar(stmt)
 
     @staticmethod
+    @cached(ttl=300, key_prefix="org")
     def list_organizations(
         db: Session,
         skip: int = 0,
@@ -91,6 +125,7 @@ class OrganizationService:
         stmt = (
             select(Organization)
             .where(Organization.deleted_at.is_(None))
+            .options(selectinload(Organization.owner))
             .offset(skip)
             .limit(limit)
         )
@@ -106,6 +141,10 @@ class OrganizationService:
         stmt = select(Organization).where(
             Organization.owner_id == owner_id,
             Organization.deleted_at.is_(None),
+        stmt = (
+            select(Organization)
+            .options(selectinload(Organization.owner))
+            .where(Organization.owner_id == owner_id)
         )
 
         return list(db.scalars(stmt))
@@ -119,6 +158,10 @@ class OrganizationService:
         stmt = select(Organization).where(
             Organization.name.ilike(f"%{keyword}%"),
             Organization.deleted_at.is_(None),
+        stmt = (
+            select(Organization)
+            .options(selectinload(Organization.owner))
+            .where(Organization.name.ilike(f"%{keyword}%"))
         )
 
         return list(db.scalars(stmt))
@@ -135,7 +178,7 @@ class OrganizationService:
         for key, value in data.items():
             setattr(db_organization, key, value)
 
-        db.commit()
+        db.flush()
         db.refresh(db_organization)
 
         return db_organization
@@ -148,7 +191,7 @@ class OrganizationService:
 
         db_organization.verified = True
 
-        db.commit()
+        db.flush()
         db.refresh(db_organization)
 
         return db_organization
@@ -161,7 +204,7 @@ class OrganizationService:
 
         db_organization.hiring = True
 
-        db.commit()
+        db.flush()
         db.refresh(db_organization)
 
         return db_organization
@@ -174,7 +217,7 @@ class OrganizationService:
 
         db_organization.hiring = False
 
-        db.commit()
+        db.flush()
         db.refresh(db_organization)
 
         return db_organization
@@ -187,7 +230,7 @@ class OrganizationService:
 
         db_organization.active = False
 
-        db.commit()
+        db.flush()
         db.refresh(db_organization)
 
         return db_organization
@@ -200,7 +243,7 @@ class OrganizationService:
 
         db_organization.active = True
 
-        db.commit()
+        db.flush()
         db.refresh(db_organization)
 
         return db_organization
@@ -234,5 +277,11 @@ class OrganizationService:
         db_organization: Organization,
     ) -> None:
         """Permanently remove an organization from the database (admin only)."""
+        from app.models.organization_member import OrganizationMember
+
+        # Explicitly delete member rows first to avoid SQLAlchemy FK nullification
+        db.query(OrganizationMember).filter(
+            OrganizationMember.organization_id == db_organization.id
+        ).delete(synchronize_session=False)
         db.delete(db_organization)
-        db.commit()
+        db.flush()

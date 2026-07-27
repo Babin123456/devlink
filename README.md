@@ -1,5 +1,6 @@
 # DevLink
 
+
 <p align="center">
   <img src="docs/images/devlink-banner.jpeg" alt="DevLink Banner" width="400">
 </p>
@@ -42,28 +43,7 @@ participate in hackathons, and launch products together.
 
 ---
 
-# Table of Contents
 
-- Overview
-- Why DevLink?
-- Features
-- Architecture
-- Tech Stack
-- Project Structure
-- Screenshots
-- Getting Started
-- Environment Variables
-- Development Workflow
-- API Documentation
-- Roadmap
-- Contributing
-- ECSoc 2026
-- Security
-- Code of Conduct
-- License
-- Maintainers
-
----
 
 # Overview
 
@@ -578,8 +558,9 @@ Special thanks to:
 
 ## ⭐ If you like DevLink, consider giving the repository a star!
 
-Made with ❤️ by developers, for developers.
+Made by developers, for developers.
 
 Building the future of developer collaboration.
 
 </p>
+
