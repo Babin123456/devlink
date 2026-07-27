@@ -4,23 +4,34 @@ import { Avatar } from "@/components/shared/primitives";
 import { currentUser } from "@/mocks/seed";
 import { useSidebar } from "@/hooks/useSidebar";
 
-export function UserProfile() {
-  const { isCollapsed, closeMobile } = useSidebar();
+interface UserProfileProps {
+  /** When true, renders compact avatar-only view regardless of sidebar state */
+  forceCollapsed?: boolean;
+}
 
-  if (isCollapsed) {
+export function UserProfile({ forceCollapsed }: UserProfileProps) {
+  const { isCollapsed, closeMobile } = useSidebar();
+  const collapsed = forceCollapsed ?? isCollapsed;
+
+  if (collapsed) {
     return (
-      <div className="border-t border-sidebar-border px-2 py-3 flex flex-col items-center gap-4">
+      <div className="border-t border-sidebar-border px-2 py-3 flex flex-col items-center gap-3">
         <Link
           to="/profile/$username"
           params={{ username: currentUser.handle }}
           onClick={closeMobile}
-          className="rounded-full transition-transform hover:scale-105"
-          title="Profile"
+          className="rounded-full transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          title={currentUser.name}
+          aria-label={`View ${currentUser.name}'s profile`}
         >
           <Avatar src={currentUser.avatar} alt={currentUser.name} name={currentUser.name} size={36} />
         </Link>
-        <button title="Logout" className="text-muted-foreground hover:text-foreground">
-          <LogOut size={20} />
+        <button
+          title="Logout"
+          aria-label="Logout"
+          className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md p-1"
+        >
+          <LogOut size={18} />
         </button>
       </div>
     );
@@ -32,13 +43,11 @@ export function UserProfile() {
         to="/profile/$username"
         params={{ username: currentUser.handle }}
         onClick={closeMobile}
-        className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-sidebar-accent transition-colors"
+        className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <Avatar src={currentUser.avatar} alt={currentUser.name} name={currentUser.name} size={36} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-semibold text-foreground">
-            {currentUser.name}
-          </p>
+          <p className="truncate text-[13px] font-semibold text-foreground">{currentUser.name}</p>
           <p className="truncate text-[12px] text-muted-foreground">@{currentUser.handle}</p>
         </div>
         {currentUser.premium && (
@@ -47,7 +56,7 @@ export function UserProfile() {
           </span>
         )}
       </Link>
-      <button className="mt-1 flex w-full items-center gap-3 rounded-md px-2 py-2 text-[13px] text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors">
+      <button className="mt-1 flex w-full items-center gap-3 rounded-md px-2 py-2 text-[13px] text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
         <LogOut size={16} /> Logout
       </button>
     </div>

@@ -177,4 +177,28 @@
     background: var(--primary-soft);
     color: var(--foreground);
   }
+  /* Prevent horizontal scroll globally */
+  html {
+    overflow-x: hidden;
+  }
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
 }
+
+/* ─── Safe-area utility for mobile bottom navigation ─────────────── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ─── Responsive utility: hide scrollbar universally ─────────────── */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+

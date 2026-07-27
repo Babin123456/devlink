@@ -12,6 +12,7 @@ import {
   Rss,
   PanelLeftClose,
   PanelLeftOpen,
+  Loader2,
 } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -86,10 +87,11 @@ export function TopNavbar() {
 
   return (
     <header className="sticky top-0 z-20 flex h-[72px] items-center gap-3 border-b border-border bg-surface/80 px-4 backdrop-blur">
+      {/* Hamburger: visible on tablet only (md to lg). Mobile uses BottomNavigation instead. */}
       <button
         onClick={toggleMobile}
-        aria-label="Open mobile menu"
-        className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-border text-muted-foreground hover:bg-muted lg:hidden"
+        aria-label="Open navigation menu"
+        className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-border text-muted-foreground hover:bg-muted md:grid lg:hidden hidden"
       >
         <Menu size={16} />
       </button>
@@ -255,7 +257,8 @@ export function TopNavbar() {
               <div className="px-3 py-4 text-center text-[12px] text-muted-foreground flex justify-center items-center gap-2">
                 {isLoading ? (
                   <>
-                    <Loader2 className="animate-spin" size={14} /> Loading...
+                    <Loader2 className="animate-spin" size={14} />
+                    Loading...
                   </>
                 ) : (
                   `No suggestions found for "${query}"`
