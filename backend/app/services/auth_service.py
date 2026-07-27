@@ -28,7 +28,8 @@ from app.core.security import (
 from app.models.user import User
 from app.models.password_history import PasswordHistory
 from app.models.refresh_token import RefreshToken
-from app.services.refresh_token_service import RefreshTokenServicefrom app.schemas.auth import (
+from app.services.refresh_token_service import RefreshTokenService
+from app.schemas.auth import (
     LoginRequest,
     RegisterRequest,
 )
@@ -204,11 +205,10 @@ class AuthService:
             str(user.id),
             {
                 "username": user.username,
-                "email": user.email,
             },
         )
 
-refresh_token = create_refresh_token(str(user.id))
+        refresh_token = create_refresh_token(str(user.id))
 
         RefreshTokenService.create_token(
             self.db,
@@ -227,7 +227,8 @@ refresh_token = create_refresh_token(str(user.id))
         )
         return {
             "success": True,
-            "message": "Login successful.",            "access_token": access_token,
+            "message": "Login successful.",
+            "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
             "user": user,
@@ -407,7 +408,8 @@ refresh_token = create_refresh_token(str(user.id))
                 "email": user.email,
             },
         )
-refresh_token = create_refresh_token(str(user.id))
+
+        refresh_token = create_refresh_token(str(user.id))
 
         RefreshTokenService.create_token(
             self.db,
@@ -427,7 +429,8 @@ refresh_token = create_refresh_token(str(user.id))
 
         return {
             "success": True,
-            "message": "GitHub login successful.",            "access_token": access_token,
+            "message": "GitHub login successful.",
+            "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
             "user": user,
@@ -481,7 +484,7 @@ refresh_token = create_refresh_token(str(user.id))
     # Refresh Token
     # =====================================================
 
-def refresh_token(self, old_refresh_token: str):
+    def refresh_token(self, old_refresh_token: str):
 
         # 1. Look up the token in the database (this is our "blacklist" check —
         #    if it's not there, or it's revoked, it's not usable anymore).
@@ -538,6 +541,7 @@ def refresh_token(self, old_refresh_token: str):
             "token_type": "bearer",
             "user": user,
         }
+
     # =====================================================
     # Change Password
     # =====================================================
@@ -616,7 +620,7 @@ def refresh_token(self, old_refresh_token: str):
     # Logout
     # =====================================================
 
-def logout(self, user_id: str, refresh_token: str | None = None):
+    def logout(self, user_id: str, refresh_token: str | None = None):
 
         user = self.get_current_user(user_id)
 
@@ -655,6 +659,7 @@ def logout(self, user_id: str, refresh_token: str | None = None):
             "success": True,
             "message": "Logged out from all devices.",
         }
+
     # =====================================================
     # Forgot Password
     # =====================================================

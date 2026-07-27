@@ -34,7 +34,8 @@ from app.schemas.user_report import (
     UserReportCreate,
     UserReportResponse,
 )
-from app.core.security import hash_passwordfrom app.services.user_service import UserService
+from app.core.security import hash_password
+from app.services.user_service import UserService
 from app.core.cache import cached
 from app.utils.validators import validate_username
 
@@ -263,10 +264,11 @@ async def upload_resume(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-resume_url = save_resume_upload(contents, file.filename, current_user.id)
+    resume_url = save_resume_upload(contents, file.filename, current_user.id)
     full_resume_url = str(request.base_url).rstrip("/") + resume_url
 
     return UserService.update_resume_url(db, current_user, full_resume_url)
+
 
 @router.delete(
     "/me",
@@ -433,7 +435,7 @@ def report_user(
     target_user = UserService.get_user(db, user_id)
     if target_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-if current_user.id == target_user.id:
+    if current_user.id == target_user.id:
         raise HTTPException(status_code=400, detail="You cannot report yourself")
 
     return UserService.create_user_report(db, current_user.id, target_user.id, report)
