@@ -6,7 +6,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Search, X, Building2, Rss } from "lucide-react";
 
-const tabs = ["Developers", "Projects", "Posts", "Organizations"] as const;
+const tabs = ["Developers", "Projects", "Skills", "Posts", "Organizations"] as const;
 type Tab = (typeof tabs)[number];
 
 const organizations = [
@@ -26,7 +26,6 @@ export const Route = createFileRoute("/_app/search")({
       { title: "Search — DevLink" },
       {
         name: "description",
-        content: "Global search across developers, projects, skills and flares.",
         content: "Global search across developers, projects, posts and organizations.",
       },
     ],
