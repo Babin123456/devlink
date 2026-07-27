@@ -29,7 +29,6 @@ export interface DifficultyEstimateResponse {
   reasoning: string;
 }
 
-
 export interface DuplicateSuggestion {
   id: string;
   source_issue_id: string;

@@ -13,20 +13,21 @@ export interface SidebarItemProps {
 export function SidebarItem({ label, to, icon, badge }: SidebarItemProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { isCollapsed, closeMobile } = useSidebar();
-  
+
   const active = pathname === to || pathname.startsWith(to.split("?")[0] + "/");
 
   return (
     <li title={isCollapsed ? label : undefined}>
       <Link
         to={to.split("?")[0]}
+        preload="intent"
         onClick={closeMobile}
         className={cn(
           "mt-1 flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary",
           active
             ? "bg-primary-soft font-semibold text-primary"
             : "text-foreground/80 hover:bg-sidebar-accent hover:text-foreground focus:bg-sidebar-accent",
-          isCollapsed ? "justify-center px-0 mx-2" : ""
+          isCollapsed ? "justify-center px-0 mx-2" : "",
         )}
       >
         <span className={cn("shrink-0", active ? "text-primary" : "text-muted-foreground")}>

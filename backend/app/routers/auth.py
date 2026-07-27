@@ -257,7 +257,9 @@ from app.schemas.auth import GitHubLoginRequest  # noqa: E402
     response_model=AuthResponse,
     summary="GitHub OAuth Login",
 )
+@limiter.limit(LOGIN_LIMIT)
 async def github_login(
+    request: Request,
     payload: GitHubLoginRequest,
     db: Session = Depends(get_database),
 ):
@@ -362,8 +364,6 @@ def me(
 # ==========================================================
 # Forgot Password
 # ==========================================================
-
-
 from app.schemas.auth import (  # noqa: E402
     ChangePasswordRequest,
     ForgotPasswordResponse,
@@ -441,29 +441,9 @@ def reset_password(
     payload: ResetPasswordRequest,
     db: Session = Depends(get_database),
 ):
-    """
-    NOTE
-
-    Currently this endpoint assumes the reset token
-    contains the user's UUID.
-
-    Later we'll replace this with secure signed reset
-    tokens stored in Redis.
-    """
-
-    try:
-        token_payload = decode_token(payload.token)
-
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid reset token.",
-        )
-
     auth_service = AuthService(db)
-
     return auth_service.reset_password(
-        user_id=token_payload["sub"],
+        token=payload.token,
         new_password=payload.new_password,
     )
 

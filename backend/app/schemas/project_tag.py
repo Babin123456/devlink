@@ -29,3 +29,12 @@ class ProjectTagResponse(BaseModel):
         max_length=10,
         description="5-10 suggested tags with confidence scores",
     )
+
+
+class PredefinedTagsResponse(BaseModel):
+    """Response containing predefined project tags / categories."""
+
+    tags: list[str] = Field(
+        ...,
+        description="List of predefined project categories and tags",
+    )

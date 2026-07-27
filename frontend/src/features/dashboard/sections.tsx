@@ -228,7 +228,6 @@ export function AIRecommendations() {
             <Avatar
               src="https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Rahul"
               alt="Rahul"
-              size={40}
               size={42}
             />
             <div className="min-w-0 flex-1">
@@ -300,42 +299,36 @@ export function QuickActions() {
     {
       icon: FolderPlus,
       label: "New Project",
-      tint: "bg-info/10 text-info",
       tint: "bg-blue-500/10 text-blue-500",
       to: "/projects" as const,
     },
     {
       icon: Flame,
       label: "Create Flare",
-      tint: "bg-warning/10 text-warning",
       tint: "bg-amber-500/10 text-amber-500",
       to: "/flares" as const,
     },
     {
       icon: Users2,
       label: "Find Builder",
-      tint: "bg-success/10 text-success",
       tint: "bg-emerald-500/10 text-emerald-500",
       to: "/builders" as const,
     },
     {
       icon: Trophy,
       label: "Start Hackathon",
-      tint: "bg-primary-soft text-primary",
       tint: "bg-cyan-500/10 text-cyan-500",
       to: "/hackathons" as const,
     },
     {
       icon: FileText,
       label: "AI Description",
-      tint: "bg-destructive/10 text-destructive",
       tint: "bg-rose-500/10 text-rose-500",
       to: "/dashboard" as const,
     },
     {
       icon: BarChart3,
       label: "View Analytics",
-      tint: "bg-info/10 text-info",
       tint: "bg-blue-500/10 text-blue-500",
       to: "/analytics" as const,
     },

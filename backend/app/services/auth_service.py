@@ -1,6 +1,11 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
+
+from app.services.email_service import EmailService
+from app.core.config import settings
 
 # pyrefly: ignore [missing-import]
 from fastapi import HTTPException, status
@@ -17,14 +22,17 @@ from app.core.security import (
     create_refresh_token,
     hash_password,
     verify_password,
+    _create_token,
+    decode_token,
 )
 from app.models.user import User
 from app.models.password_history import PasswordHistory
+from app.models.refresh_token import RefreshToken
+from app.services.refresh_token_service import RefreshTokenService
 from app.schemas.auth import (
     LoginRequest,
     RegisterRequest,
 )
-from app.services.refresh_token_service import RefreshTokenService
 from app.utils.validators import (
     validate_email,
     validate_name,
@@ -408,6 +416,15 @@ class AuthService:
             },
         )
         refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=refresh_token,
+            expires_at=expires_at,
+        )
+        self.db.commit()
 
         event_bus.publish(
             "USER_LOGIN",
@@ -644,6 +661,27 @@ class AuthService:
             "message": "Logged out successfully.",
         }
 
+    def logout_all_devices(self, user_id: str):
+        """
+        Revoke every refresh token belonging to this user
+        (logs the user out everywhere).
+        """
+
+        user = self.get_current_user(user_id)
+
+        RefreshTokenService.revoke_all_tokens(self.db, user.id)
+
+        event_bus.publish(
+            "USER_LOGOUT",
+            email=user.email,
+            user_id=str(user.id),
+        )
+
+        return {
+            "success": True,
+            "message": "Logged out from all devices.",
+        }
+
     # =====================================================
     # Forgot Password
     # =====================================================
@@ -658,9 +696,23 @@ class AuthService:
                 "message": ("If the account exists, a reset email has been sent."),
             }
 
-        # TODO:
-        # Generate reset token
-        # Send email
+        pwd_hash_frag = user.password_hash[-10:] if user.password_hash else "nohash"
+
+        token = _create_token(
+            subject=str(user.id),
+            expires_delta=timedelta(minutes=15),
+            token_type="reset_password",
+            extra={"hash_frag": pwd_hash_frag},
+        )
+
+        reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+
+        EmailService.send_notification_email(
+            to_email=user.email,
+            title="Reset Your Password",
+            message="You requested a password reset. This link will expire in 15 minutes.",
+            action_url=reset_url,
+        )
 
         event_bus.publish(
             "PASSWORD_RESET_REQUESTED",
@@ -678,13 +730,31 @@ class AuthService:
 
     def reset_password(
         self,
-        user_id: str,
+        token: str,
         new_password: str,
     ):
+        try:
+            payload = decode_token(token)
+            if payload.get("type") != "reset_password":
+                raise ValueError("Invalid token type")
+            user_id = payload.get("sub")
+            hash_frag = payload.get("hash_frag")
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired reset token.",
+            )
 
         validate_password(new_password)
 
         user = self.get_current_user(user_id)
+
+        expected_frag = user.password_hash[-10:] if user.password_hash else "nohash"
+        if hash_frag != expected_frag:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This reset token has already been used.",
+            )
 
         if self._is_password_reused(user, new_password):
             raise HTTPException(
