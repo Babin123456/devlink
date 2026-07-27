@@ -32,15 +32,23 @@ export const Route = createFileRoute("/_app/bookmarks")({
   component: BookmarksPage,
 });
 
+type Developer = {
+  id: string;
+  avatar_url?: string;
+  name?: string;
+  role?: string;
+  location?: string;
+  experience?: string;
+  skills?: string[];
+};
+
 function BookmarksPage() {
   const [activeCollectionId, setActiveCollectionId] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<BookmarkCollection | null>(null);
 
-  const [bookmarkedDevs, setBookmarkedDevs] = useState<
-    (Record<string, unknown> & { id: string })[]
-  >([]);
-  const toggleBookmark = useCallback((dev: Record<string, unknown> & { id: string }) => {
+  const [bookmarkedDevs, setBookmarkedDevs] = useState<Developer[]>([]);
+  const toggleBookmark = useCallback((dev: Developer) => {
     setBookmarkedDevs((prev) =>
       prev.some((d) => d.id === dev.id) ? prev.filter((d) => d.id !== dev.id) : [...prev, dev],
     );

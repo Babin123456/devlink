@@ -1,7 +1,6 @@
 import { cn, getInitials } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useCardAnimation } from "@/lib/animations";
 
@@ -182,13 +181,6 @@ export function Avatar({
           {getInitials(name ?? alt)}
         </div>
       )}
-      <img
-        src={src}
-        alt={alt}
-        width={size}
-        height={size}
-        className="h-full w-full rounded-full border border-border/80 bg-muted object-cover shadow-xs transition-transform duration-200 hover:scale-105"
-      />
       {online !== undefined && (
         <span className="absolute -bottom-0.5 -right-0.5">
           <StatusDot online={online} />

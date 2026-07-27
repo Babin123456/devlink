@@ -61,6 +61,10 @@ async function fetchJson<T>(signal: AbortSignal, url: string): Promise<T> {
   return response.json();
 }
 
+type ApiConfig = {
+  baseUrl: string;
+};
+
 function getApiConfig(): ApiConfig {
   const baseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
 
@@ -103,7 +107,7 @@ async function requestJson<TResponse, TBody extends JsonValue | undefined = unde
 
     throw new Error(message);
   }
-  return (await response.json()) as T;
+  return (await res.json()) as TResponse;
 }
 
 export async function searchProjects(
