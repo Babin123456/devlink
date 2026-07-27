@@ -30,8 +30,8 @@ function ForgotPassword() {
         await authApi.forgotPassword(email);
         setSent(true);
         toast.success("Reset link sent");
-      } catch (err: any) {
-        toast.error(err.message || "Failed to send reset link");
+      } catch (err: unknown) {
+        toast.error((err as Error).message || "Failed to send reset link");
       } finally {
         setSubmitting(false);
       }

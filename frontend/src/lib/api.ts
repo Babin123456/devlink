@@ -210,7 +210,7 @@ export async function applyToFlare(
   projectId: UUID,
   payload: Omit<ApplicationCreatePayload, "project_id" | "flare_id">,
 ): Promise<ApplicationResponse> {
-  return requestJson<ApplicationResponse, any>({
+  return requestJson<ApplicationResponse, Record<string, unknown>>({
     url: `/applications`,
     method: "POST",
     body: {

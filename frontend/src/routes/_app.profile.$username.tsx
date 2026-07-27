@@ -99,7 +99,7 @@ function buildUpdatedBuilder(builder: Builder, values: ProfileFormValues): Build
     portfolioUrl: values.portfolioUrl || undefined,
     githubUrl: values.githubUrl || undefined,
     linkedinUrl: values.linkedinUrl || undefined,
-    role: (values.role as any) || "Developer",
+    role: (values.role as string) || "Developer",
     experienceLevel: values.experienceLevel || undefined,
     company: values.company || undefined,
     profileSkills: values.profileSkills.map((skill) => ({
