@@ -7,12 +7,12 @@ import { RightPanel } from "./RightPanel";
 
 export function DashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  
+
   return (
     <div className="flex min-h-screen w-full bg-background overflow-hidden">
       <Sidebar />
       <MobileSidebar />
-      
+
       <div className="flex min-w-0 flex-1 flex-col relative h-screen">
         <TopNavbar />
         <main className="flex-1 overflow-y-auto">
@@ -30,7 +30,7 @@ export function DashboardLayout() {
           </AnimatePresence>
         </main>
       </div>
-      
+
       <RightPanel />
     </div>
   );

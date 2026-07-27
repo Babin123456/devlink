@@ -25,7 +25,11 @@ class ActivityBase(BaseModel):
     description: Optional[str] = None
     target_id: Optional[uuid.UUID] = None
     target_type: Optional[str] = None
-    meta: Dict[str, Any] = Field(default_factory=dict, validation_alias=AliasChoices("meta", "metadata"), serialization_alias="metadata")
+    meta: Dict[str, Any] = Field(
+        default_factory=dict,
+        validation_alias=AliasChoices("meta", "metadata"),
+        serialization_alias="metadata",
+    )
     icon: Optional[str] = None
     color: Optional[str] = None
 
@@ -39,7 +43,11 @@ class ActivityUpdate(BaseModel):
     description: Optional[str] = None
     icon: Optional[str] = None
     color: Optional[str] = None
-    meta: Optional[Dict[str, Any]] = Field(None, validation_alias=AliasChoices("meta", "metadata"), serialization_alias="metadata")
+    meta: Optional[Dict[str, Any]] = Field(
+        None,
+        validation_alias=AliasChoices("meta", "metadata"),
+        serialization_alias="metadata",
+    )
 
 
 class ActivityResponse(ActivityBase):

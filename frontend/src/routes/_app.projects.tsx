@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { projectsService } from "@/services";
 import { Card, TagChip, SectionHeader } from "@/components/shared/primitives";
@@ -28,17 +28,17 @@ export const Route = createFileRoute("/_app/projects")({
   component: ProjectsPage,
 });
 
-
-
 function ProjectsPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const search = useRouterState({ select: (state) => state.location.search as Record<string, unknown> });
+  const search = useRouterState({
+    select: (state) => state.location.search as Record<string, unknown>,
+  });
   const navigate = Route.useNavigate();
   const page = Number(search?.page) || 1;
   const ITEMS_PER_PAGE = 6;
   const [createOpen, setCreateOpen] = useState(false);
   const [q, setQ] = useState("");
-  
+
   // Status filter state (keep for now as it's separate from ProjectFilters component)
   const [statusFilter, setStatusFilter] = useState<
     "all" | "recruiting" | "in-progress" | "completed" | "archived"
@@ -60,14 +60,27 @@ function ProjectsPage() {
 
   const { data = [], isLoading } = useQuery({
     queryKey: ["projects", language, experience, remote, paid, openSource, techStack],
-    queryFn: () => projectsService.list({ 
-      language: language || undefined,
-      experience: experience || undefined,
-      remote: remote ? (remote.toLowerCase() === "yes" || remote.toLowerCase() === "true" ? "true" : "false") : undefined,
-      paid: paid ? (paid.toLowerCase() === "paid" || paid.toLowerCase() === "true" ? "true" : "false") : undefined,
-      opensource: openSource ? (openSource.toLowerCase() === "yes" || openSource.toLowerCase() === "true" ? "true" : "false") : undefined,
-      tech: techStack || undefined,
-    }),
+    queryFn: () =>
+      projectsService.list({
+        language: language || undefined,
+        experience: experience || undefined,
+        remote: remote
+          ? remote.toLowerCase() === "yes" || remote.toLowerCase() === "true"
+            ? "true"
+            : "false"
+          : undefined,
+        paid: paid
+          ? paid.toLowerCase() === "paid" || paid.toLowerCase() === "true"
+            ? "true"
+            : "false"
+          : undefined,
+        opensource: openSource
+          ? openSource.toLowerCase() === "yes" || openSource.toLowerCase() === "true"
+            ? "true"
+            : "false"
+          : undefined,
+        tech: techStack || undefined,
+      }),
   });
 
   const recentlyViewed = useMemo(
@@ -103,9 +116,16 @@ function ProjectsPage() {
     navigate({ search: { page: 1 } });
   }
 
-  const handleSetFilters = (newFilters: { language: string; experience: string; remote: string; paid: string; openSource: string; techStack: string }) => {
+  const handleSetFilters = (newFilters: {
+    language: string;
+    experience: string;
+    remote: string;
+    paid: string;
+    openSource: string;
+    techStack: string;
+  }) => {
     navigate({
-      search: (prev: any) => ({
+      search: (prev: Record<string, unknown>) => ({
         ...prev,
         page: 1,
         language: newFilters.language || undefined,
@@ -256,17 +276,7 @@ function ProjectsPage() {
             ) : undefined
           }
         >
-          <ProjectFilters 
-            filters={{
-              language,
-              experience,
-              remote,
-              paid,
-              openSource,
-              techStack,
-            }}
-            setFilters={handleSetFilters}
-          />
+          <ProjectFilters />
         </BottomSheet>
       </Card>
 
@@ -325,9 +335,9 @@ function ProjectsPage() {
                     {p.difficulty && (
                       <TagChip
                         className={cn(
-                          p.difficulty === "beginner"
+                          p.difficulty === "Beginner"
                             ? "border-success/30 bg-success/10 text-success"
-                            : p.difficulty === "intermediate"
+                            : p.difficulty === "Intermediate"
                               ? "border-warning/30 bg-warning/10 text-warning"
                               : "border-destructive/30 bg-destructive/10 text-destructive",
                         )}
@@ -390,10 +400,7 @@ function ProjectsPage() {
                   </PaginationItem>
                   {Array.from({ length: totalPages }).map((_, i) => (
                     <PaginationItem key={i}>
-                      <PaginationLink
-                        href={`/projects?page=${i + 1}`}
-                        isActive={page === i + 1}
-                      >
+                      <PaginationLink href={`/projects?page=${i + 1}`} isActive={page === i + 1}>
                         {i + 1}
                       </PaginationLink>
                     </PaginationItem>

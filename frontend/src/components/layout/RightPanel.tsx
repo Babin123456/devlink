@@ -4,7 +4,6 @@ export function RightPanel() {
   return (
     <aside className="sticky top-0 h-screen hidden xl:flex flex-col border-l border-border bg-surface w-[320px] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       <div className="p-5 flex flex-col gap-6">
-        
         {/* Workspace Status */}
         <section>
           <h3 className="text-[13px] font-semibold tracking-tight text-muted-foreground uppercase mb-3">
@@ -60,14 +59,18 @@ export function RightPanel() {
             <div className="flex gap-3">
               <div className="h-2 w-2 mt-1.5 rounded-full bg-primary shrink-0" />
               <div>
-                <p className="text-[13px] text-foreground">You starred <strong>devlink-ui</strong></p>
+                <p className="text-[13px] text-foreground">
+                  You starred <strong>devlink-ui</strong>
+                </p>
                 <p className="text-[11px] text-muted-foreground">2 hours ago</p>
               </div>
             </div>
             <div className="flex gap-3">
               <div className="h-2 w-2 mt-1.5 rounded-full bg-muted-foreground shrink-0" />
               <div>
-                <p className="text-[13px] text-foreground"><strong>Alex</strong> commented on your flare</p>
+                <p className="text-[13px] text-foreground">
+                  <strong>Alex</strong> commented on your flare
+                </p>
                 <p className="text-[11px] text-muted-foreground">5 hours ago</p>
               </div>
             </div>

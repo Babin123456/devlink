@@ -26,8 +26,6 @@ export const Route = createFileRoute("/_app/search")({
       { title: "Search — DevLink" },
       {
         name: "description",
-        content: "Global search across developers, projects, skills and flares.",
-        content: "Global search across developers, projects, posts and organizations.",
       },
     ],
   }),
@@ -50,6 +48,8 @@ function SearchPage() {
   const fls = useMemo(
     () => flares.filter((f) => f.content.toLowerCase().includes(q.toLowerCase())),
     [q],
+  const skillSet = Array.from(new Set(builders.flatMap((b) => b.skills))).filter((s) =>
+    s.toLowerCase().includes(q.toLowerCase()),
   );
 
   const devs = useMemo(
@@ -78,7 +78,10 @@ function SearchPage() {
   return (
     <div className="space-y-4">
       <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Search
+          size={16}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+        />
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -175,18 +178,6 @@ function SearchPage() {
           )}
         </div>
       )}
-      {tab === "Skills" && (
-        <Card className="p-4">
-          <div className="flex flex-wrap gap-2">
-            {skillSet.map((s) => (
-              <TagChip key={s} className="text-[12px]">
-                {s}
-              </TagChip>
-            ))}
-          </div>
-        </Card>
-      )}
-
       {tab === "Posts" && (
         <div className="space-y-4">
           {posts.length === 0 ? (
