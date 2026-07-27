@@ -34,7 +34,8 @@ from app.schemas.user_report import (
     UserReportCreate,
     UserReportResponse,
 )
-from app.core.security import hash_passwordfrom app.services.user_service import UserService
+from app.core.security import hash_password
+from app.services.user_service import UserService
 from app.core.cache import cached
 from app.utils.validators import validate_username
 
@@ -159,6 +160,10 @@ def get_user_profile_completion(
     return UserService.get_profile_completion(db, user)
 
 
+from app.dependencies import get_database, get_current_user, get_optional_current_user
+from app.services.block_service import BlockService
+
+
 @router.get(
     "/{user_id}",
     response_model=UserResponse,
@@ -170,6 +175,7 @@ def get_user(
         None, description="Online threshold in seconds"
     ),
     db: Session = Depends(get_database),
+    current_user: User | None = Depends(get_optional_current_user),
 ):
 
     user = UserService.get_user(
@@ -182,6 +188,18 @@ def get_user(
             status_code=404,
             detail="User not found",
         )
+
+    # Check private profile and blocking restrictions
+    if user.is_private:
+        if not current_user or (
+            current_user.id != user_id
+            and BlockService.is_blocked(db, user_id, current_user.id)
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to view this private profile.",
+            )
+
     if online_threshold is not None:
         user._online_threshold = online_threshold
     return user
@@ -263,10 +281,11 @@ async def upload_resume(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-resume_url = save_resume_upload(contents, file.filename, current_user.id)
+    resume_url = save_resume_upload(contents, file.filename, current_user.id)
     full_resume_url = str(request.base_url).rstrip("/") + resume_url
 
     return UserService.update_resume_url(db, current_user, full_resume_url)
+
 
 @router.delete(
     "/me",
@@ -433,7 +452,7 @@ def report_user(
     target_user = UserService.get_user(db, user_id)
     if target_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-if current_user.id == target_user.id:
+    if current_user.id == target_user.id:
         raise HTTPException(status_code=400, detail="You cannot report yourself")
 
     return UserService.create_user_report(db, current_user.id, target_user.id, report)
