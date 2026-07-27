@@ -1,4 +1,3 @@
-
 import {
   Bell,
   MessageSquare,
@@ -56,7 +55,6 @@ export function TopNavbar() {
   const developerSuggestions = searchResults?.users || [];
   const projectSuggestions = searchResults?.projects || [];
   const skillSuggestions = searchResults?.skills?.map((s) => s.name) || [];
-
 
   const postSuggestions = normalizedQuery
     ? flares
@@ -144,7 +142,11 @@ export function TopNavbar() {
                         className="flex items-center gap-2 rounded-md px-2 py-2 text-[13px] text-foreground hover:bg-muted"
                       >
                         {builder.profile_image ? (
-                          <img src={builder.profile_image} alt="" className="h-7 w-7 rounded-full" />
+                          <img
+                            src={builder.profile_image}
+                            alt=""
+                            className="h-7 w-7 rounded-full"
+                          />
                         ) : (
                           <div className="h-7 w-7 rounded-full bg-muted" />
                         )}

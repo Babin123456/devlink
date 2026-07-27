@@ -17,7 +17,12 @@ export function UserProfile() {
           className="rounded-full transition-transform hover:scale-105"
           title="Profile"
         >
-          <Avatar src={currentUser.avatar} alt={currentUser.name} name={currentUser.name} size={36} />
+          <Avatar
+            src={currentUser.avatar}
+            alt={currentUser.name}
+            name={currentUser.name}
+            size={36}
+          />
         </Link>
         <button title="Logout" className="text-muted-foreground hover:text-foreground">
           <LogOut size={20} />

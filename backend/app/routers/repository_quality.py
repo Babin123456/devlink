@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """
 API router for the AI Repository Quality Analyzer.
 """

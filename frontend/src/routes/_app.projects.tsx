@@ -28,17 +28,17 @@ export const Route = createFileRoute("/_app/projects")({
   component: ProjectsPage,
 });
 
-
-
 function ProjectsPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const search = useRouterState({ select: (state) => state.location.search as Record<string, unknown> });
+  const search = useRouterState({
+    select: (state) => state.location.search as Record<string, unknown>,
+  });
   const navigate = Route.useNavigate();
   const page = Number(search?.page) || 1;
   const ITEMS_PER_PAGE = 6;
   const [createOpen, setCreateOpen] = useState(false);
   const [q, setQ] = useState("");
-  
+
   // Status filter state (keep for now as it's separate from ProjectFilters component)
   const [statusFilter, setStatusFilter] = useState<
     "all" | "recruiting" | "in-progress" | "completed" | "archived"
@@ -60,21 +60,36 @@ function ProjectsPage() {
 
   const { data = [], isLoading } = useQuery({
     queryKey: ["projects", language, experience, remote, paid, openSource, techStack],
-    queryFn: () => projectsService.list({ 
-      language: language || undefined,
-      experience: experience || undefined,
-      remote: remote ? (remote.toLowerCase() === "yes" || remote.toLowerCase() === "true" ? "true" : "false") : undefined,
-      paid: paid ? (paid.toLowerCase() === "paid" || paid.toLowerCase() === "true" ? "true" : "false") : undefined,
-      opensource: openSource ? (openSource.toLowerCase() === "yes" || openSource.toLowerCase() === "true" ? "true" : "false") : undefined,
-      tech: techStack || undefined,
-    }),
+    queryFn: () =>
+      projectsService.list({
+        language: language || undefined,
+        experience: experience || undefined,
+        remote: remote
+          ? remote.toLowerCase() === "yes" || remote.toLowerCase() === "true"
+            ? "true"
+            : "false"
+          : undefined,
+        paid: paid
+          ? paid.toLowerCase() === "paid" || paid.toLowerCase() === "true"
+            ? "true"
+            : "false"
+          : undefined,
+        opensource: openSource
+          ? openSource.toLowerCase() === "yes" || openSource.toLowerCase() === "true"
+            ? "true"
+            : "false"
+          : undefined,
+        tech: techStack || undefined,
+      }),
   });
 
   const recentlyViewed = recentProjectIds
     .map((id) => data.find((project) => project.id === id))
     .filter((project): project is NonNullable<typeof project> => Boolean(project));
 
-  const chipFilterCount = [language, experience, remote, paid, openSource, techStack].filter(f => f !== "").length;
+  const chipFilterCount = [language, experience, remote, paid, openSource, techStack].filter(
+    (f) => f !== "",
+  ).length;
   const hasActiveFilters = q !== "" || statusFilter !== "all" || chipFilterCount > 0;
 
   if (pathname !== "/projects" && pathname !== "/projects/") {
@@ -87,7 +102,14 @@ function ProjectsPage() {
     navigate({ search: { page: 1 } });
   }
 
-  const handleSetFilters = (newFilters: { language: string; experience: string; remote: string; paid: string; openSource: string; techStack: string }) => {
+  const handleSetFilters = (newFilters: {
+    language: string;
+    experience: string;
+    remote: string;
+    paid: string;
+    openSource: string;
+    techStack: string;
+  }) => {
     navigate({
       search: (prev: any) => ({
         ...prev,
@@ -246,7 +268,7 @@ function ProjectsPage() {
             ) : undefined
           }
         >
-          <ProjectFilters 
+          <ProjectFilters
             filters={{
               language,
               experience,
@@ -380,10 +402,7 @@ function ProjectsPage() {
                   </PaginationItem>
                   {Array.from({ length: totalPages }).map((_, i) => (
                     <PaginationItem key={i}>
-                      <PaginationLink
-                        href={`/projects?page=${i + 1}`}
-                        isActive={page === i + 1}
-                      >
+                      <PaginationLink href={`/projects?page=${i + 1}`} isActive={page === i + 1}>
                         {i + 1}
                       </PaginationLink>
                     </PaginationItem>

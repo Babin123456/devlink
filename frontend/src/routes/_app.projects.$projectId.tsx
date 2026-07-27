@@ -2,7 +2,18 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { projectsService } from "@/services";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
-import { ArrowLeft, Star, GitFork, Users2, Github, Copy, Check, Eye, Sparkles, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Star,
+  GitFork,
+  Users2,
+  Github,
+  Copy,
+  Check,
+  Eye,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { builders, activity, currentUser } from "@/mocks/seed";
@@ -42,14 +53,15 @@ function ProjectDetail() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const tagMutation = useMutation({
-    mutationFn: () => projectTagsApi.generate({
-      title: p?.name || "",
-      description: p?.description || "",
-      tech_stack: p?.stack?.join(", "),
-    }),
+    mutationFn: () =>
+      projectTagsApi.generate({
+        title: p?.name || "",
+        description: p?.description || "",
+        tech_stack: p?.stack?.join(", "),
+      }),
     onSuccess: (data) => {
       setSuggestedTags(data.tags);
-      setSelectedTags(data.tags.map(t => t.name));
+      setSelectedTags(data.tags.map((t) => t.name));
     },
     onError: () => {
       toast.error("Failed to generate tags. Please try again.");
@@ -63,8 +75,8 @@ function ProjectDetail() {
   });
 
   const toggleTag = (tagName: string) => {
-    setSelectedTags(prev =>
-      prev.includes(tagName) ? prev.filter(t => t !== tagName) : [...prev, tagName]
+    setSelectedTags((prev) =>
+      prev.includes(tagName) ? prev.filter((t) => t !== tagName) : [...prev, tagName],
     );
   };
 
@@ -209,7 +221,7 @@ function ProjectDetail() {
                               "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors",
                               selectedTags.includes(tag.name)
                                 ? "border-primary bg-primary/10 text-primary"
-                                : "border-border bg-surface text-muted-foreground hover:border-primary/50"
+                                : "border-border bg-surface text-muted-foreground hover:border-primary/50",
                             )}
                           >
                             {tag.name}

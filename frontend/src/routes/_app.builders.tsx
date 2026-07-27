@@ -25,7 +25,6 @@ import { Search, Sparkles, Calendar, Briefcase, Check, Bookmark, BadgeCheck } fr
 import { motion } from "framer-motion";
 import { containerVariants } from "@/lib/animations";
 
-
 export const Route = createFileRoute("/_app/builders")({
   head: () => ({
     meta: [
@@ -38,7 +37,6 @@ export const Route = createFileRoute("/_app/builders")({
   }),
   component: BuildersPage,
 });
-
 
 const TARGET_SKILLS = [
   "React",
@@ -104,7 +102,10 @@ function AIMatchCard({ builder }: { builder: Builder }) {
               <h3 className="font-bold text-foreground text-[20px] leading-tight truncate flex items-center gap-1">
                 {builder.name}
                 {builder.verified && (
-                  <BadgeCheck className="text-primary shrink-0 h-5 w-5" aria-label="Verified User" />
+                  <BadgeCheck
+                    className="text-primary shrink-0 h-5 w-5"
+                    aria-label="Verified User"
+                  />
                 )}
               </h3>
             </Link>
@@ -211,7 +212,6 @@ function BuildersPage() {
     queryKey: ["builders", tab],
     queryFn: () => (tab === "matches" ? buildersService.matches() : buildersService.list()),
   });
-
 
   const [connections, setConnections] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
@@ -344,7 +344,10 @@ function BuildersPage() {
                     <p className="mt-2 text-[14px] font-semibold text-foreground flex items-center justify-center gap-1">
                       <HighlightText text={b.name} query={q} />
                       {b.verified && (
-                        <BadgeCheck className="text-primary h-3.5 w-3.5" aria-label="Verified User" />
+                        <BadgeCheck
+                          className="text-primary h-3.5 w-3.5"
+                          aria-label="Verified User"
+                        />
                       )}
                     </p>
                     <p className="text-[12px] text-muted-foreground">

@@ -16,7 +16,7 @@ import {
   Sparkles,
   Pencil,
   RotateCw,
-  BadgeCheck
+  BadgeCheck,
 } from "lucide-react";
 import { copyText } from "@/lib/clipboard";
 import { ReportUserModal } from "@/components/shared/ReportUserModal";
@@ -65,10 +65,17 @@ function mapBuilderToFormValues(builder: Builder): ProfileFormValues {
     role: builder.role ?? "",
     experienceLevel: builder.experienceLevel ?? "",
     company: builder.company ?? "",
-    profileSkills:
-      builder.profileSkills?.length
-        ? builder.profileSkills.map((skill) => ({ ...skill, level: skill.level ?? "Intermediate", yearsOfExperience: skill.yearsOfExperience ?? 0 }))
-        : builder.skills.map((skill) => ({ name: skill, level: "Intermediate", category: "general" })),
+    profileSkills: builder.profileSkills?.length
+      ? builder.profileSkills.map((skill) => ({
+          ...skill,
+          level: skill.level ?? "Intermediate",
+          yearsOfExperience: skill.yearsOfExperience ?? 0,
+        }))
+      : builder.skills.map((skill) => ({
+          name: skill,
+          level: "Intermediate",
+          category: "general",
+        })),
     techStack: builder.techStack ?? [],
   };
 }
@@ -267,7 +274,8 @@ function ProfilePage() {
                 disabled={summaryMutation.isPending}
                 className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted/50 hover:text-foreground disabled:opacity-50"
               >
-                <RotateCw size={12} className={summaryMutation.isPending ? "animate-spin" : ""} /> Regenerate
+                <RotateCw size={12} className={summaryMutation.isPending ? "animate-spin" : ""} />{" "}
+                Regenerate
               </button>
             </div>
           )}
@@ -301,10 +309,12 @@ function ProfilePage() {
                   className="w-full rounded-md border border-border bg-surface px-3 py-2 text-[13px] text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
                 />
                 <div className="flex items-center justify-between">
-                  <p className={cn(
-                    "text-[11px]",
-                    editedSummary.length > 450 ? "text-orange-500" : "text-muted-foreground"
-                  )}>
+                  <p
+                    className={cn(
+                      "text-[11px]",
+                      editedSummary.length > 450 ? "text-orange-500" : "text-muted-foreground",
+                    )}
+                  >
                     {editedSummary.length}/500 characters
                   </p>
                   <div className="flex items-center gap-2">

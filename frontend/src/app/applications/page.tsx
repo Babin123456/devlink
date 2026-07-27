@@ -58,7 +58,7 @@ export default function MyApplicationsPage() {
 
   const paginatedApps = apps.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   useEffect(() => {

@@ -26,10 +26,7 @@ function MessagesIndex() {
           <p className="text-[14px] font-semibold text-foreground">Conversations</p>
         </div>
         {data.length === 0 ? (
-          <EmptyState
-            title="No conversations"
-            desc="You don't have any open conversations yet."
-          />
+          <EmptyState title="No conversations" desc="You don't have any open conversations yet." />
         ) : (
           <ul className="divide-y divide-border">
             {data.map((c) => (
