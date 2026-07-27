@@ -9,24 +9,29 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Toaster } from "sonner";
-import lottie from "lottie-web";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import searchAnimation from "@/assets/404 Error - Doodle animation.json";
 
 function NotFoundComponent() {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!ref.current) return;
-    const anim = lottie.loadAnimation({
-      container: ref.current,
-      animationData: searchAnimation,
-      loop: true,
-      autoplay: true,
-    });
-    return () => anim.destroy();
+    let destroy: (() => void) | undefined;
+    Promise.all([import("lottie-web"), import("@/assets/404 Error - Doodle animation.json")]).then(
+      ([lottieMod, animMod]) => {
+        if (!ref.current) return;
+        const anim = lottieMod.default.loadAnimation({
+          container: ref.current,
+          animationData: animMod.default,
+          loop: true,
+          autoplay: true,
+        });
+        destroy = () => anim.destroy();
+      },
+    );
+    return () => destroy?.();
   }, []);
 
   return (

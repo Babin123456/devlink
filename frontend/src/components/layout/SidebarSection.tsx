@@ -33,7 +33,10 @@ export function SidebarSection({ label, items }: SidebarSectionProps) {
         className="flex w-full items-center justify-between px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
       >
         {label}
-        <ChevronRight size={12} className={cn("transition-transform duration-200", open && "rotate-90")} />
+        <ChevronRight
+          size={12}
+          className={cn("transition-transform duration-200", open && "rotate-90")}
+        />
       </button>
       <AnimatePresence initial={false}>
         {open && (
