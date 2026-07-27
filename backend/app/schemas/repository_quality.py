@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """
 Pydantic schemas for the AI Repository Quality Analyzer.
 """
