@@ -36,7 +36,8 @@ from app.schemas.auth import (
     GitHubLoginRequest,
     RefreshTokenRequest,
     LogoutRequest,
-    LogoutResponse,    CurrentUserResponse,
+    LogoutResponse,
+    CurrentUserResponse,
     ChangePasswordRequest,
     ForgotPasswordResponse,
     ResetPasswordRequest,
@@ -277,9 +278,10 @@ def refresh(
             detail="Invalid refresh token.",
         )
 
-auth_service = AuthService(db)
+    auth_service = AuthService(db)
 
     return auth_service.refresh_token(payload.refresh_token)
+
 
 # ==========================================================
 # Logout
@@ -324,6 +326,7 @@ def logout_all(
     auth_service = AuthService(db)
 
     return auth_service.logout_all_devices(user_id)
+
 
 from app.schemas.auth import (  # noqa: E402
     ChangePasswordRequest,
