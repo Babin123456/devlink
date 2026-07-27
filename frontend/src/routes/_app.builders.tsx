@@ -18,7 +18,7 @@ import {
 } from "@/components/shared/primitives";
 import { HighlightText } from "@/components/shared/HighlightText";
 import { LastActive } from "@/components/shared/LastActive";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 import { Search, Sparkles, Calendar, Briefcase, Check, Bookmark, BadgeCheck } from "lucide-react";
@@ -232,17 +232,24 @@ function BuildersPage() {
     });
   };
 
+  const baseData = useMemo(
+    () => (tab === "connections" ? data.filter((b) => connections.includes(b.id)) : data),
+    [data, tab, connections],
+  );
+
+  const filtered = useMemo(
+    () =>
+      baseData.filter(
+        (b) =>
+          b.name.toLowerCase().includes(q.toLowerCase()) ||
+          b.skills.some((s) => s.toLowerCase().includes(q.toLowerCase())),
+      ),
+    [baseData, q],
+  );
+
   if (childMatches.length > 0) {
     return <Outlet />;
   }
-
-  const baseData = tab === "connections" ? data.filter((b) => connections.includes(b.id)) : data;
-
-  const filtered = baseData.filter(
-    (b) =>
-      b.name.toLowerCase().includes(q.toLowerCase()) ||
-      b.skills.some((s) => s.toLowerCase().includes(q.toLowerCase())),
-  );
 
   const tabs = [
     { k: "discover", label: "Discover" },
