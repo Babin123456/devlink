@@ -1,20 +1,30 @@
+from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
 
-from app.database.session import get_db
 from app.dependencies import get_database
-from app.models.user import User
-from app.models.project import Project
-from app.models.skill import Skill
-from app.schemas.search import (
-    SearchAutocompleteResponse,
-    SearchSuggestionUser,
-    SearchSuggestionProject,
-    SearchSuggestionSkill,
-)
+from app.schemas.search import SearchAutocompleteResponse
+from app.services.search_service import SearchService
 
 router = APIRouter()
+
+
+@router.get("", summary="Full multi-category search")
+def full_search(
+    q: str = Query("", max_length=200),
+    category: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_database),
+):
+    """Full-text paginated search across Users, Projects, Organizations, Skills, and Tags."""
+    return SearchService.search(
+        db=db,
+        q=q,
+        category=category,
+        page=page,
+        limit=limit,
+    )
 
 
 @router.get(
@@ -26,74 +36,19 @@ def autocomplete(
     q: str = Query("", min_length=0, max_length=100),
     db: Session = Depends(get_database),
 ):
-    if not q or not q.strip():
-        return SearchAutocompleteResponse(users=[], projects=[], skills=[])
+    """Lightweight autocomplete endpoint returning top matches per category."""
+    return SearchService.autocomplete(db=db, q=q)
 
-    query_str = f"%{q.strip()}%"
 
-    # Search Users
-    users = (
-        db.query(User)
-        .filter(
-            or_(
-                User.username.ilike(query_str),
-                User.first_name.ilike(query_str),
-                User.last_name.ilike(query_str),
-                User.role.ilike(query_str),
-            )
-        )
-        .limit(3)
-        .all()
-    )
-
-    # Format Users (name combination)
-    formatted_users = [
-        SearchSuggestionUser(
-            id=u.id,
-            name=f"{u.first_name} {u.last_name}".strip(),
-            username=u.username,
-            role=u.role,
-            profile_image=u.profile_image,
-        )
-        for u in users
-    ]
-
-    # Search Projects
-    projects = (
-        db.query(Project)
-        .filter(
-            or_(
-                Project.title.ilike(query_str),
-                Project.tagline.ilike(query_str),
-                Project.description.ilike(query_str),
-            )
-        )
-        .limit(3)
-        .all()
-    )
-
-    formatted_projects = [
-        SearchSuggestionProject(
-            id=p.id,
-            title=p.title,
-            icon=p.logo_url or "🚀",  # Fallback to emoji or logo_url
-        )
-        for p in projects
-    ]
-
-    # Search Skills
-    skills = db.query(Skill).filter(Skill.name.ilike(query_str)).limit(3).all()
-
-    formatted_skills = [
-        SearchSuggestionSkill(
-            id=s.id,
-            name=s.name,
-        )
-        for s in skills
-    ]
-
-    return SearchAutocompleteResponse(
-        users=formatted_users,
-        projects=formatted_projects,
-        skills=formatted_skills,
-    )
+@router.get(
+    "/suggestions",
+    response_model=List[str],
+    summary="Global search suggestions",
+)
+def suggestions(
+    q: str = Query("", min_length=0, max_length=100),
+    limit: int = Query(8, ge=1, le=50),
+    db: Session = Depends(get_database),
+):
+    """Returns a flat list of matching query suggestion strings."""
+    return SearchService.suggestions(db=db, q=q, limit=limit)

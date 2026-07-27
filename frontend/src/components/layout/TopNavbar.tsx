@@ -1,4 +1,3 @@
-
 import {
   Bell,
   MessageSquare,
@@ -56,7 +55,6 @@ export function TopNavbar() {
   const developerSuggestions = searchResults?.users || [];
   const projectSuggestions = searchResults?.projects || [];
   const skillSuggestions = searchResults?.skills?.map((s) => s.name) || [];
-
 
   const postSuggestions = normalizedQuery
     ? flares
@@ -120,7 +118,6 @@ export function TopNavbar() {
           onFocus={() => {
             if (query.trim()) setShowSuggestions(true);
           }}
-          placeholder="Search developers, projects, posts, organizations…"
           className="w-full rounded-md border border-border bg-surface py-[7px] pl-9 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
         {showSuggestions && normalizedQuery && (
@@ -145,7 +142,11 @@ export function TopNavbar() {
                         className="flex items-center gap-2 rounded-md px-2 py-2 text-[13px] text-foreground hover:bg-muted"
                       >
                         {builder.profile_image ? (
-                          <img src={builder.profile_image} alt="" className="h-7 w-7 rounded-full" />
+                          <img
+                            src={builder.profile_image}
+                            alt=""
+                            className="h-7 w-7 rounded-full"
+                          />
                         ) : (
                           <div className="h-7 w-7 rounded-full bg-muted" />
                         )}
@@ -181,7 +182,7 @@ export function TopNavbar() {
                           {project.icon}
                         </span>
 
-                        <span className="truncate font-medium">{project.name}</span>
+                        <span className="truncate font-medium">{project.title}</span>
                       </Link>
                     ))}
                   </div>
@@ -301,8 +302,11 @@ export function TopNavbar() {
       >
         <Avatar src={currentUser.avatar} alt={currentUser.name} name={currentUser.name} size={32} />
         <div className="hidden text-left sm:block">
-          <p className="text-[12px] font-semibold leading-tight text-foreground">
+          <p className="text-[12px] font-semibold leading-tight text-foreground flex items-center gap-1">
             {currentUser.name}
+            {currentUser.verified && (
+              <BadgeCheck className="text-primary h-3 w-3" aria-label="Verified User" />
+            )}
           </p>
           <p className="text-[11px] leading-tight text-muted-foreground">View Profile</p>
         </div>

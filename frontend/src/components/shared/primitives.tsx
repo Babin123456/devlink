@@ -94,21 +94,46 @@ export function EmptyState({
   title,
   desc,
   action,
+  icon: Icon,
 }: {
   title: string;
   desc?: string;
   action?: ReactNode;
+  icon?: React.ComponentType<{ size?: number }>;
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft text-primary shadow-xs">
-        ✨
+        {Icon ? <Icon size={24} /> : "✨"}
       </div>
       <p className="text-[14px] font-semibold text-foreground">{title}</p>
       {desc && <p className="mt-1 max-w-xs text-[13px] text-muted-foreground">{desc}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );
+}
+
+export function NoNotificationsEmptyState() {
+  return (
+    <EmptyState
+      title="No notifications"
+      desc="You're all caught up! Check back later for updates."
+    />
+  );
+}
+
+export function NoMessagesEmptyState({
+  title = "No messages",
+  desc = "You don't have any messages yet.",
+  action,
+  icon,
+}: {
+  title?: string;
+  desc?: string;
+  action?: ReactNode;
+  icon?: React.ComponentType<{ size?: number }>;
+}) {
+  return <EmptyState title={title} desc={desc} action={action} icon={icon} />;
 }
 
 export function TagChip({ children, className }: { children: ReactNode; className?: string }) {
@@ -188,6 +213,25 @@ export function Avatar({
       )}
     </div>
   );
+}
+
+export function NoNotificationsEmptyState() {
+  return (
+    <EmptyState
+      title="No notifications"
+      desc="You're all caught up! Check back later for new updates."
+    />
+  );
+}
+
+export function NoMessagesEmptyState({
+  title = "No messages",
+  desc = "You don't have any messages yet.",
+}: {
+  title?: string;
+  desc?: string;
+}) {
+  return <EmptyState title={title} desc={desc} />;
 }
 
 export function Skeleton({ className }: { className?: string }) {

@@ -58,6 +58,7 @@ export function SidebarItem({ label, to, icon, badge, forceCollapsed }: SidebarI
     <li title={undefined}>
       <Link
         to={to.split("?")[0]}
+        preload="intent"
         onClick={closeMobile}
         aria-current={active ? "page" : undefined}
         className={cn(

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { LogOut } from "lucide-react";
+import { LogOut, BadgeCheck } from "lucide-react";
 import { Avatar } from "@/components/shared/primitives";
 import { currentUser } from "@/mocks/seed";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -24,7 +24,12 @@ export function UserProfile({ forceCollapsed }: UserProfileProps) {
           title={currentUser.name}
           aria-label={`View ${currentUser.name}'s profile`}
         >
-          <Avatar src={currentUser.avatar} alt={currentUser.name} name={currentUser.name} size={36} />
+          <Avatar
+            src={currentUser.avatar}
+            alt={currentUser.name}
+            name={currentUser.name}
+            size={36}
+          />
         </Link>
         <button
           title="Logout"

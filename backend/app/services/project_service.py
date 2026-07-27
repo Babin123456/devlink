@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import uuid
 
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -86,6 +88,18 @@ class ProjectService:
         project_id: uuid.UUID,
     ) -> Project | None:
 
+        stmt = select(Project).where(
+            Project.id == project_id,
+            Project.deleted_at.is_(None),
+        )
+        return db.scalar(stmt)
+
+    @staticmethod
+    def get_project_including_deleted(
+        db: Session,
+        project_id: uuid.UUID,
+    ) -> Project | None:
+        """Retrieve a project regardless of soft-delete status (admin use)."""
         return db.get(Project, project_id)
 
     @staticmethod
@@ -98,7 +112,10 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.slug == slug)
+            .where(
+                Project.slug == slug,
+                Project.deleted_at.is_(None),
+            )
         )
         return db.scalar(stmt)
 
@@ -119,7 +136,12 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.is_published.is_(True))
+            .where(
+                Project.deleted_at.is_(None),
+                Project.is_published.is_(True),
+            )
+            .offset(skip)
+            .limit(limit)
         )
 
         if language:
@@ -149,7 +171,10 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.owner_id == owner_id)
+            .where(
+                Project.owner_id == owner_id,
+                Project.deleted_at.is_(None),
+            )
         )
 
         return list(db.scalars(stmt))
@@ -323,7 +348,6 @@ class ProjectService:
             bookmark_count=bookmark_count,
         )
 
-
     @staticmethod
     def find_similar_projects(
         db: Session,
@@ -333,19 +357,23 @@ class ProjectService:
         description_threshold: float = 0.65,
     ) -> list[SimilarProjectWarning]:
         from difflib import SequenceMatcher
-    
-        candidates = list(db.scalars(select(Project).where(Project.is_archived.is_(False))))
-    
+
+        candidates = list(
+            db.scalars(select(Project).where(Project.is_archived.is_(False)))
+        )
+
         results = []
         title_lower = title.lower()
         desc_lower = description.lower()
-    
+
         for project in candidates:
-            title_sim = SequenceMatcher(None, title_lower, project.title.lower()).ratio()
+            title_sim = SequenceMatcher(
+                None, title_lower, project.title.lower()
+            ).ratio()
             desc_sim = SequenceMatcher(
                 None, desc_lower, project.description.lower()
             ).ratio()
-    
+
             if title_sim >= title_threshold or desc_sim >= description_threshold:
                 results.append(
                     SimilarProjectWarning(
@@ -356,14 +384,38 @@ class ProjectService:
                         description_similarity=round(desc_sim, 2),
                     )
                 )
-    
+
         return results
 
     @staticmethod
-    def delete_project(
+    def soft_delete_project(
+        db: Session,
+        db_project: Project,
+        deleted_by_id: uuid.UUID,
+    ) -> None:
+        """Mark a project as deleted without removing the row."""
+        db_project.deleted_at = func.now()
+        db_project.deleted_by_id = deleted_by_id
+        db.commit()
+
+    @staticmethod
+    def restore_soft_deleted_project(
+        db: Session,
+        db_project: Project,
+    ) -> Project:
+        """Restore a soft-deleted project."""
+        db_project.deleted_at = None
+        db_project.deleted_by_id = None
+        db.commit()
+        db.refresh(db_project)
+        return db_project
+
+    @staticmethod
+    def hard_delete_project(
         db: Session,
         db_project: Project,
     ) -> None:
+        """Permanently remove a project from the database (admin only)."""
         from app.models.project_member import ProjectMember
 
         # Explicitly delete member rows first to avoid SQLAlchemy FK nullification

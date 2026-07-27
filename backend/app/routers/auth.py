@@ -35,8 +35,8 @@ from app.schemas.auth import (
     RegisterRequest,
     GitHubLoginRequest,
     RefreshTokenRequest,
-    LogoutResponse,
-    CurrentUserResponse,
+    LogoutRequest,
+    LogoutResponse,    CurrentUserResponse,
     ChangePasswordRequest,
     ForgotPasswordResponse,
     ResetPasswordRequest,
@@ -114,7 +114,9 @@ from app.schemas.auth import GitHubLoginRequest  # noqa: E402
     response_model=AuthResponse,
     summary="GitHub OAuth Login",
 )
+@limiter.limit(LOGIN_LIMIT)
 async def github_login(
+    request: Request,
     payload: GitHubLoginRequest,
     db: Session = Depends(get_database),
 ):
@@ -275,10 +277,9 @@ def refresh(
             detail="Invalid refresh token.",
         )
 
-    auth_service = AuthService(db)
+auth_service = AuthService(db)
 
-    return auth_service.refresh_token(token_payload["sub"])
-
+    return auth_service.refresh_token(payload.refresh_token)
 
 # ==========================================================
 # Logout
@@ -293,14 +294,36 @@ def refresh(
 @limiter.limit("10/minute")
 def logout(
     request: Request,
+    payload: LogoutRequest,
     user_id: str = Depends(get_current_user_id),
     db: Session = Depends(get_database),
 ):
 
     auth_service = AuthService(db)
 
-    return auth_service.logout(user_id)
+    return auth_service.logout(user_id, payload.refresh_token)
 
+
+# ==========================================================
+# Logout From All Devices (bonus)
+# ==========================================================
+
+
+@router.post(
+    "/logout-all",
+    response_model=LogoutResponse,
+    summary="Logout from all devices",
+)
+@limiter.limit("10/minute")
+def logout_all(
+    request: Request,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_database),
+):
+
+    auth_service = AuthService(db)
+
+    return auth_service.logout_all_devices(user_id)
 
 from app.schemas.auth import (  # noqa: E402
     ChangePasswordRequest,
@@ -379,29 +402,9 @@ def reset_password(
     payload: ResetPasswordRequest,
     db: Session = Depends(get_database),
 ):
-    """
-    NOTE
-
-    Currently this endpoint assumes the reset token
-    contains the user's UUID.
-
-    Later we'll replace this with secure signed reset
-    tokens stored in Redis.
-    """
-
-    try:
-        token_payload = decode_token(payload.token)
-
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid reset token.",
-        )
-
     auth_service = AuthService(db)
-
     return auth_service.reset_password(
-        user_id=token_payload["sub"],
+        token=payload.token,
         new_password=payload.new_password,
     )
 

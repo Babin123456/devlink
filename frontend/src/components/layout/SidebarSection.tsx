@@ -39,7 +39,10 @@ export function SidebarSection({ label, items, forceCollapsed }: SidebarSectionP
         aria-expanded={open}
       >
         {label}
-        <ChevronRight size={12} className={cn("transition-transform duration-200", open && "rotate-90")} />
+        <ChevronRight
+          size={12}
+          className={cn("transition-transform duration-200", open && "rotate-90")}
+        />
       </button>
       <AnimatePresence initial={false}>
         {open && (

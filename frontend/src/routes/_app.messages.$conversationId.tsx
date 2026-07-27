@@ -240,7 +240,6 @@ function Thread() {
           )}
         </div>
 
-
         {/* Inline typing label above the input for extra visibility. */}
         {themTyping && (
           <div className="px-4 pt-1">
