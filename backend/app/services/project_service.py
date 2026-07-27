@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import uuid
 
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -86,6 +88,18 @@ class ProjectService:
         project_id: uuid.UUID,
     ) -> Project | None:
 
+        stmt = select(Project).where(
+            Project.id == project_id,
+            Project.deleted_at.is_(None),
+        )
+        return db.scalar(stmt)
+
+    @staticmethod
+    def get_project_including_deleted(
+        db: Session,
+        project_id: uuid.UUID,
+    ) -> Project | None:
+        """Retrieve a project regardless of soft-delete status (admin use)."""
         return db.get(Project, project_id)
 
     @staticmethod
@@ -95,6 +109,9 @@ class ProjectService:
         slug: str,
     ) -> Project | None:
 
+        stmt = select(Project).where(
+            Project.slug == slug,
+            Project.deleted_at.is_(None),
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
@@ -118,6 +135,10 @@ class ProjectService:
 
         stmt = (
             select(Project)
+            .where(Project.deleted_at.is_(None))
+            .offset(skip)
+            .limit(limit)
+        )
             .options(selectinload(Project.owner))
             .where(Project.is_published.is_(True))
         )
@@ -146,6 +167,9 @@ class ProjectService:
         owner_id: uuid.UUID,
     ) -> list[Project]:
 
+        stmt = select(Project).where(
+            Project.owner_id == owner_id,
+            Project.deleted_at.is_(None),
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
@@ -363,10 +387,34 @@ class ProjectService:
         return results
 
     @staticmethod
-    def delete_project(
+    def soft_delete_project(
+        db: Session,
+        db_project: Project,
+        deleted_by_id: uuid.UUID,
+    ) -> None:
+        """Mark a project as deleted without removing the row."""
+        db_project.deleted_at = func.now()
+        db_project.deleted_by_id = deleted_by_id
+        db.commit()
+
+    @staticmethod
+    def restore_soft_deleted_project(
+        db: Session,
+        db_project: Project,
+    ) -> Project:
+        """Restore a soft-deleted project."""
+        db_project.deleted_at = None
+        db_project.deleted_by_id = None
+        db.commit()
+        db.refresh(db_project)
+        return db_project
+
+    @staticmethod
+    def hard_delete_project(
         db: Session,
         db_project: Project,
     ) -> None:
+        """Permanently remove a project from the database (admin only)."""
         from app.models.project_member import ProjectMember
 
         # Explicitly delete member rows first to avoid SQLAlchemy FK nullification
