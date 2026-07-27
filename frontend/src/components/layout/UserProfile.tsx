@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { LogOut } from "lucide-react";
+import { LogOut, BadgeCheck } from "lucide-react";
 import { Avatar } from "@/components/shared/primitives";
 import { currentUser } from "@/mocks/seed";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -17,7 +17,12 @@ export function UserProfile() {
           className="rounded-full transition-transform hover:scale-105"
           title="Profile"
         >
-          <Avatar src={currentUser.avatar} alt={currentUser.name} name={currentUser.name} size={36} />
+          <Avatar
+            src={currentUser.avatar}
+            alt={currentUser.name}
+            name={currentUser.name}
+            size={36}
+          />
         </Link>
         <button title="Logout" className="text-muted-foreground hover:text-foreground">
           <LogOut size={20} />
@@ -36,8 +41,11 @@ export function UserProfile() {
       >
         <Avatar src={currentUser.avatar} alt={currentUser.name} name={currentUser.name} size={36} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-semibold text-foreground">
+          <p className="truncate text-[13px] font-semibold text-foreground flex items-center gap-1">
             {currentUser.name}
+            {currentUser.verified && (
+              <BadgeCheck className="text-primary h-3.5 w-3.5" aria-label="Verified User" />
+            )}
           </p>
           <p className="truncate text-[12px] text-muted-foreground">@{currentUser.handle}</p>
         </div>

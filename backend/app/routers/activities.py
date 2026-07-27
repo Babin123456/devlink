@@ -32,7 +32,6 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
 )
 def create_activity(
-
     activity: ActivityCreate,
     db: Session = Depends(get_database),
     current_user: User = Depends(get_current_user),

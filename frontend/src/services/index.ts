@@ -77,7 +77,7 @@ export interface BackendActivity {
 }
 
 export const projectsService = {
-  list: () => withFallback(() => projectsApi.list(), seed.projects),
+  list: (params?: any) => withFallback(() => projectsApi.list(params), seed.projects),
   get: (id: string) =>
     withFallback(() => projectsApi.get(id), seed.projects.find((p) => p.id === id) ?? null),
   trending: () =>
@@ -152,10 +152,8 @@ export const messagesService = {
 
 export const issuesService = {
   list: (projectId: string, params?: { status?: string; skip?: number; limit?: number }) =>
-    isBackendConfigured()
-      ? issuesApi.list(projectId, params)
-      : Promise.resolve([]),
-  
+    isBackendConfigured() ? issuesApi.list(projectId, params) : Promise.resolve([]),
+
   get: (projectId: string, issueId: string) =>
     isBackendConfigured()
       ? issuesApi.get(projectId, issueId)
@@ -219,14 +217,19 @@ export const techStackService = {
 
 export const searchService = {
   autocomplete: (q: string) =>
-    withFallback(async () => {
-      const res = await searchApi.autocomplete(q);
-      return res;
-    }, {
-      users: [],
-      projects: [],
-      skills: []
-    }), // In fallback we could just return empty or mock data, but we'll handle mock logic in the component for offline mode, or we can add it here.
+    withFallback(
+      async () => {
+        const res = await searchApi.autocomplete(q);
+        return res;
+      },
+      {
+        users: [],
+        projects: [],
+        skills: [],
+        organizations: [],
+        tags: [],
+      },
+    ), // In fallback we could just return empty or mock data, but we'll handle mock logic in the component for offline mode, or we can add it here.
 };
 
 export const userService = {
