@@ -25,7 +25,7 @@ export default function MyApplicationsPage() {
   const ITEMS_PER_PAGE = 5;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["myApplications"],
     queryFn: () => getMyApplications(),
   });
@@ -69,11 +69,9 @@ export default function MyApplicationsPage() {
     if (busyId) return;
     setBusyId(id);
     try {
-      await withdrawApplication(id);
-      toast.success("Application withdrawn");
-      await refetch();
+      await withdrawMutation.mutateAsync(id);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to withdraw application");
+      // Error handling is already in the mutation
     } finally {
       setBusyId(null);
     }

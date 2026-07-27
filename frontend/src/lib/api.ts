@@ -183,3 +183,33 @@ export async function unfollowUser(userId: UUID): Promise<FollowStatusResponse> 
   });
   return getFollowStatus(userId);
 }
+
+export async function getMyApplications(): Promise<ApplicationResponse[]> {
+  return requestJson<ApplicationResponse[]>({
+    url: `/applications/my`,
+    method: "GET",
+  });
+}
+
+export async function acceptApplication(id: UUID): Promise<ApplicationResponse> {
+  return requestJson<ApplicationResponse>({
+    url: `/applications/${id}/accept`,
+    method: "PATCH",
+  });
+}
+
+export async function applyToFlare(
+  flareId: UUID,
+  projectId: UUID,
+  payload: Omit<ApplicationCreatePayload, "project_id" | "flare_id">,
+): Promise<ApplicationResponse> {
+  return requestJson<ApplicationResponse>({
+    url: `/applications`,
+    method: "POST",
+    body: {
+      ...payload,
+      project_id: projectId,
+      flare_id: flareId,
+    },
+  });
+}
