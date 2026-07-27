@@ -253,7 +253,7 @@ def delete_me(
 )
 def restore_user(
     user_id: uuid.UUID,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_database),
     current_user: User = Depends(get_current_user),
 ):
 
@@ -289,7 +289,7 @@ def restore_user(
 )
 def hard_delete_user(
     user_id: uuid.UUID,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_database),
     current_user: User = Depends(get_current_user),
 ):
 
