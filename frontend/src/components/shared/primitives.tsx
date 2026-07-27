@@ -215,6 +215,25 @@ export function Avatar({
   );
 }
 
+export function NoNotificationsEmptyState() {
+  return (
+    <EmptyState
+      title="No notifications"
+      desc="You're all caught up! Check back later for new updates."
+    />
+  );
+}
+
+export function NoMessagesEmptyState({
+  title = "No messages",
+  desc = "You don't have any messages yet.",
+}: {
+  title?: string;
+  desc?: string;
+}) {
+  return <EmptyState title={title} desc={desc} />;
+}
+
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cn("animate-pulse rounded-xl bg-muted/70", className)} />;
 }
