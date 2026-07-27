@@ -113,7 +113,8 @@ class LogoutRequest(BaseModel):
     refresh_token: str | None = None
 
 
-class LogoutResponse(BaseModel):    success: bool = True
+class LogoutResponse(BaseModel):
+    success: bool = True
     message: str = "Successfully logged out."
 
 
