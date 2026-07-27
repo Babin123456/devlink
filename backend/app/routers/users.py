@@ -28,6 +28,7 @@ from app.schemas.user import (
     UserStats,
     UserUpdate,
     UsernameAvailabilityResponse,
+    ProfileCompletionResponse,
 )
 from app.schemas.user_report import (
     UserReportCreate,
@@ -122,6 +123,42 @@ def get_me(
     if online_threshold is not None:
         current_user._online_threshold = online_threshold
     return current_user
+
+
+@router.get(
+    "/me/completion",
+    response_model=ProfileCompletionResponse,
+    summary="Get Current User Profile Completion",
+)
+def get_my_profile_completion(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    """
+    Get profile completion percentage and missing factors for current user.
+    """
+    return UserService.get_profile_completion(db, current_user)
+
+
+@router.get(
+    "/{user_id}/completion",
+    response_model=ProfileCompletionResponse,
+    summary="Get User Profile Completion by ID",
+)
+def get_user_profile_completion(
+    user_id: uuid.UUID,
+    db: Session = Depends(get_database),
+):
+    """
+    Get profile completion percentage and missing factors for a specific user.
+    """
+    user = UserService.get_user(db, user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    return UserService.get_profile_completion(db, user)
 
 
 @router.get(
