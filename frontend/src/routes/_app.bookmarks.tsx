@@ -37,8 +37,8 @@ function BookmarksPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<BookmarkCollection | null>(null);
 
-  const [bookmarkedDevs, setBookmarkedDevs] = useState<any[]>([]);
-  const toggleBookmark = useCallback((dev: any) => {
+  const [bookmarkedDevs, setBookmarkedDevs] = useState<(Record<string, unknown> & { id: string })[]>([]);
+  const toggleBookmark = useCallback((dev: Record<string, unknown> & { id: string }) => {
     setBookmarkedDevs((prev) =>
       prev.some((d) => d.id === dev.id) ? prev.filter((d) => d.id !== dev.id) : [...prev, dev],
     );

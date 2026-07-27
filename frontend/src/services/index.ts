@@ -159,12 +159,12 @@ export const issuesService = {
       ? issuesApi.get(projectId, issueId)
       : Promise.reject("Not implemented in mock"),
 
-  create: (projectId: string, body: any) =>
+  create: (projectId: string, body: unknown) =>
     isBackendConfigured()
       ? issuesApi.create(projectId, body)
       : Promise.reject("Not implemented in mock"),
 
-  update: (projectId: string, issueId: string, body: any) =>
+  update: (projectId: string, issueId: string, body: unknown) =>
     isBackendConfigured()
       ? issuesApi.update(projectId, issueId, body)
       : Promise.reject("Not implemented in mock"),
@@ -174,7 +174,7 @@ export const issuesService = {
       ? issuesApi.remove(projectId, issueId)
       : Promise.reject("Not implemented in mock"),
 
-  checkDuplicates: (projectId: string, body: any) =>
+  checkDuplicates: (projectId: string, body: unknown) =>
     isBackendConfigured()
       ? issuesApi.checkDuplicates(projectId, body)
       : Promise.reject("Not implemented in mock"),

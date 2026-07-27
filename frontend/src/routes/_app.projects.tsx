@@ -111,7 +111,7 @@ function ProjectsPage() {
     techStack: string;
   }) => {
     navigate({
-      search: (prev: any) => ({
+      search: (prev: Record<string, unknown>) => ({
         ...prev,
         page: 1,
         language: newFilters.language || undefined,
