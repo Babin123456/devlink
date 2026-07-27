@@ -210,7 +210,8 @@ export async function applyToFlare(
   projectId: UUID,
   payload: Omit<ApplicationCreatePayload, "project_id" | "flare_id">,
 ): Promise<ApplicationResponse> {
-  return requestJson<ApplicationResponse, Record<string, unknown>>({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return requestJson<ApplicationResponse, any>({
     url: `/applications`,
     method: "POST",
     body: {
