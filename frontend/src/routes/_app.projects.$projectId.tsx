@@ -21,6 +21,12 @@ import { Markdown } from "@/components/shared/Markdown";
 import { BackButton } from "@/components/shared/BackButton";
 import { ShareProjectButton } from "@/components/shared/ShareProjectButton";
 import { projectTagsApi } from "@/api";
+
+type TagSuggestion = {
+  id: string;
+  name: string;
+  count: number;
+};
 import { toast } from "sonner";
 import { BookmarkToggleButton } from "@/components/shared/BookmarkToggleButton";
 import { addRecentlyViewedProject } from "@/lib/recentlyViewedProjects";

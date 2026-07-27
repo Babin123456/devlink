@@ -91,7 +91,7 @@ function buildUpdatedBuilder(builder: Builder, values: ProfileFormValues): Build
   return {
     ...builder,
     headline: values.headline || undefined,
-    bio: values.bio || undefined,
+    bio: values.bio || "",
     location: values.location || undefined,
     timezone: values.timezone || undefined,
     website: values.website || undefined,
@@ -99,7 +99,7 @@ function buildUpdatedBuilder(builder: Builder, values: ProfileFormValues): Build
     portfolioUrl: values.portfolioUrl || undefined,
     githubUrl: values.githubUrl || undefined,
     linkedinUrl: values.linkedinUrl || undefined,
-    role: values.role || undefined,
+    role: (values.role as any) || "Developer",
     experienceLevel: values.experienceLevel || undefined,
     company: values.company || undefined,
     profileSkills: values.profileSkills.map((skill) => ({
