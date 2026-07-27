@@ -34,11 +34,16 @@ env["PGPASSWORD"] = db_password or ""
 
 command = [
     "pg_dump",
-    "-h", db_host,
-    "-p", str(db_port),
-    "-U", db_user,
-    "-F", "p",
-    "-f", str(backup_file),
+    "-h",
+    db_host,
+    "-p",
+    str(db_port),
+    "-U",
+    db_user,
+    "-F",
+    "p",
+    "-f",
+    str(backup_file),
     db_name,
 ]
 

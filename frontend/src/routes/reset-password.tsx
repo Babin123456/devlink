@@ -45,8 +45,8 @@ function ResetPassword() {
         await authApi.resetPassword(token, password);
         toast.success("Password has been reset successfully. You can now log in.");
         navigate({ to: "/auth" });
-      } catch (err: any) {
-        toast.error(err.message || "Failed to reset password");
+      } catch (err: unknown) {
+        toast.error((err as Error).message || "Failed to reset password");
       } finally {
         setSubmitting(false);
       }
@@ -68,7 +68,9 @@ function ResetPassword() {
         </p>
 
         <form onSubmit={handleSubmit} className="mt-5">
-          <label className="mb-1 block text-[13px] font-semibold text-foreground">New Password</label>
+          <label className="mb-1 block text-[13px] font-semibold text-foreground">
+            New Password
+          </label>
           <input
             type="password"
             required
@@ -78,7 +80,9 @@ function ResetPassword() {
             className="mb-4 w-full rounded-md border border-border bg-surface px-3 py-[8px] text-[14px] text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
 
-          <label className="mb-1 block text-[13px] font-semibold text-foreground">Confirm New Password</label>
+          <label className="mb-1 block text-[13px] font-semibold text-foreground">
+            Confirm New Password
+          </label>
           <input
             type="password"
             required
