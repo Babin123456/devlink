@@ -1,7 +1,6 @@
 import { cn, getInitials } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useCardAnimation } from "@/lib/animations";
 
@@ -196,6 +195,25 @@ export function Avatar({
       )}
     </div>
   );
+}
+
+export function NoNotificationsEmptyState() {
+  return (
+    <EmptyState
+      title="No notifications"
+      desc="You're all caught up! Check back later for new updates."
+    />
+  );
+}
+
+export function NoMessagesEmptyState({
+  title = "No messages",
+  desc = "You don't have any messages yet.",
+}: {
+  title?: string;
+  desc?: string;
+}) {
+  return <EmptyState title={title} desc={desc} />;
 }
 
 export function Skeleton({ className }: { className?: string }) {

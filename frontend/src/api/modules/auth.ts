@@ -40,5 +40,5 @@ export const authApi = {
   forgotPassword: (email: string) =>
     api.post<{ ok: true }>("/api/auth/forgot-password", { email }, { auth: false }),
   resetPassword: (token: string, password: string) =>
-    api.post<{ ok: true }>("/api/auth/reset-password", { token, password }, { auth: false }),
+    api.post<{ ok: true }>("/api/auth/reset-password", { token, new_password: password }, { auth: false }),
 };

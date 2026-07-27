@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 from uuid import UUID
+
+from app.services.email_service import EmailService
+from app.core.config import settings
 
 # pyrefly: ignore [missing-import]
 from fastapi import HTTPException, status
@@ -19,6 +22,8 @@ from app.core.security import (
     create_refresh_token,
     hash_password,
     verify_password,
+    _create_token,
+    decode_token,
 )
 from app.models.user import User
 from app.models.password_history import PasswordHistory
@@ -590,9 +595,23 @@ class AuthService:
                 "message": ("If the account exists, a reset email has been sent."),
             }
 
-        # TODO:
-        # Generate reset token
-        # Send email
+        pwd_hash_frag = user.password_hash[-10:] if user.password_hash else "nohash"
+
+        token = _create_token(
+            subject=str(user.id),
+            expires_delta=timedelta(minutes=15),
+            token_type="reset_password",
+            extra={"hash_frag": pwd_hash_frag},
+        )
+
+        reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+
+        EmailService.send_notification_email(
+            to_email=user.email,
+            title="Reset Your Password",
+            message="You requested a password reset. This link will expire in 15 minutes.",
+            action_url=reset_url,
+        )
 
         event_bus.publish(
             "PASSWORD_RESET_REQUESTED",
@@ -610,13 +629,31 @@ class AuthService:
 
     def reset_password(
         self,
-        user_id: str,
+        token: str,
         new_password: str,
     ):
+        try:
+            payload = decode_token(token)
+            if payload.get("type") != "reset_password":
+                raise ValueError("Invalid token type")
+            user_id = payload.get("sub")
+            hash_frag = payload.get("hash_frag")
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired reset token.",
+            )
 
         validate_password(new_password)
 
         user = self.get_current_user(user_id)
+
+        expected_frag = user.password_hash[-10:] if user.password_hash else "nohash"
+        if hash_frag != expected_frag:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This reset token has already been used.",
+            )
 
         if self._is_password_reused(user, new_password):
             raise HTTPException(
