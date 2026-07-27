@@ -45,11 +45,10 @@ function SearchPage() {
       ),
     [q],
   );
+
   const fls = useMemo(
     () => flares.filter((f) => f.content.toLowerCase().includes(q.toLowerCase())),
     [q],
-  const skillSet = Array.from(new Set(builders.flatMap((b) => b.skills))).filter((s) =>
-    s.toLowerCase().includes(q.toLowerCase()),
   );
 
   const devs = useMemo(
