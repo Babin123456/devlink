@@ -23,9 +23,22 @@ export interface Builder {
   badges: string[];
   interests: string[];
   online: boolean;
-  bio: string;
+  headline?: string;
+  bio?: string;
+  location?: string;
+  timezone?: string;
+  website?: string;
+  resumeUrl?: string;
+  portfolioUrl?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  experienceLevel?: string;
+  company?: string;
+  profileSkills?: { name: string; level?: string; category?: string; yearsOfExperience?: number }[];
+  techStack?: string[];
   lastActiveAt: string | null;
   publicEmail?: string;
+  verified?: boolean;
 }
 export interface Project {
   id: ID;
@@ -141,6 +154,7 @@ export const builders: Builder[] = [
     interests: ["Web Dev", "Design Systems", "AI"],
     lastActiveAt: ago(1),
     publicEmail: "priya@example.com",
+    verified: true,
   },
   {
     id: "b2",
@@ -601,6 +615,7 @@ export const currentUser = {
   handle: "nancy_dev",
   avatar: AV("Nancy"),
   premium: true,
+  verified: true,
 };
 
 export const stats = [

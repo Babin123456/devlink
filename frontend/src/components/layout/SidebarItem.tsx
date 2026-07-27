@@ -13,7 +13,7 @@ export interface SidebarItemProps {
 export function SidebarItem({ label, to, icon, badge }: SidebarItemProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { isCollapsed, closeMobile } = useSidebar();
-  
+
   const active = pathname === to || pathname.startsWith(to.split("?")[0] + "/");
 
   return (
@@ -26,7 +26,7 @@ export function SidebarItem({ label, to, icon, badge }: SidebarItemProps) {
           active
             ? "bg-primary-soft font-semibold text-primary"
             : "text-foreground/80 hover:bg-sidebar-accent hover:text-foreground focus:bg-sidebar-accent",
-          isCollapsed ? "justify-center px-0 mx-2" : ""
+          isCollapsed ? "justify-center px-0 mx-2" : "",
         )}
       >
         <span className={cn("shrink-0", active ? "text-primary" : "text-muted-foreground")}>

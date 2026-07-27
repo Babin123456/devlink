@@ -71,11 +71,11 @@ export function Sidebar() {
     <aside
       className={cn(
         "sticky top-0 h-screen hidden lg:flex flex-col border-r border-border bg-sidebar transition-all duration-300",
-        isCollapsed ? "w-[80px]" : "w-[280px]"
+        isCollapsed ? "w-[80px]" : "w-[280px]",
       )}
     >
       <Logo />
-      
+
       <nav className="flex-1 overflow-y-auto px-2 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {SIDEBAR_SECTIONS.map((section) => (
           <SidebarSection key={section.label} {...section} />

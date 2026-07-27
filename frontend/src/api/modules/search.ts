@@ -24,6 +24,7 @@ export interface SearchSuggestionUser {
   username: string;
   role?: string;
   profile_image?: string;
+  verified?: boolean;
 }
 
 export interface SearchSuggestionProject {
@@ -73,6 +74,7 @@ export interface SearchResultUser {
   headline?: string;
   profile_image?: string;
   location?: string;
+  verified?: boolean;
 }
 
 export interface SearchResultProject {

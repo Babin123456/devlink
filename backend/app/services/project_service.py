@@ -323,7 +323,6 @@ class ProjectService:
             bookmark_count=bookmark_count,
         )
 
-
     @staticmethod
     def find_similar_projects(
         db: Session,
@@ -333,19 +332,23 @@ class ProjectService:
         description_threshold: float = 0.65,
     ) -> list[SimilarProjectWarning]:
         from difflib import SequenceMatcher
-    
-        candidates = list(db.scalars(select(Project).where(Project.is_archived.is_(False))))
-    
+
+        candidates = list(
+            db.scalars(select(Project).where(Project.is_archived.is_(False)))
+        )
+
         results = []
         title_lower = title.lower()
         desc_lower = description.lower()
-    
+
         for project in candidates:
-            title_sim = SequenceMatcher(None, title_lower, project.title.lower()).ratio()
+            title_sim = SequenceMatcher(
+                None, title_lower, project.title.lower()
+            ).ratio()
             desc_sim = SequenceMatcher(
                 None, desc_lower, project.description.lower()
             ).ratio()
-    
+
             if title_sim >= title_threshold or desc_sim >= description_threshold:
                 results.append(
                     SimilarProjectWarning(
@@ -356,7 +359,7 @@ class ProjectService:
                         description_similarity=round(desc_sim, 2),
                     )
                 )
-    
+
         return results
 
     @staticmethod

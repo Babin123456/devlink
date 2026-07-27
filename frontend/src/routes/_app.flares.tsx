@@ -143,7 +143,6 @@ function FlaresPage() {
         </Card>
 
         {feed.map((f) => (
-
           <FlareCard key={f.id} flare={f} />
         ))}
       </div>
