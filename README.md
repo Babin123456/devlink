@@ -1,566 +1,221 @@
-# DevLink
-
-
 <p align="center">
-  <img src="docs/images/devlink-banner.jpeg" alt="DevLink Banner" width="400">
+  <img src="lodo-dev.jpeg" alt="DevLink Banner" width="600" style="border-radius: 8px;">
 </p>
 
 <h1 align="center">DevLink</h1>
 
 <p align="center">
-<strong>Build With People Who Actually Ship.</strong>
+  <strong>Build With People Who Actually Ship.</strong>
 </p>
 
 <p align="center">
-An open-source collaboration platform where developers, founders, designers,
-AI engineers, and builders discover teammates, collaborate on projects,
-participate in hackathons, and launch products together.
+  An enterprise-grade open-source developer collaboration platform designed to connect builders, founders, designers, AI engineers, and open-source contributors to form teams, track issues, and launch production-ready applications.
 </p>
 
 <p align="center">
-
-<img src="https://img.shields.io/github/license/nensii21/devlink?style=for-the-badge">
-
-<img src="https://img.shields.io/github/stars/nensii21/devlink?style=for-the-badge">
-
-<img src="https://img.shields.io/github/forks/nensii21/devlink?style=for-the-badge">
-
-<img src="https://img.shields.io/github/issues/nensii21/devlink?style=for-the-badge">
-
-<img src="https://img.shields.io/github/issues-pr/nensii21/devlink?style=for-the-badge">
-
-<img src="https://img.shields.io/github/contributors/nensii21/devlink?style=for-the-badge">
-
+  <a href="https://github.com/nensii21/devlink/blob/main/LICENSE"><img src="https://img.shields.io/github/license/nensii21/devlink?style=for-the-badge&color=blue" alt="License"></a>
+  <a href="https://github.com/nensii21/devlink/stargazers"><img src="https://img.shields.io/github/stars/nensii21/devlink?style=for-the-badge&color=gold" alt="Stars"></a>
+  <a href="https://github.com/nensii21/devlink/network/members"><img src="https://img.shields.io/github/forks/nensii21/devlink?style=for-the-badge&color=orange" alt="Forks"></a>
+  <a href="https://github.com/nensii21/devlink/issues"><img src="https://img.shields.io/github/issues/nensii21/devlink?style=for-the-badge&color=red" alt="Issues"></a>
+  <a href="https://github.com/nensii21/devlink/pulls"><img src="https://img.shields.io/github/issues-pr/nensii21/devlink?style=for-the-badge&color=purple" alt="Pull Requests"></a>
+  <a href="https://github.com/nensii21/devlink/graphs/contributors"><img src="https://img.shields.io/github/contributors/nensii21/devlink?style=for-the-badge&color=green" alt="Contributors"></a>
 </p>
 
 ---
 
-## 🌐 Live Demo
+## 📌 Quick Links
 
-| Website | Status |
-|----------|--------|
-| Coming Soon | 🚧 Under Development |
-
----
-
-
-
-# Overview
-
-DevLink is an open-source developer collaboration platform designed for developers, startup founders, designers, AI engineers, and builders.
-
-Finding the right people to build with shouldn't require endless scrolling through Discord servers, LinkedIn, GitHub repositories, or Twitter.
-
-DevLink brings everything together in one place.
-
-Whether you're looking for:
-
-- Open Source Contributors
-- Startup Co-founders
-- Hackathon Teammates
-- Freelance Developers
-- AI Engineers
-- UI/UX Designers
-
-DevLink helps you discover builders, showcase your skills, collaborate on projects, and ship products faster.
+- 📖 **[API Documentation](docs/api.md)** | **[Interactive Swagger UI](http://localhost:8000/docs)**
+- 🏗️ **[Architecture Overview](docs/architecture.md)**
+- 🚀 **[Development Guide](docs/development.md)**
+- 🐳 **[Docker Compose Setup](#-docker--quick-start)**
+- 🤝 **[Contribution Guidelines](CONTRIBUTING.md)**
 
 ---
 
-# Why DevLink?
+## 🎬 Demo & Product Showcase
 
-### Discover Builders
-
-Find developers with matching skills and interests.
-
-### Build Together
-
-Create projects and invite teammates.
-
-### Showcase Your Work
-
-Build a developer portfolio that goes beyond a traditional resume.
-
-### Join Hackathons
-
-Discover hackathons and find teammates instantly.
-
-### AI-Powered Recommendations
-
-Get intelligent teammate and project recommendations.
-
-### One Platform
-
-Everything developers need—from networking to collaboration.
+<p align="center">
+  <img src="docs/images/devlink-preview.png" alt="DevLink Platform Showcase" width="100%" style="border-radius: 8px; border: 1px solid #30363d;">
+  <br>
+  <em>Figure 1: DevLink Teammate Discovery & Real-Time Project Dashboard.</em>
+</p>
 
 ---
 
-# Features
+## 📸 Interface Screenshots
 
-## Developer Profiles
+| Developer Discovery & Profiles | Project Marketplace & Applications |
+| :---: | :---: |
+| <img src="docs/images/screenshot-profiles.png" alt="Developer Profiles" width="400"> | <img src="docs/images/screenshot-projects.png" alt="Project Marketplace" width="400"> |
+| *Filter builders by skills, availability & GitHub score* | *Post collaboration requests & review applicant profiles* |
 
-- Professional portfolios
-- Skills & tech stack
-- Experience
-- GitHub integration
-- Social links
-
----
-
-## Project Marketplace
-
-- Browse projects
-- Create projects
-- Join teams
-- Apply to contribute
-- Bookmark projects
+| Real-Time Messaging & Workspace | AI Compatibility Recommendations |
+| :---: | :---: |
+| <img src="docs/images/screenshot-messaging.png" alt="Messaging" width="400"> | <img src="docs/images/screenshot-ai.png" alt="AI Recommendations" width="400"> |
+| *Instant messaging via WebSockets with typing status* | *AI-driven teammate and project matching engine* |
 
 ---
 
-## Team Matching
+## 🌟 Key Platform Features
 
-- Skill matching
-- Experience matching
-- AI recommendations
-- Availability filters
-
----
-
-## Collaboration
-
-- Real-time messaging
-- Team workspaces
-- Notifications
-- Discussions
+- **⚡ Teammate Matchmaking**: AI-assisted skill matching connecting front-end, back-end, AI/ML, and DevOps builders.
+- **📁 Project Marketplace**: Discover open requests, apply with portfolio credentials, and manage team roles.
+- **💬 Real-Time WebSockets**: Instant Direct Messaging (DM), notification broadcasts, typing indicators, and online status.
+- **📊 Repository Quality Metrics**: Automated score evaluation of linked GitHub repos based on coverage, docs, and activity.
+- **🔒 Enterprise Security**: OAuth 2.0 (GitHub), JWT access/refresh token rotation, rate limiting, and security headers.
 
 ---
 
-## Community
+## 🏛 System Architecture
 
-- Builder feed
-- Open Source projects
-- Startup Hub
-- Events
-- Hackathons
-
----
-
-## AI Features
-
-- Smart teammate recommendations
-- Project recommendations
-- AI profile suggestions
-- AI skill analysis
-
----
-
-# Architecture
+DevLink follows a decoupled, cloud-native architecture. The front-end communicates with an asynchronous FastAPI application server, PostgreSQL database, and Redis cache/broker.
 
 ```mermaid
-graph TD
+graph TB
+    subgraph Client Layer
+        UserClient[Browser / Client App]
+    end
 
-A[Frontend]
+    subgraph Presentation & Gateway
+        Nginx[Nginx / Reverse Proxy]
+        FrontendApp[React 19 / Vite App]
+    end
 
-A --> B[React]
+    subgraph Application Server
+        FastAPI[FastAPI REST & WebSockets]
+        AuthModule[JWT & OAuth Module]
+        MatchEngine[AI Teammate Engine]
+    end
 
-A --> C[TypeScript]
+    subgraph Data & Storage
+        PostgreSQL[(PostgreSQL Relational DB)]
+        Redis[(Redis Cache & PubSub)]
+    end
 
-A --> D[Tailwind CSS]
-
-B --> E[FastAPI Backend]
-
-E --> F[JWT Authentication]
-
-E --> G[GitHub OAuth]
-
-E --> H[OpenAI API]
-
-E --> I[(PostgreSQL)]
-
-E --> J[SQLAlchemy]
-
-E --> K[WebSockets]
-
-E --> L[Redis]
+    UserClient -->|HTTPS / WSS| Nginx
+    Nginx -->|Static Assets| FrontendApp
+    Nginx -->|API & Sockets| FastAPI
+    FastAPI --> AuthModule
+    FastAPI --> MatchEngine
+    FastAPI --> PostgreSQL
+    FastAPI --> Redis
 ```
 
----
-
-# Tech Stack
-
-| Layer | Technology |
-|--------|------------|
-| Frontend | React 19 |
-| Language | TypeScript |
-| Styling | Tailwind CSS v4 |
-| Backend | Python, FastAPI |
-| Database | PostgreSQL |
-| ORM | SQLAlchemy |
-| Authentication | JWT, GitHub OAuth |
-| Validation | Pydantic |
-| Realtime | WebSockets |
-| AI | OpenAI API, MCP |
-| DevOps | Docker, GitHub Actions |
-| Deployment | Vercel |
+*For complete diagrams and architectural deep-dives, see **[Architecture Documentation](docs/architecture.md)**.*
 
 ---
 
-# Project Structure
+## 💻 Tech Stack
 
-```
-devlink/
-
-├── backend/
-│   ├── app/
-│   ├── api/
-│   ├── models/
-│   ├── schemas/
-│   ├── services/
-│   ├── core/
-│   └── tests/
-│
-├── frontend/
-│   ├── src/
-│   │   ├── app/
-│   │   ├── assets/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── styles/
-│   │   ├── types/
-│   │   └── utils/
-│
-├── docs/
-│
-├── .github/
-│
-├── docker/
-│
-├── public/
-│
-├── README.md
-│
-├── CONTRIBUTING.md
-│
-├── CODE_OF_CONDUCT.md
-│
-├── SECURITY.md
-│
-└── LICENSE
-```
+| Domain | Technologies |
+| :--- | :--- |
+| **Frontend** | React 19, TypeScript, Tailwind CSS v4, TanStack Query/Router, Framer Motion |
+| **Backend** | Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy 2.0, Asyncpg |
+| **Realtime** | WebSockets, Redis Pub/Sub |
+| **Database & Caching** | PostgreSQL 15+, Redis 7+ |
+| **AI Integration** | OpenAI API, Model Context Protocol (MCP) |
+| **DevOps & Containers** | Docker, Docker Compose, DevContainers, GitHub Actions |
 
 ---
 
-# Screenshots
+## 🚀 Docker & Quick Start
 
-## Landing Page
+### 1. Launch Everything via Docker Compose (Recommended)
 
-> Coming Soon
-
----
-
-## Dashboard
-
-> Coming Soon
-
----
-
-## Builder Profile
-
-> Coming Soon
-
----
-
-## Project Marketplace
-
-> Coming Soon
-
----
-
-## Messages
-
-> Coming Soon
-
----
-
-# Getting Started
-
-## Prerequisites
-
-- Node.js 20+
-- Python 3.11+
-- PostgreSQL
-- Git
-- Docker (Optional)
-
----
-
-## Clone Repository
+Launch Backend, Frontend, PostgreSQL, and Redis with a single command:
 
 ```bash
-git clone https://github.com/nensii21/devlink.git
-
-cd devlink
+docker-compose -f docker-compose.dev.yml up --build
 ```
+
+- **Frontend Application**: `http://localhost:5173`
+- **Backend REST API**: `http://localhost:8000/api`
+- **Interactive Swagger Docs**: `http://localhost:8000/docs`
 
 ---
 
-## Backend Setup
+### 2. Manual Local Setup
 
+#### Backend Setup
 ```bash
 cd backend
-
 python -m venv venv
-
-source venv/bin/activate
-
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-
 uvicorn app.main:app --reload
 ```
 
----
-
-## Frontend Setup
-
+#### Frontend Setup
 ```bash
 cd frontend
-
 npm install
-
 npm run dev
 ```
 
 ---
 
-Visit
+## 📚 API Documentation
 
-```
-http://localhost:5173
-```
+DevLink exposes a comprehensive RESTful API. Below is a quick overview of primary routes:
 
----
+| Route Group | Base Endpoint | Description |
+| :--- | :--- | :--- |
+| **Authentication** | `/api/auth` | Login, Register, JWT Refresh, GitHub OAuth |
+| **User Profiles** | `/api/users` | Developer profile CRUD, bio export, search |
+| **Projects** | `/api/projects` | Project postings, tech stack tagging, bookmarks |
+| **Applications** | `/api/applications` | Team application submission & status management |
+| **Messaging** | `/api/messages` | Direct messaging & thread history |
+| **Recommendations**| `/api/recommendations`| AI teammate & project matching |
 
-# Environment Variables
-
-Backend
-
-```env
-DATABASE_URL=
-
-SECRET_KEY=
-
-JWT_ALGORITHM=
-
-ACCESS_TOKEN_EXPIRE_MINUTES=
-
-GITHUB_CLIENT_ID=
-
-GITHUB_CLIENT_SECRET=
-
-OPENAI_API_KEY=
-```
-
-Frontend
-
-```env
-VITE_API_URL=http://localhost:8000
-
-VITE_APP_NAME=DevLink
-```
+*For complete endpoint request/response payloads, see **[docs/api.md](docs/api.md)**.*
 
 ---
 
-# Development Workflow
+## 🗺 Product Roadmap
 
-```
-Fork Repository
-
-↓
-
-Create Branch
-
-↓
-
-Develop Feature
-
-↓
-
-Test Changes
-
-↓
-
-Commit Changes
-
-↓
-
-Push Branch
-
-↓
-
-Open Pull Request
-
-↓
-
-Code Review
-
-↓
-
-Merge
-```
+- [x] **Phase 1: Core Platform**: Developer profiles, project creation, JWT auth, and repository links.
+- [x] **Phase 2: Real-time Communication**: WebSocket messaging, application tracking, and global search.
+- [x] **Phase 3: AI Engine & Intelligence**: Teammate matching algorithms, auto bio summaries, and repo scoring.
+- [ ] **Phase 4: Ecosystem & Expansion**: Mobile app (React Native), organization teams, and browser extensions.
 
 ---
 
-# API Documentation
+## ❓ Frequently Asked Questions (FAQ)
 
-API documentation will be available at
+<details>
+<summary><strong>Is DevLink free and open source?</strong></summary>
+<p>Yes! DevLink is licensed under the MIT License and completely open source. Anyone can contribute or host their own instance.</p>
+</details>
 
-```
-http://localhost:8000/docs
-```
+<details>
+<summary><strong>How does the AI Teammate Recommendation work?</strong></summary>
+<p>Our recommendation engine evaluates tech stack overlap, availability, past projects, and profile embeddings to suggest optimal collaborators.</p>
+</details>
 
-Swagger UI will automatically generate API documentation using FastAPI.
-
----
-
-# Roadmap
-
-## Phase 1
-
-- ✅ Landing Page
-- ✅ Authentication UI
-- ✅ Dashboard UI
-- ✅ Builder Profiles
+<details>
+<summary><strong>Can I run DevLink inside VS Code / GitHub Codespaces?</strong></summary>
+<p>Yes! We provide a pre-configured DevContainer setup in <code>.devcontainer/</code> with preinstalled tools, linting, and port forwarding.</p>
+</details>
 
 ---
 
-## Phase 2
+## 🤝 Contribution Flow
 
-- ⬜ Backend APIs
-- ⬜ Project Marketplace
-- ⬜ Team Applications
-- ⬜ Search
-- ⬜ Notifications
+We welcome contributions from developers of all experience levels!
 
----
+1. **Fork the Repository** on GitHub.
+2. **Create a Feature Branch**: `git checkout -b feat/your-feature-name`
+3. **Commit Your Changes**: Follow Conventional Commits (e.g. `feat(auth): add OAuth provider`).
+4. **Push & Create Pull Request**: Open a PR pointing to `main`.
 
-## Phase 3
-
-- ⬜ AI Team Matching
-- ⬜ AI Recommendations
-- ⬜ Startup Hub
-- ⬜ Messaging
-- ⬜ Hackathons
+*Please read **[CONTRIBUTING.md](CONTRIBUTING.md)** for detailed coding standards and pull request criteria.*
 
 ---
 
-## Phase 4
+## 📄 License & Maintainers
 
-- ⬜ Mobile App
-- ⬜ Organizations
-- ⬜ Premium Features
-- ⬜ Public API
-- ⬜ Browser Extension
+Distributed under the **MIT License**. See `LICENSE` for details.
 
----
-
-# Contributing
-
-We welcome contributions from developers of all experience levels.
-
-Please read **CONTRIBUTING.md** before creating a Pull Request.
-
-### Contribution Workflow
-
-```bash
-git checkout -b feat/feature-name
-
-git commit -m "feat: add feature"
-
-git push origin feat/feature-name
-```
-
-Please ensure:
-
-- Code follows existing style
-- No breaking changes
-- Documentation is updated
-- Build passes successfully
-- Pull Requests remain focused
-
----
-
-# ECSoc 2026
-
-DevLink is proud to participate in **ECSoc 2026**.
-
-We welcome contributors from all backgrounds.
-
-Look for labels such as:
-
-- good first issue
-- frontend
-- backend
-- documentation
-- accessibility
-- enhancement
-- help wanted
-
-We encourage first-time contributors to start with beginner-friendly issues.
-
----
-
-# Security
-
-If you discover a security vulnerability, please **do not** create a public issue.
-
-Instead, report it privately by following the instructions in **SECURITY.md**.
-
----
-
-# Code of Conduct
-
-Please read our **CODE_OF_CONDUCT.md** before participating.
-
-We are committed to creating a welcoming, inclusive, and respectful community.
-
----
-
-# License
-
-Distributed under the **MIT License**.
-
-See **LICENSE** for more information.
-
----
-
-# Maintainers
-
-| Name | Role |
-|------|------|
-| **Nensi Patel (@nensii21)** | Project Lead & Maintainer |
-
----
-
-# Acknowledgements
-
-Special thanks to:
-
-- All open-source contributors
-- ECSoc 2026
-- The React community
-- The FastAPI community
-- Every developer helping build DevLink
-
----
-
-<p align="center">
-
-## ⭐ If you like DevLink, consider giving the repository a star!
-
-Made by developers, for developers.
-
-Building the future of developer collaboration.
-
-</p>
-
+* **Lead Maintainer**: Nensi Patel ([@nensii21](https://github.com/nensii21))
+* **Community**: ECSoc 2026 Open Source Contributors
