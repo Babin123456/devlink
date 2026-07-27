@@ -21,7 +21,7 @@ import { LastActive } from "@/components/shared/LastActive";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-import { Search, Sparkles, Calendar, Briefcase, Check, Bookmark } from "lucide-react";
+import { Search, Sparkles, Calendar, Briefcase, Check, Bookmark, BadgeCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants } from "@/lib/animations";
 
@@ -101,8 +101,11 @@ function AIMatchCard({ builder }: { builder: Builder }) {
               params={{ builderId: builder.id }}
               className="block hover:underline"
             >
-              <h3 className="font-bold text-foreground text-[20px] leading-tight truncate">
+              <h3 className="font-bold text-foreground text-[20px] leading-tight truncate flex items-center gap-1">
                 {builder.name}
+                {builder.verified && (
+                  <BadgeCheck className="text-primary shrink-0 h-5 w-5" aria-label="Verified User" />
+                )}
               </h3>
             </Link>
             <p className="text-muted-foreground text-[13px] font-medium mt-0.5 truncate">
@@ -338,8 +341,11 @@ function BuildersPage() {
                     <div className="mx-auto w-fit">
                       <Avatar src={b.avatar} alt={b.name} size={64} online={b.online} />
                     </div>
-                    <p className="mt-2 text-[14px] font-semibold text-foreground">
+                    <p className="mt-2 text-[14px] font-semibold text-foreground flex items-center justify-center gap-1">
                       <HighlightText text={b.name} query={q} />
+                      {b.verified && (
+                        <BadgeCheck className="text-primary h-3.5 w-3.5" aria-label="Verified User" />
+                      )}
                     </p>
                     <p className="text-[12px] text-muted-foreground">
                       <HighlightText text={b.role} query={q} />

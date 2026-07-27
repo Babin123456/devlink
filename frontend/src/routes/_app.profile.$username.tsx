@@ -15,7 +15,8 @@ import {
   AlertTriangle,
   Sparkles,
   Pencil,
-  RotateCw
+  RotateCw,
+  BadgeCheck
 } from "lucide-react";
 import { copyText } from "@/lib/clipboard";
 import { ReportUserModal } from "@/components/shared/ReportUserModal";
@@ -206,7 +207,12 @@ function ProfilePage() {
         <div className="flex flex-wrap items-start gap-5">
           <Avatar src={b.avatar} alt={b.name} size={96} online={b.online} />
           <div className="min-w-0 flex-1">
-            <h1 className="text-[22px] font-bold text-foreground">{b.name}</h1>
+            <h1 className="text-[22px] font-bold text-foreground flex items-center gap-2">
+              {b.name}
+              {b.verified && (
+                <BadgeCheck className="text-primary h-6 w-6" aria-label="Verified User" />
+              )}
+            </h1>
             <p className="text-[13px] text-muted-foreground">
               @{b.handle} · {b.role}
             </p>

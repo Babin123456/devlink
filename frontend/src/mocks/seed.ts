@@ -26,6 +26,7 @@ export interface Builder {
   bio: string;
   lastActiveAt: string | null;
   publicEmail?: string;
+  verified?: boolean;
 }
 export interface Project {
   id: ID;
@@ -141,6 +142,7 @@ export const builders: Builder[] = [
     interests: ["Web Dev", "Design Systems", "AI"],
     lastActiveAt: ago(1),
     publicEmail: "priya@example.com",
+    verified: true,
   },
   {
     id: "b2",
@@ -601,6 +603,7 @@ export const currentUser = {
   handle: "nancy_dev",
   avatar: AV("Nancy"),
   premium: true,
+  verified: true,
 };
 
 export const stats = [

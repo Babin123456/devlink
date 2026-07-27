@@ -12,6 +12,7 @@ import {
   Rss,
   PanelLeftClose,
   PanelLeftOpen,
+  BadgeCheck,
 } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -298,8 +299,11 @@ export function TopNavbar() {
       >
         <Avatar src={currentUser.avatar} alt={currentUser.name} name={currentUser.name} size={32} />
         <div className="hidden text-left sm:block">
-          <p className="text-[12px] font-semibold leading-tight text-foreground">
+          <p className="text-[12px] font-semibold leading-tight text-foreground flex items-center gap-1">
             {currentUser.name}
+            {currentUser.verified && (
+              <BadgeCheck className="text-primary h-3 w-3" aria-label="Verified User" />
+            )}
           </p>
           <p className="text-[11px] leading-tight text-muted-foreground">View Profile</p>
         </div>
