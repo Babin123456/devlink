@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "sonner";
 
 export type ProjectSearchResult = {
   id: string;
@@ -61,6 +62,10 @@ async function fetchJson<T>(signal: AbortSignal, url: string): Promise<T> {
   return response.json();
 }
 
+type ApiConfig = {
+  baseUrl: string;
+};
+
 function getApiConfig(): ApiConfig {
   const baseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
 
@@ -103,7 +108,7 @@ async function requestJson<TResponse, TBody extends JsonValue | undefined = unde
 
     throw new Error(message);
   }
-  return (await response.json()) as T;
+  return (await res.json()) as TResponse;
 }
 
 export async function searchProjects(
@@ -177,4 +182,41 @@ export async function unfollowUser(userId: UUID): Promise<FollowStatusResponse> 
     method: "DELETE",
   });
   return getFollowStatus(userId);
+}
+
+export async function getMyApplications(): Promise<ApplicationResponse[]> {
+  return requestJson<ApplicationResponse[]>({
+    url: `/applications/my`,
+    method: "GET",
+  });
+}
+
+export async function acceptApplication(id: UUID): Promise<ApplicationResponse> {
+  return requestJson<ApplicationResponse>({
+    url: `/applications/${id}/accept`,
+    method: "PATCH",
+  });
+}
+
+export async function getProjectApplications(projectId: UUID): Promise<ApplicationResponse[]> {
+  return requestJson<ApplicationResponse[]>({
+    url: `/projects/${projectId}/applications`,
+    method: "GET",
+  });
+}
+
+export async function applyToFlare(
+  flareId: UUID,
+  projectId: UUID,
+  payload: Omit<ApplicationCreatePayload, "project_id" | "flare_id">,
+): Promise<ApplicationResponse> {
+  return requestJson<ApplicationResponse, any>({
+    url: `/applications`,
+    method: "POST",
+    body: {
+      ...payload,
+      project_id: projectId,
+      flare_id: flareId,
+    },
+  });
 }

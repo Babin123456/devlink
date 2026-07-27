@@ -41,7 +41,7 @@ function builderToDeveloper(builder: Builder): Developer {
       previousContributorIds: [],
     },
     online: builder.online,
-    bio: builder.bio,
+    bio: builder.bio || "",
     lastActiveAt: builder.lastActiveAt,
   };
 }

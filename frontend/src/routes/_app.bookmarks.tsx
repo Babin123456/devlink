@@ -32,14 +32,26 @@ export const Route = createFileRoute("/_app/bookmarks")({
   component: BookmarksPage,
 });
 
+type Developer = {
+  id: string;
+  avatar_url?: string;
+  name?: string;
+  role?: string;
+  location?: string;
+  experience?: string;
+  skills?: string[];
+};
+
 function BookmarksPage() {
   const [activeCollectionId, setActiveCollectionId] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<BookmarkCollection | null>(null);
 
-  const [bookmarkedDevs, setBookmarkedDevs] = useState<any[]>([]);
-  const toggleBookmark = useCallback((dev: any) => {
-    setBookmarkedDevs(prev => prev.some(d => d.id === dev.id) ? prev.filter(d => d.id !== dev.id) : [...prev, dev]);
+  const [bookmarkedDevs, setBookmarkedDevs] = useState<Developer[]>([]);
+  const toggleBookmark = useCallback((dev: Developer) => {
+    setBookmarkedDevs((prev) =>
+      prev.some((d) => d.id === dev.id) ? prev.filter((d) => d.id !== dev.id) : [...prev, dev],
+    );
   }, []);
 
   const createCollection = useCreateCollection();
@@ -53,7 +65,7 @@ function BookmarksPage() {
         onSuccess: () => setCreateDialogOpen(false),
       });
     },
-    [createCollection]
+    [createCollection],
   );
 
   const handleRenameCollection = useCallback(
@@ -63,10 +75,10 @@ function BookmarksPage() {
         { id: renameTarget.id, name },
         {
           onSuccess: () => setRenameTarget(null),
-        }
+        },
       );
     },
-    [renameTarget, renameCollection]
+    [renameTarget, renameCollection],
   );
 
   const handleDeleteCollection = useCallback(
@@ -79,7 +91,7 @@ function BookmarksPage() {
         },
       });
     },
-    [deleteCollection, activeCollectionId]
+    [deleteCollection, activeCollectionId],
   );
 
   const handleAddToCollection = useCallback(
@@ -89,13 +101,12 @@ function BookmarksPage() {
         bookmarkId,
       });
     },
-    [addBookmarkToCollection]
+    [addBookmarkToCollection],
   );
 
   const bookmarkedProjects = projects.slice(0, 3);
 
   return (
-
     <div className="flex gap-6">
       <aside className="hidden w-56 shrink-0 md:block">
         <div className="sticky top-6">
@@ -112,9 +123,7 @@ function BookmarksPage() {
       <div className="min-w-0 flex-1 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-[22px] font-bold tracking-tight text-foreground">
-              Bookmarks
-            </h1>
+            <h1 className="text-[22px] font-bold tracking-tight text-foreground">Bookmarks</h1>
             <p className="text-[13px] text-muted-foreground">
               {activeCollectionId
                 ? "Filtered by collection"
@@ -158,9 +167,7 @@ function BookmarksPage() {
                           size={40}
                         />
                         <div>
-                          <p className="text-[14px] font-semibold text-foreground">
-                            {dev.name}
-                          </p>
+                          <p className="text-[14px] font-semibold text-foreground">{dev.name}</p>
                           <p className="text-[12px] text-muted-foreground">{dev.role}</p>
                         </div>
                       </div>
@@ -237,9 +244,7 @@ function BookmarksPage() {
                             <p className="truncate text-[14px] font-semibold text-foreground">
                               {p.name}
                             </p>
-                            {p.difficulty && (
-                              <ProjectDifficultyBadge difficulty={p.difficulty} />
-                            )}
+                            {p.difficulty && <ProjectDifficultyBadge difficulty={p.difficulty} />}
                           </div>
                           <p className="mt-0.5 text-[12px] text-muted-foreground line-clamp-2">
                             {p.description}
@@ -248,10 +253,7 @@ function BookmarksPage() {
 
                         <Bookmark size={14} className="text-primary fill-primary" />
 
-
                         <Bookmark size={14} className="text-primary fill-primary shrink-0" />
-
-
                       </div>
                       <div className="mt-3 flex flex-wrap gap-1">
                         {p.stack.map((s) => (
@@ -281,9 +283,7 @@ function BookmarksPage() {
           <div className="space-y-2">
             {flares.slice(0, 2).map((f) => (
               <Card key={f.id} className="p-4">
-                <p className="text-[13px] font-semibold text-foreground">
-                  {f.author.name}
-                </p>
+                <p className="text-[13px] font-semibold text-foreground">{f.author.name}</p>
                 <p className="mt-1 text-[13px] text-foreground">{f.content}</p>
               </Card>
             ))}

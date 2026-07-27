@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { notificationsService } from "@/services";
-import { Card, NoNotificationsEmptyState } from "@/components/shared/primitives";
+import { Card, EmptyState } from "@/components/shared/primitives";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app/notifications")({
@@ -34,7 +34,7 @@ function NotificationsPage() {
       </div>
       <Card>
         {data.length === 0 ? (
-          <NoNotificationsEmptyState />
+          <EmptyState title="No notifications" desc="You're all caught up!" />
         ) : (
           <ul className="divide-y divide-border">
             {data.map((n) => (
