@@ -137,6 +137,73 @@ class RefreshTokenService:
         return True
 
     @staticmethod
+    def get_active_sessions(
+        db: Session,
+        user_id: uuid.UUID,
+    ) -> list[RefreshToken]:
+        now = datetime.now(timezone.utc)
+        stmt = (
+            select(RefreshToken)
+            .where(
+                RefreshToken.user_id == user_id,
+                RefreshToken.is_revoked == False,  # noqa: E712
+                RefreshToken.expires_at > now,
+            )
+            .order_by(RefreshToken.created_at.desc())
+        )
+        return list(db.scalars(stmt))
+
+    @staticmethod
+    def get_session_by_id(
+        db: Session,
+        session_id: uuid.UUID,
+        user_id: uuid.UUID,
+    ) -> RefreshToken | None:
+        stmt = select(RefreshToken).where(
+            RefreshToken.id == session_id,
+            RefreshToken.user_id == user_id,
+        )
+        return db.scalar(stmt)
+
+    @staticmethod
+    def revoke_session_by_id(
+        db: Session,
+        session_id: uuid.UUID,
+        user_id: uuid.UUID,
+    ) -> bool:
+        session = RefreshTokenService.get_session_by_id(db, session_id, user_id)
+        if not session or session.is_revoked:
+            return False
+        session.is_revoked = True
+        session.revoked_at = datetime.now(timezone.utc)
+        db.flush()
+        return True
+
+    @staticmethod
+    def revoke_other_sessions(
+        db: Session,
+        user_id: uuid.UUID,
+        current_session_id: uuid.UUID | None = None,
+    ) -> int:
+        now = datetime.now(timezone.utc)
+        stmt = select(RefreshToken).where(
+            RefreshToken.user_id == user_id,
+            RefreshToken.is_revoked == False,  # noqa: E712
+            RefreshToken.expires_at > now,
+        )
+        if current_session_id:
+            stmt = stmt.where(RefreshToken.id != current_session_id)
+
+        tokens = list(db.scalars(stmt))
+        for token in tokens:
+            token.is_revoked = True
+            token.revoked_at = now
+
+        db.flush()
+        return len(tokens)
+
+    @staticmethod
+    def delete_expired_token(
     def revoke_all_tokens(
         db: Session,
         user_id: uuid.UUID,

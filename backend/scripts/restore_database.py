@@ -36,11 +36,16 @@ env["PGPASSWORD"] = db_password or ""
 
 command = [
     "psql",
-    "-h", db_host,
-    "-p", str(db_port),
-    "-U", db_user,
-    "-d", db_name,
-    "-f", str(backup_file),
+    "-h",
+    db_host,
+    "-p",
+    str(db_port),
+    "-U",
+    db_user,
+    "-d",
+    db_name,
+    "-f",
+    str(backup_file),
 ]
 
 print(f"Restoring database from {backup_file}...")

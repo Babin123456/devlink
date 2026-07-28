@@ -280,6 +280,7 @@ class UserService:
         db: Session,
         db_user: User,
     ) -> User:
+
         db_user.is_verified = True
 
         db.flush()

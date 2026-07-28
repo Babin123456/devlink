@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
-import { builders, currentUser, projects, type Builder } from "@/mocks/seed";
+import { builders, currentUser, projects, type Builder, type UserRole } from "@/mocks/seed";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -99,7 +99,7 @@ function buildUpdatedBuilder(builder: Builder, values: ProfileFormValues): Build
     portfolioUrl: values.portfolioUrl || undefined,
     githubUrl: values.githubUrl || undefined,
     linkedinUrl: values.linkedinUrl || undefined,
-    role: (values.role as any) || "Developer",
+    role: (values.role as UserRole) || "Developer",
     experienceLevel: values.experienceLevel || undefined,
     company: values.company || undefined,
     profileSkills: values.profileSkills.map((skill) => ({
