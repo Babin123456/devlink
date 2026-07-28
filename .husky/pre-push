@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# DevLink pre-push hook — runs TypeScript typecheck before every push
+cd frontend && npx tsc --noEmit
