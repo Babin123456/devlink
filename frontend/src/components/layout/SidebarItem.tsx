@@ -53,6 +53,7 @@ export function SidebarItem({ label, to, icon, badge, forceCollapsed }: SidebarI
       </li>
     );
   }
+
   return (
     <li title={undefined}>
       <Link
