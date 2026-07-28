@@ -23,9 +23,22 @@ export interface Builder {
   badges: string[];
   interests: string[];
   online: boolean;
-  bio: string;
+  headline?: string;
+  bio?: string;
+  location?: string;
+  timezone?: string;
+  website?: string;
+  resumeUrl?: string;
+  portfolioUrl?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  experienceLevel?: string;
+  company?: string;
+  profileSkills?: { name: string; level?: string; category?: string; yearsOfExperience?: number }[];
+  techStack?: string[];
   lastActiveAt: string | null;
   publicEmail?: string;
+  verified?: boolean;
 }
 export interface Project {
   id: ID;
@@ -105,11 +118,30 @@ export interface Notification {
 export interface Hackathon {
   id: ID;
   name: string;
+  description: string;
   theme: string;
-  startsIn: number;
+  starts_at: string;
+  ends_at: string;
+  min_team_size: number;
+  max_team_size: number;
   prize: string;
-  teamSize: string;
-  registered: boolean;
+  status: string;
+  is_published: boolean;
+  created_by: string;
+  website_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HackathonTeam {
+  id: ID;
+  hackathon_id: string;
+  name: string;
+  description?: string;
+  created_by: string;
+  member_count: number;
+  created_at: string;
+  updated_at: string;
 }
 export interface Deadline {
   id: ID;
@@ -141,6 +173,7 @@ export const builders: Builder[] = [
     interests: ["Web Dev", "Design Systems", "AI"],
     lastActiveAt: ago(1),
     publicEmail: "priya@example.com",
+    verified: true,
   },
   {
     id: "b2",
@@ -550,29 +583,53 @@ export const hackathons: Hackathon[] = [
   {
     id: "h1",
     name: "AI for Good 2025",
+    description:
+      "Build AI-powered tools that drive social impact. Use machine learning, NLP, or computer vision to solve real-world problems.",
     theme: "Social impact",
-    startsIn: 12,
+    starts_at: "2025-09-15T09:00:00Z",
+    ends_at: "2025-09-17T18:00:00Z",
+    min_team_size: 2,
+    max_team_size: 5,
     prize: "$25k",
-    teamSize: "2–5",
-    registered: true,
+    status: "registration_open",
+    is_published: true,
+    created_by: "u1",
+    created_at: "2025-08-01T00:00:00Z",
+    updated_at: "2025-08-01T00:00:00Z",
   },
   {
     id: "h2",
     name: "DevLink Winter Jam",
+    description:
+      "A weekend hackathon for the DevLink community. Ship something cool, win prizes, and meet fellow developers.",
     theme: "Any theme",
-    startsIn: 30,
+    starts_at: "2025-12-10T09:00:00Z",
+    ends_at: "2025-12-12T18:00:00Z",
+    min_team_size: 1,
+    max_team_size: 4,
     prize: "$10k",
-    teamSize: "1–4",
-    registered: false,
+    status: "draft",
+    is_published: false,
+    created_by: "u1",
+    created_at: "2025-11-01T00:00:00Z",
+    updated_at: "2025-11-01T00:00:00Z",
   },
   {
     id: "h3",
     name: "Chain Builders",
+    description:
+      "Build the next generation of decentralized applications. Focus on DeFi, NFTs, DAOs, or blockchain infrastructure.",
     theme: "Web3",
-    startsIn: 45,
+    starts_at: "2026-01-20T09:00:00Z",
+    ends_at: "2026-01-22T18:00:00Z",
+    min_team_size: 1,
+    max_team_size: 5,
     prize: "$50k",
-    teamSize: "1–5",
-    registered: false,
+    status: "completed",
+    is_published: true,
+    created_by: "u2",
+    created_at: "2025-12-15T00:00:00Z",
+    updated_at: "2026-01-23T00:00:00Z",
   },
 ];
 
@@ -601,6 +658,7 @@ export const currentUser = {
   handle: "nancy_dev",
   avatar: AV("Nancy"),
   premium: true,
+  verified: true,
 };
 
 export const stats = [

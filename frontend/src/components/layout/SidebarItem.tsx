@@ -53,11 +53,11 @@ export function SidebarItem({ label, to, icon, badge, forceCollapsed }: SidebarI
       </li>
     );
   }
-
   return (
     <li title={undefined}>
       <Link
         to={to.split("?")[0]}
+        preload="intent"
         onClick={closeMobile}
         aria-current={active ? "page" : undefined}
         className={cn(
@@ -65,7 +65,7 @@ export function SidebarItem({ label, to, icon, badge, forceCollapsed }: SidebarI
           "focus-visible:ring-2 focus-visible:ring-primary",
           active
             ? "bg-primary-soft font-semibold text-primary"
-            : "text-foreground/80 hover:bg-sidebar-accent hover:text-foreground",
+            : "text-foreground/80 hover:bg-sidebar-accent hover:text-foreground focus:bg-sidebar-accent",
         )}
       >
         <span className={cn("shrink-0", active ? "text-primary" : "text-muted-foreground")}>

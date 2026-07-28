@@ -7,11 +7,14 @@ from datetime import datetime
 from sqlalchemy import (
     Boolean,
     DateTime,
+    ForeignKey,
     String,
     Text,
     JSON,
     func,
 )
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -75,9 +78,9 @@ class User(Base):
     # ------------------------------------------------------------------
 
     badges: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
+        ARRAY(String).with_variant(JSON, "sqlite"),
         default=list,
-        server_default="{}",
+        server_default="[]",
         nullable=False,
     )
 
@@ -172,6 +175,12 @@ class User(Base):
         nullable=False,
     )
 
+    is_private: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
     # ------------------------------------------------------------------
     # Authentication
     # ------------------------------------------------------------------
@@ -230,6 +239,29 @@ class User(Base):
         String(100),
         nullable=True,
         unique=True,
+    )
+
+    # ------------------------------------------------------------------
+    # Soft Delete
+    # ------------------------------------------------------------------
+
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
+    )
+
+    deleted_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+    )
+
+    deleted_by: Mapped[User | None] = relationship(
+        "User",
+        foreign_keys=[deleted_by_id],
+        remote_side="User.id",
     )
 
     # ------------------------------------------------------------------

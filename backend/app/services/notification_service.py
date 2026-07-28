@@ -246,7 +246,7 @@ class NotificationService:
         application_id=None,
     ):
         from app.tasks.notification_tasks import send_notification_task
-        
+
         payload = {
             "recipient_id": str(recipient_id) if recipient_id else None,
             "sender_id": str(sender_id) if sender_id else None,
@@ -260,5 +260,5 @@ class NotificationService:
             "message_id": str(message_id) if message_id else None,
             "application_id": str(application_id) if application_id else None,
         }
-        
+
         send_notification_task.delay(payload)

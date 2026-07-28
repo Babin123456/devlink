@@ -1,6 +1,6 @@
 import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
-import { builders, currentUser, projects } from "@/mocks/seed";
+import { builders, currentUser, projects, type Builder, type UserRole } from "@/mocks/seed";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -15,7 +15,8 @@ import {
   AlertTriangle,
   Sparkles,
   Pencil,
-  RotateCw
+  RotateCw,
+  BadgeCheck,
 } from "lucide-react";
 import { copyText } from "@/lib/clipboard";
 import { ReportUserModal } from "@/components/shared/ReportUserModal";
@@ -32,6 +33,13 @@ export const Route = createFileRoute("/_app/profile/$username")({
   }),
   component: ProfilePage,
 });
+
+type ProfileSkill = {
+  name: string;
+  level?: string;
+  category?: string;
+  yearsOfExperience?: number;
+};
 
 type ProfileFormValues = {
   headline: string;
@@ -64,10 +72,17 @@ function mapBuilderToFormValues(builder: Builder): ProfileFormValues {
     role: builder.role ?? "",
     experienceLevel: builder.experienceLevel ?? "",
     company: builder.company ?? "",
-    profileSkills:
-      builder.profileSkills?.length
-        ? builder.profileSkills.map((skill) => ({ ...skill, level: skill.level ?? "Intermediate", yearsOfExperience: skill.yearsOfExperience ?? 0 }))
-        : builder.skills.map((skill) => ({ name: skill, level: "Intermediate", category: "general" })),
+    profileSkills: builder.profileSkills?.length
+      ? builder.profileSkills.map((skill: ProfileSkill) => ({
+          ...skill,
+          level: skill.level ?? "Intermediate",
+          yearsOfExperience: skill.yearsOfExperience ?? 0,
+        }))
+      : builder.skills.map((skill: string) => ({
+          name: skill,
+          level: "Intermediate",
+          category: "general",
+        })),
     techStack: builder.techStack ?? [],
   };
 }
@@ -76,7 +91,7 @@ function buildUpdatedBuilder(builder: Builder, values: ProfileFormValues): Build
   return {
     ...builder,
     headline: values.headline || undefined,
-    bio: values.bio || undefined,
+    bio: values.bio || "",
     location: values.location || undefined,
     timezone: values.timezone || undefined,
     website: values.website || undefined,
@@ -84,7 +99,7 @@ function buildUpdatedBuilder(builder: Builder, values: ProfileFormValues): Build
     portfolioUrl: values.portfolioUrl || undefined,
     githubUrl: values.githubUrl || undefined,
     linkedinUrl: values.linkedinUrl || undefined,
-    role: values.role || undefined,
+    role: (values.role as UserRole) || "Developer",
     experienceLevel: values.experienceLevel || undefined,
     company: values.company || undefined,
     profileSkills: values.profileSkills.map((skill) => ({
@@ -110,7 +125,6 @@ function ProfilePage() {
         handle: currentUser.handle,
         avatar: currentUser.avatar,
         bio: "Product engineer. Ships fast, sleeps sometimes.",
-        role: "Developer",
         role: "Full Stack Developer",
         id: currentUser.id,
       }
@@ -206,7 +220,12 @@ function ProfilePage() {
         <div className="flex flex-wrap items-start gap-5">
           <Avatar src={b.avatar} alt={b.name} size={96} online={b.online} />
           <div className="min-w-0 flex-1">
-            <h1 className="text-[22px] font-bold text-foreground">{b.name}</h1>
+            <h1 className="text-[22px] font-bold text-foreground flex items-center gap-2">
+              {b.name}
+              {b.verified && (
+                <BadgeCheck className="text-primary h-6 w-6" aria-label="Verified User" />
+              )}
+            </h1>
             <p className="text-[13px] text-muted-foreground">
               @{b.handle} · {b.role}
             </p>
@@ -261,7 +280,8 @@ function ProfilePage() {
                 disabled={summaryMutation.isPending}
                 className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted/50 hover:text-foreground disabled:opacity-50"
               >
-                <RotateCw size={12} className={summaryMutation.isPending ? "animate-spin" : ""} /> Regenerate
+                <RotateCw size={12} className={summaryMutation.isPending ? "animate-spin" : ""} />{" "}
+                Regenerate
               </button>
             </div>
           )}
@@ -295,10 +315,12 @@ function ProfilePage() {
                   className="w-full rounded-md border border-border bg-surface px-3 py-2 text-[13px] text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
                 />
                 <div className="flex items-center justify-between">
-                  <p className={cn(
-                    "text-[11px]",
-                    editedSummary.length > 450 ? "text-orange-500" : "text-muted-foreground"
-                  )}>
+                  <p
+                    className={cn(
+                      "text-[11px]",
+                      editedSummary.length > 450 ? "text-orange-500" : "text-muted-foreground",
+                    )}
+                  >
                     {editedSummary.length}/500 characters
                   </p>
                   <div className="flex items-center gap-2">

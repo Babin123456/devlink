@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { BackButton } from "@/components/shared/BackButton";
 import { LoadingButton } from "@/components/shared/LoadingButton";
+import { authApi } from "@/api/modules/auth";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
@@ -18,21 +19,24 @@ export const Route = createFileRoute("/forgot-password")({
 function ForgotPassword() {
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [email, setEmail] = useState("");
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      if (submitting) return;
+      if (submitting || !email) return;
       setSubmitting(true);
       try {
-        await new Promise((r) => setTimeout(r, 800));
+        await authApi.forgotPassword(email);
         setSent(true);
         toast.success("Reset link sent");
+      } catch (err: unknown) {
+        toast.error((err as Error).message || "Failed to send reset link");
       } finally {
         setSubmitting(false);
       }
     },
-    [submitting],
+    [submitting, email],
   );
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-background px-4">
@@ -56,6 +60,8 @@ function ForgotPassword() {
             <input
               type="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-md border border-border bg-surface px-3 py-[8px] text-[14px] text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
             <LoadingButton

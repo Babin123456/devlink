@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { LogOut } from "lucide-react";
+import { LogOut, BadgeCheck } from "lucide-react";
 import { Avatar } from "@/components/shared/primitives";
 import { currentUser } from "@/mocks/seed";
 import { useSidebar } from "@/hooks/useSidebar";
@@ -24,7 +24,12 @@ export function UserProfile({ forceCollapsed }: UserProfileProps) {
           title={currentUser.name}
           aria-label={`View ${currentUser.name}'s profile`}
         >
-          <Avatar src={currentUser.avatar} alt={currentUser.name} name={currentUser.name} size={36} />
+          <Avatar
+            src={currentUser.avatar}
+            alt={currentUser.name}
+            name={currentUser.name}
+            size={36}
+          />
         </Link>
         <button
           title="Logout"
@@ -47,7 +52,12 @@ export function UserProfile({ forceCollapsed }: UserProfileProps) {
       >
         <Avatar src={currentUser.avatar} alt={currentUser.name} name={currentUser.name} size={36} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13px] font-semibold text-foreground">{currentUser.name}</p>
+          <p className="truncate text-[13px] font-semibold text-foreground flex items-center gap-1">
+            {currentUser.name}
+            {currentUser.verified && (
+              <BadgeCheck className="text-primary h-3.5 w-3.5" aria-label="Verified User" />
+            )}
+          </p>
           <p className="truncate text-[12px] text-muted-foreground">@{currentUser.handle}</p>
         </div>
         {currentUser.premium && (

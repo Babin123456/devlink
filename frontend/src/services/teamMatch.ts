@@ -41,17 +41,34 @@ function builderToDeveloper(builder: Builder): Developer {
       previousContributorIds: [],
     },
     online: builder.online,
-    bio: builder.bio,
+    bio: builder.bio || "",
     lastActiveAt: builder.lastActiveAt,
   };
 }
 
-function projectToRequirements(project: Project): ProjectRequirements {
+function projectToRequirements(project?: Project): ProjectRequirements {
+  if (!project) {
+    return {
+      id: "",
+      name: "",
+      description: "",
+      requiredSkills: [],
+      preferredSkills: [],
+      tags: [],
+      requiredExperienceYears: 0,
+      requiredAvailabilityHoursPerWeek: 0,
+      ownerId: "owner-1",
+      maintainerIds: [],
+      orgId: null,
+      contributorIds: [],
+    };
+  }
+
   return {
     id: project.id,
     name: project.name,
     description: project.description,
-    requiredSkills: project.stack,
+    requiredSkills: project.stack || [],
     preferredSkills: [],
     tags: [
       ...(project.ai ? ["AI"] : []),
@@ -60,8 +77,10 @@ function projectToRequirements(project: Project): ProjectRequirements {
       ...(project.backend ? ["Backend"] : []),
       ...(project.frontend ? ["Frontend"] : []),
     ],
-    requiredExperienceYears:
-      project.difficulty === "Advanced" ? 4 : project.difficulty === "Intermediate" ? 2 : 1,
+    requiredExperienceYears: (() => {
+      const diff = (project.difficulty || "").toString().toLowerCase();
+      return diff === "advanced" ? 4 : diff === "intermediate" ? 2 : 1;
+    })(),
     requiredAvailabilityHoursPerWeek: 10,
     ownerId: "owner-1",
     maintainerIds: [],

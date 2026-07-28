@@ -4,7 +4,7 @@ import logging
 from collections import Counter
 from typing import List, Optional, Sequence
 
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.models.organization import Organization
@@ -52,15 +52,55 @@ def _ilike_pattern(q: str) -> str:
     return f"%{escaped}%"
 
 
+def _is_postgres(db: Session) -> bool:
+    """Check if the active database dialect is PostgreSQL."""
+    try:
+        bind = db.get_bind()
+        return bind is not None and bind.dialect.name == "postgresql"
+    except Exception:
+        return False
+
+
 # ---------------------------------------------------------------------
 # Per-category search helpers
 # ---------------------------------------------------------------------
 
 
 def search_users(db: Session, q: str, limit: int = 20) -> List[User]:
-    """Search active users by name / username / role / headline."""
-    if not _normalize_query(q):
+    """Search active users by name / username / role / headline.
+
+    Uses PostgreSQL Full-Text Search when connected to PostgreSQL,
+    with a fallback to ILIKE for SQLite/other databases.
+    """
+    clean_q = _normalize_query(q)
+    if not clean_q:
         return []
+
+    if _is_postgres(db):
+        ts_vector = func.to_tsvector(
+            "english",
+            func.coalesce(User.username, "")
+            + " "
+            + func.coalesce(User.first_name, "")
+            + " "
+            + func.coalesce(User.last_name, "")
+            + " "
+            + func.coalesce(User.role, "")
+            + " "
+            + func.coalesce(User.headline, ""),
+        )
+        ts_query = func.websearch_to_tsquery("english", clean_q)
+        return (
+            db.query(User)
+            .filter(
+                User.is_active.is_(True),
+                ts_vector.op("@@")(ts_query),
+            )
+            .order_by(func.ts_rank(ts_vector, ts_query).desc(), User.username.asc())
+            .limit(limit)
+            .all()
+        )
+
     pattern = _ilike_pattern(q)
     return (
         db.query(User)
@@ -81,9 +121,43 @@ def search_users(db: Session, q: str, limit: int = 20) -> List[User]:
 
 
 def search_projects(db: Session, q: str, limit: int = 20) -> List[Project]:
-    """Search published projects by title / tagline / description / tech stack."""
-    if not _normalize_query(q):
+    """Search published projects by title / tagline / description / tech stack.
+
+    Uses PostgreSQL Full-Text Search when connected to PostgreSQL,
+    with a fallback to ILIKE for SQLite/other databases.
+    """
+    clean_q = _normalize_query(q)
+    if not clean_q:
         return []
+
+    if _is_postgres(db):
+        ts_vector = func.to_tsvector(
+            "english",
+            func.coalesce(Project.title, "")
+            + " "
+            + func.coalesce(Project.tagline, "")
+            + " "
+            + func.coalesce(Project.description, "")
+            + " "
+            + func.coalesce(Project.tech_stack, ""),
+        )
+        ts_query = func.websearch_to_tsquery("english", clean_q)
+        return (
+            db.query(Project)
+            .filter(
+                Project.is_published.is_(True),
+                Project.is_archived.is_(False),
+                ts_vector.op("@@")(ts_query),
+            )
+            .order_by(
+                func.ts_rank(ts_vector, ts_query).desc(),
+                Project.stars.desc(),
+                Project.created_at.desc(),
+            )
+            .limit(limit)
+            .all()
+        )
+
     pattern = _ilike_pattern(q)
     return (
         db.query(Project)
@@ -104,9 +178,42 @@ def search_projects(db: Session, q: str, limit: int = 20) -> List[Project]:
 
 
 def search_organizations(db: Session, q: str, limit: int = 20) -> List[Organization]:
-    """Search active organizations by name / slug / description / location."""
-    if not _normalize_query(q):
+    """Search active organizations by name / slug / description / location.
+
+    Uses PostgreSQL Full-Text Search when connected to PostgreSQL,
+    with a fallback to ILIKE for SQLite/other databases.
+    """
+    clean_q = _normalize_query(q)
+    if not clean_q:
         return []
+
+    if _is_postgres(db):
+        ts_vector = func.to_tsvector(
+            "english",
+            func.coalesce(Organization.name, "")
+            + " "
+            + func.coalesce(Organization.slug, "")
+            + " "
+            + func.coalesce(Organization.description, "")
+            + " "
+            + func.coalesce(Organization.location, ""),
+        )
+        ts_query = func.websearch_to_tsquery("english", clean_q)
+        return (
+            db.query(Organization)
+            .filter(
+                Organization.active.is_(True),
+                ts_vector.op("@@")(ts_query),
+            )
+            .order_by(
+                func.ts_rank(ts_vector, ts_query).desc(),
+                Organization.members_count.desc(),
+                Organization.name.asc(),
+            )
+            .limit(limit)
+            .all()
+        )
+
     pattern = _ilike_pattern(q)
     return (
         db.query(Organization)
@@ -126,9 +233,35 @@ def search_organizations(db: Session, q: str, limit: int = 20) -> List[Organizat
 
 
 def search_skills(db: Session, q: str, limit: int = 20) -> List[Skill]:
-    """Search skills by name / normalized_name / category / description."""
-    if not _normalize_query(q):
+    """Search skills by name / normalized_name / category / description.
+
+    Uses PostgreSQL Full-Text Search when connected to PostgreSQL,
+    with a fallback to ILIKE for SQLite/other databases.
+    """
+    clean_q = _normalize_query(q)
+    if not clean_q:
         return []
+
+    if _is_postgres(db):
+        ts_vector = func.to_tsvector(
+            "english",
+            func.coalesce(Skill.name, "")
+            + " "
+            + func.coalesce(Skill.normalized_name, "")
+            + " "
+            + func.coalesce(Skill.category, "")
+            + " "
+            + func.coalesce(Skill.description, ""),
+        )
+        ts_query = func.websearch_to_tsquery("english", clean_q)
+        return (
+            db.query(Skill)
+            .filter(ts_vector.op("@@")(ts_query))
+            .order_by(func.ts_rank(ts_vector, ts_query).desc(), Skill.name.asc())
+            .limit(limit)
+            .all()
+        )
+
     pattern = _ilike_pattern(q)
     return (
         db.query(Skill)

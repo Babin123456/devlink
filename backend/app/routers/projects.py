@@ -72,14 +72,44 @@ def check_project_similarity(
     )
 
 
+from app.dependencies import (
+    get_database,
+    get_current_user,
+    get_optional_current_user,
+    require_project_permission,
+)
+from app.schemas.project_analytics import ProjectAnalyticsResponse
+from app.services.project_analytics_service import ProjectAnalyticsService
+
+
+@router.get(
+    "/{project_id}/analytics",
+    response_model=ProjectAnalyticsResponse,
+    summary="Get Project View Analytics",
+)
+def get_project_analytics(
+    project_id: uuid.UUID,
+    days: int = Query(
+        30, ge=1, le=365, description="Number of days for daily views breakdown"
+    ),
+    db: Session = Depends(get_database),
+):
+    """
+    Get project view analytics including total views, unique viewers, and daily views.
+    """
+    return ProjectAnalyticsService.get_analytics(db, project_id, days=days)
+
+
 @router.get(
     "/{project_id}",
     response_model=ProjectResponse,
 )
 @cached(ttl=60, key_prefix="projects:get")
 def get_project(
+    request: Request,
     project_id: uuid.UUID,
     db: Session = Depends(get_database),
+    current_user: User | None = Depends(get_optional_current_user),
 ):
 
     project = ProjectService.get_project(
@@ -93,9 +123,16 @@ def get_project(
             detail="Project not found",
         )
 
-    ProjectService.increment_views(
-        db,
-        project,
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    viewer_id = current_user.id if current_user else None
+
+    ProjectAnalyticsService.record_view(
+        db=db,
+        project_id=project_id,
+        viewer_id=viewer_id,
+        ip_address=ip_address,
+        user_agent=user_agent,
     )
 
     return project
@@ -107,8 +144,10 @@ def get_project(
 )
 @cached(ttl=60, key_prefix="projects:slug")
 def get_project_by_slug(
+    request: Request,
     slug: str,
     db: Session = Depends(get_database),
+    current_user: User | None = Depends(get_optional_current_user),
 ):
 
     project = ProjectService.get_by_slug(
@@ -122,9 +161,16 @@ def get_project_by_slug(
             detail="Project not found",
         )
 
-    ProjectService.increment_views(
-        db,
-        project,
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    viewer_id = current_user.id if current_user else None
+
+    ProjectAnalyticsService.record_view(
+        db=db,
+        project_id=project.id,
+        viewer_id=viewer_id,
+        ip_address=ip_address,
+        user_agent=user_agent,
     )
 
     return project
@@ -427,6 +473,77 @@ def invite_user(
             detail="Only the project owner can invite members",
         )
 
+    ProjectService.soft_delete_project(
+        db,
+        project,
+        deleted_by_id=current_user.id,
+    )
+
+
+@router.patch(
+    "/{project_id}/restore-soft-delete",
+    response_model=ProjectResponse,
+)
+def restore_project_soft_delete(
+    project_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+
+    project = ProjectService.get_project_including_deleted(db, project_id)
+
+    if project is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found",
+        )
+
+    if project.deleted_at is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Project is not deleted",
+        )
+
+    if project.owner_id != current_user.id and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Permission denied",
+        )
+
+    return ProjectService.restore_soft_deleted_project(
+        db,
+        project,
+    )
+
+
+@router.delete(
+    "/{project_id}/hard",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def hard_delete_project(
+    project_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Only admins can permanently delete projects",
+        )
+
+    project = ProjectService.get_project_including_deleted(db, project_id)
+
+    if project is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found",
+        )
+
+    ProjectService.hard_delete_project(
+        db,
+        project,
+    )
     from app.models.project_member import ProjectMember, MemberRole
 
     # pyrefly: ignore [missing-import]

@@ -14,6 +14,8 @@ from app.models.follower import Follower
 from app.models.project import Project
 from app.core.cache import cached
 from app.schemas.user import UserStats
+from app.models.user_report import UserReport
+from app.schemas.user_report import UserReportCreate
 
 
 class UserService:
@@ -22,18 +24,39 @@ class UserService:
     """
 
     @staticmethod
-    def get_user(db: Session, user_id: uuid.UUID) -> User | None:
+    def get_user(
+        db: Session,
+        user_id: uuid.UUID,
+    ) -> User | None:
+        stmt = select(User).where(
+            User.id == user_id,
+            User.deleted_at.is_(None),
+        )
+        return db.scalar(stmt)
+
+    @staticmethod
+    def get_user_including_deleted(
+        db: Session,
+        user_id: uuid.UUID,
+    ) -> User | None:
+        """Retrieve a user regardless of soft-delete status (admin use)."""
         return db.get(User, user_id)
 
     @staticmethod
     def get_by_email(db: Session, email: str) -> User | None:
-        stmt = select(User).where(User.email == email)
+        stmt = select(User).where(
+            User.email == email,
+            User.deleted_at.is_(None),
+        )
         return db.scalar(stmt)
 
     @staticmethod
     @cached(ttl=300, key_prefix="user")
     def get_by_username(db: Session, username: str) -> User | None:
-        stmt = select(User).where(User.username == username)
+        stmt = select(User).where(
+            User.username == username,
+            User.deleted_at.is_(None),
+        )
         return db.scalar(stmt)
 
     @staticmethod
@@ -43,7 +66,7 @@ class UserService:
         skip: int = 0,
         limit: int = 20,
     ) -> list[User]:
-        stmt = select(User).offset(skip).limit(limit)
+        stmt = select(User).where(User.deleted_at.is_(None)).offset(skip).limit(limit)
         return list(db.scalars(stmt))
 
     @staticmethod
@@ -84,7 +107,7 @@ class UserService:
         user: UserUpdate,
     ) -> User:
 
-        data = user.model_dump(exclude_unset=True)
+        data = user.model_dump(exclude_unset=True, mode="json")
 
         for key, value in data.items():
             setattr(db_user, key, value)
@@ -105,11 +128,34 @@ class UserService:
         return db_user
 
     @staticmethod
-    def delete_user(
+    def soft_delete_user(
+        db: Session,
+        db_user: User,
+        deleted_by_id: uuid.UUID,
+    ) -> None:
+        """Mark a user as deleted without removing the row."""
+        db_user.deleted_at = func.now()
+        db_user.deleted_by_id = deleted_by_id
+        db.commit()
+
+    @staticmethod
+    def restore_user(
+        db: Session,
+        db_user: User,
+    ) -> User:
+        """Restore a soft-deleted user."""
+        db_user.deleted_at = None
+        db_user.deleted_by_id = None
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+
+    @staticmethod
+    def hard_delete_user(
         db: Session,
         db_user: User,
     ) -> None:
-
+        """Permanently remove a user from the database (admin only)."""
         db.delete(db_user)
         db.flush()
 
@@ -241,3 +287,116 @@ class UserService:
         db.refresh(db_user)
 
         return db_user
+
+    @staticmethod
+    def get_profile_completion(
+        db: Session,
+        user: User,
+    ) -> ProfileCompletionResponse:
+        """
+        Calculate profile completion percentage and list missing profile factors.
+
+        Factors evaluated:
+        - Avatar: profile_image
+        - Bio: bio
+        - Skills: UserSkill table entries count > 0
+        - Experience: experience_level, role, or company
+        - GitHub: github_url or github_id
+        - Portfolio: portfolio_url or website
+        - Location: location
+        """
+        from app.models.user_skill import UserSkill
+        from app.schemas.user import ProfileCompletionResponse
+
+        missing: list[str] = []
+
+        # 1. Avatar
+        if not (user.profile_image and user.profile_image.strip()):
+            missing.append("Avatar")
+
+        # 2. Bio
+        if not (user.bio and user.bio.strip()):
+            missing.append("Bio")
+
+        # 3. Skills
+        skills_count = (
+            db.scalar(
+                select(func.count())
+                .select_from(UserSkill)
+                .where(UserSkill.user_id == user.id)
+            )
+            or 0
+        )
+        if skills_count == 0:
+            missing.append("Skills")
+
+        # 4. Experience
+        has_exp = bool(
+            (user.experience_level and user.experience_level.strip())
+            or (user.role and user.role.strip())
+            or (user.company and user.company.strip())
+        )
+        if not has_exp:
+            missing.append("Experience")
+
+        # 5. GitHub
+        has_github = bool(
+            (user.github_url and str(user.github_url).strip())
+            or (user.github_id and str(user.github_id).strip())
+        )
+        if not has_github:
+            missing.append("GitHub")
+
+        # 6. Portfolio
+        has_portfolio = bool(
+            (user.portfolio_url and str(user.portfolio_url).strip())
+            or (user.website and str(user.website).strip())
+        )
+        if not has_portfolio:
+            missing.append("Portfolio")
+
+        # 7. Location
+        if not (user.location and user.location.strip()):
+            missing.append("Location")
+
+        total_factors = 7
+        completed_factors = total_factors - len(missing)
+        completion_pct = round((completed_factors / total_factors) * 100)
+
+        return ProfileCompletionResponse(
+            completion=completion_pct,
+            missing=missing,
+        )
+
+    def update_resume_url(
+        db: Session,
+        user: User,
+        resume_url: str,
+    ) -> User:
+        user.resume_url = resume_url
+
+        db.commit()
+        db.refresh(user)
+
+        return user
+
+    @staticmethod
+    def create_user_report(
+        db: Session,
+        reporter_id: uuid.UUID,
+        reported_id: uuid.UUID,
+        report: UserReportCreate,
+    ) -> UserReport:
+        db_report = UserReport(
+            reporter_id=reporter_id,
+            reported_id=reported_id,
+            reason=report.reason,
+            description=report.description,
+            status="pending",
+        )
+
+        db.add(db_report)
+        db.commit()
+        db.refresh(db_report)
+
+        return db_report
