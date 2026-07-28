@@ -18,6 +18,10 @@ export function getInitials(name?: string | null, fallback = "?") {
     return fallback;
   }
 
+  if (parts.length === 1) {
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+
   const initials = parts
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
