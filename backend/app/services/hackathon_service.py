@@ -406,7 +406,9 @@ class HackathonService:
                 sqlfunc.count(HackathonScore.id).label("judge_count"),
             )
             .join(HackathonSubmission, HackathonSubmission.team_id == HackathonTeam.id)
-            .join(HackathonScore, HackathonScore.submission_id == HackathonSubmission.id)
+            .join(
+                HackathonScore, HackathonScore.submission_id == HackathonSubmission.id
+            )
             .where(HackathonTeam.hackathon_id == hackathon_id)
             .group_by(HackathonTeam.id, HackathonTeam.name, HackathonSubmission.title)
             .order_by(sqlfunc.avg(HackathonScore.score).desc())
@@ -420,7 +422,9 @@ class HackathonService:
                 "team_id": str(row.id),
                 "team_name": row.name,
                 "submission_title": row.submission_title or "",
-                "avg_score": round(float(row.avg_score), 1) if row.avg_score is not None else 0.0,
+                "avg_score": (
+                    round(float(row.avg_score), 1) if row.avg_score is not None else 0.0
+                ),
                 "judge_count": row.judge_count,
             }
             for idx, row in enumerate(results)
