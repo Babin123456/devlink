@@ -1,5 +1,6 @@
 "use client";
 import { toast } from "sonner";
+import { api } from "../api/client";
 
 export type ProjectSearchResult = {
   id: string;
@@ -128,17 +129,11 @@ export async function searchUsers(
 }
 
 export async function rejectApplication(id: UUID): Promise<ApplicationResponse> {
-  return requestJson<ApplicationResponse>({
-    url: `/applications/${id}/reject`,
-    method: "PATCH",
-  });
+  return api.patch<ApplicationResponse>(`/applications/${id}/reject`);
 }
 
 export async function withdrawApplication(id: UUID): Promise<ApplicationResponse> {
-  return requestJson<ApplicationResponse>({
-    url: `/applications/${id}/withdraw`,
-    method: "PATCH",
-  });
+  return api.patch<ApplicationResponse>(`/applications/${id}/withdraw`);
 }
 
 export function toastError(err: unknown, fallback = "Something went wrong") {
@@ -169,40 +164,26 @@ export async function getFollowStatus(userId: UUID): Promise<FollowStatusRespons
 }
 
 export async function followUser(userId: UUID): Promise<FollowStatusResponse> {
-  await requestJson<void>({
-    url: `/followers/${userId}`,
-    method: "POST",
-  });
+  await api.post<void>(`/followers/${userId}`);
+
   return getFollowStatus(userId);
 }
 
 export async function unfollowUser(userId: UUID): Promise<FollowStatusResponse> {
-  await requestJson<void>({
-    url: `/followers/${userId}`,
-    method: "DELETE",
-  });
+  await api.delete<void>(`/followers/${userId}`);
   return getFollowStatus(userId);
 }
 
 export async function getMyApplications(): Promise<ApplicationResponse[]> {
-  return requestJson<ApplicationResponse[]>({
-    url: `/applications/my`,
-    method: "GET",
-  });
+  return api.get<ApplicationResponse[]>("/applications/my");
 }
 
 export async function acceptApplication(id: UUID): Promise<ApplicationResponse> {
-  return requestJson<ApplicationResponse>({
-    url: `/applications/${id}/accept`,
-    method: "PATCH",
-  });
+  return api.patch<ApplicationResponse>(`/applications/${id}/accept`);
 }
 
 export async function getProjectApplications(projectId: UUID): Promise<ApplicationResponse[]> {
-  return requestJson<ApplicationResponse[]>({
-    url: `/projects/${projectId}/applications`,
-    method: "GET",
-  });
+  return api.get<ApplicationResponse[]>(`/projects/${projectId}/applications`);
 }
 
 export async function applyToFlare(
@@ -210,6 +191,11 @@ export async function applyToFlare(
   projectId: UUID,
   payload: Omit<ApplicationCreatePayload, "project_id" | "flare_id">,
 ): Promise<ApplicationResponse> {
+  return api.post<ApplicationResponse>("/applications", {
+    ...payload,
+    project_id: projectId,
+    flare_id: flareId,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return requestJson<ApplicationResponse, any>({
     url: `/applications`,
     method: "POST",

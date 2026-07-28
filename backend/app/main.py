@@ -108,10 +108,25 @@ app = FastAPI(
 # ------------------------------------------------------------------
 
 app.state.limiter = limiter
-app.add_exception_handler(
-    RateLimitExceeded,
-    _rate_limit_exceeded_handler,
+
+# ------------------------------------------------------------------
+# Standardized Exception Handlers
+# ------------------------------------------------------------------
+
+from fastapi.exceptions import HTTPException, RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from app.core.error_handlers import (
+    http_exception_handler,
+    validation_exception_handler,
+    rate_limit_exception_handler,
+    global_exception_handler,
 )
+
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(RateLimitExceeded, rate_limit_exception_handler)
+app.add_exception_handler(Exception, global_exception_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 # ------------------------------------------------------------------
@@ -187,22 +202,6 @@ async def health_simple():
 
 
 # ------------------------------------------------------------------
-# Global Exception Handler
-# ------------------------------------------------------------------
-
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
-    return JSONResponse(
-        status_code=500,
-        content={
-            "success": False,
-            "message": "Internal Server Error",
-        },
-    )
-
-
-# ------------------------------------------------------------------
 # API Routers
 # ------------------------------------------------------------------
 
@@ -227,6 +226,7 @@ from app.routers import (
     followers,
     health,
     issues,
+    hackathons,
     messages,
     notifications,
     organizations,
@@ -290,3 +290,4 @@ app.include_router(health.router)
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
 app.include_router(saved_searches.router)
 
+app.include_router(hackathons.router, prefix="/api/hackathons", tags=["Hackathons"])

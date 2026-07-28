@@ -22,7 +22,14 @@ import {
   searchApi,
   issuesApi,
 } from "@/api";
-import type { BookmarkCollection, BookmarkCollectionWithBookmarks, TechStackResponse } from "@/api";
+import type {
+  BookmarkCollection,
+  BookmarkCollectionWithBookmarks,
+  TechStackResponse,
+  IssueCreateInput,
+  IssueUpdateInput,
+} from "@/api";
+import type { Hackathon } from "@/mocks/seed";
 
 const delay = 120;
 const mock = <T>(v: T): Promise<T> => new Promise((r) => setTimeout(() => r(v), delay));
@@ -77,7 +84,8 @@ export interface BackendActivity {
 }
 
 export const projectsService = {
-  list: (params?: any) => withFallback(() => projectsApi.list(params), seed.projects),
+  list: (params?: Record<string, unknown>) =>
+    withFallback(() => projectsApi.list(params), seed.projects),
   get: (id: string) =>
     withFallback(() => projectsApi.get(id), seed.projects.find((p) => p.id === id) ?? null),
   trending: () =>
@@ -159,12 +167,12 @@ export const issuesService = {
       ? issuesApi.get(projectId, issueId)
       : Promise.reject("Not implemented in mock"),
 
-  create: (projectId: string, body: any) =>
+  create: (projectId: string, body: IssueCreateInput) =>
     isBackendConfigured()
       ? issuesApi.create(projectId, body)
       : Promise.reject("Not implemented in mock"),
 
-  update: (projectId: string, issueId: string, body: any) =>
+  update: (projectId: string, issueId: string, body: IssueUpdateInput) =>
     isBackendConfigured()
       ? issuesApi.update(projectId, issueId, body)
       : Promise.reject("Not implemented in mock"),
@@ -174,7 +182,10 @@ export const issuesService = {
       ? issuesApi.remove(projectId, issueId)
       : Promise.reject("Not implemented in mock"),
 
-  checkDuplicates: (projectId: string, body: any) =>
+  checkDuplicates: (
+    projectId: string,
+    body: { title: string; description: string; threshold?: number },
+  ) =>
     isBackendConfigured()
       ? issuesApi.checkDuplicates(projectId, body)
       : Promise.reject("Not implemented in mock"),
@@ -205,6 +216,33 @@ export const notificationsService = {
 
 export const hackathonsService = {
   list: () => withFallback(() => hackathonsApi.list(), seed.hackathons),
+  get: (id: string) =>
+    withFallback(() => hackathonsApi.get(id), seed.hackathons.find((h) => h.id === id) ?? null),
+  create: (body: Partial<Hackathon>) => withFallback(() => hackathonsApi.create(body), null),
+  update: (id: string, body: Partial<Hackathon>) =>
+    withFallback(() => hackathonsApi.update(id, body), null),
+  delete: (id: string) => withFallback(() => hackathonsApi.delete(id), undefined),
+  register: (id: string, body?: { motivation?: string }) =>
+    withFallback(() => hackathonsApi.register(id, body), undefined),
+  cancelRegistration: (id: string) =>
+    withFallback(() => hackathonsApi.cancelRegistration(id), undefined),
+  getTeams: (id: string) => withFallback(() => hackathonsApi.getTeams(id), []),
+  createTeam: (id: string, body: { name: string; description?: string }) =>
+    withFallback(() => hackathonsApi.createTeam(id, body), null),
+  joinTeam: (teamId: string) => withFallback(() => hackathonsApi.joinTeam(teamId), undefined),
+  leaveTeam: (teamId: string) => withFallback(() => hackathonsApi.leaveTeam(teamId), undefined),
+  getSubmissions: (id: string) => withFallback(() => hackathonsApi.getSubmissions(id), []),
+  createSubmission: (
+    id: string,
+    body: {
+      team_id: string;
+      title: string;
+      description: string;
+      repo_url?: string;
+      demo_url?: string;
+    },
+  ) => withFallback(() => hackathonsApi.createSubmission(id, body), null),
+  getLeaderboard: (id: string) => withFallback(() => hackathonsApi.getLeaderboard(id), []),
 };
 
 export const techStackService = {
