@@ -33,12 +33,15 @@ Architecture:
 
 import json
 import logging
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, status
 from jose import JWTError, jwt
 
 from app.core.config import settings
+from app.dependencies import get_current_user
+from app.models.user import User
 
 router = APIRouter(prefix="/ws", tags=["WebSockets"])
 logger = logging.getLogger(__name__)
@@ -52,8 +55,8 @@ def authenticate_ws_token(token: str) -> Optional[str]:
 
     Returns ``None`` if the token is invalid, expired, or missing the
     ``sub`` claim.  This is the WebSocket equivalent of
-    ``dependencies.get_current_user`` — browsers cannot send
-    ``Authorization`` headers on WebSocket handshakes, so the token is
+    `dependencies.get_current_user` — browsers cannot send
+    `Authorization` headers on WebSocket handshakes, so the token is
     passed as a query parameter instead.
     """
     try:
@@ -74,7 +77,7 @@ def authenticate_ws_token(token: str) -> Optional[str]:
 
 
 class ConnectionManager:
-    """Manages WebSocket connections with project-scoped rooms.
+    """Manages WebSocket connections with project-scoped rooms and user presence.
 
     A "room" is identified by a project UUID string.  Users join rooms
     to receive project-scoped broadcasts (member joins/leaves, project
@@ -88,20 +91,34 @@ class ConnectionManager:
         self.active_connections: Dict[str, List[WebSocket]] = {}
         # room_id (project UUID string) → set of user_ids currently in room
         self.rooms: Dict[str, Set[str]] = {}
+        # user_id → presence status ("online", "away", "busy", "offline")
+        self.presence_states: Dict[str, str] = {}
+        # user_id → timestamp of last activity
+        self.last_activity: Dict[str, datetime] = {}
 
     # ── Connection lifecycle ─────────────────────────────────────────────
 
     async def connect(self, websocket: WebSocket, user_id: str) -> None:
         """Accept the WebSocket and register it under ``user_id``."""
         await websocket.accept()
+        is_first_connection = user_id not in self.active_connections
         self.active_connections.setdefault(user_id, []).append(websocket)
+
+        self.last_activity[user_id] = datetime.now(timezone.utc)
+        if is_first_connection:
+            self.presence_states[user_id] = "online"
+            await self.broadcast_to_all(
+                _event("presence.status_changed", user_id=user_id, status="online"),
+                exclude_user_id=user_id,
+            )
+
         logger.info(
             "User %s connected. Active sessions: %d",
             user_id,
             len(self.active_connections[user_id]),
         )
 
-    def disconnect(self, websocket: WebSocket, user_id: str) -> None:
+    async def disconnect(self, websocket: WebSocket, user_id: str) -> None:
         """Remove a single WebSocket connection for ``user_id``."""
         conns = self.active_connections.get(user_id)
         if conns and websocket in conns:
@@ -111,6 +128,16 @@ class ConnectionManager:
             # Remove user from all rooms they were in.
             for room_users in self.rooms.values():
                 room_users.discard(user_id)
+
+            # Set user offline and notify others
+            self.presence_states[user_id] = "offline"
+            await self.broadcast_to_all(
+                _event("presence.status_changed", user_id=user_id, status="offline"),
+                exclude_user_id=user_id,
+            )
+            self.presence_states.pop(user_id, None)
+            self.last_activity.pop(user_id, None)
+
         logger.info("User %s disconnected a session.", user_id)
 
     # ── Room management ──────────────────────────────────────────────────
@@ -131,6 +158,40 @@ class ConnectionManager:
         """Return the set of user_ids currently in ``room_id``."""
         return self.rooms.get(room_id, set()).copy()
 
+    # ── Presence Helpers ─────────────────────────────────────────────────
+
+    async def update_activity(self, user_id: str) -> None:
+        """Update last activity timestamp for user, and wake up from away status."""
+        self.last_activity[user_id] = datetime.now(timezone.utc)
+        current_status = self.presence_states.get(user_id)
+        if current_status == "away":
+            self.presence_states[user_id] = "online"
+            await self.broadcast_to_all(
+                _event("presence.status_changed", user_id=user_id, status="online")
+            )
+
+    async def update_presence_status(self, user_id: str, status: str) -> None:
+        """Manually update user's presence status."""
+        allowed_statuses = {"online", "away", "busy", "offline"}
+        if status not in allowed_statuses:
+            raise ValueError(f"Invalid presence status: {status}")
+
+        self.presence_states[user_id] = status
+        await self.broadcast_to_all(
+            _event("presence.status_changed", user_id=user_id, status=status)
+        )
+
+    async def check_timeouts(self, timeout_seconds: int = 300) -> None:
+        """Check for inactive users and transition them to away status."""
+        now = datetime.now(timezone.utc)
+        for user_id, last_act in list(self.last_activity.items()):
+            if self.presence_states.get(user_id) == "online":
+                if (now - last_act).total_seconds() > timeout_seconds:
+                    self.presence_states[user_id] = "away"
+                    await self.broadcast_to_all(
+                        _event("presence.status_changed", user_id=user_id, status="away")
+                    )
+
     # ── Message delivery ─────────────────────────────────────────────────
 
     async def send_personal_message(self, message: dict, user_id: str) -> None:
@@ -143,7 +204,7 @@ class ConnectionManager:
             except Exception:
                 dead.append(conn)
         for conn in dead:
-            self.disconnect(conn, user_id)
+            await self.disconnect(conn, user_id)
 
     async def broadcast_to_room(self, room_id: str, message: dict) -> None:
         """Broadcast ``message`` to every user currently in room ``room_id``."""
@@ -151,13 +212,31 @@ class ConnectionManager:
         for user_id in members:
             await self.send_personal_message(message, user_id)
 
-    async def broadcast_to_all(self, message: dict) -> None:
+    async def broadcast_to_all(self, message: dict, exclude_user_id: Optional[str] = None) -> None:
         """Broadcast ``message`` to every connected user (use sparingly)."""
         for user_id in list(self.active_connections.keys()):
+            if user_id == exclude_user_id:
+                continue
             await self.send_personal_message(message, user_id)
 
 
 manager = ConnectionManager()
+
+
+# ── HTTP REST Endpoints ─────────────────────────────────────────────────────
+
+
+@router.get("/presence", response_model=Dict[str, str])
+def get_all_presences(current_user: User = Depends(get_current_user)):
+    """Retrieve active presence states for all connected users."""
+    return manager.presence_states.copy()
+
+
+@router.get("/presence/{user_id}", response_model=Dict[str, str])
+def get_user_presence(user_id: str, current_user: User = Depends(get_current_user)):
+    """Retrieve presence status of a specific user."""
+    status = manager.presence_states.get(user_id, "offline")
+    return {"user_id": user_id, "status": status}
 
 
 # ── Event helpers ────────────────────────────────────────────────────────────
@@ -235,6 +314,8 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
                 )
                 continue
 
+            await manager.update_activity(user_id)
+
             msg_type = data.get("type", "")
             project_id = data.get("project_id", "")
 
@@ -302,6 +383,33 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
                     ),
                 )
 
+            # ── Presence Update ─────────────────────────────────────────
+            elif msg_type == "presence_update":
+                status_val = data.get("status")
+                try:
+                    await manager.update_presence_status(user_id, status_val)
+                except ValueError as exc:
+                    await manager.send_personal_message(
+                        _event("error", message=str(exc)),
+                        user_id,
+                    )
+
+            # ── Presence Query ──────────────────────────────────────────
+            elif msg_type == "presence_query":
+                queried_ids = data.get("user_ids")
+                if isinstance(queried_ids, list):
+                    presences = {
+                        uid: manager.presence_states.get(uid, "offline")
+                        for uid in queried_ids
+                    }
+                else:
+                    presences = manager.presence_states.copy()
+
+                await manager.send_personal_message(
+                    _event("presence.query_response", presences=presences),
+                    user_id,
+                )
+
             # ── Unknown message type ─────────────────────────────────────
             else:
                 await manager.send_personal_message(
@@ -313,7 +421,7 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
                 )
 
     except WebSocketDisconnect:
-        manager.disconnect(websocket, user_id)
+        await manager.disconnect(websocket, user_id)
         # Notify all rooms the user was in that they left.
         for room_id in list(manager.rooms.keys()):
             if user_id in manager.rooms[room_id]:
@@ -361,7 +469,7 @@ async def websocket_chat(websocket: WebSocket, user_id: str):
                 await manager.broadcast_to_all(payload)
 
     except WebSocketDisconnect:
-        manager.disconnect(websocket, user_id)
+        await manager.disconnect(websocket, user_id)
         await manager.broadcast_to_all(
             {"sender_id": user_id, "type": "status", "content": "offline"}
         )
