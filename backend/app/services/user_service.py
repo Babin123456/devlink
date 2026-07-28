@@ -17,6 +17,7 @@ from app.schemas.user import UserStats
 from app.models.user_report import UserReport
 from app.schemas.user_report import UserReportCreate
 
+
 class UserService:
     """
     Business logic for User operations.
@@ -279,8 +280,7 @@ class UserService:
         db: Session,
         db_user: User,
     ) -> User:
-
-db_user.is_verified = True
+        db_user.is_verified = True
 
         db.flush()
         db.refresh(db_user)
@@ -366,6 +366,7 @@ db_user.is_verified = True
             completion=completion_pct,
             missing=missing,
         )
+
     def update_resume_url(
         db: Session,
         user: User,

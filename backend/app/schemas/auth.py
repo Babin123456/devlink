@@ -104,17 +104,34 @@ class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
 
-# ==========================================================
-# Logout
-# ==========================================================
-
-
 class LogoutRequest(BaseModel):
-    refresh_token: str | None = None
+    refresh_token: Optional[str] = None
 
 
-class LogoutResponse(BaseModel):    success: bool = True
+class LogoutResponse(BaseModel):
+    success: bool = True
     message: str = "Successfully logged out."
+
+
+# ==========================================================
+# Sessions & Devices
+# ==========================================================
+
+
+class SessionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    device_name: Optional[str] = None
+    device_type: Optional[str] = None
+    browser: Optional[str] = None
+    operating_system: Optional[str] = None
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    is_current: bool = False
+    created_at: datetime
+    last_used_at: Optional[datetime] = None
+    expires_at: datetime
 
 
 # ==========================================================
