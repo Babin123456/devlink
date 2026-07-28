@@ -80,7 +80,7 @@ class User(Base):
     badges: Mapped[list[str]] = mapped_column(
         ARRAY(String).with_variant(JSON, "sqlite"),
         default=list,
-        server_default="{}",
+        server_default="[]",
         nullable=False,
     )
 
@@ -172,6 +172,12 @@ class User(Base):
     open_to_work: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
+        nullable=False,
+    )
+
+    is_private: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
         nullable=False,
     )
 

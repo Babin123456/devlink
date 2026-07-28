@@ -24,12 +24,14 @@ from .notification import Notification  # noqa: F401
 from .organization import Organization  # noqa: F401
 from .organization_member import OrganizationMember, OrgMemberRole  # noqa: F401
 from .project import Project  # noqa: F401
+from .project_view import ProjectView  # noqa: F401
 from .project_member import ProjectMember  # noqa: F401
 from .project_skill import ProjectSkill  # noqa: F401
 from .refresh_token import RefreshToken  # noqa: F401
 from .repository import Repository  # noqa: F401
 from .skill import Skill  # noqa: F401
 from .user import User  # noqa: F401
+from .user_block import UserBlock  # noqa: F401
 from .user_skill import UserSkill  # noqa: F401
 from .user_report import UserReport as UserReport
 from .activity import Activity

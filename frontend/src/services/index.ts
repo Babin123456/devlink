@@ -22,7 +22,13 @@ import {
   searchApi,
   issuesApi,
 } from "@/api";
-import type { BookmarkCollection, BookmarkCollectionWithBookmarks, TechStackResponse } from "@/api";
+import type {
+  BookmarkCollection,
+  BookmarkCollectionWithBookmarks,
+  TechStackResponse,
+  IssueCreateInput,
+  IssueUpdateInput,
+} from "@/api";
 import type { Hackathon } from "@/mocks/seed";
 
 const delay = 120;
@@ -78,7 +84,8 @@ export interface BackendActivity {
 }
 
 export const projectsService = {
-  list: (params?: any) => withFallback(() => projectsApi.list(params), seed.projects),
+  list: (params?: Record<string, unknown>) =>
+    withFallback(() => projectsApi.list(params), seed.projects),
   get: (id: string) =>
     withFallback(() => projectsApi.get(id), seed.projects.find((p) => p.id === id) ?? null),
   trending: () =>
@@ -160,12 +167,12 @@ export const issuesService = {
       ? issuesApi.get(projectId, issueId)
       : Promise.reject("Not implemented in mock"),
 
-  create: (projectId: string, body: any) =>
+  create: (projectId: string, body: IssueCreateInput) =>
     isBackendConfigured()
       ? issuesApi.create(projectId, body)
       : Promise.reject("Not implemented in mock"),
 
-  update: (projectId: string, issueId: string, body: any) =>
+  update: (projectId: string, issueId: string, body: IssueUpdateInput) =>
     isBackendConfigured()
       ? issuesApi.update(projectId, issueId, body)
       : Promise.reject("Not implemented in mock"),
@@ -175,7 +182,10 @@ export const issuesService = {
       ? issuesApi.remove(projectId, issueId)
       : Promise.reject("Not implemented in mock"),
 
-  checkDuplicates: (projectId: string, body: any) =>
+  checkDuplicates: (
+    projectId: string,
+    body: { title: string; description: string; threshold?: number },
+  ) =>
     isBackendConfigured()
       ? issuesApi.checkDuplicates(projectId, body)
       : Promise.reject("Not implemented in mock"),

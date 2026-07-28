@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 
@@ -28,7 +28,8 @@ from app.core.security import (
 from app.models.user import User
 from app.models.password_history import PasswordHistory
 from app.models.refresh_token import RefreshToken
-from app.services.refresh_token_service import RefreshTokenServicefrom app.schemas.auth import (
+from app.services.refresh_token_service import RefreshTokenService
+from app.schemas.auth import (
     LoginRequest,
     RegisterRequest,
 )
@@ -164,7 +165,12 @@ class AuthService:
     # Login
     # =====================================================
 
-    def login(self, payload: LoginRequest):
+    def login(
+        self,
+        payload: LoginRequest,
+        user_agent: str | None = None,
+        ip_address: str | None = None,
+    ):
 
         payload.email = validate_email(payload.email)
 
@@ -204,21 +210,21 @@ class AuthService:
             str(user.id),
             {
                 "username": user.username,
-                "email": user.email,
             },
         )
 
-refresh_token = create_refresh_token(str(user.id))
+        refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
 
-        RefreshTokenService.create_token(
-            self.db,
-            RefreshToken(
-                user_id=user.id,
-                token=refresh_token,
-                expires_at=datetime.now(timezone.utc)
-                + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
-            ),
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=refresh_token,
+            expires_at=expires_at,
+            user_agent=user_agent,
+            ip_address=ip_address,
         )
+        self.db.commit()
 
         event_bus.publish(
             "USER_LOGIN",
@@ -227,7 +233,8 @@ refresh_token = create_refresh_token(str(user.id))
         )
         return {
             "success": True,
-            "message": "Login successful.",            "access_token": access_token,
+            "message": "Login successful.",
+            "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
             "user": user,
@@ -407,7 +414,8 @@ refresh_token = create_refresh_token(str(user.id))
                 "email": user.email,
             },
         )
-refresh_token = create_refresh_token(str(user.id))
+
+        refresh_token = create_refresh_token(str(user.id))
 
         RefreshTokenService.create_token(
             self.db,
@@ -417,7 +425,16 @@ refresh_token = create_refresh_token(str(user.id))
                 expires_at=datetime.now(timezone.utc)
                 + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
             ),
+        refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=refresh_token,
+            expires_at=expires_at,
         )
+        self.db.commit()
 
         event_bus.publish(
             "USER_LOGIN",
@@ -427,7 +444,8 @@ refresh_token = create_refresh_token(str(user.id))
 
         return {
             "success": True,
-            "message": "GitHub login successful.",            "access_token": access_token,
+            "message": "GitHub login successful.",
+            "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
             "user": user,
@@ -481,49 +499,71 @@ refresh_token = create_refresh_token(str(user.id))
     # Refresh Token
     # =====================================================
 
-def refresh_token(self, old_refresh_token: str):
+    def refresh_token(self, old_refresh_token: str):
+    def refresh_token(
+        self,
+        token_str: str,
+        user_agent: str | None = None,
+        ip_address: str | None = None,
+    ):
+        db_token = RefreshTokenService.get_token(self.db, token_str)
+        now = datetime.now(timezone.utc)
 
-        # 1. Look up the token in the database (this is our "blacklist" check —
-        #    if it's not there, or it's revoked, it's not usable anymore).
-        db_token = RefreshTokenService.get_token(self.db, old_refresh_token)
-
-        if not db_token or db_token.is_revoked:
+        if db_token and db_token.is_revoked:
+            # Token reuse detected! Revoke all tokens for this user for security.
+            RefreshTokenService.revoke_all_tokens(self.db, db_token.user_id)
+            self.db.commit()
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh token has been revoked or is invalid.",
+                detail="Refresh token has already been revoked or reused. All sessions revoked for security.",
             )
 
-        if db_token.expires_at < datetime.now(timezone.utc):
+        if not db_token:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh token has expired.",
+                detail="Invalid or expired refresh token.",
+            )
+
+        expires_at = db_token.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+        if expires_at < now:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired refresh token.",
             )
 
         user = self.get_current_user(str(db_token.user_id))
 
-        # 2. Rotation: kill the old refresh token so it can never be used again.
-        RefreshTokenService.revoke_token(self.db, db_token)
+        # Rotate refresh token
+        db_token.is_revoked = True
+        db_token.revoked_at = now
+        db_token.last_used_at = now
 
-        # 3. Issue a brand new pair of tokens.
-        access_token = create_access_token(
+        new_access_token = create_access_token(
             str(user.id),
             {
                 "username": user.username,
                 "email": user.email,
             },
         )
-
         new_refresh_token = create_refresh_token(str(user.id))
+        new_expires_at = now + timedelta(days=7)
 
-        RefreshTokenService.create_token(
-            self.db,
-            RefreshToken(
-                user_id=user.id,
-                token=new_refresh_token,
-                expires_at=datetime.now(timezone.utc)
-                + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
-            ),
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=new_refresh_token,
+            expires_at=new_expires_at,
+            user_agent=user_agent or db_token.user_agent,
+            ip_address=ip_address or db_token.ip_address,
+            device_name=db_token.device_name,
+            device_type=db_token.device_type,
+            browser=db_token.browser,
+            operating_system=db_token.operating_system,
         )
+        self.db.commit()
 
         event_bus.publish(
             "ACCESS_TOKEN_REFRESHED",
@@ -533,11 +573,12 @@ def refresh_token(self, old_refresh_token: str):
         return {
             "success": True,
             "message": "Token refreshed successfully.",
-            "access_token": access_token,
+            "access_token": new_access_token,
             "refresh_token": new_refresh_token,
             "token_type": "bearer",
             "user": user,
         }
+
     # =====================================================
     # Change Password
     # =====================================================
@@ -616,14 +657,15 @@ def refresh_token(self, old_refresh_token: str):
     # Logout
     # =====================================================
 
-def logout(self, user_id: str, refresh_token: str | None = None):
+    def logout(self, user_id: str, refresh_token: str | None = None):
+    def logout(self, user_id: str, refresh_token_str: str | None = None):
 
         user = self.get_current_user(user_id)
-
-        if refresh_token:
-            db_token = RefreshTokenService.get_token(self.db, refresh_token)
-            if db_token and db_token.user_id == user.id:
+        if refresh_token_str:
+            db_token = RefreshTokenService.get_token(self.db, refresh_token_str)
+            if db_token and str(db_token.user_id) == str(user.id):
                 RefreshTokenService.revoke_token(self.db, db_token)
+                self.db.commit()
 
         event_bus.publish(
             "USER_LOGOUT",
@@ -655,6 +697,7 @@ def logout(self, user_id: str, refresh_token: str | None = None):
             "success": True,
             "message": "Logged out from all devices.",
         }
+
     # =====================================================
     # Forgot Password
     # =====================================================
