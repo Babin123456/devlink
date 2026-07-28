@@ -1,182 +1,243 @@
-# <p align="center">DevLink</p>
+<p align="center">
+  <img src="assets/logo.png" width="170" alt="DevLink Logo">
+</p>
+
+<h1 align="center">DevLink</h1>
 
 <p align="center">
-  <img src="docs/assets/banner.png" alt="DevLink Banner" width="100%">
+  <strong>Build. Collaborate. Launch.</strong><br>
+  The modern open-source platform where developers, founders, designers, and contributors build products together.
 </p>
 
 <p align="center">
-  <strong>The Open Source Platform for Developer Collaboration</strong>
-</p>
-
-<p align="center">
-Connect with developers, discover projects, recruit teammates, collaborate in real time, and build production-ready software from one unified platform.
-</p>
-
-<p align="center">
-
-[![License](https://img.shields.io/github/license/nensii21/devlink?style=for-the-badge)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/nensii21/devlink?style=for-the-badge)](https://github.com/nensii21/devlink/stargazers)
-[![Forks](https://img.shields.io/github/forks/nensii21/devlink?style=for-the-badge)](https://github.com/nensii21/devlink/network/members)
-[![Issues](https://img.shields.io/github/issues/nensii21/devlink?style=for-the-badge)](https://github.com/nensii21/devlink/issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/nensii21/devlink?style=for-the-badge)](https://github.com/nensii21/devlink/pulls)
-[![Contributors](https://img.shields.io/github/contributors/nensii21/devlink?style=for-the-badge)](https://github.com/nensii21/devlink/graphs/contributors)
-[![React](https://img.shields.io/badge/React-19-149ECA?style=for-the-badge\&logo=react\&logoColor=white)]()
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge\&logo=fastapi\&logoColor=white)]()
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge\&logo=typescript\&logoColor=white)]()
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge\&logo=python\&logoColor=white)]()
-
+  <a href="LICENSE">
+    <img src="https://img.shields.io/github/license/YOUR_USERNAME/DevLink">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-blue">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/Backend-FastAPI-green">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/Database-PostgreSQL-blueviolet">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/github/stars/YOUR_USERNAME/DevLink">
+  </a>
 </p>
 
 ---
 
 # Overview
 
-DevLink is an enterprise-grade open-source collaboration platform built for developers, founders, designers, AI engineers, and open-source contributors.
+DevLink is an open-source social platform designed for developers, startup founders, designers, AI engineers, and contributors to discover projects, collaborate with teams, and build products together.
 
-Instead of managing discussions across multiple platforms, DevLink centralizes developer networking, project recruitment, messaging, issue tracking, and collaboration into a single modern workspace.
+Instead of managing GitHub repositories, LinkedIn networking, Discord communities, and hackathon groups separately, DevLink brings everything into one unified platform.
 
-Whether you're building a startup, preparing for a hackathon, or contributing to open source, DevLink helps you find the right people and ship faster.
-
----
-
-# Why DevLink?
-
-Modern software development is collaborative, but existing platforms solve only part of the problem.
-
-GitHub manages code.
-
-LinkedIn manages networking.
-
-Discord manages communication.
-
-Notion manages documentation.
-
-DevLink brings everything together in one platform.
+Whether you're searching for contributors, showcasing projects, joining startups, or participating in hackathons, DevLink provides a streamlined experience focused on collaboration.
 
 ---
 
-# Product Preview
+# Screenshots
+
+## Dashboard
 
 <p align="center">
-<img src="docs/images/dashboard.png" width="95%">
+<img src="assets/screenshots/dashboard.png" width="100%">
 </p>
 
 ---
 
-# Platform Screenshots
+## Authentication
 
-| Dashboard                                  | Authentication                         |
-| ------------------------------------------ | -------------------------------------- |
-| <img src="docs/screenshots/dashboard.png"> | <img src="docs/screenshots/login.png"> |
+<p align="center">
+<img src="assets/screenshots/login.png" width="100%">
+</p>
 
-| Projects                                  | Feed                                  |
-| ----------------------------------------- | ------------------------------------- |
-| <img src="docs/screenshots/projects.png"> | <img src="docs/screenshots/feed.png"> |
+---
 
-| Mobile View                             | Messaging                             |
-| --------------------------------------- | ------------------------------------- |
-| <img src="docs/screenshots/mobile.png"> | <img src="docs/screenshots/chat.png"> |
+## Project Page
+
+<p align="center">
+<img src="assets/screenshots/project-page.png" width="100%">
+</p>
+
+---
+
+## Feed
+
+<p align="center">
+<img src="assets/screenshots/feed.png" width="100%">
+</p>
+
+---
+
+## Mobile Experience
+
+<p align="center">
+<img src="assets/screenshots/mobile.png" width="40%">
+</p>
 
 ---
 
 # Features
 
-| Feature              | Description                                                 |
-| -------------------- | ----------------------------------------------------------- |
-| Developer Profiles   | Showcase skills, repositories, experience, and availability |
-| Project Marketplace  | Create projects and recruit contributors                    |
-| AI Matchmaking       | Smart teammate recommendations                              |
-| Repository Insights  | GitHub repository analysis                                  |
-| Real-Time Messaging  | WebSocket powered chat                                      |
-| Team Applications    | Review and manage applicants                                |
-| Notifications        | Live project activity updates                               |
-| Authentication       | JWT + GitHub OAuth                                          |
-| Organization Support | Team collaboration                                          |
-| Search               | Global developer and project search                         |
+### Developer Profiles
+
+- Professional portfolio
+- Skills
+- Experience
+- GitHub integration
+- Project showcase
+- Social links
+
+---
+
+### Project Collaboration
+
+- Create projects
+- Find contributors
+- Join teams
+- Track progress
+- Manage applications
+
+---
+
+### Social Feed
+
+- Share updates
+- Publish achievements
+- Community discussions
+- Follow developers
+- Like & comment
+
+---
+
+### Real-time Messaging
+
+- One-to-one chat
+- Team conversations
+- Notifications
+- Instant communication
+
+---
+
+### Authentication
+
+- Email authentication
+- OAuth
+- Secure sessions
+- JWT authentication
+
+---
+
+### Discover
+
+- Search developers
+- Search projects
+- Trending repositories
+- Recommended collaborators
+
+---
+
+### Notifications
+
+- Project invitations
+- Messages
+- Collaboration requests
+- Activity updates
+
+---
+
+### Responsive Design
+
+- Desktop
+- Tablet
+- Mobile
+- Dark mode support
+
+---
+
+# Tech Stack
+
+## Frontend
+
+- React
+- TypeScript
+- Tailwind CSS
+- React Router
+- React Query
+
+## Backend
+
+- FastAPI
+- SQLAlchemy
+- PostgreSQL
+- Redis
+- JWT
+
+## DevOps
+
+- Docker
+- GitHub Actions
+- Nginx
 
 ---
 
 # Architecture
 
-```text
-                    Browser
+```mermaid
+flowchart LR
 
-                       │
+User --> Frontend
 
-             React + TypeScript
+Frontend --> API
 
-                       │
+API --> Authentication
 
-                REST / WebSocket
+API --> Database
 
-                       │
+API --> Notifications
 
-                  FastAPI API
+API --> Chat
 
-          ┌──────────┴──────────┐
+Database --> PostgreSQL
 
-     Authentication      AI Matching
+Chat --> WebSocket
 
-          │                    │
-
-     PostgreSQL          Redis Cache
-
-          │
-
-    Background Workers
+Notifications --> Redis
 ```
-
-Detailed diagrams are available in
-
-```
-docs/architecture.md
-```
-
----
-
-# Technology Stack
-
-| Category         | Technologies                          |
-| ---------------- | ------------------------------------- |
-| Frontend         | React 19, TypeScript, Tailwind CSS v4 |
-| State Management | TanStack Query                        |
-| Routing          | TanStack Router                       |
-| Backend          | FastAPI                               |
-| ORM              | SQLAlchemy 2                          |
-| Validation       | Pydantic v2                           |
-| Database         | PostgreSQL                            |
-| Cache            | Redis                                 |
-| Authentication   | JWT, OAuth 2.0                        |
-| AI               | OpenAI API                            |
-| Containers       | Docker                                |
-| CI/CD            | GitHub Actions                        |
 
 ---
 
 # Repository Structure
 
-```text
-devlink/
+```
+DevLink/
 
 ├── backend/
 │   ├── app/
-│   ├── tests/
-│   └── migrations/
+│   ├── api/
+│   ├── models/
+│   ├── services/
+│   └── core/
 │
 ├── frontend/
 │   ├── src/
-│   ├── public/
-│   └── components/
+│   ├── components/
+│   ├── pages/
+│   ├── hooks/
+│   └── assets/
 │
 ├── docs/
 │
+├── assets/
+│   └── screenshots/
+│
 ├── docker/
 │
-├── .github/
-│
-├── docker-compose.yml
-│
-└── README.md
+└── .github/
 ```
 
 ---
@@ -186,30 +247,12 @@ devlink/
 ## Clone Repository
 
 ```bash
-git clone https://github.com/nensii21/devlink.git
+git clone https://github.com/YOUR_USERNAME/DevLink.git
 
-cd devlink
+cd DevLink
 ```
 
 ---
-
-# Docker Installation
-
-```bash
-docker compose up --build
-```
-
-Services
-
-| Service  | URL                        |
-| -------- | -------------------------- |
-| Frontend | http://localhost:5173      |
-| Backend  | http://localhost:8000      |
-| API Docs | http://localhost:8000/docs |
-
----
-
-# Local Development
 
 ## Backend
 
@@ -243,61 +286,63 @@ npm run dev
 
 Backend
 
-```env
+```
 DATABASE_URL=
-
-REDIS_URL=
 
 JWT_SECRET=
 
-OPENAI_API_KEY=
+JWT_ALGORITHM=
 
-GITHUB_CLIENT_ID=
+ACCESS_TOKEN_EXPIRE_MINUTES=
 
-GITHUB_CLIENT_SECRET=
+REDIS_URL=
 ```
 
 Frontend
 
-```env
+```
 VITE_API_URL=
-
-VITE_APP_NAME=
 ```
 
 ---
 
-# API
+# Running with Docker
 
-| Module         | Endpoint           |
-| -------------- | ------------------ |
-| Authentication | /api/auth          |
-| Users          | /api/users         |
-| Projects       | /api/projects      |
-| Applications   | /api/applications  |
-| Messaging      | /api/messages      |
-| Notifications  | /api/notifications |
-
-Swagger
-
-```
-http://localhost:8000/docs
+```bash
+docker compose up --build
 ```
 
 ---
 
-# Security
+# Project Roadmap
 
-* JWT Authentication
-* OAuth 2.0
-* Password Hashing
-* Refresh Tokens
-* Secure HTTP Headers
-* Input Validation
-* SQL Injection Protection
-* Rate Limiting
-* CORS Protection
-* XSS Protection
+## Phase 1
+
+- User authentication
+- Developer profiles
+- Projects
+- Applications
+- Messaging
+
+---
+
+## Phase 2
+
+- GitHub integration
+- Team workspaces
+- AI recommendations
+- Hackathons
+- Notifications
+
+---
+
+## Phase 3
+
+- Organizations
+- Payments
+- Recruiter Portal
+- Analytics
+- Mobile App
 
 ---
 
@@ -307,12 +352,6 @@ Backend
 
 ```bash
 pytest
-```
-
-Coverage
-
-```bash
-pytest --cov
 ```
 
 Frontend
@@ -329,50 +368,70 @@ npm run lint
 
 ---
 
-# Performance
+# Contributing
 
-* Async FastAPI
-* Redis Caching
-* Lazy Loading
-* Optimized API Responses
-* WebSocket Communication
-* Background Tasks
-* Database Connection Pooling
+1. Fork the repository
+
+2. Create a feature branch
+
+```bash
+git checkout -b feature/amazing-feature
+```
+
+3. Commit changes
+
+```bash
+git commit -m "feat: add amazing feature"
+```
+
+4. Push
+
+```bash
+git push origin feature/amazing-feature
+```
+
+5. Open a Pull Request
+
+---
+
+# Good First Issues
+
+Contributors can work on:
+
+- UI improvements
+- Accessibility
+- Documentation
+- API enhancements
+- Performance optimization
+- Bug fixes
+- Testing
+- Responsive design
 
 ---
 
 # Documentation
 
-| Guide        | Link                 |
-| ------------ | -------------------- |
-| API          | docs/api.md          |
-| Architecture | docs/architecture.md |
-| Development  | docs/development.md  |
-| Contributing | CONTRIBUTING.md      |
+```
+docs/
+
+Architecture
+
+API
+
+Deployment
+
+Contributing
+
+Design System
+```
 
 ---
 
-# Roadmap
+# Security
 
-| Version | Status                    |
-| ------- | ------------------------- |
-| v0.8    | Authentication & Profiles |
-| v0.9    | Messaging                 |
-| v1.0    | AI Matchmaking            |
-| v1.1    | Organizations             |
-| v2.0    | Mobile Applications       |
+Please report security vulnerabilities responsibly.
 
----
-
-# Contributing
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Follow Conventional Commits.
-4. Submit a Pull Request.
-5. Wait for review.
-
-See **CONTRIBUTING.md** for complete contribution guidelines.
+Never expose secrets or API keys in commits.
 
 ---
 
@@ -380,35 +439,24 @@ See **CONTRIBUTING.md** for complete contribution guidelines.
 
 Distributed under the MIT License.
 
-See the LICENSE file for more information.
+---
+
+# Contributors
+
+<a href="https://github.com/YOUR_USERNAME/DevLink/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=YOUR_USERNAME/DevLink" />
+</a>
 
 ---
 
-# Maintainers
+# Star History
 
-**Lead Maintainer**
-
-Nensi Patel
-
-GitHub
-
-https://github.com/nensii21
-
----
-
-# Community
-
-* Open Source Contributors
-* GitHub Discussions
-* Issues
-* Pull Requests
+[![Star History Chart](https://api.star-history.com/svg?repos=YOUR_USERNAME/DevLink&type=Date)](https://star-history.com)
 
 ---
 
 <p align="center">
 
-Built with React, FastAPI, PostgreSQL, Redis, and OpenAI.
-
-Designed for developers who build together.
+Built with ❤️ by the DevLink Community
 
 </p>
