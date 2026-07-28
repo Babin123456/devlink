@@ -1,416 +1,348 @@
-# <p align="center">DevLink</p>
-
 <p align="center">
-  <img src="docs/assets/banner.png" alt="DevLink Banner" width="100%">
+  <img src="docs/images/devlink-banner.jpeg" alt="DevLink" width="600">
 </p>
 
-<p align="center">
-  <strong>The Open Source Platform for Developer Collaboration</strong>
-</p>
+<h2 align="center">DevLink</h2>
+
+<p align="center">Open-source platform for developer collaboration, project discovery, and team formation.</p>
 
 <p align="center">
-Connect with developers, discover projects, recruit teammates, collaborate in real time, and build production-ready software from one unified platform.
-</p>
-
-<p align="center">
-
-[![License](https://img.shields.io/github/license/nensii21/devlink?style=for-the-badge)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/nensii21/devlink?style=for-the-badge)](https://github.com/nensii21/devlink/stargazers)
-[![Forks](https://img.shields.io/github/forks/nensii21/devlink?style=for-the-badge)](https://github.com/nensii21/devlink/network/members)
-[![Issues](https://img.shields.io/github/issues/nensii21/devlink?style=for-the-badge)](https://github.com/nensii21/devlink/issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/nensii21/devlink?style=for-the-badge)](https://github.com/nensii21/devlink/pulls)
-[![Contributors](https://img.shields.io/github/contributors/nensii21/devlink?style=for-the-badge)](https://github.com/nensii21/devlink/graphs/contributors)
-[![React](https://img.shields.io/badge/React-19-149ECA?style=for-the-badge\&logo=react\&logoColor=white)]()
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge\&logo=fastapi\&logoColor=white)]()
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge\&logo=typescript\&logoColor=white)]()
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge\&logo=python\&logoColor=white)]()
-
+  <a href="https://github.com/nensii21/devlink/actions"><img src="https://img.shields.io/github/actions/workflow/status/nensii21/devlink/ci.yml?branch=main&style=flat-square&label=build" alt="Build"></a>
+  <a href="https://github.com/nensii21/devlink/releases"><img src="https://img.shields.io/github/v/release/nensii21/devlink?style=flat-square" alt="Release"></a>
+  <a href="https://github.com/nensii21/devlink/blob/main/LICENSE"><img src="https://img.shields.io/github/license/nensii21/devlink?style=flat-square" alt="License"></a>
+  <a href="https://hub.docker.com"><img src="https://img.shields.io/badge/docker-ready-blue?style=flat-square&logo=docker" alt="Docker"></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/react-19-blue?style=flat-square&logo=react" alt="React"></a>
+  <a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/fastapi-0.110-green?style=flat-square&logo=fastapi" alt="FastAPI"></a>
+  <a href="https://github.com/nensii21/devlink/stargazers"><img src="https://img.shields.io/github/stars/nensii21/devlink?style=flat-square" alt="Stars"></a>
+  <a href="https://github.com/nensii21/devlink/graphs/contributors"><img src="https://img.shields.io/github/contributors/nensii21/devlink?style=flat-square" alt="Contributors"></a>
 </p>
 
 ---
 
-# Overview
+## Table of Contents
 
-DevLink is an enterprise-grade open-source collaboration platform built for developers, founders, designers, AI engineers, and open-source contributors.
-
-Instead of managing discussions across multiple platforms, DevLink centralizes developer networking, project recruitment, messaging, issue tracking, and collaboration into a single modern workspace.
-
-Whether you're building a startup, preparing for a hackathon, or contributing to open source, DevLink helps you find the right people and ship faster.
-
----
-
-# Why DevLink?
-
-Modern software development is collaborative, but existing platforms solve only part of the problem.
-
-GitHub manages code.
-
-LinkedIn manages networking.
-
-Discord manages communication.
-
-Notion manages documentation.
-
-DevLink brings everything together in one platform.
+- [Overview](#overview)
+- [Screenshots](#screenshots)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Available Scripts](#available-scripts)
+- [Project Structure](#project-structure)
+- [Deployment](#deployment)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Changelog](#changelog)
+- [Acknowledgements](#acknowledgements)
+- [License](#license)
 
 ---
 
-# Product Preview
+## Overview
 
-<p align="center">
-<img src="docs/images/dashboard.png" width="95%">
-</p>
+DevLink is an open-source developer collaboration platform. Developers can create profiles, post and discover projects, apply to join teams, communicate in real time via WebSockets, follow contributors, and link their GitHub repositories.
 
----
+> **Status:** Active development. Open to contributors. See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
-# Platform Screenshots
-
-| Dashboard                                  | Authentication                         |
-| ------------------------------------------ | -------------------------------------- |
-| <img src="docs/screenshots/dashboard.png"> | <img src="docs/screenshots/login.png"> |
-
-| Projects                                  | Feed                                  |
-| ----------------------------------------- | ------------------------------------- |
-| <img src="docs/screenshots/projects.png"> | <img src="docs/screenshots/feed.png"> |
-
-| Mobile View                             | Messaging                             |
-| --------------------------------------- | ------------------------------------- |
-| <img src="docs/screenshots/mobile.png"> | <img src="docs/screenshots/chat.png"> |
+**Documentation:**
+[Architecture](docs/architecture.md) · [API Reference](docs/api.md) · [Development Setup](docs/development.md) · [Deployment Guide](docs/deployment.md) · [Coding Standards](docs/coding-standards.md) · [WebSockets](docs/WEBSOCKETS.md)
 
 ---
 
-# Features
+## Screenshots
 
-| Feature              | Description                                                 |
-| -------------------- | ----------------------------------------------------------- |
-| Developer Profiles   | Showcase skills, repositories, experience, and availability |
-| Project Marketplace  | Create projects and recruit contributors                    |
-| AI Matchmaking       | Smart teammate recommendations                              |
-| Repository Insights  | GitHub repository analysis                                  |
-| Real-Time Messaging  | WebSocket powered chat                                      |
-| Team Applications    | Review and manage applicants                                |
-| Notifications        | Live project activity updates                               |
-| Authentication       | JWT + GitHub OAuth                                          |
-| Organization Support | Team collaboration                                          |
-| Search               | Global developer and project search                         |
+> UI screenshots will be added once a stable deployment is available. The sections below reflect the current feature set.
+
+| Dashboard | Project Marketplace |
+| :---: | :---: |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Projects](docs/screenshots/projects.png) |
+
+| Direct Messaging | Builder Activity Feed |
+| :---: | :---: |
+| ![Messaging](docs/screenshots/messaging.png) | ![Feed](docs/screenshots/feed.png) |
+
+| Authentication | Mobile View |
+| :---: | :---: |
+| ![Login](docs/screenshots/login.png) | ![Mobile](docs/screenshots/mobile.png) |
+
+- React
+- TypeScript
+- Tailwind CSS
+- React Router
+- React Query
+
+## Features
+
+| Feature | Description |
+| :--- | :--- |
+| Developer Profiles | Portfolio pages with skills, GitHub repository links, experience, and social links |
+| Project Marketplace | Browse, create, and apply to open-source projects and team openings |
+| Team Applications | Role-based application submission with status tracking and owner review |
+| Real-Time Messaging | WebSocket direct messaging with conversation threads and presence indicators |
+| Notifications | Real-time event notifications for applications, messages, and activity |
+| Builder Activity Feed | Community updates, project announcements, and contributor flares |
+| Followers & Activity | Follow developers and track their public activity feed |
+| Search & Discovery | Full-text search across developers, projects, issues, and skills |
+| Saved Searches | Store and manage custom search queries with alert support |
+| Bookmarks | Save projects to personal bookmark collections |
+| Project Issues | Issue tracking linked to projects |
+| Repository Linking | Connect GitHub repositories to project profiles with quality scoring |
+| Organizations | Create and manage organization workspaces |
+| Contributor Matching | Match contributors to projects based on skills and availability |
+| Project Recommendations | Recommend relevant projects to developers based on their profile |
 
 ---
 
-# Architecture
+## Tech Stack
 
-```text
-                    Browser
+### Frontend
 
-                       │
+| Technology | Purpose |
+| :--- | :--- |
+| React 19 | UI library |
+| TypeScript 5.8 | Type safety |
+| Vite 8 | Build tool and development server |
+| Tailwind CSS v4 | Styling |
+| TanStack Router v1 | Client-side routing |
+| TanStack Query v5 | Server state and data fetching |
+| Framer Motion | Animations |
 
-             React + TypeScript
+### Backend
 
-                       │
+| Technology | Purpose |
+| :--- | :--- |
+| Python 3.11+ | Runtime |
+| FastAPI | REST API framework |
+| Pydantic v2 | Request validation and serialization |
+| SQLAlchemy 2.0 | ORM and async query engine |
+| Asyncpg | Async PostgreSQL driver |
+| Alembic | Database schema migrations |
 
-                REST / WebSocket
+### Database & Infrastructure
 
-                       │
+| Technology | Purpose |
+| :--- | :--- |
+| PostgreSQL 15+ | Primary relational database |
+| Redis 7+ | Caching and Pub/Sub broker |
+| Celery | Asynchronous task processing |
 
-                  FastAPI API
+### DevOps
 
-          ┌──────────┴──────────┐
+| Technology | Purpose |
+| :--- | :--- |
+| Docker & Docker Compose | Containerization and local environment |
+| DevContainers | VS Code and GitHub Codespaces support |
+| GitHub Actions | CI/CD pipelines |
 
-     Authentication      AI Matching
+---
 
-          │                    │
+## Getting Started
 
-     PostgreSQL          Redis Cache
+### Prerequisites
 
-          │
+- Node.js 20+
+- Python 3.11+
+- Docker & Docker Compose *(recommended)*
+- PostgreSQL 15+ and Redis 7+ *(if running without Docker)*
 
-    Background Workers
+### Option 1 — Docker Compose (Recommended)
+
+```bash
+git clone https://github.com/nensii21/devlink.git
+cd devlink
+docker-compose -f docker-compose.dev.yml up --build
 ```
 
-Detailed diagrams are available in
+| Service | URL |
+| :--- | :--- |
+| Frontend | `http://localhost:5173` |
+| Backend API | `http://localhost:8000` |
+| Swagger UI | `http://localhost:8000/docs` |
 
+### Option 2 — Manual Setup
+
+```bash
+git clone https://github.com/nensii21/devlink.git
+cd devlink
 ```
-docs/architecture.md
+
+**Backend:**
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env          # fill in required values
+alembic upgrade head
+uvicorn app.main:app --reload
+```
+
+**Frontend:**
+
+```bash
+cd frontend
+npm install
+cp .env.example .env          # fill in required values
+npm run dev
+```
+
+### DevContainers
+
+Open in VS Code and run **Remote-Containers: Reopen in Container**, or launch in [GitHub Codespaces](https://codespaces.new/nensii21/devlink). Dependencies and port forwarding are configured automatically via `.devcontainer/`.
+
+---
+
+## Environment Variables
+
+### Backend (`backend/.env`)
+
+| Variable | Required | Description |
+| :--- | :---: | :--- |
+| `DATABASE_URL` | Yes | PostgreSQL async connection string |
+| `REDIS_URL` | Yes | Redis connection URI |
+| `SECRET_KEY` | Yes | Secret for JWT token signing |
+| `ENVIRONMENT` | No | `development`, `staging`, or `production` |
+| `GITHUB_CLIENT_ID` | No | GitHub OAuth App client ID |
+| `GITHUB_CLIENT_SECRET` | No | GitHub OAuth App client secret |
+| `OPENAI_API_KEY` | No | OpenAI key for profile summary and recommendations |
+| `CORS_ORIGINS` | No | Allowed CORS origins (JSON array) |
+
+### Frontend (`frontend/.env`)
+
+| Variable | Required | Description |
+| :--- | :---: | :--- |
+| `VITE_API_URL` | Yes | Backend API base URL |
+| `VITE_APP_NAME` | No | Application display name |
+
+---
+
+## Available Scripts
+
+### Frontend
+
+```bash
+npm run dev        # Start local development server (HMR)
+npm run build      # Compile production bundle
+npm run test       # Run unit tests (Vitest)
+npm run lint       # Static analysis with ESLint
+npm run format     # Format with Prettier
+npm run typecheck  # TypeScript type check (no emit)
+```
+
+### Backend
+
+```bash
+uvicorn app.main:app --reload             # Start development server
+pytest                                    # Run test suite
+pytest --cov=app --cov-report=term        # Run with coverage report
+alembic upgrade head                      # Apply pending migrations
+alembic revision --autogenerate -m "msg"  # Generate new migration
 ```
 
 ---
 
-# Technology Stack
+## Project Structure
 
-| Category         | Technologies                          |
-| ---------------- | ------------------------------------- |
-| Frontend         | React 19, TypeScript, Tailwind CSS v4 |
-| State Management | TanStack Query                        |
-| Routing          | TanStack Router                       |
-| Backend          | FastAPI                               |
-| ORM              | SQLAlchemy 2                          |
-| Validation       | Pydantic v2                           |
-| Database         | PostgreSQL                            |
-| Cache            | Redis                                 |
-| Authentication   | JWT, OAuth 2.0                        |
-| AI               | OpenAI API                            |
-| Containers       | Docker                                |
-| CI/CD            | GitHub Actions                        |
-
----
-
-# Repository Structure
-
-```text
+```
 devlink/
-
+├── .devcontainer/          # DevContainer configuration
+├── .github/                # GitHub Actions workflows and issue templates
 ├── backend/
+│   ├── alembic/            # Database migration scripts
 │   ├── app/
-│   ├── tests/
-│   └── migrations/
-│
+│   │   ├── core/           # Config, security, events, cache
+│   │   ├── middleware/     # Rate limiting, security headers, request ID
+│   │   ├── models/         # SQLAlchemy ORM models
+│   │   ├── routers/        # API route handlers
+│   │   ├── schemas/        # Pydantic validation schemas
+│   │   ├── services/       # Business logic layer
+│   │   └── main.py         # FastAPI application entrypoint
+│   ├── tests/              # Pytest test suite
+│   ├── Dockerfile
+│   └── requirements.txt
 ├── frontend/
 │   ├── src/
-│   ├── public/
-│   └── components/
-│
-├── docs/
-│
-├── docker/
-│
-├── .github/
-│
-├── docker-compose.yml
-│
+│   │   ├── api/            # HTTP client modules
+│   │   ├── components/     # UI component library
+│   │   ├── hooks/          # Custom React hooks
+│   │   └── routes/         # Page routes (TanStack Router)
+│   ├── Dockerfile
+│   └── package.json
+├── docs/                   # Documentation files
+│   ├── screenshots/        # Application screenshots
+│   ├── api.md
+│   ├── architecture.md
+│   ├── coding-standards.md
+│   ├── deployment.md
+│   └── development.md
+├── docker-compose.dev.yml
+├── CONTRIBUTING.md
+├── CHANGELOG.md
+├── CODE_OF_CONDUCT.md
 └── README.md
 ```
 
 ---
 
-# Quick Start
+## Deployment
 
-## Clone Repository
+Full deployment instructions are in [docs/deployment.md](docs/deployment.md).
+
+**Frontend** — Deploy the `frontend/` build to [Vercel](https://vercel.com), [Netlify](https://netlify.com), or [Cloudflare Pages](https://pages.cloudflare.com).
+
+**Backend** — Deploy `backend/Dockerfile` to [Render](https://render.com), [Railway](https://railway.app), or AWS ECS.
+
+**Database** — Use a managed PostgreSQL service (AWS RDS, Supabase) and managed Redis (Upstash, Redis Cloud).
+
+---
+
+## Roadmap
+
+| Version | Planned Features | Status |
+| :--- | :--- | :--- |
+| `v0.1.0` | User authentication, developer profiles, project marketplace, GitHub OAuth | Completed |
+| `v0.2.0` | WebSocket messaging, team applications, notifications, repository linking | Completed |
+| `v0.3.0` | Builder flares, saved searches, bookmark collections, contributor matching, organizations | In Progress |
+| `v0.4.0` | Project issue tracking, project analytics, extended search filters | Planned |
+| `v1.0.0` | Mobile application, public REST API, advanced integrations | Planned |
+
+---
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before submitting a pull request.
 
 ```bash
-git clone https://github.com/nensii21/devlink.git
+# Create a feature branch
+git checkout -b feat/your-feature
 
-cd devlink
+# Commit using Conventional Commits
+git commit -m "feat(scope): short description"
+
+# Push and open a pull request
+git push origin feat/your-feature
 ```
 
 ---
 
-# Docker Installation
+## Changelog
 
-```bash
-docker compose up --build
-```
-
-Services
-
-| Service  | URL                        |
-| -------- | -------------------------- |
-| Frontend | http://localhost:5173      |
-| Backend  | http://localhost:8000      |
-| API Docs | http://localhost:8000/docs |
+See [CHANGELOG.md](CHANGELOG.md) for a full list of changes across releases.
 
 ---
 
-# Local Development
+## Acknowledgements
 
-## Backend
-
-```bash
-cd backend
-
-python -m venv venv
-
-source venv/bin/activate
-
-pip install -r requirements.txt
-
-uvicorn app.main:app --reload
-```
+- [FastAPI](https://fastapi.tiangolo.com) — backend API framework
+- [React](https://react.dev) — frontend UI library
+- [TanStack](https://tanstack.com) — routing and data fetching
+- [Radix UI](https://www.radix-ui.com) — accessible UI primitives
+- [SQLAlchemy](https://www.sqlalchemy.org) — async ORM
+- All contributors and [ECSoc 2026](https://github.com/nensii21/devlink/graphs/contributors) participants
 
 ---
 
-## Frontend
+## License
 
-```bash
-cd frontend
-
-npm install
-
-npm run dev
-```
-
----
-
-# Environment Variables
-
-Backend
-
-```env
-DATABASE_URL=
-
-REDIS_URL=
-
-JWT_SECRET=
-
-OPENAI_API_KEY=
-
-GITHUB_CLIENT_ID=
-
-GITHUB_CLIENT_SECRET=
-```
-
-Frontend
-
-```env
-VITE_API_URL=
-
-VITE_APP_NAME=
-```
-
----
-
-# API
-
-| Module         | Versioned Endpoint (`v1`) | Legacy Endpoint (`/api`) |
-| -------------- | ------------------------- | ------------------------ |
-| Authentication | `/api/v1/auth`            | `/api/auth`              |
-| Users          | `/api/v1/users`           | `/api/users`             |
-| Projects       | `/api/v1/projects`        | `/api/projects`          |
-| Applications   | `/api/v1/applications`    | `/api/applications`      |
-| Messaging      | `/api/v1/messages`        | `/api/messages`          |
-| Notifications  | `/api/v1/notifications`   | `/api/notifications`     |
-
-> DevLink uses URL Path Versioning (`/api/v1`). Legacy unversioned `/api/` endpoints are maintained for backward compatibility. See [API Versioning & Migration Strategy](file:///Users/nayanraj/devlink/docs/api_versioning_and_migration.md).
-
-Swagger UI:
-
-```
-http://localhost:8000/docs
-```
-
----
-
-# Security
-
-* JWT Authentication
-* OAuth 2.0
-* Password Hashing
-* Refresh Tokens
-* Secure HTTP Headers
-* Input Validation
-* SQL Injection Protection
-* Rate Limiting
-* CORS Protection
-* XSS Protection
-
----
-
-# Testing
-
-Backend
-
-```bash
-pytest
-```
-
-Coverage
-
-```bash
-pytest --cov
-```
-
-Frontend
-
-```bash
-npm run test
-```
-
-Lint
-
-```bash
-npm run lint
-```
-
----
-
-# Performance
-
-* Async FastAPI
-* Redis Caching
-* Lazy Loading
-* Optimized API Responses
-* WebSocket Communication
-* Background Tasks
-* Database Connection Pooling
-
----
-
-# Documentation
-
-| Guide        | Link                 |
-| ------------ | -------------------- |
-| API          | docs/api.md          |
-| Architecture | docs/architecture.md |
-| Development  | docs/development.md  |
-| Contributing | CONTRIBUTING.md      |
-
----
-
-# Roadmap
-
-| Version | Status                    |
-| ------- | ------------------------- |
-| v0.8    | Authentication & Profiles |
-| v0.9    | Messaging                 |
-| v1.0    | AI Matchmaking            |
-| v1.1    | Organizations             |
-| v2.0    | Mobile Applications       |
-
----
-
-# Contributing
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Follow Conventional Commits.
-4. Submit a Pull Request.
-5. Wait for review.
-
-See **CONTRIBUTING.md** for complete contribution guidelines.
-
----
-
-# License
-
-Distributed under the MIT License.
-
-See the LICENSE file for more information.
-
----
-
-# Maintainers
-
-**Lead Maintainer**
-
-Nensi Patel
-
-GitHub
-
-https://github.com/nensii21
-
----
-
-# Community
-
-* Open Source Contributors
-* GitHub Discussions
-* Issues
-* Pull Requests
-
----
-
-<p align="center">
-
-Built with React, FastAPI, PostgreSQL, Redis, and OpenAI.
-
-Designed for developers who build together.
-
-</p>
+MIT License — see [LICENSE](LICENSE) for details.

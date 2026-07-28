@@ -1,6 +1,7 @@
-from __future__ import annotations
+from uuid import UUID
 
 # pyrefly: ignore [missing-import]
+import uuid
 from fastapi import (
     APIRouter,
     Depends,
@@ -102,8 +103,151 @@ def login(
     """
 
     auth_service = AuthService(db)
+    user_agent = request.headers.get("user-agent")
+    ip_address = request.client.host if request.client else None
 
-    return auth_service.login(payload)
+    return auth_service.login(payload, user_agent=user_agent, ip_address=ip_address)
+
+
+# ==========================================================
+# Refresh Access Token
+# ==========================================================
+
+
+@router.post(
+    "/refresh",
+    response_model=AuthResponse,
+    summary="Refresh JWT",
+)
+@limiter.limit("10/minute")
+def refresh(
+    request: Request,
+    payload: RefreshTokenRequest,
+    db: Session = Depends(get_database),
+):
+    user_agent = request.headers.get("user-agent")
+    ip_address = request.client.host if request.client else None
+    auth_service = AuthService(db)
+
+    return auth_service.refresh_token(
+        payload.refresh_token,
+        user_agent=user_agent,
+        ip_address=ip_address,
+    )
+
+
+security = HTTPBearer()
+
+
+# ==========================================================
+# Current Authenticated User Dependency
+# ==========================================================
+
+
+def get_current_user_id(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> str:
+    """
+    Extract the current user's ID from the JWT.
+    """
+
+    try:
+        payload = decode_token(credentials.credentials)
+
+        return payload["sub"]
+
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials.",
+        )
+
+
+# ==========================================================
+# Logout
+# ==========================================================
+
+
+@router.post(
+    "/logout",
+    response_model=LogoutResponse,
+    summary="Logout",
+)
+@limiter.limit("10/minute")
+def logout(
+    request: Request,
+    payload: LogoutRequest | None = None,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_database),
+):
+
+    auth_service = AuthService(db)
+    refresh_token_str = payload.refresh_token if payload else None
+
+    return auth_service.logout(user_id, refresh_token_str=refresh_token_str)
+
+
+# ==========================================================
+# Session Management
+# ==========================================================
+
+
+from app.schemas.auth import SessionResponse  # noqa: E402
+from app.services.refresh_token_service import RefreshTokenService  # noqa: E402
+
+
+@router.get(
+    "/sessions",
+    response_model=list[SessionResponse],
+    summary="List active sessions for current user",
+)
+def get_sessions(
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_database),
+):
+    user_uuid = UUID(user_id)
+    return RefreshTokenService.get_active_sessions(db, user_uuid)
+
+
+@router.delete(
+    "/sessions/{session_id}",
+    response_model=SuccessResponse,
+    summary="Revoke an individual session by ID",
+)
+def revoke_session(
+    session_id: UUID,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_database),
+):
+    user_uuid = UUID(user_id)
+    success = RefreshTokenService.revoke_session_by_id(db, user_uuid, session_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session not found or already revoked.",
+        )
+    db.commit()
+    return SuccessResponse(message="Session revoked successfully.")
+
+
+@router.delete(
+    "/sessions",
+    response_model=SuccessResponse,
+    summary="Revoke all active sessions (Logout from all devices)",
+)
+@router.post(
+    "/logout-all",
+    response_model=SuccessResponse,
+    summary="Logout from all devices",
+)
+def logout_all_sessions(
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_database),
+):
+    user_uuid = UUID(user_id)
+    RefreshTokenService.revoke_all_tokens(db, user_uuid)
+    db.commit()
+    return SuccessResponse(message="All sessions revoked successfully.")
 
 
 import httpx  # noqa: E402
@@ -195,33 +339,6 @@ async def github_login(
 
     auth_service = AuthService(db)
     return auth_service.github_login(github_user, primary_email)
-
-
-security = HTTPBearer()
-
-
-# ==========================================================
-# Current Authenticated User Dependency
-# ==========================================================
-
-
-def get_current_user_id(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-) -> str:
-    """
-    Extract the current user's ID from the JWT.
-    """
-
-    try:
-        payload = decode_token(credentials.credentials)
-
-        return payload["sub"]
-
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials.",
-        )
 
 
 # ==========================================================
@@ -328,6 +445,104 @@ def logout_all(
     return auth_service.logout_all_devices(user_id)
 
 
+# ==========================================================
+# User Session Management (Issue #248)
+# ==========================================================
+
+from typing import List
+from fastapi import Query
+from app.models.user import User
+from app.dependencies import get_current_user
+from app.schemas.session import SessionResponse, RevokeSessionResponse
+from app.services.refresh_token_service import RefreshTokenService
+
+
+@router.get(
+    "/sessions",
+    response_model=List[SessionResponse],
+    summary="List Active Sessions",
+)
+@limiter.limit("30/minute")
+def list_sessions(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+    current_session_id: uuid.UUID | None = Query(
+        None, description="Optional ID of current session"
+    ),
+):
+    """
+    List all active sessions for the current user.
+    """
+    tokens = RefreshTokenService.get_active_sessions(db, current_user.id)
+    results = []
+    for token in tokens:
+        item = SessionResponse.model_validate(token)
+        if current_session_id and token.id == current_session_id:
+            item.is_current = True
+        results.append(item)
+    return results
+
+
+@router.delete(
+    "/sessions/{session_id}",
+    response_model=RevokeSessionResponse,
+    summary="Revoke Individual Session",
+)
+@limiter.limit("20/minute")
+def revoke_session(
+    request: Request,
+    session_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    """
+    Revoke a specific active session by ID.
+    """
+    revoked = RefreshTokenService.revoke_session_by_id(db, session_id, current_user.id)
+    if not revoked:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Session not found or already revoked.",
+        )
+    return RevokeSessionResponse(
+        success=True,
+        message="Session revoked successfully.",
+        revoked_count=1,
+    )
+
+
+@router.post(
+    "/sessions/revoke-others",
+    response_model=RevokeSessionResponse,
+    summary="Revoke All Other Sessions",
+)
+@limiter.limit("10/minute")
+def revoke_other_sessions(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+    current_session_id: uuid.UUID | None = Query(
+        None, description="Current session ID to keep active"
+    ),
+):
+    """
+    Revoke all active sessions for current user except the current session.
+    """
+    count = RefreshTokenService.revoke_other_sessions(
+        db=db,
+        user_id=current_user.id,
+        current_session_id=current_session_id,
+    )
+    return RevokeSessionResponse(
+        success=True,
+        message=f"Revoked {count} other session(s).",
+        revoked_count=count,
+    )
+
+
+# Forgot Password
+# ==========================================================
 from app.schemas.auth import (  # noqa: E402
     ChangePasswordRequest,
     ForgotPasswordResponse,

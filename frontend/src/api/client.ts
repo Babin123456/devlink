@@ -22,11 +22,12 @@ export class ApiError extends Error {
     this.payload = payload;
   }
 }
-
 export interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
   auth?: boolean;
   retries?: number;
+  timeout?: number;
+  signal?: AbortSignal;
   query?: Record<string, string | number | boolean | undefined | null>;
   raw?: boolean;
 }
@@ -82,7 +83,17 @@ async function refreshAccessToken(): Promise<string | null> {
 }
 
 async function coreFetch(path: string, opts: RequestOptions, attempt = 0): Promise<Response> {
-  const { body, auth = true, query, retries = 2, raw: _raw, headers, ...rest } = opts;
+  const {
+    body,
+    auth = true,
+    query,
+    retries = 2,
+    timeout = 10000,
+    signal,
+    raw: _raw,
+    headers,
+    ...rest
+  } = opts;
   void _raw;
   const finalHeaders = new Headers(headers);
   if (body !== undefined && !(body instanceof FormData)) {
@@ -101,14 +112,36 @@ async function coreFetch(path: string, opts: RequestOptions, attempt = 0): Promi
   };
 
   let res: Response;
+
+  const controller = new AbortController();
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeout);
+
+  if (signal) {
+    signal.addEventListener("abort", () => controller.abort(), { once: true });
+  }
+
   try {
-    res = await fetch(buildUrl(path, query), init);
+    res = await fetch(buildUrl(path, query), {
+      ...init,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
   } catch (err) {
-    // Network error — retry with backoff
+    clearTimeout(timeoutId);
+
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new ApiError("Request cancelled or timed out", 408, null);
+    }
+
     if (attempt < retries) {
       await new Promise((r) => setTimeout(r, 200 * 2 ** attempt));
       return coreFetch(path, opts, attempt + 1);
     }
+
     throw new ApiError(err instanceof Error ? err.message : "Network error", 0, null);
   }
 
