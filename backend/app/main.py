@@ -1,4 +1,6 @@
 from contextlib import asynccontextmanager
+import os
+from pathlib import Path
 
 # pyrefly: ignore [missing-import]
 
@@ -164,7 +166,8 @@ app.add_middleware(
 # Static Files
 # ------------------------------------------------------------------
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 # ------------------------------------------------------------------
 # Health Check

@@ -100,6 +100,7 @@ class Settings(BaseSettings):
     # Uploads
     # ==========================================================
 
+    UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_SIZE_MB: int = 10
     RESUME_MAX_SIZE_MB: int = 5
 

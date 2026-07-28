@@ -381,6 +381,20 @@ class UserService:
         return user
 
     @staticmethod
+    def update_profile_image(
+        db: Session,
+        user: User,
+        profile_image_url: str,
+    ) -> User:
+        user.profile_image = profile_image_url
+
+        db.commit()
+        db.refresh(user)
+
+        return user
+
+
+    @staticmethod
     def create_user_report(
         db: Session,
         reporter_id: uuid.UUID,
