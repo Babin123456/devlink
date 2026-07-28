@@ -210,7 +210,6 @@ class AuthService:
             str(user.id),
             {
                 "username": user.username,
-                "email": user.email,
             },
         )
 
@@ -415,6 +414,17 @@ class AuthService:
                 "email": user.email,
             },
         )
+
+        refresh_token = create_refresh_token(str(user.id))
+
+        RefreshTokenService.create_token(
+            self.db,
+            RefreshToken(
+                user_id=user.id,
+                token=refresh_token,
+                expires_at=datetime.now(timezone.utc)
+                + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+            ),
         refresh_token = create_refresh_token(str(user.id))
         expires_at = datetime.now(timezone.utc) + timedelta(days=7)
 
@@ -485,6 +495,11 @@ class AuthService:
 
         return user
 
+    # =====================================================
+    # Refresh Token
+    # =====================================================
+
+    def refresh_token(self, old_refresh_token: str):
     def refresh_token(
         self,
         token_str: str,
@@ -642,6 +657,7 @@ class AuthService:
     # Logout
     # =====================================================
 
+    def logout(self, user_id: str, refresh_token: str | None = None):
     def logout(self, user_id: str, refresh_token_str: str | None = None):
 
         user = self.get_current_user(user_id)
