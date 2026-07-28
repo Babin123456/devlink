@@ -27,7 +27,12 @@ PROJECT_VIEW = "project:view"
 
 # Mapping roles to exact permissions list
 ORG_ROLE_PERMISSIONS = {
-    OrgMemberRole.OWNER: {ORG_UPDATE, ORG_DELETE, ORG_MANAGE_MEMBERS, ORG_MANAGE_TOKENS},
+    OrgMemberRole.OWNER: {
+        ORG_UPDATE,
+        ORG_DELETE,
+        ORG_MANAGE_MEMBERS,
+        ORG_MANAGE_TOKENS,
+    },
     OrgMemberRole.ADMIN: {ORG_UPDATE, ORG_MANAGE_MEMBERS, ORG_MANAGE_TOKENS},
     OrgMemberRole.MEMBER: set(),
 }

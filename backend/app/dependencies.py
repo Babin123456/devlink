@@ -88,14 +88,19 @@ def get_current_user(
     except Exception:
         # Try authenticating as a workspace API Token
         from app.services.workspace_api_token_service import WorkspaceApiTokenService
-        token_info = WorkspaceApiTokenService.authenticate_api_token(db, credentials.credentials)
+
+        token_info = WorkspaceApiTokenService.authenticate_api_token(
+            db, credentials.credentials
+        )
         if token_info:
             auth_service = AuthService(db)
             user = auth_service.get_current_user(token_info.created_by_id)
             if user:
                 user._authenticated_via_token = True
                 user._token_organization_id = token_info.organization_id
-                user._token_scopes = [s.strip() for s in token_info.scopes.split(",") if s.strip()]
+                user._token_scopes = [
+                    s.strip() for s in token_info.scopes.split(",") if s.strip()
+                ]
                 return user
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -134,14 +139,19 @@ def get_optional_current_user(
     except Exception:
         # Try authenticating as a workspace API Token
         from app.services.workspace_api_token_service import WorkspaceApiTokenService
-        token_info = WorkspaceApiTokenService.authenticate_api_token(db, credentials.credentials)
+
+        token_info = WorkspaceApiTokenService.authenticate_api_token(
+            db, credentials.credentials
+        )
         if token_info:
             auth_service = AuthService(db)
             user = auth_service.get_current_user(token_info.created_by_id)
             if user:
                 user._authenticated_via_token = True
                 user._token_organization_id = token_info.organization_id
-                user._token_scopes = [s.strip() for s in token_info.scopes.split(",") if s.strip()]
+                user._token_scopes = [
+                    s.strip() for s in token_info.scopes.split(",") if s.strip()
+                ]
                 return user
         return None
 
@@ -302,7 +312,9 @@ def require_project_permission(action: str):
             token_scopes = current_user._token_scopes
             if "org:admin" not in token_scopes:
                 if action == "project:view":
-                    if not any(s in token_scopes for s in ("project:read", "project:write")):
+                    if not any(
+                        s in token_scopes for s in ("project:read", "project:write")
+                    ):
                         raise HTTPException(
                             status_code=status.HTTP_403_FORBIDDEN,
                             detail="Scope 'project:read' required.",

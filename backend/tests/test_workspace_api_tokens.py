@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 from app.models.audit_log import AuditLog, AuditAction
 
 
-def test_api_token_lifecycle_and_authentication(client: TestClient, register_and_login, db: Session):
+def test_api_token_lifecycle_and_authentication(
+    client: TestClient, register_and_login, db: Session
+):
     owner_id, owner_token = register_and_login("owner@x.com", "owner")
     headers = {"Authorization": f"Bearer {owner_token}"}
 

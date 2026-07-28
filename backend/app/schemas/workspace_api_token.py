@@ -6,9 +6,15 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class WorkspaceApiTokenCreate(BaseModel):
-    name: str = Field(..., max_length=200, description="Friendly name/label for the token")
-    scopes: list[str] = Field(default=[], description="Scopes associated with this token")
-    expires_in_days: int | None = Field(default=None, ge=1, description="Expiration time in days from now")
+    name: str = Field(
+        ..., max_length=200, description="Friendly name/label for the token"
+    )
+    scopes: list[str] = Field(
+        default=[], description="Scopes associated with this token"
+    )
+    expires_in_days: int | None = Field(
+        default=None, ge=1, description="Expiration time in days from now"
+    )
 
 
 class WorkspaceApiTokenResponse(BaseModel):
@@ -34,4 +40,6 @@ class WorkspaceApiTokenResponse(BaseModel):
 
 
 class WorkspaceApiTokenCreateResponse(WorkspaceApiTokenResponse):
-    token: str = Field(..., description="The generated clear-text API token. Shown only once.")
+    token: str = Field(
+        ..., description="The generated clear-text API token. Shown only once."
+    )

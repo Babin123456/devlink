@@ -405,7 +405,9 @@ class HackathonService:
                 sqlfunc.count(HackathonScore.id).label("score_count"),
             )
             .join(HackathonSubmission, HackathonSubmission.team_id == HackathonTeam.id)
-            .join(HackathonScore, HackathonScore.submission_id == HackathonSubmission.id)
+            .join(
+                HackathonScore, HackathonScore.submission_id == HackathonSubmission.id
+            )
             .where(HackathonTeam.hackathon_id == hackathon_id)
             .group_by(HackathonTeam.id, HackathonTeam.name)
             .order_by(sqlfunc.sum(HackathonScore.score).desc())

@@ -63,7 +63,9 @@ def list_tokens(
     organization_id: uuid.UUID,
     db: Session = Depends(get_database),
 ):
-    tokens = WorkspaceApiTokenService.list_tokens(db=db, organization_id=organization_id)
+    tokens = WorkspaceApiTokenService.list_tokens(
+        db=db, organization_id=organization_id
+    )
     return tokens
 
 

@@ -39,7 +39,9 @@ class WorkspaceApiTokenService:
         # Calculate expiration date
         expires_at = None
         if schema.expires_in_days is not None:
-            expires_at = datetime.now(timezone.utc) + timedelta(days=schema.expires_in_days)
+            expires_at = datetime.now(timezone.utc) + timedelta(
+                days=schema.expires_in_days
+            )
 
         # Standardize scopes (comma-separated)
         scopes_str = ",".join(schema.scopes)
