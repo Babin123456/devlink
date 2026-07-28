@@ -175,6 +175,12 @@ class User(Base):
         nullable=False,
     )
 
+    is_private: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
     # ------------------------------------------------------------------
     # Authentication
     # ------------------------------------------------------------------

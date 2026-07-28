@@ -68,6 +68,7 @@ class UserBase(BaseModel):
     company: Optional[str] = None
 
     open_to_work: bool = True
+    is_private: bool = False
     availability: list[AvailabilitySlot] = Field(default_factory=list)
 
 
@@ -112,6 +113,7 @@ class UserUpdate(BaseModel):
     company: Optional[str] = None
 
     open_to_work: Optional[bool] = None
+    is_private: Optional[bool] = None
     availability: Optional[list[AvailabilitySlot]] = None
 
 
