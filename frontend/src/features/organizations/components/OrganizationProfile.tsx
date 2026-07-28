@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { OrganizationHeader } from "./OrganizationHeader";
+import { OrganizationApiTokens } from "./OrganizationApiTokens";
 
 interface OrganizationProfileProps {
   organizationData: {
@@ -11,10 +12,11 @@ interface OrganizationProfileProps {
     description?: string;
     hiring: boolean;
   };
+  orgId: string;
 }
 
-export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({ organizationData }) => {
-  const [activeTab, setActiveTab] = useState<"about" | "team" | "projects" | "hiring">("about");
+export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({ organizationData, orgId }) => {
+  const [activeTab, setActiveTab] = useState<"about" | "team" | "projects" | "hiring" | "tokens">("about");
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -30,7 +32,7 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({ organi
 
       {/* Tabs */}
       <div className="flex border-b border-gray-800 mb-6 gap-6">
-        {(["about", "team", "projects", "hiring"] as const).map((tab) => (
+        {(["about", "team", "projects", "hiring", "tokens"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -40,7 +42,7 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({ organi
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
-            {tab}
+            {tab === "tokens" ? "API Tokens" : tab}
           </button>
         ))}
       </div>
@@ -85,6 +87,10 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({ organi
               <p className="text-gray-400 text-sm">We are not actively hiring right now.</p>
             )}
           </div>
+        )}
+
+        {activeTab === "tokens" && (
+          <OrganizationApiTokens orgId={orgId} />
         )}
       </div>
     </div>

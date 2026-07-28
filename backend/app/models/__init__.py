@@ -49,5 +49,6 @@ from .refresh_token import RefreshToken
 from .repository import Repository
 from .skill import Skill
 from .user import User
-from .user_report import UserReport
-from .user_skill import UserSkill
+from .user_report import UserReport as UserReport
+from .user_skill import UserSkill as UserSkill
+from .workspace_api_token import WorkspaceApiToken as WorkspaceApiToken

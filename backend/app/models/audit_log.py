@@ -66,6 +66,8 @@ class AuditAction(str, Enum):
     FAILED_LOGIN = "failed_login"
     TOKEN_REVOKED = "token_revoked"
     API_ACCESS = "api_access"
+    API_TOKEN_CREATED = "api_token_created"
+    API_TOKEN_REVOKED = "api_token_revoked"
 
 
 class AuditLog(Base):

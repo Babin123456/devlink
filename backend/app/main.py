@@ -272,6 +272,10 @@ app.include_router(
 )
 app.include_router(repositories.router)
 app.include_router(organizations.router)
+
+from app.routers import workspace_api_tokens
+app.include_router(workspace_api_tokens.router, prefix="/api")
+
 app.include_router(applications.router)
 app.include_router(skills.router)
 app.include_router(users.router)

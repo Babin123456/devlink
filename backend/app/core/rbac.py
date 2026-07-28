@@ -15,6 +15,7 @@ from app.models.project import Project
 ORG_UPDATE = "org:update"
 ORG_DELETE = "org:delete"
 ORG_MANAGE_MEMBERS = "org:manage_members"
+ORG_MANAGE_TOKENS = "org:manage_tokens"
 
 # Project permissions
 PROJECT_UPDATE = "project:update"
@@ -26,8 +27,8 @@ PROJECT_VIEW = "project:view"
 
 # Mapping roles to exact permissions list
 ORG_ROLE_PERMISSIONS = {
-    OrgMemberRole.OWNER: {ORG_UPDATE, ORG_DELETE, ORG_MANAGE_MEMBERS},
-    OrgMemberRole.ADMIN: {ORG_UPDATE, ORG_MANAGE_MEMBERS},
+    OrgMemberRole.OWNER: {ORG_UPDATE, ORG_DELETE, ORG_MANAGE_MEMBERS, ORG_MANAGE_TOKENS},
+    OrgMemberRole.ADMIN: {ORG_UPDATE, ORG_MANAGE_MEMBERS, ORG_MANAGE_TOKENS},
     OrgMemberRole.MEMBER: set(),
 }
 
