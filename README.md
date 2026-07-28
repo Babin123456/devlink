@@ -195,6 +195,22 @@ Open in VS Code and run **Remote-Containers: Reopen in Container**, or launch in
 
 ## Environment Variables
 
+| Module         | Versioned Endpoint (`v1`) | Legacy Endpoint (`/api`) |
+| -------------- | ------------------------- | ------------------------ |
+| Authentication | `/api/v1/auth`            | `/api/auth`              |
+| Users          | `/api/v1/users`           | `/api/users`             |
+| Projects       | `/api/v1/projects`        | `/api/projects`          |
+| Applications   | `/api/v1/applications`    | `/api/applications`      |
+| Messaging      | `/api/v1/messages`        | `/api/messages`          |
+| Notifications  | `/api/v1/notifications`   | `/api/notifications`     |
+
+> DevLink uses URL Path Versioning (`/api/v1`). Legacy unversioned `/api/` endpoints are maintained for backward compatibility. See [API Versioning & Migration Strategy](file:///Users/nayanraj/devlink/docs/api_versioning_and_migration.md).
+
+Swagger UI:
+
+```
+http://localhost:8000/docs
+```
 ### Backend (`backend/.env`)
 
 | Variable | Required | Description |
