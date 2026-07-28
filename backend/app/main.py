@@ -62,6 +62,19 @@ from app.routers import (
 )
 
 
+import asyncio
+
+async def check_presence_timeouts():
+    """Background task to scan for inactive WebSocket connections and set status to away."""
+    from app.routers.websockets import manager
+    try:
+        while True:
+            await asyncio.sleep(15)  # scan every 15 seconds
+            await manager.check_timeouts(timeout_seconds=300)  # 5 minutes
+    except asyncio.CancelledError:
+        pass
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -69,6 +82,9 @@ async def lifespan(app: FastAPI):
     """
 
     print("🚀 DevLink Backend Starting...")
+
+    # Start user presence timeout background task
+    presence_task = asyncio.create_task(check_presence_timeouts())
 
     from app.core.events import event_bus
     from app.core.event_handlers import register_all_handlers
@@ -88,6 +104,13 @@ async def lifespan(app: FastAPI):
     yield
 
     print("🛑 DevLink Backend Stopping...")
+
+    # Cancel user presence timeout background task
+    presence_task.cancel()
+    try:
+        await presence_task
+    except asyncio.CancelledError:
+        pass
 
     from app.core.cache import cache_manager
 
