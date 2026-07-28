@@ -269,16 +269,18 @@ VITE_APP_NAME=
 
 # API
 
-| Module         | Endpoint           |
-| -------------- | ------------------ |
-| Authentication | /api/auth          |
-| Users          | /api/users         |
-| Projects       | /api/projects      |
-| Applications   | /api/applications  |
-| Messaging      | /api/messages      |
-| Notifications  | /api/notifications |
+| Module         | Versioned Endpoint (`v1`) | Legacy Endpoint (`/api`) |
+| -------------- | ------------------------- | ------------------------ |
+| Authentication | `/api/v1/auth`            | `/api/auth`              |
+| Users          | `/api/v1/users`           | `/api/users`             |
+| Projects       | `/api/v1/projects`        | `/api/projects`          |
+| Applications   | `/api/v1/applications`    | `/api/applications`      |
+| Messaging      | `/api/v1/messages`        | `/api/messages`          |
+| Notifications  | `/api/v1/notifications`   | `/api/notifications`     |
 
-Swagger
+> DevLink uses URL Path Versioning (`/api/v1`). Legacy unversioned `/api/` endpoints are maintained for backward compatibility. See [API Versioning & Migration Strategy](file:///Users/nayanraj/devlink/docs/api_versioning_and_migration.md).
+
+Swagger UI:
 
 ```
 http://localhost:8000/docs

@@ -24,9 +24,13 @@ Pass the access token received during login or registration in the HTTP `Authori
 Authorization: Bearer <your_jwt_access_token>
 ```
 
-### Base URL
-* **Development**: `http://localhost:8000/api`
-* **Production**: `https://api.devlink.app/api`
+### Base URL & API Versioning
+* **Version 1 Base URL (Recommended)**: `http://localhost:8000/api/v1` (Production: `https://api.devlink.app/api/v1`)
+* **Legacy Base URL (Backward Compatible)**: `http://localhost:8000/api` (Production: `https://api.devlink.app/api`)
+
+> [!NOTE]
+> DevLink supports explicit URL Path Versioning (`/api/v1`). Legacy unversioned `/api/` endpoints are maintained for backward compatibility.
+> For detailed versioning rules, breaking change policies, and migration instructions, see the [API Versioning Strategy & Migration Guide](file:///Users/nayanraj/devlink/docs/api_versioning_and_migration.md).
 
 ### Common HTTP Headers
 | Header | Type | Description |
