@@ -203,7 +203,6 @@ class RefreshTokenService:
         return len(tokens)
 
     @staticmethod
-    def delete_expired_token(
     def revoke_all_tokens(
         db: Session,
         user_id: uuid.UUID,
