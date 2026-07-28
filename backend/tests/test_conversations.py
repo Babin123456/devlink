@@ -16,31 +16,7 @@ from app.models.conversation_member import ConversationMember, ConversationRole
 from app.schemas.conversation import ConversationCreate
 from app.services.conversation_service import ConversationService
 
-engine = create_engine(
-    "sqlite://",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-@pytest.fixture(autouse=True)
-def setup_db():
-    app.dependency_overrides[get_database] = override_get_db
-    Base.metadata.create_all(bind=engine)
-
-    yield
-
-    Base.metadata.drop_all(bind=engine)
-    app.dependency_overrides.clear()
 
 
 def _create_user(db, email: str, username: str) -> User:
@@ -151,8 +127,7 @@ def test_add_third_member_to_direct_fails():
     db.close()
 
 
-def test_router_prevent_self_messaging_integration():
-    client = TestClient(app)
+def test_router_prevent_self_messaging_integration(client):
 
     # Register and login a user
     client.post(
