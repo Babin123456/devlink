@@ -203,7 +203,9 @@ class HackathonScoreResponse(HackathonScoreBase):
 
 
 class HackathonLeaderboardEntry(BaseModel):
+    rank: int = 0
     team_id: str
     team_name: str
-    total_score: int | None = None
-    score_count: int = 0
+    submission_title: str = ""
+    avg_score: float = 0.0
+    judge_count: int = 0

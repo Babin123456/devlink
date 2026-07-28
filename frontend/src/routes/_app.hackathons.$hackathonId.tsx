@@ -1,26 +1,21 @@
 import { useState } from "react";
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { hackathonsService } from "@/services";
-import { Card, TagChip, EmptyState, Skeleton } from "@/components/shared/primitives";
-import {
-  ArrowLeft,
-  Trophy,
-  Users2,
-  Clock,
-  Calendar,
-  Award,
-  GitBranch,
-  ExternalLink,
-} from "lucide-react";
+import { Card, TagChip, Skeleton, EmptyState } from "@/components/shared/primitives";
+import { Trophy, Users2, Calendar, ExternalLink, CheckCircle2, Award, GitBranch } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BackButton } from "@/components/shared/BackButton";
+import { RegisterDialog } from "@/components/hackathons/RegisterDialog";
+import { TeamsTab } from "@/components/hackathons/TeamsTab";
+import { SubmissionsTab } from "@/components/hackathons/SubmissionsTab";
+import { LeaderboardTab } from "@/components/hackathons/LeaderboardTab";
 
 type Tab = "overview" | "teams" | "submissions" | "leaderboard";
 
-function getTabFromURL(): Tab {
-  const params = new URLSearchParams(window.location.search);
-  const tab = params.get("tab");
+function getInitialTab(): Tab {
+  if (typeof window === "undefined") return "overview";
+  const tab = new URLSearchParams(window.location.search).get("tab");
   if (tab === "overview" || tab === "teams" || tab === "submissions" || tab === "leaderboard")
     return tab;
   return "overview";
@@ -36,47 +31,69 @@ export const Route = createFileRoute("/_app/hackathons/$hackathonId")({
   component: HackathonDetail,
 });
 
+const STATUS_META: Record<string, { label: string; className: string }> = {
+  draft: { label: "Draft", className: "border-border bg-muted text-muted-foreground" },
+  registration_open: { label: "Registration open", className: "border-success/30 bg-success/10 text-success" },
+  in_progress: { label: "In progress", className: "border-primary/30 bg-primary/10 text-primary" },
+  judging: { label: "Judging", className: "border-warning/30 bg-warning/10 text-warning" },
+  completed: { label: "Completed", className: "border-border bg-muted text-muted-foreground" },
+  cancelled: { label: "Cancelled", className: "border-destructive/30 bg-destructive/10 text-destructive" },
+};
+
 function HackathonDetail() {
   const { hackathonId } = Route.useParams();
+  const queryClient = useQueryClient();
+  const [tab, setTab] = useState<Tab>(getInitialTab);
+  const [registerOpen, setRegisterOpen] = useState(false);
+  // Track registration locally — persists as long as user stays on page
+  const [registered, setRegistered] = useState(() =>
+    hackathonsService.isRegistered(hackathonId),
+  );
+
   const { data: hackathon, isLoading } = useQuery({
     queryKey: ["hackathon", hackathonId],
     queryFn: () => hackathonsService.get(hackathonId),
   });
+
   const { data: teams = [] } = useQuery({
     queryKey: ["hackathon-teams", hackathonId],
     queryFn: () => hackathonsService.getTeams(hackathonId),
     enabled: !!hackathonId,
   });
-  const [tab, setTab] = useState<Tab>(getTabFromURL);
 
-  const handleTabChange = (value: string) => {
+  function handleTabChange(value: string) {
     setTab(value as Tab);
-    const url = new URL(window.location.href);
-    url.searchParams.set("tab", value);
-    window.history.replaceState({}, "", url.toString());
-  };
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", value);
+      window.history.replaceState({}, "", url.toString());
+    }
+  }
 
+  function handleRegistered() {
+    setRegistered(true);
+    setRegisterOpen(false);
+    queryClient.invalidateQueries({ queryKey: ["hackathon", hackathonId] });
+  }
+
+  // ── Loading ──────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="space-y-4" role="status" aria-busy="true">
+      <div className="space-y-4" aria-busy="true">
         <Skeleton className="h-5 w-32" />
-        <Card className="p-4">
-          <div className="flex flex-wrap items-start gap-5">
-            <Skeleton className="h-24 w-24 shrink-0 rounded-full" />
-            <div className="min-w-0 flex-1">
-              <Skeleton className="h-7 w-40" />
+        <Card className="p-6">
+          <div className="flex flex-wrap gap-5">
+            <Skeleton className="h-20 w-20 shrink-0 rounded-xl" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-7 w-48" />
               <Skeleton className="h-4 w-32" />
-              <Skeleton className="mt-2 h-4 w-64" />
-              <Skeleton className="mt-2 h-3 w-28" />
+              <Skeleton className="h-4 w-64" />
             </div>
           </div>
         </Card>
-        <div className="grid gap-3 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="p-4">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="mt-2 h-9 w-16" />
-            </Card>
+            <Card key={i} className="h-20 animate-pulse" />
           ))}
         </div>
       </div>
@@ -85,168 +102,206 @@ function HackathonDetail() {
 
   if (!hackathon) throw notFound();
 
-  const formatDate = (d: string) =>
+  const fmt = (d: string) =>
     new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  const statusMeta = STATUS_META[hackathon.status] ?? {
+    label: hackathon.status.replace(/_/g, " "),
+    className: "border-border bg-muted text-muted-foreground",
+  };
+  const canRegister = !registered && hackathon.status !== "completed" && hackathon.status !== "cancelled";
 
   return (
     <div className="space-y-4">
       <BackButton to="/hackathons" label="Back to hackathons" />
 
-      <Card className="p-4">
-        <div className="flex flex-wrap items-start gap-5">
-          <span className="grid h-24 w-24 shrink-0 place-items-center rounded-lg bg-primary-soft text-primary">
-            <Trophy size={32} />
+      {/* Hero */}
+      <Card className="p-4 sm:p-6">
+        <div className="flex flex-wrap items-start gap-4">
+          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
+            <Trophy size={28} />
           </span>
+
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h1 className="text-[22px] font-bold text-foreground">{hackathon.name}</h1>
-              <TagChip
-                className={
-                  hackathon.status === "completed"
-                    ? "text-muted-foreground border-border bg-muted"
-                    : "text-primary border-primary/30 bg-primary/10"
-                }
-              >
-                {hackathon.status.replace("_", " ")}
-              </TagChip>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-[20px] font-bold text-foreground sm:text-[22px]">
+                {hackathon.name}
+              </h1>
+              <TagChip className={statusMeta.className}>{statusMeta.label}</TagChip>
             </div>
             {hackathon.theme && (
               <p className="mt-0.5 text-[13px] text-muted-foreground">{hackathon.theme}</p>
             )}
-            <p className="mt-2 text-[13px] text-foreground line-clamp-3">{hackathon.description}</p>
+            <p className="mt-2 line-clamp-3 text-[13px] text-foreground/80">
+              {hackathon.description}
+            </p>
             <div className="mt-3 flex flex-wrap gap-3 text-[12px] text-muted-foreground">
               <span className="inline-flex items-center gap-1">
-                <Calendar size={12} /> {formatDate(hackathon.starts_at)} —{" "}
-                {formatDate(hackathon.ends_at)}
+                <Calendar size={12} />
+                {fmt(hackathon.starts_at)} — {fmt(hackathon.ends_at)}
               </span>
               <span className="inline-flex items-center gap-1">
-                <Users2 size={12} /> {hackathon.min_team_size}–{hackathon.max_team_size} per team
+                <Users2 size={12} />
+                {hackathon.min_team_size}–{hackathon.max_team_size} per team
               </span>
               {hackathon.prize && (
-                <TagChip className="text-warning border-warning/30 bg-warning/10">
-                  {hackathon.prize}
+                <TagChip className="border-warning/30 bg-warning/10 text-warning">
+                  🏆 {hackathon.prize}
                 </TagChip>
               )}
             </div>
           </div>
-          <div className="flex gap-2">
-            <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90">
-              Register
-            </button>
+
+          {/* Actions */}
+          <div className="flex shrink-0 flex-wrap items-start gap-2">
+            {registered ? (
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-success/30 bg-success/10 px-3 py-2 text-[13px] font-semibold text-success">
+                <CheckCircle2 size={14} /> Registered
+              </span>
+            ) : canRegister ? (
+              <button
+                onClick={() => setRegisterOpen(true)}
+                className="rounded-md bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90"
+              >
+                Register now
+              </button>
+            ) : null}
+            {hackathon.website_url && (
+              <a
+                href={hackathon.website_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-2 text-[13px] font-medium text-foreground hover:bg-muted"
+              >
+                <ExternalLink size={13} /> Website
+              </a>
+            )}
           </div>
         </div>
       </Card>
 
-      <div className="grid gap-3 lg:grid-cols-3">
+      {/* Stats */}
+      <div className="grid gap-3 sm:grid-cols-3">
         <Card className="p-4">
-          <p className="text-[13px] font-semibold text-foreground">Status</p>
-          <p className="mt-2 text-[24px] font-bold capitalize text-foreground">
-            {hackathon.status.replace("_", " ")}
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Status</p>
+          <p className="mt-1 text-[18px] font-bold capitalize text-foreground">
+            {hackathon.status.replace(/_/g, " ")}
           </p>
         </Card>
         <Card className="p-4">
-          <p className="text-[13px] font-semibold text-foreground">Teams</p>
-          <p className="mt-2 text-[24px] font-bold text-foreground">{teams.length}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Teams</p>
+          <p className="mt-1 text-[18px] font-bold text-foreground">{teams.length}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-[13px] font-semibold text-foreground">Team Size</p>
-          <p className="mt-2 text-[24px] font-bold text-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Team size</p>
+          <p className="mt-1 text-[18px] font-bold text-foreground">
             {hackathon.min_team_size}–{hackathon.max_team_size}
           </p>
         </Card>
       </div>
 
+      {/* Tabs */}
       <Tabs value={tab} onValueChange={handleTabChange}>
-        <TabsList className="overflow-x-auto">
+        <TabsList className="w-full overflow-x-auto sm:w-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="teams">Teams</TabsTrigger>
+          <TabsTrigger value="teams">
+            Teams
+            {teams.length > 0 && (
+              <span className="ml-1.5 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold text-primary">
+                {teams.length}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="submissions">Submissions</TabsTrigger>
           <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview">
+        {/* ── Overview ── */}
+        <TabsContent value="overview" className="mt-3 space-y-3">
           <Card className="p-4">
-            <p className="text-[13px] font-semibold text-foreground">About</p>
-            <p className="mt-2 text-[13px] text-muted-foreground whitespace-pre-wrap">
+            <h2 className="text-[13px] font-semibold text-foreground">About this hackathon</h2>
+            <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-muted-foreground">
               {hackathon.description}
             </p>
           </Card>
-          {hackathon.website_url && (
-            <Card className="mt-3 p-4">
-              <a
-                href={hackathon.website_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-primary hover:underline"
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Card className="p-4">
+              <h2 className="text-[13px] font-semibold text-foreground">Schedule</h2>
+              <dl className="mt-2 space-y-2 text-[13px]">
+                <div className="flex items-center justify-between gap-2">
+                  <dt className="text-muted-foreground">Starts</dt>
+                  <dd className="font-medium text-foreground">{fmt(hackathon.starts_at)}</dd>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <dt className="text-muted-foreground">Ends</dt>
+                  <dd className="font-medium text-foreground">{fmt(hackathon.ends_at)}</dd>
+                </div>
+              </dl>
+            </Card>
+            <Card className="p-4">
+              <h2 className="text-[13px] font-semibold text-foreground">Team rules</h2>
+              <dl className="mt-2 space-y-2 text-[13px]">
+                <div className="flex items-center justify-between gap-2">
+                  <dt className="text-muted-foreground">Minimum</dt>
+                  <dd className="font-medium text-foreground">{hackathon.min_team_size} member{hackathon.min_team_size !== 1 ? "s" : ""}</dd>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <dt className="text-muted-foreground">Maximum</dt>
+                  <dd className="font-medium text-foreground">{hackathon.max_team_size} members</dd>
+                </div>
+                {hackathon.prize && (
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-muted-foreground">Prize pool</dt>
+                    <dd className="font-medium text-warning">{hackathon.prize}</dd>
+                  </div>
+                )}
+              </dl>
+            </Card>
+          </div>
+
+          {!registered && canRegister && (
+            <Card className="flex items-center justify-between gap-4 p-4">
+              <div>
+                <p className="text-[13px] font-semibold text-foreground">Ready to join?</p>
+                <p className="text-[12px] text-muted-foreground">
+                  Register to form or join a team and submit your project.
+                </p>
+              </div>
+              <button
+                onClick={() => setRegisterOpen(true)}
+                className="shrink-0 rounded-md bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90"
               >
-                <ExternalLink size={14} /> Visit website
-              </a>
+                Register now
+              </button>
             </Card>
           )}
         </TabsContent>
 
-        <TabsContent value="teams">
-          {teams.length === 0 ? (
-            <Card className="p-8">
-              <EmptyState
-                title="No teams yet"
-                desc="Be the first to create a team for this hackathon."
-                action={<Users2 size={20} className="text-muted-foreground" />}
-              />
-            </Card>
-          ) : (
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {teams.map((team) => (
-                <Card key={team.id} interactive className="p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-muted text-xl">
-                      <Users2 size={16} />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[14px] font-semibold text-foreground">
-                        {team.name}
-                      </p>
-                      {team.description && (
-                        <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
-                          {team.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span className="inline-flex items-center gap-1">
-                      <Users2 size={12} /> {team.member_count} members
-                    </span>
-                    <button className="rounded-md border border-border px-2 py-1 text-[11px] font-medium hover:bg-muted">
-                      Join
-                    </button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
+        {/* ── Teams ── */}
+        <TabsContent value="teams" className="mt-3">
+          <TeamsTab hackathonId={hackathonId} maxTeamSize={hackathon.max_team_size} />
         </TabsContent>
 
-        <TabsContent value="submissions">
-          <Card className="p-8">
-            <EmptyState
-              title="No submissions yet"
-              desc="Submissions will appear here once teams start shipping."
-              action={<GitBranch size={20} className="text-muted-foreground" />}
-            />
-          </Card>
+        {/* ── Submissions ── */}
+        <TabsContent value="submissions" className="mt-3">
+          <SubmissionsTab hackathonId={hackathonId} teams={teams} />
         </TabsContent>
 
-        <TabsContent value="leaderboard">
-          <Card className="p-8">
-            <EmptyState
-              title="No scores yet"
-              desc="The leaderboard will be populated after judging begins."
-              action={<Award size={20} className="text-muted-foreground" />}
-            />
-          </Card>
+        {/* ── Leaderboard ── */}
+        <TabsContent value="leaderboard" className="mt-3">
+          <LeaderboardTab hackathonId={hackathonId} />
         </TabsContent>
       </Tabs>
+
+      {/* Register dialog */}
+      <RegisterDialog
+        hackathonId={hackathonId}
+        hackathonName={hackathon.name}
+        open={registerOpen}
+        onOpenChange={setRegisterOpen}
+        onRegistered={handleRegistered}
+      />
     </div>
   );
 }
