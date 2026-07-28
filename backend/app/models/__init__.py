@@ -18,6 +18,7 @@ from .notification import Notification  # noqa: F401
 from .organization import Organization  # noqa: F401
 from .organization_member import OrganizationMember, OrgMemberRole  # noqa: F401
 from .project import Project  # noqa: F401
+from .project_view import ProjectView  # noqa: F401
 from .project_member import ProjectMember  # noqa: F401
 from .project_skill import ProjectSkill  # noqa: F401
 from .refresh_token import RefreshToken  # noqa: F401

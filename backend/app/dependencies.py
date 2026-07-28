@@ -34,6 +34,28 @@ def get_database():
     yield from get_db()
 
 
+def get_optional_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(optional_security),
+    db: Session = Depends(get_database),
+) -> User | None:
+    """
+    Returns the currently authenticated user if token is valid, else None.
+    """
+    if not credentials:
+        return None
+
+    try:
+        payload = decode_token(credentials.credentials)
+        user_id = payload.get("sub")
+        if not user_id:
+            return None
+        user_uuid = UUID(user_id)
+        auth_service = AuthService(db)
+        return auth_service.get_current_user(user_uuid)
+    except Exception:
+        return None
+
+
 # ---------------------------------------------------------------------
 # Current User
 # ---------------------------------------------------------------------
