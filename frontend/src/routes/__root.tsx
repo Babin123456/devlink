@@ -6,7 +6,9 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
+import { AnimatePresence } from "framer-motion";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
@@ -148,9 +150,13 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useRouterState({ select: (s) => s.location });
+
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AnimatePresence mode="wait" initial={false}>
+        <Outlet key={location.pathname} />
+      </AnimatePresence>
       <Toaster position="top-right" richColors />
     </QueryClientProvider>
   );
