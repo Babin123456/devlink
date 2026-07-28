@@ -1,210 +1,462 @@
 <p align="center">
-  <img src="logo-dev.jpeg" alt="DevLink Banner" width="100%">
+  <img src="assets/logo.png" width="170" alt="DevLink Logo">
 </p>
 
 <h1 align="center">DevLink</h1>
 
 <p align="center">
-Open Source Developer Collaboration Platform
+  <strong>Build. Collaborate. Launch.</strong><br>
+  The modern open-source platform where developers, founders, designers, and contributors build products together.
 </p>
 
 <p align="center">
-Discover developers. Build teams. Ship software.
-</p>
-
-<p align="center">
-  <a href="https://github.com/nensii21/devlink/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/nensii21/devlink/ci.yml?style=flat-square&label=build">
-  </a>
   <a href="LICENSE">
-    <img src="https://img.shields.io/github/license/nensii21/devlink?style=flat-square">
+    <img src="https://img.shields.io/github/license/YOUR_USERNAME/DevLink">
   </a>
-  <a href="https://github.com/nensii21/devlink/stargazers">
-    <img src="https://img.shields.io/github/stars/nensii21/devlink?style=flat-square">
+  <a href="#">
+    <img src="https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-blue">
   </a>
-  <a href="https://github.com/nensii21/devlink/graphs/contributors">
+  <a href="#">
+    <img src="https://img.shields.io/badge/Backend-FastAPI-green">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/Database-PostgreSQL-blueviolet">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/github/stars/YOUR_USERNAME/DevLink">
+  </a>
+</p>
 
-    ## Overview
+---
 
-DevLink is an open-source collaboration platform built for developers, designers, founders, and open-source contributors.
+# Overview
 
-It helps builders discover teammates, create projects, manage applications, collaborate in real time, and showcase their work in a single platform.
+DevLink is an open-source social platform designed for developers, startup founders, designers, AI engineers, and contributors to discover projects, collaborate with teams, and build products together.
 
-Whether you're building a startup, contributing to open source, or participating in hackathons, DevLink provides the tools to move from idea to production with the right people.
+Instead of managing GitHub repositories, LinkedIn networking, Discord communities, and hackathon groups separately, DevLink brings everything into one unified platform.
 
-## Why DevLink
+Whether you're searching for contributors, showcasing projects, joining startups, or participating in hackathons, DevLink provides a streamlined experience focused on collaboration.
 
-Building software often requires multiple disconnected tools.
+---
 
-| Platform | Purpose |
-|----------|----------|
-| GitHub | Source Code |
-| LinkedIn | Professional Network |
-| Discord | Communication |
-| Notion | Documentation |
-| Forms | Team Applications |
+# Screenshots
 
-DevLink combines these workflows into one platform designed specifically for developers.
+## Dashboard
 
-## Features
+<p align="center">
+<img src="assets/screenshots/dashboard.png" width="100%">
+</p>
 
-| Feature | Description |
-|----------|-------------|
-| Developer Profiles | Showcase skills, repositories, portfolio, and experience. |
-| Project Marketplace | Discover projects or recruit contributors. |
-| Team Applications | Apply to projects directly from the platform. |
-| Real-Time Messaging | Collaborate instantly using WebSockets. |
-| Notifications | Receive live updates across projects. |
-| GitHub Integration | Link repositories and contribution history. |
-| AI Recommendations | Discover teammates based on skills and interests. |
-| Responsive Design | Optimized for desktop, tablet, and mobile. |
+---
 
-Architecture
-graph LR
+## Authentication
 
-A[Browser]
+<p align="center">
+<img src="assets/screenshots/login.png" width="100%">
+</p>
 
-B[React]
+---
 
-C[FastAPI]
+## Project Page
 
-D[Redis]
+<p align="center">
+<img src="assets/screenshots/project-page.png" width="100%">
+</p>
 
-E[PostgreSQL]
+---
 
-A --> B
+## Feed
 
-B --> C
+<p align="center">
+<img src="assets/screenshots/feed.png" width="100%">
+</p>
 
-C --> D
+---
 
-C --> E
+## Mobile Experience
 
-## Architecture
+<p align="center">
+<img src="assets/screenshots/mobile.png" width="40%">
+</p>
 
-DevLink follows a modern client-server architecture.
+---
 
-- React powers the frontend.
-- FastAPI provides REST APIs and WebSocket communication.
-- PostgreSQL stores application data.
-- Redis enables caching and real-time messaging.
+# Features
 
-## Technology Stack
+### Developer Profiles
 
-### Frontend
+- Professional portfolio
+- Skills
+- Experience
+- GitHub integration
+- Project showcase
+- Social links
 
-- React 19
+---
+
+### Project Collaboration
+
+- Create projects
+- Find contributors
+- Join teams
+- Track progress
+- Manage applications
+
+---
+
+### Social Feed
+
+- Share updates
+- Publish achievements
+- Community discussions
+- Follow developers
+- Like & comment
+
+---
+
+### Real-time Messaging
+
+- One-to-one chat
+- Team conversations
+- Notifications
+- Instant communication
+
+---
+
+### Authentication
+
+- Email authentication
+- OAuth
+- Secure sessions
+- JWT authentication
+
+---
+
+### Discover
+
+- Search developers
+- Search projects
+- Trending repositories
+- Recommended collaborators
+
+---
+
+### Notifications
+
+- Project invitations
+- Messages
+- Collaboration requests
+- Activity updates
+
+---
+
+### Responsive Design
+
+- Desktop
+- Tablet
+- Mobile
+- Dark mode support
+
+---
+
+# Tech Stack
+
+## Frontend
+
+- React
 - TypeScript
 - Tailwind CSS
-- TanStack Query
-- TanStack Router
-- Framer Motion
+- React Router
+- React Query
 
-### Backend
+## Backend
 
 - FastAPI
 - SQLAlchemy
-- Pydantic
-- AsyncPG
-
-### Infrastructure
-
 - PostgreSQL
 - Redis
+- JWT
+
+## DevOps
+
 - Docker
 - GitHub Actions
+- Nginx
 
-Repository Structure
-devlink/
+---
+
+# Architecture
+
+```mermaid
+flowchart LR
+
+User --> Frontend
+
+Frontend --> API
+
+API --> Authentication
+
+API --> Database
+
+API --> Notifications
+
+API --> Chat
+
+Database --> PostgreSQL
+
+Chat --> WebSocket
+
+Notifications --> Redis
+```
+
+---
+
+# Repository Structure
+
+```
+DevLink/
 
 ├── backend/
-
+│   ├── app/
+│   ├── api/
+│   ├── models/
+│   ├── services/
+│   └── core/
+│
 ├── frontend/
-
+│   ├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── hooks/
+│   └── assets/
+│
 ├── docs/
-
+│
+├── assets/
+│   └── screenshots/
+│
 ├── docker/
+│
+└── .github/
+```
 
-├── .github/
+---
 
-├── docker-compose.yml
+# Quick Start
 
-└── README.md
+## Clone Repository
 
-Getting Started
-git clone https://github.com/nensii21/devlink.git
+```bash
+git clone https://github.com/YOUR_USERNAME/DevLink.git
 
-cd devlink
+cd DevLink
+```
 
-cp .env.example .env
+---
 
+## Backend
+
+```bash
+cd backend
+
+python -m venv venv
+
+source venv/bin/activate
+
+pip install -r requirements.txt
+
+uvicorn app.main:app --reload
+```
+
+---
+
+## Frontend
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+---
+
+# Environment Variables
+
+Backend
+
+```
+DATABASE_URL=
+
+JWT_SECRET=
+
+JWT_ALGORITHM=
+
+ACCESS_TOKEN_EXPIRE_MINUTES=
+
+REDIS_URL=
+```
+
+Frontend
+
+```
+VITE_API_URL=
+```
+
+---
+
+# Running with Docker
+
+```bash
 docker compose up --build
+```
 
-##Environment Variables
+---
 
-| Variable             | Description           |
-| -------------------- | --------------------- |
-| DATABASE_URL         | PostgreSQL connection |
-| REDIS_URL            | Redis server          |
-| SECRET_KEY           | JWT secret            |
-| OPENAI_API_KEY       | AI features           |
-| GITHUB_CLIENT_ID     | OAuth                 |
-| GITHUB_CLIENT_SECRET | OAuth                 |
+# Project Roadmap
 
-## API Documentation
+## Phase 1
 
-| Endpoint | Description |
-|----------|-------------|
-| /api/auth | Authentication |
-| /api/users | Users |
-| /api/projects | Projects |
-| /api/messages | Messaging |
-| /api/applications | Applications |
+- User authentication
+- Developer profiles
+- Projects
+- Applications
+- Messaging
 
-Interactive documentation is available at
+---
 
-http://localhost:8000/docs
+## Phase 2
 
-Testing
-npm run test
+- GitHub integration
+- Team workspaces
+- AI recommendations
+- Hackathons
+- Notifications
 
-npm run lint
+---
 
-npm run typecheck
+## Phase 3
 
+- Organizations
+- Payments
+- Recruiter Portal
+- Analytics
+- Mobile App
+
+---
+
+# Testing
+
+Backend
+
+```bash
 pytest
+```
 
-## Deployment
+Frontend
 
-DevLink can be deployed using Docker Compose for local development or containerized for cloud platforms such as Railway, Render, AWS, Google Cloud, and Azure.
-    <img src="https://img.shields.io/github/contributors/nensii21/devlink?style=flat-square">
-  </a>
+```bash
+npm run test
+```
+
+Lint
+
+```bash
+npm run lint
+```
+
+---
+
+# Contributing
+
+1. Fork the repository
+
+2. Create a feature branch
+
+```bash
+git checkout -b feature/amazing-feature
+```
+
+3. Commit changes
+
+```bash
+git commit -m "feat: add amazing feature"
+```
+
+4. Push
+
+```bash
+git push origin feature/amazing-feature
+```
+
+5. Open a Pull Request
+
+---
+
+# Good First Issues
+
+Contributors can work on:
+
+- UI improvements
+- Accessibility
+- Documentation
+- API enhancements
+- Performance optimization
+- Bug fixes
+- Testing
+- Responsive design
+
+---
+
+# Documentation
+
+```
+docs/
+
+Architecture
+
+API
+
+Deployment
+
+Contributing
+
+Design System
+```
+
+---
+
+# Security
+
+Please report security vulnerabilities responsibly.
+
+Never expose secrets or API keys in commits.
+
+---
+
+# License
+
+Distributed under the MIT License.
+
+---
+
+# Contributors
+
+<a href="https://github.com/YOUR_USERNAME/DevLink/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=YOUR_USERNAME/DevLink" />
+</a>
+
+---
+
+# Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=YOUR_USERNAME/DevLink&type=Date)](https://star-history.com)
+
+---
+
+<p align="center">
+
+Built with ❤️ by the DevLink Community
+
 </p>
-
-Roadmap
-| Version             | Status      |
-| ------------------- | ----------- |
-| Authentication      | Complete    |
-| Project Marketplace | Complete    |
-| Messaging           | Complete    |
-| AI Recommendations  | In Progress |
-| Organizations       | Planned     |
-| Mobile Application  | Planned     |
-
-## Contributing
-
-We welcome contributions from developers of all experience levels.
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Commit your changes.
-4. Push your branch.
-5. Open a Pull Request.
-
-Please read the CONTRIBUTING.md guide before submitting your PR.
-
-## License
-
-Licensed under the MIT License.
-
-See the LICENSE file for more information.
