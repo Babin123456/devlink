@@ -58,6 +58,7 @@ from app.routers import (
     users,
     search,
     saved_searches,
+    media,
 )
 
 
@@ -160,9 +161,8 @@ app.add_middleware(
     ],
 )
 
-# ------------------------------------------------------------------
-# Static Files
-# ------------------------------------------------------------------
+from pathlib import Path
+Path("uploads").mkdir(exist_ok=True)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
@@ -214,6 +214,7 @@ from app.routers import (
 
 # Router inclusions
 
+app.include_router(media.router, prefix="/api")
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
