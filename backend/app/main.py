@@ -69,7 +69,7 @@ async def lifespan(app: FastAPI):
     Startup and shutdown events.
     """
 
-    print("🚀 DevLink Backend Starting...")
+    print("[INFO] DevLink Backend Starting...")
 
     from app.core.events import event_bus
     from app.core.event_handlers import register_all_handlers
@@ -88,7 +88,7 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    print("🛑 DevLink Backend Stopping...")
+    print("[INFO] DevLink Backend Stopping...")
 
     from app.core.cache import cache_manager
 
