@@ -109,13 +109,13 @@ class ProjectService:
         slug: str,
     ) -> Project | None:
 
-        stmt = select(Project).where(
-            Project.slug == slug,
-            Project.deleted_at.is_(None),
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.slug == slug)
+            .where(
+                Project.slug == slug,
+                Project.deleted_at.is_(None),
+            )
         )
         return db.scalar(stmt)
 
@@ -135,12 +135,13 @@ class ProjectService:
 
         stmt = (
             select(Project)
-            .where(Project.deleted_at.is_(None))
+            .options(selectinload(Project.owner))
+            .where(
+                Project.deleted_at.is_(None),
+                Project.is_published.is_(True),
+            )
             .offset(skip)
             .limit(limit)
-        )
-            .options(selectinload(Project.owner))
-            .where(Project.is_published.is_(True))
         )
 
         if language:
@@ -167,13 +168,13 @@ class ProjectService:
         owner_id: uuid.UUID,
     ) -> list[Project]:
 
-        stmt = select(Project).where(
-            Project.owner_id == owner_id,
-            Project.deleted_at.is_(None),
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.owner_id == owner_id)
+            .where(
+                Project.owner_id == owner_id,
+                Project.deleted_at.is_(None),
+            )
         )
 
         return list(db.scalars(stmt))

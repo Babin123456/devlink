@@ -94,15 +94,17 @@ export function EmptyState({
   title,
   desc,
   action,
+  icon: Icon,
 }: {
   title: string;
   desc?: string;
   action?: ReactNode;
+  icon?: React.ComponentType<{ size?: number }>;
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft text-primary shadow-xs">
-        ✨
+        {Icon ? <Icon size={24} /> : "✨"}
       </div>
       <p className="text-[14px] font-semibold text-foreground">{title}</p>
       {desc && <p className="mt-1 max-w-xs text-[13px] text-muted-foreground">{desc}</p>}

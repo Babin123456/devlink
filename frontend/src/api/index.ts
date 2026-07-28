@@ -39,7 +39,12 @@ export { recommendationsApi } from "./modules/recommendations";
 export type { TechStackRecommendation, TechStackResponse } from "./modules/recommendations";
 export { bookmarksApi } from "./modules/bookmarks";
 export { issuesApi } from "./modules/issues";
-export type { Issue, DifficultyEstimateResponse } from "./modules/issues";
+export type {
+  Issue,
+  DifficultyEstimateResponse,
+  IssueCreateInput,
+  IssueUpdateInput,
+} from "./modules/issues";
 export { profileSummaryApi } from "./modules/profileSummary";
 export type { ProfileSummaryResponse } from "./modules/profileSummary";
 export { conversationStartersApi } from "./modules/conversationStarters";
