@@ -65,7 +65,11 @@ DevLink is an open-source developer collaboration platform. Developers can creat
 | :---: | :---: |
 | ![Login](docs/screenshots/login.png) | ![Mobile](docs/screenshots/mobile.png) |
 
----
+- React
+- TypeScript
+- Tailwind CSS
+- React Router
+- React Query
 
 ## Features
 

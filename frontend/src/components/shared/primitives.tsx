@@ -113,29 +113,6 @@ export function EmptyState({
   );
 }
 
-export function NoNotificationsEmptyState() {
-  return (
-    <EmptyState
-      title="No notifications"
-      desc="You're all caught up! Check back later for updates."
-    />
-  );
-}
-
-export function NoMessagesEmptyState({
-  title = "No messages",
-  desc = "You don't have any messages yet.",
-  action,
-  icon,
-}: {
-  title?: string;
-  desc?: string;
-  action?: ReactNode;
-  icon?: React.ComponentType<{ size?: number }>;
-}) {
-  return <EmptyState title={title} desc={desc} action={action} icon={icon} />;
-}
-
 export function TagChip({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <span
@@ -213,25 +190,6 @@ export function Avatar({
       )}
     </div>
   );
-}
-
-export function NoNotificationsEmptyState() {
-  return (
-    <EmptyState
-      title="No notifications"
-      desc="You're all caught up! Check back later for new updates."
-    />
-  );
-}
-
-export function NoMessagesEmptyState({
-  title = "No messages",
-  desc = "You don't have any messages yet.",
-}: {
-  title?: string;
-  desc?: string;
-}) {
-  return <EmptyState title={title} desc={desc} />;
 }
 
 export function Skeleton({ className }: { className?: string }) {

@@ -23,6 +23,10 @@ from app.schemas.notification import NotificationCreate
 from app.services.notification_service import NotificationService
 
 
+from app.services.block_service import BlockService
+from fastapi import HTTPException, status
+
+
 class MessageService:
     """
     Business logic for chat messages.
@@ -35,6 +39,21 @@ class MessageService:
         sender_id: uuid.UUID,
         message: MessageCreate,
     ) -> Message:
+
+        # Check block status with conversation members
+        recipient_user_ids = db.scalars(
+            select(ConversationMember.user_id).where(
+                ConversationMember.conversation_id == conversation_id,
+                ConversationMember.user_id != sender_id,
+            )
+        ).all()
+
+        for recipient_id in recipient_user_ids:
+            if BlockService.is_blocked(db, sender_id, recipient_id):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Cannot send message to this user due to blocking.",
+                )
 
         db_message = Message(
             conversation_id=conversation_id,
