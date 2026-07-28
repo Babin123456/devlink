@@ -58,6 +58,7 @@ from app.routers import (
     users,
     search,
     saved_searches,
+    media,
 )
 
 
@@ -183,9 +184,8 @@ app.add_middleware(
     ],
 )
 
-# ------------------------------------------------------------------
-# Static Files
-# ------------------------------------------------------------------
+from pathlib import Path
+Path("uploads").mkdir(exist_ok=True)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
@@ -203,6 +203,19 @@ async def root():
     }
 
 
+@app.get("/api", tags=["Root"])
+@app.get("/api/", tags=["Root"])
+async def api_root():
+    return {
+        "name": "DevLink API",
+        "version": "v1",
+        "current_version": "v1",
+        "supported_versions": ["v1"],
+        "status": "running",
+        "docs": "/docs",
+    }
+
+
 @app.get("/health", tags=["Health"])
 async def health_simple():
     return {
@@ -215,28 +228,47 @@ async def health_simple():
 # API Routers
 # ------------------------------------------------------------------
 
-# Uncomment as each router is created.
+from app.api.v1.router import api_v1_router
 
+# Include Versioned API v1 Router (/api/v1)
+app.include_router(api_v1_router)
+
+# Include Legacy Unversioned API Routers (/api) for Backward Compatibility
 from app.routers import (
     activities,
     applications,
     auth,
     blocks,
+    bookmark_collections,
     bookmarks,
+    builder_flares,
+    contributor_matching,
+    conversation_starters,
     conversations,
+    export,
     followers,
+    health,
+    issues,
+    hackathons,
     messages,
     notifications,
     organizations,
+    profile_summary,
+    project_tags,
     projects,
     recommendations,
     repositories,
+    repository_quality,
+    saved_searches,
+    search,
     skills,
     users,
+    websockets,
 )
 
 # Router inclusions
 
+app.include_router(media.router, prefix="/api")
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
@@ -279,8 +311,6 @@ app.include_router(workspace_api_tokens.router, prefix="/api")
 app.include_router(applications.router)
 app.include_router(skills.router)
 app.include_router(users.router)
-from app.routers import websockets
-
 app.include_router(websockets.router)
 app.include_router(recommendations.router)
 app.include_router(
@@ -289,3 +319,5 @@ app.include_router(
 app.include_router(health.router)
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
 app.include_router(saved_searches.router)
+
+app.include_router(hackathons.router, prefix="/api/hackathons", tags=["Hackathons"])

@@ -46,6 +46,7 @@ function SearchPage() {
       ),
     [q],
   );
+
   const fls = useMemo(
     () => flares.filter((f) => f.content.toLowerCase().includes(q.toLowerCase())),
     [q],

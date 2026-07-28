@@ -137,3 +137,151 @@
   --container-xl: 1280px;
   --container-2xl: 1536px;
 }
+
+/*
+ * DevLink design tokens — extracted from AuthScreen.tsx.
+ * All hex values live here; components use semantic classes only.
+ */
+:root {
+  --radius: 0.5rem;
+
+  /* Neutrals — GitHub-like light */
+  --background: #f6f8fa;
+  --surface: #ffffff;
+  --foreground: #1f2328;
+  --muted: #f3f4f6;
+  --muted-foreground: #6e7781;
+
+  --card: #ffffff;
+  --card-foreground: #1f2328;
+  --popover: #ffffff;
+  --popover-foreground: #1f2328;
+
+  --border: #d0d7de;
+  --input: #d0d7de;
+  --ring: #05b7d7;
+
+  /* Brand — cyan from AuthScreen */
+  --primary: #05b7d7;
+  --primary-foreground: #ffffff;
+  --primary-soft: rgba(5, 183, 215, 0.12);
+
+  --secondary: #f3f4f6;
+  --secondary-foreground: #1f2328;
+  --accent: #f3f4f6;
+  --accent-foreground: #1f2328;
+
+  /* Status */
+  --destructive: #cf222e;
+  --destructive-foreground: #ffffff;
+  --success: #1a7f37;
+  --success-foreground: #ffffff;
+  --warning: #bf8700;
+  --warning-foreground: #ffffff;
+  --info: #0969da;
+  --info-foreground: #ffffff;
+
+  /* Sidebar */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1f2328;
+  --sidebar-primary: #05b7d7;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f3f4f6;
+  --sidebar-accent-foreground: #1f2328;
+  --sidebar-border: #d0d7de;
+  --sidebar-ring: #05b7d7;
+}
+
+.dark {
+  /* Neutrals — GitHub-like dark */
+  --background: #0d1117;
+  --surface: #161b22;
+  --foreground: #f0f6fc;
+  --muted: #21262d;
+  --muted-foreground: #8b949e;
+
+  --card: #161b22;
+  --card-foreground: #f0f6fc;
+  --popover: #161b22;
+  --popover-foreground: #f0f6fc;
+
+  --border: #30363d;
+  --input: #30363d;
+  --ring: #05b7d7;
+
+  /* Brand */
+  --primary: #05b7d7;
+  --primary-foreground: #ffffff;
+  --primary-soft: rgba(5, 183, 215, 0.16);
+
+  --secondary: #21262d;
+  --secondary-foreground: #f0f6fc;
+  --accent: #21262d;
+  --accent-foreground: #f0f6fc;
+
+  /* Status */
+  --destructive: #f85149;
+  --destructive-foreground: #ffffff;
+  --success: #3fb950;
+  --success-foreground: #ffffff;
+  --warning: #d29922;
+  --warning-foreground: #ffffff;
+  --info: #58a6ff;
+  --info-foreground: #ffffff;
+
+  /* Sidebar */
+  --sidebar: #161b22;
+  --sidebar-foreground: #f0f6fc;
+  --sidebar-primary: #05b7d7;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #21262d;
+  --sidebar-accent-foreground: #f0f6fc;
+  --sidebar-border: #30363d;
+  --sidebar-ring: #05b7d7;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--primary-soft);
+    color: var(--foreground);
+  }
+  /* Prevent horizontal scroll globally */
+  html {
+    overflow-x: hidden;
+  }
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* ─── Safe-area utility for mobile bottom navigation ─────────────── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ─── Responsive utility: hide scrollbar universally ─────────────── */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
