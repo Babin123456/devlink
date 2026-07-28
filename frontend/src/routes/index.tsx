@@ -52,9 +52,9 @@ function Landing() {
             <a href="#features" className="hover:text-foreground">
               Features
             </a>
-            <a href="#builders" className="hover:text-foreground">
+            <Link to="/builders" className="hover:text-foreground">
               Builders
-            </a>
+            </Link>
             <a href="#pricing" className="hover:text-foreground">
               Pricing
             </a>
@@ -114,13 +114,13 @@ function Landing() {
                 Features
               </a>
 
-              <a
-                href="#builders"
+              <Link
+                to="/builders"
                 className="text-sm text-foreground"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Builders
-              </a>
+              </Link>
 
               <a
                 href="#pricing"
