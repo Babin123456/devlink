@@ -187,67 +187,7 @@ def logout(
     return auth_service.logout(user_id, refresh_token_str=refresh_token_str)
 
 
-# ==========================================================
-# Session Management
-# ==========================================================
 
-
-from app.schemas.auth import SessionResponse  # noqa: E402
-from app.services.refresh_token_service import RefreshTokenService  # noqa: E402
-
-
-@router.get(
-    "/sessions",
-    response_model=list[SessionResponse],
-    summary="List active sessions for current user",
-)
-def get_sessions(
-    user_id: str = Depends(get_current_user_id),
-    db: Session = Depends(get_database),
-):
-    user_uuid = UUID(user_id)
-    return RefreshTokenService.get_active_sessions(db, user_uuid)
-
-
-@router.delete(
-    "/sessions/{session_id}",
-    response_model=SuccessResponse,
-    summary="Revoke an individual session by ID",
-)
-def revoke_session(
-    session_id: UUID,
-    user_id: str = Depends(get_current_user_id),
-    db: Session = Depends(get_database),
-):
-    user_uuid = UUID(user_id)
-    success = RefreshTokenService.revoke_session_by_id(db, user_uuid, session_id)
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Session not found or already revoked.",
-        )
-    db.commit()
-    return SuccessResponse(message="Session revoked successfully.")
-
-
-@router.delete(
-    "/sessions",
-    response_model=SuccessResponse,
-    summary="Revoke all active sessions (Logout from all devices)",
-)
-@router.post(
-    "/logout-all",
-    response_model=SuccessResponse,
-    summary="Logout from all devices",
-)
-def logout_all_sessions(
-    user_id: str = Depends(get_current_user_id),
-    db: Session = Depends(get_database),
-):
-    user_uuid = UUID(user_id)
-    RefreshTokenService.revoke_all_tokens(db, user_uuid)
-    db.commit()
-    return SuccessResponse(message="All sessions revoked successfully.")
 
 
 import httpx  # noqa: E402
@@ -538,6 +478,34 @@ def revoke_other_sessions(
         success=True,
         message=f"Revoked {count} other session(s).",
         revoked_count=count,
+    )
+
+
+@router.delete(
+    "/sessions",
+    response_model=RevokeSessionResponse,
+    summary="Revoke All Active Sessions",
+)
+@router.post(
+    "/logout-all",
+    response_model=RevokeSessionResponse,
+    summary="Logout from all devices",
+)
+@limiter.limit("10/minute")
+def logout_all_sessions(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    """
+    Revoke all active sessions for current user (logout from all devices).
+    """
+    RefreshTokenService.revoke_all_tokens(db, current_user.id)
+    db.commit()
+    return RevokeSessionResponse(
+        success=True,
+        message="All sessions revoked successfully.",
+        revoked_count=1,
     )
 
 
