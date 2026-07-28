@@ -110,6 +110,9 @@ def create_access_token(
     )
 
 
+import uuid
+
+
 def create_refresh_token(
     user_id: str,
 ) -> str:
@@ -121,6 +124,7 @@ def create_refresh_token(
         subject=user_id,
         expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         token_type="refresh",
+        extra={"jti": str(uuid.uuid4())},
     )
 
 

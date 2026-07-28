@@ -160,6 +160,10 @@ def get_user_profile_completion(
     return UserService.get_profile_completion(db, user)
 
 
+from app.dependencies import get_database, get_current_user, get_optional_current_user
+from app.services.block_service import BlockService
+
+
 @router.get(
     "/{user_id}",
     response_model=UserResponse,
@@ -171,6 +175,7 @@ def get_user(
         None, description="Online threshold in seconds"
     ),
     db: Session = Depends(get_database),
+    current_user: User | None = Depends(get_optional_current_user),
 ):
 
     user = UserService.get_user(
@@ -183,6 +188,18 @@ def get_user(
             status_code=404,
             detail="User not found",
         )
+
+    # Check private profile and blocking restrictions
+    if user.is_private:
+        if not current_user or (
+            current_user.id != user_id
+            and BlockService.is_blocked(db, user_id, current_user.id)
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to view this private profile.",
+            )
+
     if online_threshold is not None:
         user._online_threshold = online_threshold
     return user

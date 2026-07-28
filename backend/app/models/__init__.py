@@ -25,6 +25,7 @@ from .refresh_token import RefreshToken  # noqa: F401
 from .repository import Repository  # noqa: F401
 from .skill import Skill  # noqa: F401
 from .user import User  # noqa: F401
+from .user_block import UserBlock  # noqa: F401
 from .user_skill import UserSkill  # noqa: F401
 from .user_report import UserReport as UserReport
 from .activity import Activity
