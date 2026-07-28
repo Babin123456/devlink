@@ -584,3 +584,35 @@ Building the future of developer collaboration.
 
 </p>
 ...
+
+## 📸 Screenshots
+
+### Desktop
+
+| Dashboard | Features |
+|-----------|-----------|
+| <img src="assets/screenshots/desktop-dashboard.png" width="450"> | <img src="assets/screenshots/desktop-features.png" width="450"> |
+
+**Dashboard** – Main dashboard displaying the application's overview.
+
+**Features** – Highlights the core functionality available to users.
+
+| Pricing | Login |
+|---------|--------|
+| <img src="assets/screenshots/desktop-pricing.png" width="450"> | <img src="assets/screenshots/desktop-login.png" width="450"> |
+
+**Pricing** – Displays available pricing plans.
+
+**Login** – User authentication page.
+
+---
+
+### Mobile
+
+| Dashboard | Features |
+|-----------|-----------|
+| <img src="assets/screenshots/mobile-dashboard.png" width="220"> | <img src="assets/screenshots/mobile-features.png" width="220"> |
+
+**Mobile Dashboard** – Responsive dashboard view.
+
+**Mobile Features** – Responsive features page.
