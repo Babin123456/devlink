@@ -15,26 +15,7 @@ from app.dependencies import get_database
 from app.main import app
 from app.models.user import User
 
-engine = create_engine(
-    "sqlite://",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-@pytest.fixture(autouse=True)
-def setup_db():
-    app.dependency_overrides[get_database] = override_get_db
-    Base.metadata.create_all(bind=engine)
 
 
 # ==================== Helper ====================

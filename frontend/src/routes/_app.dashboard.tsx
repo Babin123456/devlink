@@ -29,28 +29,25 @@ export const Route = createFileRoute("/_app/dashboard")({
 
 function Dashboard() {
   return (
-    <div className="space-y-5">
+    <div className="mx-auto flex max-w-[1400px] w-full flex-col gap-6 pb-12 pt-2 px-2 sm:px-4">
       <GreetingHero />
       <StatsRow />
 
-      {/* Modern Bento Command Grid */}
-      <div className="grid gap-5 lg:grid-cols-[1.8fr_1fr]">
-        {/* Main Column */}
-        <div className="space-y-5">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 flex flex-col gap-6">
           <SuggestedBuilders />
-          <TrendingProjects />
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2">
             <BuilderRequests />
             <InviteRequests />
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
+          <TrendingProjects />
+          <div className="grid gap-6 sm:grid-cols-2">
             <MessagesPreview />
             <NotificationsFeed />
           </div>
         </div>
 
-        {/* Side Column */}
-        <div className="space-y-5">
+        <div className="flex flex-col gap-6">
           <QuickActions />
           <AIRecommendations />
           <UpcomingDeadlines />

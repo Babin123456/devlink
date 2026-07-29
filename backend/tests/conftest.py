@@ -83,7 +83,6 @@ def setup_db():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
-    app.dependency_overrides.clear()
 
 
 @pytest.fixture(scope="function")
