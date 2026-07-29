@@ -117,10 +117,8 @@ class UserService:
                     {k: v for k, v in privacy_data.items() if v is not None}
                 )
                 db_user.privacy_settings = current_settings
-
         for key, value in data.items():
             setattr(db_user, key, value)
-
         db.flush()
         db.refresh(db_user)
 
@@ -149,11 +147,9 @@ class UserService:
             update_data = settings
         else:
             update_data = {}
-
         for k, v in update_data.items():
             if v is not None:
                 current_settings[k] = v.value if hasattr(v, "value") else str(v)
-
         db_user.privacy_settings = current_settings
         db.flush()
         db.refresh(db_user)
@@ -167,10 +163,8 @@ class UserService:
     ) -> User:
         if not user:
             return user
-
         if viewer and (viewer.id == user.id or getattr(viewer, "is_superuser", False)):
             return user
-
         settings = user.get_privacy_settings()
         from app.services.follower_service import FollowerService
 
@@ -196,24 +190,18 @@ class UserService:
             db.expunge(user)
         except Exception:
             pass
-
         if not is_visible(settings.get("email", "private")):
             user.public_email = None
-
         if not is_visible(settings.get("github", "public")):
             user.github_url = None
-
         if not is_visible(settings.get("resume", "public")):
             user.resume_url = None
-
         if not is_visible(settings.get("social_links", "public")):
             user.linkedin_url = None
             user.website = None
             user.portfolio_url = None
-
         if not is_visible(settings.get("availability", "public")):
             user.availability = []
-
         return user
 
     @staticmethod
@@ -338,7 +326,6 @@ class UserService:
         user = db.get(User, user_id)
         if user:
             UserService.update_user_badges(db, user, stats)
-
         return stats
 
     @staticmethod
@@ -352,13 +339,10 @@ class UserService:
             new_badges.append("Top Contributor")
         elif stats.accepted >= 1:
             new_badges.append("Active Developer")
-
         if stats.projects >= 1:
             new_badges.append("Project Owner")
-
         if stats.followers >= 10:
             new_badges.append("Social Butterfly")
-
         if set(user.badges) != set(new_badges):
             user.badges = new_badges
             db.add(user)
@@ -400,14 +384,15 @@ class UserService:
         missing: list[str] = []
 
         # 1. Avatar
+
         if not (user.profile_image and user.profile_image.strip()):
             missing.append("Avatar")
-
         # 2. Bio
+
         if not (user.bio and user.bio.strip()):
             missing.append("Bio")
-
         # 3. Skills
+
         skills_count = (
             db.scalar(
                 select(func.count())
@@ -418,8 +403,8 @@ class UserService:
         )
         if skills_count == 0:
             missing.append("Skills")
-
         # 4. Experience
+
         has_exp = bool(
             (user.experience_level and user.experience_level.strip())
             or (user.role and user.role.strip())
@@ -427,27 +412,26 @@ class UserService:
         )
         if not has_exp:
             missing.append("Experience")
-
         # 5. GitHub
+
         has_github = bool(
             (user.github_url and str(user.github_url).strip())
             or (user.github_id and str(user.github_id).strip())
         )
         if not has_github:
             missing.append("GitHub")
-
         # 6. Portfolio
+
         has_portfolio = bool(
             (user.portfolio_url and str(user.portfolio_url).strip())
             or (user.website and str(user.website).strip())
         )
         if not has_portfolio:
             missing.append("Portfolio")
-
         # 7. Location
+
         if not (user.location and user.location.strip()):
             missing.append("Location")
-
         total_factors = 7
         completed_factors = total_factors - len(missing)
         completion_pct = round((completed_factors / total_factors) * 100)
@@ -481,7 +465,6 @@ class UserService:
         db.refresh(user)
 
         return user
-
 
     @staticmethod
     def create_user_report(
