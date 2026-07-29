@@ -67,7 +67,6 @@ def follow_user(
         )
     except Exception as e:
         print(f"ENQUEUE ERROR: {e}")
-        db.rollback()
 
     return follow
 
