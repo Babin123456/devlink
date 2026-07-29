@@ -28,6 +28,46 @@
   --text-2xl: 1.5rem;
   --text-3xl: 1.875rem;
   --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+
+  /* ── Semantic Typography Scale ──────────────────────────────────── */
+  /* Map readable semantic names to concrete scale values             */
+
+  /** Hero: large marketing / landing text */
+  --typo-hero-size: clamp(2.25rem, 5vw, 3.75rem);
+  --typo-hero-weight: 800;
+  --typo-hero-leading: 1.1;
+  --typo-hero-tracking: -0.03em;
+
+  /** Heading: primary page / section title */
+  --typo-heading-size: clamp(1.5rem, 3vw, 1.875rem);
+  --typo-heading-weight: 700;
+  --typo-heading-leading: 1.2;
+  --typo-heading-tracking: -0.02em;
+
+  /** Section: sub-section title */
+  --typo-section-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  --typo-section-weight: 600;
+  --typo-section-leading: 1.3;
+  --typo-section-tracking: -0.01em;
+
+  /** Card: card title / list item header */
+  --typo-card-size: clamp(1rem, 1.5vw, 1.125rem);
+  --typo-card-weight: 600;
+  --typo-card-leading: 1.35;
+  --typo-card-tracking: 0em;
+
+  /** Body: primary reading text */
+  --typo-body-size: 1rem;
+  --typo-body-weight: 400;
+  --typo-body-leading: 1.625;
+  --typo-body-tracking: 0em;
+
+  /** Caption: supplementary / metadata */
+  --typo-caption-size: 0.8125rem;
+  --typo-caption-weight: 400;
+  --typo-caption-leading: 1.4;
+  --typo-caption-tracking: 0.01em;
 
   /* Font Weight Scale */
   --font-light: 300;
