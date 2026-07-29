@@ -415,6 +415,9 @@ class AuthService:
         )
 
         refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(
+            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+        )
         expires_at = datetime.now(timezone.utc) + timedelta(days=7)
         expires_at = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
 

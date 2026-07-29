@@ -148,12 +148,14 @@ export function Avatar({
   size = 32,
   online,
   name,
+  className,
 }: {
   src?: string | null;
   alt: string;
   size?: number;
   online?: boolean;
   name?: string | null;
+  className?: string;
 }) {
   const [hasError, setHasError] = useState(false);
   const normalizedSrc = typeof src === "string" ? src.trim() : "";
@@ -165,7 +167,7 @@ export function Avatar({
   }, [normalizedSrc]);
 
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
+    <div className={cn("relative shrink-0", className)} style={{ width: size, height: size }}>
       {shouldRenderImage ? (
         <img
           src={normalizedSrc}

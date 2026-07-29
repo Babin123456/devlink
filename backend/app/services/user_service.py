@@ -113,7 +113,9 @@ class UserService:
             privacy_data = data.pop("privacy_settings")
             if privacy_data:
                 current_settings = db_user.get_privacy_settings()
-                current_settings.update({k: v for k, v in privacy_data.items() if v is not None})
+                current_settings.update(
+                    {k: v for k, v in privacy_data.items() if v is not None}
+                )
                 db_user.privacy_settings = current_settings
 
         for key, value in data.items():
@@ -184,7 +186,9 @@ class UserService:
                 return True
             if vis == "authenticated" and viewer is not None:
                 return True
-            if vis == "followers" and (is_follower or (viewer and viewer.id == user.id)):
+            if vis == "followers" and (
+                is_follower or (viewer and viewer.id == user.id)
+            ):
                 return True
             return False
 
