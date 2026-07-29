@@ -1,13 +1,12 @@
+# ------------------------------------------------------------------
+# Global Rate Limiter
+# ------------------------------------------------------------------
+import sys
+
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 from app.core.config import settings
-
-# ------------------------------------------------------------------
-# Global Rate Limiter
-# ------------------------------------------------------------------
-
-import sys
 
 is_testing = "pytest" in sys.modules
 
@@ -16,7 +15,7 @@ limiter = Limiter(
     default_limits=[
         settings.DEFAULT_RATE_LIMIT,
     ],
-    enabled=False,
+    enabled=not is_testing,
 )
 
 # ------------------------------------------------------------------
@@ -36,8 +35,11 @@ PROJECT_LIMIT = "1000000/minute" if is_testing else settings.PROJECT_RATE_LIMIT
 PASSWORD_RESET_LIMIT = (
     "1000000/minute" if is_testing else settings.PASSWORD_RESET_RATE_LIMIT
 )
-PASSWORD_RESET_LIMIT = settings.PASSWORD_RESET_RATE_LIMIT
+
+COMMENT_LIMIT = "1000000/minute" if is_testing else settings.COMMENT_RATE_LIMIT
 
 # Recommendations are expensive (multiple joins + scoring).
 # Keep a tighter limit than the default search limit.
-RECOMMENDATION_LIMIT = settings.RECOMMENDATION_RATE_LIMIT
+RECOMMENDATION_LIMIT = (
+    "1000000/minute" if is_testing else settings.RECOMMENDATION_RATE_LIMIT
+)

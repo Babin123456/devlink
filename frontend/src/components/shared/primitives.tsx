@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useCardAnimation } from "@/lib/animations";
 
@@ -94,15 +94,17 @@ export function EmptyState({
   title,
   desc,
   action,
+  icon: Icon,
 }: {
   title: string;
   desc?: string;
   action?: ReactNode;
+  icon?: React.ComponentType<{ size?: number }>;
 }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft text-primary shadow-xs">
-        ✨
+        {Icon ? <Icon size={24} /> : "✨"}
       </div>
       <p className="text-[14px] font-semibold text-foreground">{title}</p>
       {desc && <p className="mt-1 max-w-xs text-[13px] text-muted-foreground">{desc}</p>}
@@ -145,21 +147,42 @@ export function Avatar({
   alt,
   size = 32,
   online,
+  name,
 }: {
-  src: string;
+  src?: string | null;
   alt: string;
   size?: number;
   online?: boolean;
+  name?: string | null;
 }) {
+  const [hasError, setHasError] = useState(false);
+  const normalizedSrc = typeof src === "string" ? src.trim() : "";
+  const shouldRenderImage = Boolean(normalizedSrc) && !hasError;
+  const fallbackLabel = alt || name || "User avatar";
+
+  useEffect(() => {
+    setHasError(false);
+  }, [normalizedSrc]);
+
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <img
-        src={src}
-        alt={alt}
-        width={size}
-        height={size}
-        className="h-full w-full rounded-full border border-border/80 bg-muted object-cover shadow-xs transition-transform duration-200 hover:scale-105"
-      />
+      {shouldRenderImage ? (
+        <img
+          src={normalizedSrc}
+          alt={alt}
+          width={size}
+          height={size}
+          onError={() => setHasError(true)}
+          className="h-full w-full rounded-full border border-border bg-muted object-cover"
+        />
+      ) : (
+        <div
+          aria-label={fallbackLabel}
+          className="flex h-full w-full items-center justify-center rounded-full border border-border bg-primary/10 text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-primary"
+        >
+          {getInitials(name ?? alt)}
+        </div>
+      )}
       {online !== undefined && (
         <span className="absolute -bottom-0.5 -right-0.5">
           <StatusDot online={online} />

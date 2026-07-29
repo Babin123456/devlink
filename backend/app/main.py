@@ -1,18 +1,22 @@
 from contextlib import asynccontextmanager
 
 # pyrefly: ignore [missing-import]
-from fastapi.routing import APIRoute
 
 # pyrefly: ignore [missing-import]
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 # pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
 
 # pyrefly: ignore [missing-import]
 from fastapi.responses import JSONResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from app.core.config import settings
+from app.middleware.rate_limit import limiter
 from app.middleware.request_id import RequestIDMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.middleware.activity import ActivityTrackingMiddleware
@@ -34,18 +38,41 @@ from app.routers import (
     bookmark_collections,
     bookmarks,
     builder_flares,
+    conversation_starters,
+    contributor_matching,
     conversations,
+    export,
     followers,
     health,
+    issues,
     messages,
     notifications,
     organizations,
+    profile_summary,
+    project_tags,
     projects,
     recommendations,
     repositories,
+    repository_quality,
     skills,
     users,
+    search,
+    saved_searches,
+    media,
 )
+
+
+import asyncio
+
+async def check_presence_timeouts():
+    """Background task to scan for inactive WebSocket connections and set status to away."""
+    from app.routers.websockets import manager
+    try:
+        while True:
+            await asyncio.sleep(15)  # scan every 15 seconds
+            await manager.check_timeouts(timeout_seconds=300)  # 5 minutes
+    except asyncio.CancelledError:
+        pass
 
 
 @asynccontextmanager
@@ -55,6 +82,9 @@ async def lifespan(app: FastAPI):
     """
 
     print("🚀 DevLink Backend Starting...")
+
+    # Start user presence timeout background task
+    presence_task = asyncio.create_task(check_presence_timeouts())
 
     from app.core.events import event_bus
     from app.core.event_handlers import register_all_handlers
@@ -74,6 +104,13 @@ async def lifespan(app: FastAPI):
     yield
 
     print("🛑 DevLink Backend Stopping...")
+
+    # Cancel user presence timeout background task
+    presence_task.cancel()
+    try:
+        await presence_task
+    except asyncio.CancelledError:
+        pass
 
     from app.core.cache import cache_manager
 
@@ -95,10 +132,25 @@ app = FastAPI(
 # ------------------------------------------------------------------
 
 app.state.limiter = limiter
-app.add_exception_handler(
-    RateLimitExceeded,
-    _rate_limit_exceeded_handler,
+
+# ------------------------------------------------------------------
+# Standardized Exception Handlers
+# ------------------------------------------------------------------
+
+from fastapi.exceptions import HTTPException, RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from app.core.error_handlers import (
+    http_exception_handler,
+    validation_exception_handler,
+    rate_limit_exception_handler,
+    global_exception_handler,
 )
+
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(RateLimitExceeded, rate_limit_exception_handler)
+app.add_exception_handler(Exception, global_exception_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 # ------------------------------------------------------------------
@@ -132,6 +184,11 @@ app.add_middleware(
     ],
 )
 
+from pathlib import Path
+Path("uploads").mkdir(exist_ok=True)
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 # ------------------------------------------------------------------
 # Health Check
 # ------------------------------------------------------------------
@@ -146,6 +203,19 @@ async def root():
     }
 
 
+@app.get("/api", tags=["Root"])
+@app.get("/api/", tags=["Root"])
+async def api_root():
+    return {
+        "name": "DevLink API",
+        "version": "v1",
+        "current_version": "v1",
+        "supported_versions": ["v1"],
+        "status": "running",
+        "docs": "/docs",
+    }
+
+
 @app.get("/health", tags=["Health"])
 async def health_simple():
     return {
@@ -155,29 +225,55 @@ async def health_simple():
 
 
 # ------------------------------------------------------------------
-# Global Exception Handler
-# ------------------------------------------------------------------
-
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
-    return JSONResponse(
-        status_code=500,
-        content={
-            "success": False,
-            "message": "Internal Server Error",
-        },
-    )
-
-
-# ------------------------------------------------------------------
 # API Routers
 # ------------------------------------------------------------------
 
+from app.api.v1.router import api_v1_router
+
+# Include Versioned API v1 Router (/api/v1)
+app.include_router(api_v1_router)
+
+# Include Legacy Unversioned API Routers (/api) for Backward Compatibility
+from app.routers import (
+    activities,
+    applications,
+    auth,
+    blocks,
+    bookmark_collections,
+    bookmarks,
+    builder_flares,
+    contributor_matching,
+    conversation_starters,
+    conversations,
+    export,
+    followers,
+    hackathons,
+    health,
+    issues,
+    media,
+    messages,
+    notifications,
+    organizations,
+    profile_summary,
+    project_tags,
+    projects,
+    recommendations,
+    repositories,
+    repository_quality,
+    saved_searches,
+    search,
+    skills,
+    users,
+    websockets,
+)
+
 # Router inclusions
 
+app.include_router(media.router, prefix="/api")
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
+app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
+app.include_router(export.router, prefix="/api/users", tags=["Export"])
 app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
 app.include_router(builder_flares.router, prefix="/api/flare", tags=["Builder's Flare"])
 app.include_router(messages.router, prefix="/api/messages", tags=["Messages"])
@@ -190,9 +286,35 @@ app.include_router(bookmarks.router)
 app.include_router(bookmark_collections.router)
 app.include_router(activities.router)
 app.include_router(conversations.router)
+app.include_router(issues.router, prefix="/api/issues", tags=["Issues"])
+app.include_router(
+    profile_summary.router, prefix="/api/profile-summary", tags=["Profile Summary"]
+)
+app.include_router(
+    conversation_starters.router,
+    prefix="/api/conversation-starters",
+    tags=["Conversation Starters"],
+)
+app.include_router(
+    project_tags.router, prefix="/api/project-tags", tags=["Project Tags"]
+)
+app.include_router(
+    contributor_matching.router,
+    prefix="/api/contributor-matching",
+    tags=["Contributor Matching"],
+)
 app.include_router(repositories.router)
 app.include_router(organizations.router)
 app.include_router(applications.router)
 app.include_router(skills.router)
+app.include_router(users.router)
+app.include_router(websockets.router)
 app.include_router(recommendations.router)
+app.include_router(
+    repository_quality.router, prefix="/api", tags=["Repository Quality"]
+)
 app.include_router(health.router)
+app.include_router(search.router, prefix="/api/search", tags=["Search"])
+app.include_router(saved_searches.router)
+app.include_router(hackathons.router, prefix="/api/hackathons", tags=["Hackathons"])
+

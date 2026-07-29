@@ -1,11 +1,55 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, time
+from enum import Enum
 from typing import Optional
 
 # pyrefly: ignore [missing-import]
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    HttpUrl,
+    model_validator,
+)
+
+
+class AvailabilitySlot(BaseModel):
+    day: str
+    start_time: time
+    end_time: time
+
+    @model_validator(mode="after")
+    def validate_times(self):
+        if self.end_time <= self.start_time:
+            raise ValueError("end_time must be after start_time")
+        return self
+
+
+class PrivacyVisibility(str, Enum):
+    PUBLIC = "public"
+    FOLLOWERS = "followers"
+    AUTHENTICATED = "authenticated"
+    PRIVATE = "private"
+
+
+class PrivacySettings(BaseModel):
+    email: PrivacyVisibility = PrivacyVisibility.PRIVATE
+    github: PrivacyVisibility = PrivacyVisibility.PUBLIC
+    resume: PrivacyVisibility = PrivacyVisibility.PUBLIC
+    social_links: PrivacyVisibility = PrivacyVisibility.PUBLIC
+    availability: PrivacyVisibility = PrivacyVisibility.PUBLIC
+
+
+class PrivacySettingsUpdate(BaseModel):
+    email: Optional[PrivacyVisibility] = None
+    github: Optional[PrivacyVisibility] = None
+    resume: Optional[PrivacyVisibility] = None
+    social_links: Optional[PrivacyVisibility] = None
+    availability: Optional[PrivacyVisibility] = None
+
 
 # ==========================================================
 # Base User Schema
@@ -38,6 +82,7 @@ class UserBase(BaseModel):
     timezone: Optional[str] = None
 
     website: Optional[HttpUrl] = None
+    resume_url: Optional[str] = None
     portfolio_url: Optional[HttpUrl] = None
     github_url: Optional[HttpUrl] = None
     linkedin_url: Optional[HttpUrl] = None
@@ -47,6 +92,9 @@ class UserBase(BaseModel):
     company: Optional[str] = None
 
     open_to_work: bool = True
+    is_private: bool = False
+    privacy_settings: Optional[PrivacySettings] = Field(default_factory=PrivacySettings)
+    availability: list[AvailabilitySlot] = Field(default_factory=list)
 
 
 # ==========================================================
@@ -80,6 +128,7 @@ class UserUpdate(BaseModel):
     public_email: Optional[EmailStr] = None
 
     website: Optional[HttpUrl] = None
+    resume_url: Optional[str] = None
     portfolio_url: Optional[HttpUrl] = None
     github_url: Optional[HttpUrl] = None
     linkedin_url: Optional[HttpUrl] = None
@@ -89,6 +138,9 @@ class UserUpdate(BaseModel):
     company: Optional[str] = None
 
     open_to_work: Optional[bool] = None
+    is_private: Optional[bool] = None
+    privacy_settings: Optional[PrivacySettingsUpdate] = None
+    availability: Optional[list[AvailabilitySlot]] = None
 
 
 # ==========================================================
@@ -103,6 +155,7 @@ class UserResponse(UserBase):
 
     profile_image: Optional[str] = None
     cover_image: Optional[str] = None
+    badges: list[str] = Field(default_factory=list)
 
     is_active: bool
     is_verified: bool
@@ -120,6 +173,9 @@ class UserResponse(UserBase):
 
     created_at: datetime
     updated_at: datetime
+
+    deleted_at: Optional[datetime] = None
+    deleted_by_id: Optional[uuid.UUID] = None
 
 
 # ==========================================================
@@ -173,3 +229,21 @@ class UserMessage(BaseModel):
 class UsernameAvailabilityResponse(BaseModel):
     available: bool
     message: str
+
+
+# ==========================================================
+# Profile Completion Response
+# ==========================================================
+
+
+class ProfileCompletionResponse(BaseModel):
+    completion: int = Field(
+        ...,
+        ge=0,
+        le=100,
+        description="Profile completion percentage (0-100)",
+    )
+    missing: list[str] = Field(
+        ...,
+        description="List of missing profile factors",
+    )

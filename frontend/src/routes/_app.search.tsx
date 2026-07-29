@@ -2,11 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, TagChip, Avatar } from "@/components/shared/primitives";
 import { HighlightText } from "@/components/shared/HighlightText";
 import { builders, projects, flares } from "@/mocks/seed";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Search, X, Building2, Rss } from "lucide-react";
 
-const tabs = ["Developers", "Projects", "Posts", "Organizations"] as const;
+const tabs = ["Developers", "Projects", "Skills", "Posts", "Organizations"] as const;
 type Tab = (typeof tabs)[number];
 
 const organizations = [
@@ -39,20 +39,40 @@ function SearchPage() {
 
   const query = q.toLowerCase();
 
-  const devs = builders.filter((b) =>
-    (b.name + " " + b.skills.join(" ")).toLowerCase().includes(query),
+  const skillSet = useMemo(
+    () =>
+      Array.from(new Set(builders.flatMap((b) => b.skills))).filter((s) =>
+        s.toLowerCase().includes(q.toLowerCase()),
+      ),
+    [q],
   );
 
-  const projs = projects.filter((p) =>
-    (p.name + " " + p.stack.join(" ")).toLowerCase().includes(query),
+  const fls = useMemo(
+    () => flares.filter((f) => f.content.toLowerCase().includes(q.toLowerCase())),
+    [q],
   );
 
-  const posts = flares.filter((f) =>
-    (f.author.name + " " + f.content + " " + f.tags.join(" ")).toLowerCase().includes(query),
+  const devs = useMemo(
+    () => builders.filter((b) => (b.name + " " + b.skills.join(" ")).toLowerCase().includes(query)),
+    [query],
   );
 
-  const orgs = organizations.filter((o) =>
-    (o.name + " " + o.description).toLowerCase().includes(query),
+  const projs = useMemo(
+    () => projects.filter((p) => (p.name + " " + p.stack.join(" ")).toLowerCase().includes(query)),
+    [query],
+  );
+
+  const posts = useMemo(
+    () =>
+      flares.filter((f) =>
+        (f.author.name + " " + f.content + " " + f.tags.join(" ")).toLowerCase().includes(query),
+      ),
+    [query],
+  );
+
+  const orgs = useMemo(
+    () => organizations.filter((o) => (o.name + " " + o.description).toLowerCase().includes(query)),
+    [query],
   );
 
   return (
@@ -62,15 +82,13 @@ function SearchPage() {
           size={16}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
         />
-
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search DevLink…"
+          placeholder="Search DevLink for developers, projects, or skills..."
           className="w-full rounded-md border border-border bg-surface py-2.5 pl-10 pr-10 text-[14px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           autoFocus
         />
-
         {q && (
           <button
             type="button"
@@ -160,7 +178,6 @@ function SearchPage() {
           )}
         </div>
       )}
-
       {tab === "Posts" && (
         <div className="space-y-4">
           {posts.length === 0 ? (

@@ -1,5 +1,4 @@
 from __future__ import annotations
-from app import main
 
 
 import uuid
@@ -14,25 +13,9 @@ celery_app.conf.task_eager_propagates = True
 
 
 def test_task_creates_notification():
-    # pyrefly: ignore [missing-import]
-    from sqlalchemy import create_engine
-
-    # pyrefly: ignore [missing-import]
-    from sqlalchemy.orm import sessionmaker
-
-    # pyrefly: ignore [missing-import]
-    from sqlalchemy.pool import StaticPool
-
     import app.tasks.notification_tasks as nt
+    from tests.conftest import TestingSessionLocal
     from app.database.session import SessionLocal as RealSessionLocal
-
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-    Base.metadata.create_all(bind=engine)
 
     nt.SessionLocal = TestingSessionLocal
 
@@ -65,29 +48,12 @@ def test_task_creates_notification():
     db.close()
 
     nt.SessionLocal = RealSessionLocal
-    Base.metadata.drop_all(bind=engine)
 
 
 def test_task_skips_self_notification():
-    # pyrefly: ignore [missing-import]
-    from sqlalchemy import create_engine
-
-    # pyrefly: ignore [missing-import]
-    from sqlalchemy.orm import sessionmaker
-
-    # pyrefly: ignore [missing-import]
-    from sqlalchemy.pool import StaticPool
-
     import app.tasks.notification_tasks as nt
+    from tests.conftest import TestingSessionLocal
     from app.database.session import SessionLocal as RealSessionLocal
-
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-    Base.metadata.create_all(bind=engine)
 
     nt.SessionLocal = TestingSessionLocal
 
@@ -111,50 +77,14 @@ def test_task_skips_self_notification():
     assert result is None
 
     nt.SessionLocal = RealSessionLocal
-    Base.metadata.drop_all(bind=engine)
 
 
-def test_router_enqueue_integration():
-    # pyrefly: ignore [missing-import]
-    from fastapi.testclient import TestClient
-
-    # pyrefly: ignore [missing-import]
-    from sqlalchemy import create_engine
-
-    # pyrefly: ignore [missing-import]
-    from sqlalchemy.orm import sessionmaker
-
-    # pyrefly: ignore [missing-import]
-    from sqlalchemy.pool import StaticPool
-
+def test_router_enqueue_integration(client):
     import app.tasks.notification_tasks as nt
-    from app.dependencies import get_database
-    from app.main import app
+    from tests.conftest import TestingSessionLocal, engine
     from app.database.session import SessionLocal as RealSessionLocal
 
-    engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-    Base.metadata.create_all(bind=engine)
-
     nt.SessionLocal = TestingSessionLocal
-
-    def override_get_db():
-        print("USING SQLITE TEST DATABASE")
-
-        db = TestingSessionLocal()
-
-        try:
-            yield db
-        finally:
-            db.close()
-
-    app.dependency_overrides[get_database] = override_get_db
-
-    client = TestClient(app)
 
     client.post(
         "/api/auth/register",
@@ -226,6 +156,5 @@ def test_router_enqueue_integration():
     ).json()
     assert any(n["type"] == "follow" for n in notifs)
 
-    app.dependency_overrides.clear()
     nt.SessionLocal = RealSessionLocal
     Base.metadata.drop_all(bind=engine)

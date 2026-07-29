@@ -2,9 +2,9 @@ import json
 import logging
 from typing import Callable
 
+import redis
 from fastapi import Request, Response
 from fastapi.routing import APIRoute
-import redis
 
 from app.core.config import settings
 
@@ -88,15 +88,23 @@ class IdempotentRoute(APIRoute):
 
                 # Only cache successful or client-error responses, not 500s
                 if hasattr(response, "body") and response.status_code < 500:
+                    body_bytes = getattr(response, "body", b"")
+                    body_str = body_bytes.decode("utf-8") if isinstance(body_bytes, bytes) else str(body_bytes)
                     cache_payload = {
                         "status_code": response.status_code,
                         "headers": dict(response.headers),
-                        "body": response.body.decode("utf-8"),
-                        "media_type": response.media_type,
+                        "body": body_str,
+                        "media_type": getattr(response, "media_type", "application/json"),
                     }
                     redis_client.setex(
                         cache_key, 86400, json.dumps(cache_payload)
                     )  # cache for 24 hours
+                    return Response(
+                        content=body_bytes,
+                        status_code=response.status_code,
+                        headers=dict(response.headers),
+                        media_type=getattr(response, "media_type", "application/json"),
+                    )
             finally:
                 redis_client.delete(lock_key)
 

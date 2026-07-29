@@ -1,7 +1,11 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 // Realistic seed data for DevLink — used by all mock services.
 // Replace mock services with an HTTP client later; shapes are stable.
 
 export type ID = string;
+
+export type UserRole = "Developer" | "Founder" | "Designer" | "AI Engineer" | "Mentor";
 
 export interface Skill {
   name: string;
@@ -10,16 +14,31 @@ export interface Builder {
   id: ID;
   name: string;
   handle: string;
-  role: string;
+  role: UserRole;
   avatar: string;
   country: string;
   yearsExp: number;
   matchScore: number;
   skills: string[];
+  badges: string[];
+  interests: string[];
   online: boolean;
-  bio: string;
+  headline?: string;
+  bio?: string;
+  location?: string;
+  timezone?: string;
+  website?: string;
+  resumeUrl?: string;
+  portfolioUrl?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  experienceLevel?: string;
+  company?: string;
+  profileSkills?: { name: string; level?: string; category?: string; yearsOfExperience?: number }[];
+  techStack?: string[];
   lastActiveAt: string | null;
   publicEmail?: string;
+  verified?: boolean;
 }
 export interface Project {
   id: ID;
@@ -37,7 +56,7 @@ export interface Project {
   status: "recruiting" | "in-progress" | "completed" | "archived";
   icon: string;
   language?: string;
-  difficulty?: "beginner" | "intermediate" | "advanced";
+  difficulty?: "Beginner" | "Intermediate" | "Advanced";
   remote?: boolean;
   paid?: boolean;
   openSource?: boolean;
@@ -99,11 +118,30 @@ export interface Notification {
 export interface Hackathon {
   id: ID;
   name: string;
+  description: string;
   theme: string;
-  startsIn: number;
+  starts_at: string;
+  ends_at: string;
+  min_team_size: number;
+  max_team_size: number;
   prize: string;
-  teamSize: string;
-  registered: boolean;
+  status: string;
+  is_published: boolean;
+  created_by: string;
+  website_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HackathonTeam {
+  id: ID;
+  hackathon_id: string;
+  name: string;
+  description?: string;
+  created_by: string;
+  member_count: number;
+  created_at: string;
+  updated_at: string;
 }
 export interface Deadline {
   id: ID;
@@ -123,113 +161,130 @@ export const builders: Builder[] = [
     id: "b1",
     name: "Priya Sharma",
     handle: "priya_dev",
-    role: "Frontend Developer",
+    role: "Developer",
     avatar: AV("Priya"),
     country: "India",
     yearsExp: 3,
     matchScore: 92,
     skills: ["React", "Next.js", "TypeScript"],
+    badges: ["Top Contributor", "Social Butterfly"],
     online: true,
     bio: "Loves accessible UIs and design systems.",
+    interests: ["Web Dev", "Design Systems", "AI"],
     lastActiveAt: ago(1),
     publicEmail: "priya@example.com",
+    verified: true,
   },
   {
     id: "b2",
     name: "Rahul Verma",
     handle: "rahul_v",
-    role: "Full Stack Developer",
+    role: "Developer",
     avatar: AV("Rahul"),
     country: "India",
     yearsExp: 4,
     matchScore: 89,
     skills: ["Node.js", "MongoDB", "Express"],
+    badges: ["Active Developer"],
     online: true,
     bio: "Builds end-to-end features fast.",
+    interests: ["Backend", "Web Dev"],
     lastActiveAt: ago(3),
   },
   {
     id: "b3",
     name: "Ankit Singh",
     handle: "ankit_be",
-    role: "Backend Developer",
+    role: "Developer",
     avatar: AV("Ankit"),
     country: "India",
     yearsExp: 2,
     matchScore: 87,
     skills: ["Python", "FastAPI", "PostgreSQL"],
+    badges: ["Project Owner", "Active Developer"],
     online: false,
     bio: "APIs, queues and Postgres tuning.",
+    interests: ["Backend", "AI"],
     lastActiveAt: ago(120),
   },
   {
     id: "b4",
     name: "Sneha Iyer",
     handle: "sneha_ux",
-    role: "UI/UX Designer",
+    role: "Designer",
     avatar: AV("Sneha"),
     country: "India",
     yearsExp: 3,
     matchScore: 94,
     skills: ["Figma", "Adobe XD"],
+    badges: ["Social Butterfly"],
     online: true,
     bio: "Product design for early-stage teams.",
+    interests: ["Design Systems", "Web Dev"],
     lastActiveAt: ago(5),
   },
   {
     id: "b5",
     name: "Vikram Mehta",
     handle: "vikram_fs",
-    role: "Full Stack Dev",
+    role: "Developer",
     avatar: AV("Vikram"),
     country: "India",
     yearsExp: 4,
     matchScore: 93,
     skills: ["MERN", "Next.js"],
+    badges: ["Top Contributor", "Project Owner"],
     online: false,
     bio: "Ships side-projects on weekends.",
+    interests: ["Web Dev", "Frontend"],
     lastActiveAt: ago(1440),
   },
   {
     id: "b6",
     name: "Aditya Rao",
     handle: "aditya_m",
-    role: "Mobile Developer",
+    role: "Developer",
     avatar: AV("Aditya"),
     country: "India",
     yearsExp: 3,
     matchScore: 91,
     skills: ["Flutter", "Firebase"],
+    badges: ["Active Developer"],
     online: true,
     bio: "Cross-platform mobile since 2021.",
+    interests: ["Mobile", "Web Dev"],
     lastActiveAt: ago(10),
   },
   {
     id: "b7",
     name: "Sarah Chen",
     handle: "sarah_c",
-    role: "ML Engineer",
+    role: "AI Engineer",
     avatar: AV("Sarah"),
     country: "US",
     yearsExp: 5,
     matchScore: 88,
     skills: ["Python", "PyTorch", "AWS"],
+    badges: ["Top Contributor", "Social Butterfly"],
     online: true,
     bio: "Recsys, embeddings, evals.",
+    interests: ["AI", "Backend"],
     lastActiveAt: ago(30),
   },
   {
     id: "b8",
     name: "Alex Johnson",
     handle: "alex_j",
-    role: "DevOps",
+    role: "Developer",
     avatar: AV("Alex"),
     country: "UK",
     yearsExp: 6,
     matchScore: 86,
     skills: ["Kubernetes", "Terraform"],
+    badges: ["Project Owner"],
     online: false,
     bio: "Infra as code, cost optimization.",
+    interests: ["Backend", "AI"],
     lastActiveAt: null,
   },
 ];
@@ -243,13 +298,19 @@ export const projects: Project[] = [
     owner: "Nancy Patel",
     members: 4,
     stars: 24,
+    forks: 12,
+    progress: 75,
+    status: "active",
+    icon: "🤖",
+    language: "JavaScript",
+    difficulty: "intermediate",
     views: 1042,
     forks: 12,
     progress: 75,
     status: "in-progress",
     icon: "🤖",
     language: "JavaScript",
-    difficulty: "intermediate",
+    difficulty: "Intermediate",
     remote: true,
     paid: true,
     openSource: false,
@@ -266,13 +327,19 @@ export const projects: Project[] = [
     owner: "Nancy Patel",
     members: 6,
     stars: 18,
+    forks: 8,
+    progress: 40,
+    status: "active",
+    icon: "✨",
+    language: "Python",
+    difficulty: "advanced",
     views: 890,
     forks: 8,
     progress: 40,
     status: "in-progress",
     icon: "✨",
     language: "Python",
-    difficulty: "advanced",
+    difficulty: "Advanced",
     remote: true,
     paid: true,
     openSource: false,
@@ -289,13 +356,19 @@ export const projects: Project[] = [
     owner: "Nancy Patel",
     members: 3,
     stars: 16,
+    forks: 6,
+    progress: 60,
+    status: "active",
+    icon: "🚀",
+    language: "Go",
+    difficulty: "advanced",
     views: 521,
     forks: 6,
     progress: 60,
     status: "in-progress",
     icon: "🚀",
     language: "Go",
-    difficulty: "advanced",
+    difficulty: "Advanced",
     remote: true,
     paid: false,
     openSource: false,
@@ -311,13 +384,19 @@ export const projects: Project[] = [
     owner: "Nancy Patel",
     members: 5,
     stars: 14,
+    forks: 7,
+    progress: 25,
+    status: "planning",
+    icon: "🪙",
+    language: "TypeScript",
+    difficulty: "advanced",
     views: 310,
     forks: 7,
     progress: 25,
     status: "recruiting",
     icon: "🪙",
     language: "TypeScript",
-    difficulty: "advanced",
+    difficulty: "Advanced",
     remote: true,
     paid: false,
     openSource: true,
@@ -334,13 +413,19 @@ export const projects: Project[] = [
     owner: "Nancy Patel",
     members: 2,
     stars: 12,
+    forks: 5,
+    progress: 90,
+    status: "active",
+    icon: "🧩",
+    language: "TypeScript",
+    difficulty: "beginner",
     views: 180,
     forks: 5,
     progress: 90,
     status: "in-progress",
     icon: "🧩",
     language: "TypeScript",
-    difficulty: "beginner",
+    difficulty: "Beginner",
     remote: true,
     paid: false,
     openSource: true,
@@ -356,13 +441,19 @@ export const projects: Project[] = [
     owner: "Community",
     members: 8,
     stars: 240,
+    forks: 96,
+    progress: 100,
+    status: "shipped",
+    icon: "📇",
+    language: "JavaScript",
+    difficulty: "intermediate",
     views: 5040,
     forks: 96,
     progress: 100,
     status: "completed",
     icon: "📇",
     language: "JavaScript",
-    difficulty: "intermediate",
+    difficulty: "Intermediate",
     remote: false,
     paid: false,
     openSource: true,
@@ -492,29 +583,53 @@ export const hackathons: Hackathon[] = [
   {
     id: "h1",
     name: "AI for Good 2025",
+    description:
+      "Build AI-powered tools that drive social impact. Use machine learning, NLP, or computer vision to solve real-world problems.",
     theme: "Social impact",
-    startsIn: 12,
+    starts_at: "2025-09-15T09:00:00Z",
+    ends_at: "2025-09-17T18:00:00Z",
+    min_team_size: 2,
+    max_team_size: 5,
     prize: "$25k",
-    teamSize: "2–5",
-    registered: true,
+    status: "registration_open",
+    is_published: true,
+    created_by: "u1",
+    created_at: "2025-08-01T00:00:00Z",
+    updated_at: "2025-08-01T00:00:00Z",
   },
   {
     id: "h2",
     name: "DevLink Winter Jam",
+    description:
+      "A weekend hackathon for the DevLink community. Ship something cool, win prizes, and meet fellow developers.",
     theme: "Any theme",
-    startsIn: 30,
+    starts_at: "2025-12-10T09:00:00Z",
+    ends_at: "2025-12-12T18:00:00Z",
+    min_team_size: 1,
+    max_team_size: 4,
     prize: "$10k",
-    teamSize: "1–4",
-    registered: false,
+    status: "draft",
+    is_published: false,
+    created_by: "u1",
+    created_at: "2025-11-01T00:00:00Z",
+    updated_at: "2025-11-01T00:00:00Z",
   },
   {
     id: "h3",
     name: "Chain Builders",
+    description:
+      "Build the next generation of decentralized applications. Focus on DeFi, NFTs, DAOs, or blockchain infrastructure.",
     theme: "Web3",
-    startsIn: 45,
+    starts_at: "2026-01-20T09:00:00Z",
+    ends_at: "2026-01-22T18:00:00Z",
+    min_team_size: 1,
+    max_team_size: 5,
     prize: "$50k",
-    teamSize: "1–5",
-    registered: false,
+    status: "completed",
+    is_published: true,
+    created_by: "u2",
+    created_at: "2025-12-15T00:00:00Z",
+    updated_at: "2026-01-23T00:00:00Z",
   },
 ];
 
@@ -543,6 +658,7 @@ export const currentUser = {
   handle: "nancy_dev",
   avatar: AV("Nancy"),
   premium: true,
+  verified: true,
 };
 
 export const stats = [

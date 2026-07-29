@@ -21,6 +21,7 @@ import {
   FileText,
   BarChart3,
   Trophy,
+  ArrowRight
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
@@ -29,7 +30,10 @@ import { containerVariants, cardEntrance, cardHover } from "@/lib/animations";
 
 export function RecentActivity() {
   return (
-    <Card>
+    <Card className="border-border/60">
+      <div className="px-5 pt-4 pb-2 font-semibold flex items-center gap-2 text-sm">
+        Recent Activity
+      </div>
       <ActivityFeed
         queryKey={["activities", "recent"]}
         queryFn={() => activitiesService.list(20)}
@@ -44,36 +48,33 @@ export function BuilderRequests() {
     queryFn: dashboardService.builderRequests,
   });
   return (
-    <Card>
+    <Card className="border-border/60">
       <SectionHeader title="Builder Requests" action="View All" />
-      <ul className="divide-y divide-border/60">
+      <ul className="divide-y divide-border/40">
         {data.map((r) => (
-          <li key={r.id} className="px-4 py-3.5 transition-colors hover:bg-muted/30">
+          <li key={r.id} className="px-5 py-4 transition-colors hover:bg-muted/20">
             <div className="flex items-start gap-3">
-              <Avatar src={r.builder.avatar} alt={r.builder.name} size={42} />
+              <Avatar src={r.builder.avatar} alt={r.builder.name} size={40} />
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-bold text-foreground">{r.builder.name}</p>
-                <p className="text-[12px] font-medium text-muted-foreground">{r.builder.role}</p>
-                <div className="mt-1.5 flex flex-wrap gap-1">
+                <p className="text-sm font-semibold text-foreground">{r.builder.name}</p>
+                <p className="text-xs text-muted-foreground">{r.builder.role}</p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
                   {r.builder.skills.slice(0, 3).map((s) => (
                     <TagChip key={s}>{s}</TagChip>
                   ))}
                 </div>
-                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                <p className="mt-2 text-xs text-muted-foreground">
                   {r.builder.yearsExp} yrs exp ·{" "}
-                  <span className="font-bold text-emerald-500">{r.builder.matchScore}% Match</span>
+                  <span className="font-medium text-success">{r.builder.matchScore}% Match</span>
                 </p>
               </div>
             </div>
-            <div className="mt-2.5 flex gap-2">
-              <button className="flex-1 rounded-xl bg-primary px-2.5 py-1.5 text-[12px] font-bold text-primary-foreground shadow-xs transition-opacity hover:opacity-90 active:scale-95">
+            <div className="mt-3 flex gap-2">
+              <button className="flex-1 rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background hover:bg-foreground/90 transition-colors">
                 Accept
               </button>
-              <button className="flex-1 rounded-xl border border-border/80 bg-surface px-2.5 py-1.5 text-[12px] font-semibold text-foreground transition-colors hover:bg-muted active:scale-95">
-                Reject
-              </button>
-              <button className="rounded-xl border border-border/80 bg-surface px-2.5 py-1.5 text-[12px] font-semibold text-foreground transition-colors hover:bg-muted active:scale-95">
-                View
+              <button className="flex-1 rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors">
+                Decline
               </button>
             </div>
           </li>
@@ -89,35 +90,27 @@ export function InviteRequests() {
     queryFn: dashboardService.inviteRequests,
   });
   return (
-    <Card>
+    <Card className="border-border/60">
       <SectionHeader title="Invite Requests" action="View All" />
-      <ul className="divide-y divide-border/60">
+      <ul className="divide-y divide-border/40">
         {data.map((r) => (
           <li
             key={r.id}
-            className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/30"
+            className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/20"
           >
-            <span
-              className={cn(
-                "grid h-10 w-10 shrink-0 place-items-center rounded-xl text-lg shadow-xs",
-                r.color,
-              )}
-            >
-              {r.icon}
-            </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-bold text-foreground">{r.project}</p>
-              <p className="text-[11px] font-medium text-muted-foreground">{r.role}</p>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="truncate text-sm font-semibold text-foreground">{r.project}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{r.role}</p>
+              <p className="text-xs text-muted-foreground mt-1">
                 Due in {r.dueDays} days · By {r.by}
               </p>
             </div>
-            <div className="flex gap-1.5">
-              <button className="grid h-8 w-8 place-items-center rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-500 transition-colors hover:bg-emerald-500/20 active:scale-95">
-                <Check size={15} />
+            <div className="flex flex-col gap-2 shrink-0">
+              <button className="flex items-center justify-center h-8 w-8 rounded-md bg-success/10 text-success hover:bg-success/20 transition-colors">
+                <Check size={14} />
               </button>
-              <button className="grid h-8 w-8 place-items-center rounded-xl border border-destructive/30 bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20 active:scale-95">
-                <X size={15} />
+              <button className="flex items-center justify-center h-8 w-8 rounded-md bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+                <X size={14} />
               </button>
             </div>
           </li>
@@ -126,15 +119,16 @@ export function InviteRequests() {
     </Card>
   );
 }
+
 export function SuggestedBuilders() {
   const { data = [] } = useQuery({ queryKey: ["suggested"], queryFn: buildersService.suggested });
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <Card>
+    <Card className="border-border/60 bg-card">
       <SectionHeader title="Suggested Builders" action="View All" actionTo="/builders" />
       <motion.div
-        className="grid grid-cols-1 gap-3.5 p-4 pt-0 sm:grid-cols-3"
+        className="grid grid-cols-1 gap-4 p-5 pt-2 sm:grid-cols-2 lg:grid-cols-3"
         variants={containerVariants}
         initial={prefersReducedMotion ? undefined : "hidden"}
         animate={prefersReducedMotion ? undefined : "visible"}
@@ -144,30 +138,28 @@ export function SuggestedBuilders() {
             key={b.id}
             variants={prefersReducedMotion ? undefined : cardEntrance}
             custom={i}
-            whileHover={prefersReducedMotion ? undefined : cardHover}
-            transition={{ duration: 0.2 }}
-            className="will-change-transform flex flex-col items-center rounded-2xl border border-border/70 bg-card p-4 text-center shadow-xs transition-all hover:border-primary/40 hover:shadow-card"
+            className="flex flex-col rounded-xl border border-border/60 bg-surface p-4 hover:border-border transition-colors shadow-sm"
           >
-            <Avatar src={b.avatar} alt={b.name} size={60} online={b.online} />
-            <p className="mt-3 text-[14px] font-bold text-foreground leading-tight">{b.name}</p>
-            <p className="text-[11px] font-semibold text-muted-foreground leading-tight">
-              {b.role}
-            </p>
-            <p className="text-[11px] text-muted-foreground">{b.country}</p>
-            <div className="mt-2.5 flex flex-wrap justify-center gap-1.5">
+            <div className="flex items-start justify-between">
+              <Avatar src={b.avatar} alt={b.name} size={48} online={b.online} />
+              <span className="inline-flex items-center rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success">
+                {b.matchScore}% Match
+              </span>
+            </div>
+            <div className="mt-3">
+              <p className="text-sm font-semibold text-foreground">{b.name}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{b.role} · {b.country}</p>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-1.5">
               {b.skills.slice(0, 2).map((s) => (
                 <TagChip key={s}>{s}</TagChip>
               ))}
             </div>
-            <p className="mt-2 text-[11px] font-semibold text-muted-foreground">
-              {b.yearsExp} yrs exp
-            </p>
-            <p className="text-[11px] font-bold text-emerald-500">{b.matchScore}% Match</p>
-            <div className="mt-3 flex w-full gap-1.5">
-              <button className="flex-1 rounded-xl bg-primary px-2 py-1.5 text-[11px] font-bold text-primary-foreground shadow-xs transition-opacity hover:opacity-90 active:scale-95">
+            <div className="mt-auto pt-4 flex w-full gap-2">
+              <button className="flex-1 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
                 Connect
               </button>
-              <button className="flex-1 rounded-xl border border-border/80 px-2 py-1.5 text-[11px] font-semibold text-foreground transition-colors hover:bg-muted active:scale-95">
+              <button className="flex-1 rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted transition-colors">
                 Message
               </button>
             </div>
@@ -181,29 +173,29 @@ export function SuggestedBuilders() {
 export function TrendingProjects() {
   const { data = [] } = useQuery({ queryKey: ["trending"], queryFn: projectsService.trending });
   return (
-    <Card>
+    <Card className="border-border/60">
       <SectionHeader title="Trending Projects" action="View All" actionTo="/projects" />
-      <ul className="divide-y divide-border/60">
+      <ul className="divide-y divide-border/40">
         {data.map((p) => (
           <li
             key={p.id}
-            className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/30"
+            className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/20"
           >
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-muted text-lg shadow-xs">
+            <div className="flex items-center justify-center h-10 w-10 shrink-0 rounded-lg bg-muted text-lg border border-border/50">
               {p.icon}
-            </span>
+            </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-bold text-foreground">{p.name}</p>
-              <p className="truncate text-[11px] font-medium text-muted-foreground">
+              <p className="truncate text-sm font-semibold text-foreground">{p.name}</p>
+              <p className="truncate text-xs text-muted-foreground mt-0.5">
                 {p.stack.join(" · ")}
               </p>
             </div>
-            <div className="flex items-center gap-3 text-[11px] font-semibold text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <Star size={13} className="text-amber-500 fill-amber-500" /> {p.stars}
+            <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <Star size={14} className="text-muted-foreground" /> {p.stars}
               </span>
-              <span className="inline-flex items-center gap-1">
-                <MessageCircle size={13} /> {p.forks}
+              <span className="flex items-center gap-1.5">
+                <MessageCircle size={14} className="text-muted-foreground" /> {p.forks}
               </span>
             </div>
           </li>
@@ -215,47 +207,48 @@ export function TrendingProjects() {
 
 export function AIRecommendations() {
   return (
-    <Card className="relative overflow-hidden">
-      <SectionHeader title="AI Recommendations" action="View All" />
-      <div className="space-y-3 px-5 pb-5">
-        <p className="text-[13px] font-medium text-foreground leading-relaxed">
-          You need a <span className="font-bold text-foreground">Backend Developer</span> for your
-          project <span className="font-bold text-primary">AI Chatbot</span>
+    <Card className="relative overflow-hidden border-border/60">
+      <SectionHeader title="AI Insights" />
+      <div className="space-y-4 px-5 pb-5">
+        <p className="text-sm text-foreground leading-relaxed">
+          You need a <span className="font-semibold">Backend Developer</span> for your
+          project <span className="font-semibold text-primary">AI Chatbot</span>
         </p>
-        <div className="rounded-2xl border border-primary/30 bg-primary-soft/30 p-3.5 shadow-xs">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-primary">Top Match</p>
-          <div className="mt-2 flex items-center gap-3">
-            <Avatar
-              src="https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Rahul"
-              alt="Rahul"
-              size={42}
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-bold text-foreground">Rahul Verma</p>
-              <p className="text-[11px] font-medium text-muted-foreground">Full Stack Developer</p>
-              <p className="text-[11px] font-bold text-emerald-500">93% Match</p>
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-3">Top Match</p>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <Avatar
+                src="https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Rahul"
+                alt="Rahul"
+                size={40}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-foreground">Rahul Verma</p>
+                <p className="text-xs text-muted-foreground">Full Stack Developer</p>
+              </div>
             </div>
-            <button className="rounded-xl bg-primary px-3 py-1.5 text-[12px] font-bold text-primary-foreground shadow-xs transition-opacity hover:opacity-90 active:scale-95">
-              Invite
-            </button>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-success">93% Match</span>
+              <button className="rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background hover:bg-foreground/90 transition-colors">
+                Invite
+              </button>
+            </div>
           </div>
         </div>
-        <div className="rounded-2xl bg-muted/60 p-3.5">
-          <p className="text-[11px] font-bold text-foreground">Why this match?</p>
-          <ul className="mt-2 space-y-1.5 text-[11px] font-medium text-muted-foreground">
-            <li className="flex items-center gap-1.5">
-              <Check size={13} className="text-emerald-500" /> Skills match 90%
+        <div className="rounded-xl bg-muted/40 p-4 border border-border/50">
+          <p className="text-xs font-semibold text-foreground">Why this match?</p>
+          <ul className="mt-3 space-y-2 text-xs text-muted-foreground">
+            <li className="flex items-center gap-2">
+              <Check size={14} className="text-success" /> Skills match 90%
             </li>
-            <li className="flex items-center gap-1.5">
-              <Check size={13} className="text-emerald-500" /> Past experience
+            <li className="flex items-center gap-2">
+              <Check size={14} className="text-success" /> Past experience in AI
             </li>
-            <li className="flex items-center gap-1.5">
-              <Check size={13} className="text-emerald-500" /> Available this week
+            <li className="flex items-center gap-2">
+              <Check size={14} className="text-success" /> Available this week
             </li>
           </ul>
-          <button className="mt-2.5 text-[11px] font-bold text-primary transition-all hover:text-primary/80 hover:underline">
-            Learn More →
-          </button>
         </div>
       </div>
     </Card>
@@ -268,24 +261,24 @@ export function MessagesPreview() {
     queryFn: messagesService.conversations,
   });
   return (
-    <Card>
-      <SectionHeader title="Messages Preview" action="View All" actionTo="/messages" />
-      <ul className="divide-y divide-border/60">
+    <Card className="border-border/60">
+      <SectionHeader title="Messages" action="View All" actionTo="/messages" />
+      <ul className="divide-y divide-border/40">
         {data.map((c) => (
           <li key={c.id}>
             <Link
               to="/messages/$conversationId"
               params={{ conversationId: c.id }}
-              className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/40"
+              className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/20"
             >
-              <Avatar src={c.with.avatar} alt={c.with.name} size={34} online={c.with.online} />
+              <Avatar src={c.with.avatar} alt={c.with.name} size={36} online={c.with.online} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-bold text-foreground">{c.with.name}</p>
-                <p className="truncate text-[12px] font-medium text-muted-foreground">
+                <p className="truncate text-sm font-semibold text-foreground">{c.with.name}</p>
+                <p className="truncate text-xs text-muted-foreground mt-0.5">
                   {c.preview}
                 </p>
               </div>
-              <span className="text-[11px] font-medium text-muted-foreground">{c.ago}</span>
+              <span className="text-xs text-muted-foreground">{c.ago}</span>
             </Link>
           </li>
         ))}
@@ -299,59 +292,37 @@ export function QuickActions() {
     {
       icon: FolderPlus,
       label: "New Project",
-      tint: "bg-blue-500/10 text-blue-500",
       to: "/projects" as const,
-    },
-    {
-      icon: Flame,
-      label: "Create Flare",
-      tint: "bg-amber-500/10 text-amber-500",
-      to: "/flares" as const,
     },
     {
       icon: Users2,
       label: "Find Builder",
-      tint: "bg-emerald-500/10 text-emerald-500",
       to: "/builders" as const,
     },
     {
+      icon: Flame,
+      label: "Create Flare",
+      to: "/flares" as const,
+    },
+    {
       icon: Trophy,
-      label: "Start Hackathon",
-      tint: "bg-cyan-500/10 text-cyan-500",
+      label: "Hackathons",
       to: "/hackathons" as const,
-    },
-    {
-      icon: FileText,
-      label: "AI Description",
-      tint: "bg-rose-500/10 text-rose-500",
-      to: "/dashboard" as const,
-    },
-    {
-      icon: BarChart3,
-      label: "View Analytics",
-      tint: "bg-blue-500/10 text-blue-500",
-      to: "/analytics" as const,
     },
   ];
   return (
-    <Card>
-      <SectionHeader title="Quick Actions" />
-      <div className="grid grid-cols-3 gap-3 p-4 pt-0">
+    <Card className="border-border/60 bg-transparent shadow-none border-none">
+      <div className="grid grid-cols-2 gap-3">
         {actions.map((a) => (
           <Link
             key={a.label}
             to={a.to}
-            className="group flex flex-col items-center gap-2.5 rounded-2xl border border-border/70 bg-card p-3 text-center transition-all duration-200 hover:border-primary/40 hover:shadow-card hover:-translate-y-0.5"
+            className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card p-4 transition-all hover:border-border hover:bg-muted/20"
           >
-            <span
-              className={cn(
-                "grid h-11 w-11 place-items-center rounded-xl transition-transform duration-200 group-hover:scale-105",
-                a.tint,
-              )}
-            >
-              <a.icon size={18} />
+            <span className="flex items-center justify-center h-8 w-8 rounded-md bg-muted text-muted-foreground group-hover:text-foreground group-hover:bg-muted/80 transition-colors">
+              <a.icon size={16} />
             </span>
-            <span className="text-[11px] font-bold text-foreground leading-tight">{a.label}</span>
+            <span className="text-sm font-medium text-foreground">{a.label}</span>
           </Link>
         ))}
       </div>
@@ -362,25 +333,28 @@ export function QuickActions() {
 export function UpcomingDeadlines() {
   const { data = [] } = useQuery({ queryKey: ["deadlines"], queryFn: dashboardService.deadlines });
   const sevTint = {
-    danger: "text-destructive font-bold",
-    warning: "text-amber-500 font-bold",
-    info: "text-blue-500 font-bold",
+    danger: "text-destructive font-medium",
+    warning: "text-warning font-medium",
+    info: "text-info font-medium",
   } as const;
   return (
-    <Card>
-      <SectionHeader title="Upcoming Deadlines" action="View Calendar" />
-      <ul className="divide-y divide-border/60">
+    <Card className="border-border/60">
+      <SectionHeader title="Deadlines" action="Calendar" />
+      <ul className="divide-y divide-border/40">
         {data.map((d) => (
           <li
             key={d.id}
-            className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40"
+            className="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/20"
           >
-            <FolderPlus size={15} className="shrink-0 text-muted-foreground" />
-            <p className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground">
-              {d.project} — <span className="text-muted-foreground">{d.milestone}</span>
-            </p>
-            <span className={cn("whitespace-nowrap text-[11px]", sevTint[d.severity])}>
-              Due in {d.dueDays} days
+            <div className="h-2 w-2 rounded-full bg-border" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-foreground">
+                {d.project}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">{d.milestone}</p>
+            </div>
+            <span className={cn("whitespace-nowrap text-xs", sevTint[d.severity])}>
+              In {d.dueDays}d
             </span>
           </li>
         ))}
@@ -395,24 +369,26 @@ export function NotificationsFeed() {
     queryFn: notificationsService.list,
   });
   return (
-    <Card>
-      <SectionHeader title="Notifications Feed" action="View All" actionTo="/notifications" />
-      <ul className="divide-y divide-border/60">
+    <Card className="border-border/60">
+      <SectionHeader title="Notifications" action="View All" actionTo="/notifications" />
+      <ul className="divide-y divide-border/40">
         {data.map((n) => (
           <li
             key={n.id}
-            className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40"
+            className="flex items-start gap-3 px-5 py-3.5 transition-colors hover:bg-muted/20"
           >
             <span
               className={cn(
-                "h-2 w-2 shrink-0 rounded-full ring-2 ring-card",
-                n.unread ? "bg-primary animate-pulse" : "bg-transparent",
+                "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                n.unread ? "bg-primary" : "bg-transparent",
               )}
             />
-            <p className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground">
-              {n.text}
-            </p>
-            <span className="text-[11px] font-medium text-muted-foreground">{n.ago}</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-foreground">
+                {n.text}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">{n.ago}</p>
+            </div>
           </li>
         ))}
       </ul>

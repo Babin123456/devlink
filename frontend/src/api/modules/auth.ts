@@ -12,6 +12,7 @@ export interface AuthUser {
   username: string;
   full_name?: string;
   avatar?: string;
+  profile_image?: string;
 }
 export interface AuthResponse extends AuthTokens {
   user: AuthUser;
@@ -30,7 +31,7 @@ export const authApi = {
   },
   async logout() {
     try {
-      await api.post<void>("/api/auth/logout");
+      await api.post<void>("/api/auth/logout", { refresh_token: tokenStore.getRefresh() });
     } finally {
       tokenStore.clear();
     }
@@ -39,5 +40,9 @@ export const authApi = {
   forgotPassword: (email: string) =>
     api.post<{ ok: true }>("/api/auth/forgot-password", { email }, { auth: false }),
   resetPassword: (token: string, password: string) =>
-    api.post<{ ok: true }>("/api/auth/reset-password", { token, password }, { auth: false }),
+    api.post<{ ok: true }>(
+      "/api/auth/reset-password",
+      { token, new_password: password },
+      { auth: false },
+    ),
 };
