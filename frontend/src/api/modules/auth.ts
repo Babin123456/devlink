@@ -24,12 +24,16 @@ export const authApi = {
     tokenStore.set(res.access_token, res.refresh_token);
     return res;
   },
-  async login(input: { email: string; password: string }) {
+async login(input: { email: string; password: string }) {
     const res = await api.post<AuthResponse>("/api/auth/login", input, { auth: false });
     tokenStore.set(res.access_token, res.refresh_token);
     return res;
   },
-  async logout() {
+  async githubLogin(code: string) {
+    const res = await api.post<AuthResponse>("/api/auth/github", { code }, { auth: false });
+    tokenStore.set(res.access_token, res.refresh_token);
+    return res;
+  },  async logout() {
     try {
       await api.post<void>("/api/auth/logout", { refresh_token: tokenStore.getRefresh() });
     } finally {
