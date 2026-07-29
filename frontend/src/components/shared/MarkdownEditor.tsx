@@ -272,6 +272,7 @@ export function MarkdownEditor({
               )}
             />
 
+            {/* Autocomplete Dropdown */}
             {mentionQuery !== null && filteredUsers.length > 0 && (
               <div className="absolute left-3 bottom-full mb-1 z-50 w-64 rounded-md border border-border bg-surface shadow-lg py-1 overflow-hidden">
                 <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground border-b border-border flex items-center gap-1">
@@ -300,19 +301,3 @@ export function MarkdownEditor({
         </TabsContent>
 
         <TabsContent value="preview" className="mt-2">
-          <div
-            id={previewId}
-            className="rounded-md border border-dashed border-border bg-surface p-3"
-            style={{ minHeight: `${rows * 1.6}em` }}
-          >
-            {value.trim() ? (
-              <Markdown content={value} />
-            ) : (
-              <p className="text-[13px] text-muted-foreground">Nothing to preview yet.</p>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
