@@ -6,13 +6,22 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
+import { AnimatePresence } from "framer-motion";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/context/ThemeContext";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { ApiError } from "@/api/client";
+
+import { UnauthorizedPage } from "@/components/errors/UnauthorizedPage";
+import { ForbiddenPage } from "@/components/errors/ForbiddenPage";
+import { ServerErrorPage } from "@/components/errors/ServerErrorPage";
+import { OfflinePage } from "@/components/errors/OfflinePage";
+import { NetworkErrorPage } from "@/components/errors/NetworkErrorPage";
 
 function NotFoundComponent() {
   const ref = useRef<HTMLDivElement>(null);
@@ -74,6 +83,30 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
+  if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return <UnauthorizedPage />;
+    }
+
+    if (error.status === 403) {
+      return <ForbiddenPage />;
+    }
+
+    if (error.status >= 500) {
+      return <ServerErrorPage />;
+    }
+
+    // status 0  -> fetch/network failure (coreFetch's catch block)
+    // status 408 -> request aborted/timed out (coreFetch's AbortError branch)
+    // Both are network-class failures from the user's perspective.
+    if (error.status === 0 || error.status === 408) {
+      // navigator is undefined during SSR; assume online in that case so we
+      // don't render OfflinePage on the server for a purely client-side signal.
+      const isOnline = typeof navigator === "undefined" ? true : navigator.onLine;
+      return isOnline ? <NetworkErrorPage /> : <OfflinePage />;
+    }
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -86,19 +119,21 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
-              router.invalidate();
+              // router.invalidate() returns a Promise; explicitly discard it
+              // rather than leaving a floating unhandled promise.
+              void router.invalidate();
               reset();
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
           >
             Try again
           </button>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="inline-flex items-center justify-center rounded-md border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
             Go home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -149,12 +184,18 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useRouterState({ select: (s) => s.location });
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system">
         <Outlet />
         <Toaster position="top-right" richColors />
       </ThemeProvider>
+      <AnimatePresence mode="wait" initial={false}>
+        <Outlet key={location.pathname} />
+      </AnimatePresence>
+      <Toaster position="top-right" richColors />
     </QueryClientProvider>
   );
 }

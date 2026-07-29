@@ -285,3 +285,28 @@
   display: none;
 }
 
+/* ─── Motion System ───────────────────────────────────────────────── */
+/*
+ * Respect the user's system-level preference for reduced motion.
+ * This acts as a safety net on top of the React-level useReducedMotion()
+ * hook used by individual components.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Hover elevation surface (used by MotionCard and interactive cards) */
+.motion-card {
+  will-change: transform;
+  transition: box-shadow var(--transition-fast);
+}
+.motion-card:hover {
+  box-shadow: var(--shadow-lg);
+}
