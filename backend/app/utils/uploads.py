@@ -20,11 +20,9 @@ def validate_resume_upload(
 ) -> None:
     if not filename or not filename.lower().endswith(".pdf"):
         raise ValueError("Please upload a PDF file.")
-
     normalized_content_type = (content_type or "").lower()
     if normalized_content_type not in ALLOWED_RESUME_MIME_TYPES:
         raise ValueError("Please upload a PDF file.")
-
     if size_bytes > MAX_RESUME_SIZE_BYTES:
         raise ValueError(
             f"Resume file must be smaller than {settings.RESUME_MAX_SIZE_MB}MB."
@@ -50,19 +48,19 @@ def validate_image_upload(
     """
     if not filename:
         raise ValueError("Please upload an image file.")
-
     ext = Path(filename).suffix.lower()
     allowed_exts = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tiff"}
     if ext not in allowed_exts:
         raise ValueError(
             f"Unsupported file extension: {ext}. Allowed: {', '.join(allowed_exts)}"
         )
-
     normalized_content_type = (content_type or "").lower()
-    if normalized_content_type and normalized_content_type not in ALLOWED_IMAGE_MIME_TYPES:
+    if (
+        normalized_content_type
+        and normalized_content_type not in ALLOWED_IMAGE_MIME_TYPES
+    ):
         if not normalized_content_type.startswith("image/"):
             raise ValueError("Please upload a valid image file.")
-
     if size_bytes > MAX_IMAGE_SIZE_BYTES:
         raise ValueError(
             f"Image file size must be smaller than {settings.MAX_UPLOAD_SIZE_MB}MB."
@@ -109,9 +107,7 @@ def save_image_upload(
         thumb_path = upload_dir / thumb_filename
         thumb_path.write_bytes(result["thumbnail_bytes"])
         thumbnail_url = f"/uploads/{subfolder}/{thumb_filename}"
-
     return {
         "image_url": image_url,
         "thumbnail_url": thumbnail_url,
     }
-
