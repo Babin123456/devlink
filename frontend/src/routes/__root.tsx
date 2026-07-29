@@ -11,6 +11,7 @@ import {
 import { AnimatePresence } from "framer-motion";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -187,6 +188,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="system">
+        <Outlet />
+        <Toaster position="top-right" richColors />
+      </ThemeProvider>
       <AnimatePresence mode="wait" initial={false}>
         <Outlet key={location.pathname} />
       </AnimatePresence>
