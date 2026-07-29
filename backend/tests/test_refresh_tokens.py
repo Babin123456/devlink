@@ -12,6 +12,7 @@ from app.dependencies import get_database
 from app.main import app
 from app.models.refresh_token import RefreshToken
 
+from tests.conftest import TestingSessionLocal
 
 
 
