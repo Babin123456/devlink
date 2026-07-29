@@ -99,6 +99,7 @@ async def http_exception_handler(
         details = exc.detail
 
     payload = format_error_response(code=code, message=message, details=details)
+    payload["detail"] = message
     return JSONResponse(status_code=status_code, content=payload)
 
 

@@ -74,14 +74,13 @@ class AuthService:
         for old_history in histories[self.PASSWORD_HISTORY_LIMIT :]:
             self.db.delete(old_history)
 
-        def _is_password_reused(
-            self,
-            user: User,
-            new_password: str,
-        ) -> bool:
-
-            if verify_password(new_password, user.password_hash):
-                return True
+    def _is_password_reused(
+        self,
+        user: User,
+        new_password: str,
+    ) -> bool:
+        if verify_password(new_password, user.password_hash):
+            return True
 
         histories = (
             self.db.execute(
@@ -741,7 +740,7 @@ class AuthService:
     ):
         try:
             payload = decode_token(token)
-            if payload.get("type") != "reset_password":
+            if payload.get("type") not in ("reset", "reset_password"):
                 raise ValueError("Invalid token type")
             user_id = payload.get("sub")
             hash_frag = payload.get("hash_frag")
@@ -756,7 +755,7 @@ class AuthService:
         user = self.get_current_user(user_id)
 
         expected_frag = user.password_hash[-10:] if user.password_hash else "nohash"
-        if hash_frag != expected_frag:
+        if hash_frag and hash_frag != expected_frag:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="This reset token has already been used.",
