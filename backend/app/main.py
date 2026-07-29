@@ -251,9 +251,10 @@ from app.routers import (
     conversations,
     export,
     followers,
+    hackathons,
     health,
     issues,
-    hackathons,
+    media,
     messages,
     notifications,
     organizations,
@@ -325,5 +326,5 @@ app.include_router(
 app.include_router(health.router)
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
 app.include_router(saved_searches.router)
-
 app.include_router(hackathons.router, prefix="/api/hackathons", tags=["Hackathons"])
+

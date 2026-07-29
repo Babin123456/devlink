@@ -44,7 +44,7 @@ services:
       - "8000:8000"
     environment:
       - ENVIRONMENT=development
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/devlink_db
+      - DATABASE_URL=postgresql+psycopg://postgres:postgres@postgres:5432/devlink_db
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=dev_secret_key_change_in_production_12345
       - CORS_ORIGINS=["http://localhost:5173","http://localhost:3000","http://127.0.0.1:5173"]

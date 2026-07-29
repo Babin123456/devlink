@@ -1,0 +1,20 @@
+{
+  "name": "devlink",
+  "private": true,
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.0"
+  },
+  "lint-staged": {
+    "frontend/src/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "frontend/src/**/*.{js,jsx,json,css,md}": [
+      "prettier --write"
+    ]
+  }
+}
