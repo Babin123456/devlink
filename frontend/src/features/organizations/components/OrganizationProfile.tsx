@@ -15,8 +15,13 @@ interface OrganizationProfileProps {
   orgId: string;
 }
 
-export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({ organizationData, orgId }) => {
-  const [activeTab, setActiveTab] = useState<"about" | "team" | "projects" | "hiring" | "tokens">("about");
+export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({
+  organizationData,
+  orgId,
+}) => {
+  const [activeTab, setActiveTab] = useState<"about" | "team" | "projects" | "hiring" | "tokens">(
+    "about",
+  );
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -89,9 +94,7 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({ organi
           </div>
         )}
 
-        {activeTab === "tokens" && (
-          <OrganizationApiTokens orgId={orgId} />
-        )}
+        {activeTab === "tokens" && <OrganizationApiTokens orgId={orgId} />}
       </div>
     </div>
   );

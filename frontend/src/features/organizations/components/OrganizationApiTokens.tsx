@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { api } from "../../../api";
 import { Key, Plus, Trash2, Copy, Check, ShieldAlert, Loader2 } from "lucide-react";
 
@@ -33,29 +33,50 @@ export const OrganizationApiTokens: React.FC<OrganizationApiTokensProps> = ({ or
   const [copied, setCopied] = useState(false);
 
   const availableScopes = [
-    { value: "org:read", label: "org:read", desc: "Read organization workspace details, projects, and members" },
-    { value: "org:write", label: "org:write", desc: "Modify workspace configuration, update slug, hiring settings" },
-    { value: "org:admin", label: "org:admin", desc: "Full administrative access including managing members and tokens" },
-    { value: "project:read", label: "project:read", desc: "Read-only access to organization projects and tasks" },
-    { value: "project:write", label: "project:write", desc: "Write access to create, update, and manage organization projects and tasks" },
+    {
+      value: "org:read",
+      label: "org:read",
+      desc: "Read organization workspace details, projects, and members",
+    },
+    {
+      value: "org:write",
+      label: "org:write",
+      desc: "Modify workspace configuration, update slug, hiring settings",
+    },
+    {
+      value: "org:admin",
+      label: "org:admin",
+      desc: "Full administrative access including managing members and tokens",
+    },
+    {
+      value: "project:read",
+      label: "project:read",
+      desc: "Read-only access to organization projects and tasks",
+    },
+    {
+      value: "project:write",
+      label: "project:write",
+      desc: "Write access to create, update, and manage organization projects and tasks",
+    },
   ];
 
-  const fetchTokens = async () => {
+  const fetchTokens = useCallback(async () => {
     try {
       setLoading(true);
       const data = await api.get<Token[]>(`/organizations/${orgId}/tokens`);
       setTokens(data);
       setError(null);
-    } catch (err: any) {
-      setError(err.message || "Failed to load API tokens.");
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to load API tokens.";
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
-  };
+  }, [orgId]);
 
   useEffect(() => {
     fetchTokens();
-  }, [orgId]);
+  }, [fetchTokens]);
 
   const handleCreateToken = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +93,7 @@ export const OrganizationApiTokens: React.FC<OrganizationApiTokensProps> = ({ or
 
       const res = await api.post<{ token: string } & Token>(
         `/organizations/${orgId}/tokens`,
-        payload
+        payload,
       );
 
       setGeneratedToken(res.token);
@@ -81,15 +102,20 @@ export const OrganizationApiTokens: React.FC<OrganizationApiTokensProps> = ({ or
       setExpiresInDays("");
       setShowCreateForm(false);
       fetchTokens();
-    } catch (err: any) {
-      setError(err.message || "Failed to create API token.");
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to create API token.";
+      setError(errorMsg);
     } finally {
       setCreating(false);
     }
   };
 
   const handleRevokeToken = async (tokenId: string) => {
-    if (!window.confirm("Are you sure you want to revoke this API token? This action is permanent and cannot be undone.")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to revoke this API token? This action is permanent and cannot be undone.",
+      )
+    ) {
       return;
     }
 
@@ -97,8 +123,9 @@ export const OrganizationApiTokens: React.FC<OrganizationApiTokensProps> = ({ or
       setError(null);
       await api.delete(`/organizations/${orgId}/tokens/${tokenId}`);
       fetchTokens();
-    } catch (err: any) {
-      setError(err.message || "Failed to revoke API token.");
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to revoke API token.";
+      setError(errorMsg);
     }
   };
 
@@ -112,7 +139,7 @@ export const OrganizationApiTokens: React.FC<OrganizationApiTokensProps> = ({ or
 
   const toggleScope = (scope: string) => {
     setSelectedScopes((prev) =>
-      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope]
+      prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope],
     );
   };
 
@@ -152,7 +179,8 @@ export const OrganizationApiTokens: React.FC<OrganizationApiTokensProps> = ({ or
             <h3>Copy your API token now</h3>
           </div>
           <p className="text-sm text-gray-300">
-            For security reasons, we only show this token once. If you lose it, you will have to generate a new one.
+            For security reasons, we only show this token once. If you lose it, you will have to
+            generate a new one.
           </p>
 
           <div className="flex items-center gap-2 bg-gray-950/80 p-3 rounded-lg border border-gray-800 font-mono text-sm break-all text-white select-all">
@@ -185,7 +213,10 @@ export const OrganizationApiTokens: React.FC<OrganizationApiTokensProps> = ({ or
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="token-name" className="block text-xs font-semibold uppercase text-gray-400 mb-2">
+              <label
+                htmlFor="token-name"
+                className="block text-xs font-semibold uppercase text-gray-400 mb-2"
+              >
                 Token Name
               </label>
               <input
