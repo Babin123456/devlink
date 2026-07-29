@@ -114,13 +114,16 @@ export function MarkdownEditor({
   const [mentionPos, setMentionPos] = useState<{ start: number; end: number } | null>(null);
 
   // Filter builders based on typed @query
-  const filteredUsers = mentionQuery !== null
-    ? builders.filter(
-        (b) =>
-          b.name.toLowerCase().includes(mentionQuery.toLowerCase()) ||
-          b.id.toLowerCase().includes(mentionQuery.toLowerCase())
-      ).slice(0, 5)
-    : [];
+  const filteredUsers =
+    mentionQuery !== null
+      ? builders
+          .filter(
+            (b) =>
+              b.name.toLowerCase().includes(mentionQuery.toLowerCase()) ||
+              b.id.toLowerCase().includes(mentionQuery.toLowerCase()),
+          )
+          .slice(0, 5)
+      : [];
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
@@ -282,7 +285,9 @@ export function MarkdownEditor({
                   onClick={() => insertMention(user.id)}
                   className={cn(
                     "flex w-full items-center gap-2.5 px-3 py-2 text-left text-[12px] transition-colors",
-                    i === mentionIndex ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted text-foreground"
+                    i === mentionIndex
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "hover:bg-muted text-foreground",
                   )}
                 >
                   <Avatar src={user.avatar} alt={user.name} size={20} />

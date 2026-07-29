@@ -104,16 +104,28 @@ export function EmptyState({
   action?: ReactNode;
   className?: string;
 }) {
-  const isComponent = typeof Icon === "function" || (typeof Icon === "object" && Icon !== null && "render" in (Icon as object));
-  const IconComp = isComponent ? (Icon as ComponentType<{ className?: string; size?: number }>) : null;
+  const isComponent =
+    typeof Icon === "function" ||
+    (typeof Icon === "object" && Icon !== null && "render" in (Icon as object));
+  const IconComp = isComponent
+    ? (Icon as ComponentType<{ className?: string; size?: number }>)
+    : null;
 
   return (
-    <div className={cn("flex flex-col items-center justify-center py-12 px-4 text-center", className)}>
+    <div
+      className={cn("flex flex-col items-center justify-center py-12 px-4 text-center", className)}
+    >
       <div className="relative mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm transition-transform hover:scale-105">
-        {IconComp ? <IconComp className="h-7 w-7 text-primary" /> : <div className="text-2xl">{Icon as ReactNode}</div>}
+        {IconComp ? (
+          <IconComp className="h-7 w-7 text-primary" />
+        ) : (
+          <div className="text-2xl">{Icon as ReactNode}</div>
+        )}
       </div>
       <h3 className="text-[15px] font-semibold tracking-tight text-foreground">{title}</h3>
-      {desc && <p className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted-foreground">{desc}</p>}
+      {desc && (
+        <p className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted-foreground">{desc}</p>
+      )}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );

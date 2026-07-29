@@ -20,7 +20,13 @@ interface Props {
   onRegistered: () => void;
 }
 
-export function RegisterDialog({ hackathonId, hackathonName, open, onOpenChange, onRegistered }: Props) {
+export function RegisterDialog({
+  hackathonId,
+  hackathonName,
+  open,
+  onOpenChange,
+  onRegistered,
+}: Props) {
   const [motivation, setMotivation] = useState("");
   const [loading, setLoading] = useState(false);
 

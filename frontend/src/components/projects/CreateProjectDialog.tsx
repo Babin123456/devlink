@@ -142,7 +142,10 @@ export function CreateProjectDialog({ open, onOpenChange }: Props) {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5 sm:space-y-4 overflow-y-auto pr-1">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-3.5 sm:space-y-4 overflow-y-auto pr-1"
+          >
             <div className="space-y-1.5">
               <Label className="text-[12px] text-muted-foreground">Title</Label>
               <Input
@@ -245,7 +248,12 @@ export function CreateProjectDialog({ open, onOpenChange }: Props) {
             </div>
 
             <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2 border-t border-border sm:border-0">
-              <Button type="button" variant="outline" onClick={handleClose} className="w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                className="w-full sm:w-auto"
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={submitting} className="w-full sm:w-auto">

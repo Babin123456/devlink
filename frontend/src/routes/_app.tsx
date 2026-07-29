@@ -17,9 +17,7 @@ const mockUserProfile = {
 function AppLayoutWithProfileChecklist() {
   return (
     <div className="space-y-4">
-      <ProfileCompletionChecklist
-        userProfile={mockUserProfile}
-      />
+      <ProfileCompletionChecklist userProfile={mockUserProfile} />
       <SidebarProvider>
         <DashboardLayout />
       </SidebarProvider>

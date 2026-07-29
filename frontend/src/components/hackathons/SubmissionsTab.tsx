@@ -16,11 +16,31 @@ const STATUS_META: Record<
   HackathonSubmission["status"],
   { label: string; cls: string; icon: React.ReactNode }
 > = {
-  draft:     { label: "Draft",     cls: "border-border bg-muted text-muted-foreground",        icon: <Clock size={10} /> },
-  submitted: { label: "Submitted", cls: "border-primary/30 bg-primary/10 text-primary",        icon: <CheckCircle2 size={10} /> },
-  in_review: { label: "In review", cls: "border-warning/30 bg-warning/10 text-warning",        icon: <Eye size={10} /> },
-  accepted:  { label: "Accepted",  cls: "border-success/30 bg-success/10 text-success",        icon: <CheckCircle2 size={10} /> },
-  rejected:  { label: "Rejected",  cls: "border-destructive/30 bg-destructive/10 text-destructive", icon: <XCircle size={10} /> },
+  draft: {
+    label: "Draft",
+    cls: "border-border bg-muted text-muted-foreground",
+    icon: <Clock size={10} />,
+  },
+  submitted: {
+    label: "Submitted",
+    cls: "border-primary/30 bg-primary/10 text-primary",
+    icon: <CheckCircle2 size={10} />,
+  },
+  in_review: {
+    label: "In review",
+    cls: "border-warning/30 bg-warning/10 text-warning",
+    icon: <Eye size={10} />,
+  },
+  accepted: {
+    label: "Accepted",
+    cls: "border-success/30 bg-success/10 text-success",
+    icon: <CheckCircle2 size={10} />,
+  },
+  rejected: {
+    label: "Rejected",
+    cls: "border-destructive/30 bg-destructive/10 text-destructive",
+    icon: <XCircle size={10} />,
+  },
 };
 
 export function SubmissionsTab({ hackathonId, teams }: Props) {
@@ -40,7 +60,9 @@ export function SubmissionsTab({ hackathonId, teams }: Props) {
   if (isLoading) {
     return (
       <div className="space-y-3">
-        {[1, 2].map((i) => <Card key={i} className="h-28 animate-pulse" />)}
+        {[1, 2].map((i) => (
+          <Card key={i} className="h-28 animate-pulse" />
+        ))}
       </div>
     );
   }
@@ -69,7 +91,11 @@ export function SubmissionsTab({ hackathonId, teams }: Props) {
         <Card className="p-10">
           <EmptyState
             title="No submissions yet"
-            desc={teams.length > 0 ? "Submit your project when you're ready." : "Join a team first to submit a project."}
+            desc={
+              teams.length > 0
+                ? "Submit your project when you're ready."
+                : "Join a team first to submit a project."
+            }
             icon={GitBranch}
             action={
               teams.length > 0 ? (
@@ -102,7 +128,13 @@ export function SubmissionsTab({ hackathonId, teams }: Props) {
   );
 }
 
-function SubmissionCard({ submission, teams }: { submission: HackathonSubmission; teams: HackathonTeam[] }) {
+function SubmissionCard({
+  submission,
+  teams,
+}: {
+  submission: HackathonSubmission;
+  teams: HackathonTeam[];
+}) {
   const meta = STATUS_META[submission.status];
   const team = teams.find((t) => t.id === submission.team_id);
 

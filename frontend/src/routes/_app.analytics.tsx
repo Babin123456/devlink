@@ -19,7 +19,11 @@ export const Route = createFileRoute("/_app/analytics")({
   head: () => ({
     meta: [
       { title: "Analytics — DevLink" },
-      { name: "description", content: "Platform analytics tracking DAU, WAU, MAU, Retention, Conversion, and Project Growth." },
+      {
+        name: "description",
+        content:
+          "Platform analytics tracking DAU, WAU, MAU, Retention, Conversion, and Project Growth.",
+      },
     ],
   }),
   component: AnalyticsPage,
@@ -237,9 +241,7 @@ function AnalyticsPage() {
         <Card className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[14px] font-semibold text-foreground">
-                Daily Active Users Trend
-              </p>
+              <p className="text-[14px] font-semibold text-foreground">Daily Active Users Trend</p>
               <p className="text-[12px] text-muted-foreground">
                 User engagement over past {days} days
               </p>
@@ -286,9 +288,7 @@ function AnalyticsPage() {
               <p className="text-[14px] font-semibold text-foreground">
                 Project Growth & Additions
               </p>
-              <p className="text-[12px] text-muted-foreground">
-                New projects created daily
-              </p>
+              <p className="text-[12px] text-muted-foreground">New projects created daily</p>
             </div>
           </div>
           <div className="mt-4 h-64">
@@ -333,9 +333,7 @@ function AnalyticsPage() {
             <div>
               <div className="flex items-center justify-between text-[13px]">
                 <span className="font-medium text-foreground">7-Day Retention Rate</span>
-                <span className="font-bold text-primary">
-                  {data.retention.retention_7d_pct}%
-                </span>
+                <span className="font-bold text-primary">{data.retention.retention_7d_pct}%</span>
               </div>
               <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-secondary">
                 <div
@@ -344,7 +342,8 @@ function AnalyticsPage() {
                 />
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground">
-                {data.retention.retained_7d_users} retained of {data.retention.eligible_7d_users} eligible users
+                {data.retention.retained_7d_users} retained of {data.retention.eligible_7d_users}{" "}
+                eligible users
               </p>
             </div>
 
@@ -352,9 +351,7 @@ function AnalyticsPage() {
             <div>
               <div className="flex items-center justify-between text-[13px]">
                 <span className="font-medium text-foreground">30-Day Retention Rate</span>
-                <span className="font-bold text-primary">
-                  {data.retention.retention_30d_pct}%
-                </span>
+                <span className="font-bold text-primary">{data.retention.retention_30d_pct}%</span>
               </div>
               <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-secondary">
                 <div
@@ -363,7 +360,8 @@ function AnalyticsPage() {
                 />
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground">
-                {data.retention.retained_30d_users} retained of {data.retention.eligible_30d_users} eligible users
+                {data.retention.retained_30d_users} retained of {data.retention.eligible_30d_users}{" "}
+                eligible users
               </p>
             </div>
           </div>

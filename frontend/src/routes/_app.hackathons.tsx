@@ -63,9 +63,7 @@ function HackathonsPage() {
             🏆
           </div>
           <p className="text-[14px] font-semibold text-foreground">No hackathons yet</p>
-          <p className="mt-1 text-[13px] text-muted-foreground">
-            Be the first to create one.
-          </p>
+          <p className="mt-1 text-[13px] text-muted-foreground">Be the first to create one.</p>
           <button
             onClick={() => setCreateOpen(true)}
             className="mt-3 text-[13px] font-medium text-primary hover:underline"

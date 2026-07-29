@@ -30,9 +30,9 @@ function parseMentions(text: string): string {
 }
 
 export const Markdown = memo(function Markdown({ content, className }: MarkdownProps) {
-  if (!content?.trim()) return null;
+  const processedContent = useMemo(() => parseMentions(content ?? ""), [content]);
 
-  const processedContent = useMemo(() => parseMentions(content), [content]);
+  if (!content?.trim()) return null;
 
   return (
     <div
@@ -46,7 +46,10 @@ export const Markdown = memo(function Markdown({ content, className }: MarkdownP
         rehypePlugins={[[rehypeSanitize, schema]]}
         components={{
           a: ({ node, href = "", children, ...props }) => {
-            const isMention = href.startsWith("/builders/") && typeof children === "string" && children.startsWith("@");
+            const isMention =
+              href.startsWith("/builders/") &&
+              typeof children === "string" &&
+              children.startsWith("@");
 
             if (isMention) {
               const username = href.replace("/builders/", "");

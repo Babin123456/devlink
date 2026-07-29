@@ -18,9 +18,7 @@ function deriveStatus(
   targetType: BookmarkTargetType,
   targetId: string,
 ): BookmarkStatus {
-  const match = bookmarks?.find(
-    (b) => b.target_type === targetType && b.target_id === targetId,
-  );
+  const match = bookmarks?.find((b) => b.target_type === targetType && b.target_id === targetId);
   return { bookmarked: !!match, bookmarkId: match?.id ?? null };
 }
 
@@ -67,9 +65,7 @@ export function useToggleBookmark(targetType: BookmarkTargetType, targetId: stri
 
       if (status.bookmarked && status.bookmarkId) {
         queryClient.setQueryData<BookmarkResponse[]>(BOOKMARKS_KEY, (old) =>
-          old?.filter(
-            (b) => !(b.target_type === targetType && b.target_id === targetId),
-          ),
+          old?.filter((b) => !(b.target_type === targetType && b.target_id === targetId)),
         );
       } else {
         const optimistic: BookmarkResponse = {
