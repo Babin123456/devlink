@@ -191,14 +191,9 @@ export async function applyToFlare(
   projectId: UUID,
   payload: Omit<ApplicationCreatePayload, "project_id" | "flare_id">,
 ): Promise<ApplicationResponse> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return requestJson<ApplicationResponse, any>({
-    url: `/applications`,
-    method: "POST",
-    body: {
-      ...payload,
-      project_id: projectId,
-      flare_id: flareId,
-    },
+  return api.post<ApplicationResponse>("/applications", {
+    ...payload,
+    project_id: projectId,
+    flare_id: flareId,
   });
 }
