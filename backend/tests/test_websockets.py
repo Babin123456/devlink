@@ -14,20 +14,20 @@ def _ws_url(client: TestClient, token: str) -> str:
 
 def test_ws_rejects_missing_token(client: TestClient):
     """Connection without a token is closed with policy violation."""
-    with client.websocket_connect("/ws/collab") as ws:
-        try:
+    try:
+        with client.websocket_connect("/ws/collab") as ws:
             ws.receive()
-        except WebSocketDisconnect:
-            pass
+    except WebSocketDisconnect:
+        pass
 
 
 def test_ws_rejects_invalid_token(client: TestClient):
     """Connection with an invalid token is closed."""
-    with client.websocket_connect("/ws/collab?token=invalid-jwt") as ws:
-        try:
+    try:
+        with client.websocket_connect("/ws/collab?token=invalid-jwt") as ws:
             ws.receive()
-        except WebSocketDisconnect:
-            pass
+    except WebSocketDisconnect:
+        pass
 
 
 def test_ws_accepts_valid_token(client: TestClient, register_and_login):

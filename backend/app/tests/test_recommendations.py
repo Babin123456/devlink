@@ -39,10 +39,11 @@ def test_tokenize_strips_stopwords_and_punctuation():
 
 def test_skills_score_weighted_by_level():
     req = {uuid.uuid4(), uuid.uuid4()}
+    expert_skill = next(iter(req))
     levels = {
-        next(iter(req)): SkillLevel.EXPERT,  # matches with weight 1.0
+        expert_skill: SkillLevel.EXPERT,  # matches with weight 1.0
     }
-    score, matched = _skills_score(req, levels, req)
+    score, matched = _skills_score({expert_skill}, levels, req)
     assert 0.0 < score <= 1.0
     assert len(matched) == 1
 

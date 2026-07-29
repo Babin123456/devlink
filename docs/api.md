@@ -24,9 +24,13 @@ Pass the access token received during login or registration in the HTTP `Authori
 Authorization: Bearer <your_jwt_access_token>
 ```
 
-### Base URL
-* **Development**: `http://localhost:8000/api`
-* **Production**: `https://api.devlink.app/api`
+### Base URL & API Versioning
+* **Version 1 Base URL (Recommended)**: `http://localhost:8000/api/v1` (Production: `https://api.devlink.app/api/v1`)
+* **Legacy Base URL (Backward Compatible)**: `http://localhost:8000/api` (Production: `https://api.devlink.app/api`)
+
+> [!NOTE]
+> DevLink supports explicit URL Path Versioning (`/api/v1`). Legacy unversioned `/api/` endpoints are maintained for backward compatibility.
+> For detailed versioning rules, breaking change policies, and migration instructions, see the [API Versioning Strategy & Migration Guide](file:///Users/nayanraj/devlink/docs/api_versioning_and_migration.md).
 
 ### Common HTTP Headers
 | Header | Type | Description |
@@ -574,5 +578,57 @@ Simple health status endpoint for reverse proxy, load balancer, and container or
 {
   "status": "healthy",
   "environment": "development"
+}
+```
+
+---
+
+### 2. Backend Health Check Dashboard
+Detailed health status dashboard endpoint reporting service status for Database, Redis, AI Service, Storage, and System Uptime.
+
+* **Endpoint**: `/health/dashboard` (or `/api/v1/health/dashboard`)
+* **Method**: `GET`
+* **Authentication**: None (Public)
+* **Query Parameters**:
+  * `format` (`string`, optional): Set to `html` to view an interactive visual dashboard in the browser.
+* **Response (`200 OK`)**:
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-07-28T22:34:25Z",
+  "environment": "development",
+  "uptime": {
+    "seconds": 1234.56,
+    "human": "20 minutes, 34 seconds",
+    "started_at": "2026-07-28T22:13:51Z"
+  },
+  "services": {
+    "database": {
+      "status": "healthy",
+      "latency_ms": 1.25
+    },
+    "redis": {
+      "status": "healthy",
+      "latency_ms": 0.85
+    },
+    "ai_service": {
+      "status": "healthy",
+      "provider": "OpenAI",
+      "configured": true,
+      "latency_ms": 12.4
+    },
+    "storage": {
+      "status": "healthy",
+      "path": "uploads",
+      "writable": true,
+      "free_space_mb": 45120.5,
+      "total_space_mb": 500000.0,
+      "used_space_mb": 454879.5
+    },
+    "celery": {
+      "status": "healthy",
+      "workers": 2
+    }
+  }
 }
 ```

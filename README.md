@@ -49,21 +49,39 @@ DevLink is an open-source developer collaboration platform. Developers can creat
 
 ---
 
-## Screenshots
+## 📸 Screenshots
 
-> UI screenshots will be added once a stable deployment is available. The sections below reflect the current feature set.
+### Desktop
 
-| Dashboard | Project Marketplace |
-| :---: | :---: |
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Projects](docs/screenshots/projects.png) |
+| Dashboard | Features |
+|-----------|-----------|
+| <img src="assets/screenshots/desktop-dashboard.png" width="450"> | <img src="assets/screenshots/desktop-features.png" width="450"> |
 
-| Direct Messaging | Builder Activity Feed |
-| :---: | :---: |
-| ![Messaging](docs/screenshots/messaging.png) | ![Feed](docs/screenshots/feed.png) |
+**Dashboard** – Main dashboard displaying the application's overview.
 
-| Authentication | Mobile View |
-| :---: | :---: |
-| ![Login](docs/screenshots/login.png) | ![Mobile](docs/screenshots/mobile.png) |
+**Features** – Highlights the core functionality available to users.
+
+| Pricing | Login |
+|---------|--------|
+| <img src="assets/screenshots/desktop-pricing.png" width="450"> | <img src="assets/screenshots/desktop-login.png" width="450"> |
+
+**Pricing** – Displays available pricing plans.
+
+**Login** – User authentication page.
+
+---
+
+### Mobile
+
+| Dashboard | Features |
+|-----------|-----------|
+| <img src="assets/screenshots/mobile-dashboard.png" width="220"> | <img src="assets/screenshots/mobile-features.png" width="220"> |
+
+**Mobile Dashboard** – Responsive dashboard view.
+
+**Mobile Features** – Responsive features page.
+M
+
 
 - React
 - TypeScript
@@ -195,6 +213,22 @@ Open in VS Code and run **Remote-Containers: Reopen in Container**, or launch in
 
 ## Environment Variables
 
+| Module         | Versioned Endpoint (`v1`) | Legacy Endpoint (`/api`) |
+| -------------- | ------------------------- | ------------------------ |
+| Authentication | `/api/v1/auth`            | `/api/auth`              |
+| Users          | `/api/v1/users`           | `/api/users`             |
+| Projects       | `/api/v1/projects`        | `/api/projects`          |
+| Applications   | `/api/v1/applications`    | `/api/applications`      |
+| Messaging      | `/api/v1/messages`        | `/api/messages`          |
+| Notifications  | `/api/v1/notifications`   | `/api/notifications`     |
+
+> DevLink uses URL Path Versioning (`/api/v1`). Legacy unversioned `/api/` endpoints are maintained for backward compatibility. See [API Versioning & Migration Strategy](file:///Users/nayanraj/devlink/docs/api_versioning_and_migration.md).
+
+Swagger UI:
+
+```
+http://localhost:8000/docs
+```
 ### Backend (`backend/.env`)
 
 | Variable | Required | Description |
@@ -344,5 +378,14 @@ See [CHANGELOG.md](CHANGELOG.md) for a full list of changes across releases.
 ---
 
 ## License
+IT License — see [LICENSE](LICENSE) for details.
 
-MIT License — see [LICENSE](LICENSE) for details.
+## ⭐ If you like DevLink, consider giving the repository a star!
+
+Made by developers, for developers.
+
+Building the future of developer collaboration.
+
+</p>
+...
+

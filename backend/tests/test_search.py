@@ -14,44 +14,7 @@ from app.models.project import Project, ProjectStage, ProjectVisibility
 from app.models.skill import Skill
 from app.models.user import User
 
-engine = create_engine(
-    "sqlite://",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
 
-
-@event.listens_for(engine, "connect")
-def _set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.close()
-
-
-TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-    finally:
-        db.close()
-
-
-@pytest.fixture(autouse=True)
-def setup_db():
-    app.dependency_overrides[get_database] = override_get_db
-    Base.metadata.create_all(bind=engine)
-
-    yield
-
-    Base.metadata.drop_all(bind=engine)
-    app.dependency_overrides.clear()
 
 
 # ---------------------------------------------------------------------

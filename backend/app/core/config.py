@@ -105,6 +105,12 @@ class Settings(BaseSettings):
 
     ALLOWED_IMAGE_TYPES: str = "image/png,image/jpeg,image/webp"
 
+    MEDIA_UPLOAD_DIR: str = "uploads/media"
+    MEDIA_QUALITY: int = 80
+    MEDIA_MAX_DIMENSION: int = 1200
+    MEDIA_THUMB_DIMENSION: int = 200
+    CDN_BASE_URL: str | None = None
+
     # ==========================================================
     # AI
     # ==========================================================
