@@ -156,6 +156,8 @@ M
 
 ## Getting Started
 
+> 📖 **Complete Setup & Troubleshooting Guide**: See our detailed [Environment Setup Guide](docs/environment-setup.md) for required software, environment variables, step-by-step onboarding, and common errors resolution matrix.
+
 ### Prerequisites
 
 - Node.js 20+
