@@ -93,48 +93,7 @@ class RefreshTokenService:
         db.refresh(token)
         return token
 
-    @staticmethod
-    def get_active_sessions(
-        db: Session,
-        user_id: uuid.UUID,
-    ) -> list[RefreshToken]:
-        stmt = (
-            select(RefreshToken)
-            .where(
-                RefreshToken.user_id == user_id,
-                RefreshToken.is_revoked.is_(False),
-            )
-            .order_by(RefreshToken.created_at.desc())
-        )
-        tokens = list(db.scalars(stmt))
-        now = datetime.now(timezone.utc)
-        active_tokens = []
-        for token in tokens:
-            exp = token.expires_at
-            if exp.tzinfo is None:
-                exp = exp.replace(tzinfo=timezone.utc)
-            if exp > now:
-                active_tokens.append(token)
-        return active_tokens
 
-    @staticmethod
-    def revoke_session_by_id(
-        db: Session,
-        user_id: uuid.UUID,
-        session_id: uuid.UUID,
-    ) -> bool:
-        stmt = select(RefreshToken).where(
-            RefreshToken.id == session_id,
-            RefreshToken.user_id == user_id,
-            RefreshToken.is_revoked.is_(False),
-        )
-        token = db.scalar(stmt)
-        if not token:
-            return False
-        token.is_revoked = True
-        token.revoked_at = datetime.now(timezone.utc)
-        db.flush()
-        return True
 
     @staticmethod
     def get_active_sessions(

@@ -109,6 +109,13 @@ class UserService:
 
         data = user.model_dump(exclude_unset=True, mode="json")
 
+        if "privacy_settings" in data:
+            privacy_data = data.pop("privacy_settings")
+            if privacy_data:
+                current_settings = db_user.get_privacy_settings()
+                current_settings.update({k: v for k, v in privacy_data.items() if v is not None})
+                db_user.privacy_settings = current_settings
+
         for key, value in data.items():
             setattr(db_user, key, value)
 
@@ -126,6 +133,84 @@ class UserService:
         )
 
         return db_user
+
+    @staticmethod
+    def update_privacy_settings(
+        db: Session,
+        db_user: User,
+        settings: dict | PrivacySettingsUpdate,
+    ) -> User:
+        current_settings = db_user.get_privacy_settings()
+        if hasattr(settings, "model_dump"):
+            update_data = settings.model_dump(exclude_unset=True)
+        elif isinstance(settings, dict):
+            update_data = settings
+        else:
+            update_data = {}
+
+        for k, v in update_data.items():
+            if v is not None:
+                current_settings[k] = v.value if hasattr(v, "value") else str(v)
+
+        db_user.privacy_settings = current_settings
+        db.flush()
+        db.refresh(db_user)
+        return db_user
+
+    @staticmethod
+    def apply_privacy_filters(
+        db: Session,
+        user: User,
+        viewer: User | None = None,
+    ) -> User:
+        if not user:
+            return user
+
+        if viewer and (viewer.id == user.id or getattr(viewer, "is_superuser", False)):
+            return user
+
+        settings = user.get_privacy_settings()
+        from app.services.follower_service import FollowerService
+
+        is_follower = False
+        if viewer:
+            is_follower = FollowerService.is_following(
+                db, follower_id=viewer.id, following_id=user.id
+            )
+
+        def is_visible(visibility_setting: str) -> bool:
+            vis = str(visibility_setting).lower()
+            if vis == "public":
+                return True
+            if vis == "authenticated" and viewer is not None:
+                return True
+            if vis == "followers" and (is_follower or (viewer and viewer.id == user.id)):
+                return True
+            return False
+
+        try:
+            db.expunge(user)
+        except Exception:
+            pass
+
+        if not is_visible(settings.get("email", "private")):
+            user.public_email = None
+
+        if not is_visible(settings.get("github", "public")):
+            user.github_url = None
+
+        if not is_visible(settings.get("resume", "public")):
+            user.resume_url = None
+
+        if not is_visible(settings.get("social_links", "public")):
+            user.linkedin_url = None
+            user.website = None
+            user.portfolio_url = None
+
+        if not is_visible(settings.get("availability", "public")):
+            user.availability = []
+
+        return user
 
     @staticmethod
     def soft_delete_user(

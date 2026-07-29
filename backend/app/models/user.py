@@ -181,6 +181,32 @@ class User(Base):
         nullable=False,
     )
 
+    privacy_settings: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
+        default=lambda: {
+            "email": "private",
+            "github": "public",
+            "resume": "public",
+            "social_links": "public",
+            "availability": "public",
+        },
+    )
+
+    def get_privacy_settings(self) -> dict:
+        defaults = {
+            "email": "private",
+            "github": "public",
+            "resume": "public",
+            "social_links": "public",
+            "availability": "public",
+        }
+        if not self.privacy_settings:
+            return defaults
+        res = dict(defaults)
+        res.update(self.privacy_settings)
+        return res
+
     # ------------------------------------------------------------------
     # Authentication
     # ------------------------------------------------------------------

@@ -60,7 +60,21 @@ from app.routers import (
     users,
     search,
     saved_searches,
+    media,
 )
+
+
+import asyncio
+
+async def check_presence_timeouts():
+    """Background task to scan for inactive WebSocket connections and set status to away."""
+    from app.routers.websockets import manager
+    try:
+        while True:
+            await asyncio.sleep(15)  # scan every 15 seconds
+            await manager.check_timeouts(timeout_seconds=300)  # 5 minutes
+    except asyncio.CancelledError:
+        pass
 
 
 @asynccontextmanager
@@ -70,6 +84,9 @@ async def lifespan(app: FastAPI):
     """
 
     print("[INFO] DevLink Backend Starting...")
+
+    # Start user presence timeout background task
+    presence_task = asyncio.create_task(check_presence_timeouts())
 
     from app.core.events import event_bus
     from app.core.event_handlers import register_all_handlers
@@ -89,6 +106,13 @@ async def lifespan(app: FastAPI):
     yield
 
     print("[INFO] DevLink Backend Stopping...")
+
+    # Cancel user presence timeout background task
+    presence_task.cancel()
+    try:
+        await presence_task
+    except asyncio.CancelledError:
+        pass
 
     from app.core.cache import cache_manager
 
@@ -354,9 +378,8 @@ app.add_middleware(
     ],
 )
 
-# ------------------------------------------------------------------
-# Static Files
-# ------------------------------------------------------------------
+from pathlib import Path
+Path("uploads").mkdir(exist_ok=True)
 
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
@@ -419,9 +442,10 @@ from app.routers import (
     conversations,
     export,
     followers,
+    hackathons,
     health,
     issues,
-    hackathons,
+    media,
     messages,
     notifications,
     organizations,
@@ -438,6 +462,9 @@ from app.routers import (
     websockets,
 )
 
+# Router inclusions
+
+app.include_router(media.router, prefix="/api")
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
@@ -484,5 +511,5 @@ app.include_router(
 app.include_router(health.router)
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
 app.include_router(saved_searches.router)
-
 app.include_router(hackathons.router, prefix="/api/hackathons", tags=["Hackathons"])
+

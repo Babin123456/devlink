@@ -29,6 +29,8 @@ from app.schemas.user import (
     UserUpdate,
     UsernameAvailabilityResponse,
     ProfileCompletionResponse,
+    PrivacySettings,
+    PrivacySettingsUpdate,
 )
 from app.schemas.user_report import (
     UserReportCreate,
@@ -125,9 +127,45 @@ def get_me(
     current_user: User = Depends(get_current_user),
 ):
 
+    if current_user.deleted_at is not None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
     if online_threshold is not None:
         current_user._online_threshold = online_threshold
     return current_user
+
+
+@router.get(
+    "/me/privacy",
+    response_model=PrivacySettings,
+    summary="Get Privacy Settings",
+)
+def get_my_privacy_settings(
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get profile privacy controls for the current user.
+    """
+    return current_user.get_privacy_settings()
+
+
+@router.put(
+    "/me/privacy",
+    response_model=CurrentUser,
+    summary="Update Privacy Settings",
+)
+def update_my_privacy_settings(
+    settings: PrivacySettingsUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    """
+    Update profile privacy controls for email, GitHub, resume, social links, and availability.
+    """
+    return UserService.update_privacy_settings(db, current_user, settings)
 
 
 @router.get(
@@ -174,7 +212,6 @@ from app.services.block_service import BlockService
     "/{user_id}",
     response_model=UserResponse,
 )
-@cached(ttl=120, key_prefix="users:get")
 def get_user(
     user_id: uuid.UUID,
     online_threshold: int | None = Query(
@@ -208,6 +245,8 @@ def get_user(
 
     if online_threshold is not None:
         user._online_threshold = online_threshold
+
+    user = UserService.apply_privacy_filters(db, user, current_user)
     return user
 
 
@@ -224,6 +263,7 @@ def list_users(
         None, description="Online threshold in seconds"
     ),
     db: Session = Depends(get_database),
+    current_user: User | None = Depends(get_optional_current_user),
 ):
 
     users = UserService.list_users(
@@ -232,10 +272,14 @@ def list_users(
         limit,
     )
 
-    if online_threshold is not None:
-        for u in users:
-            u._online_threshold = online_threshold
-    return users
+    filtered_users = []
+    for u in users:
+        fu = UserService.apply_privacy_filters(db, u, current_user)
+        if online_threshold is not None:
+            fu._online_threshold = online_threshold
+        filtered_users.append(fu)
+
+    return filtered_users
 
 
 @router.get(

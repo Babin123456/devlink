@@ -344,6 +344,7 @@ _STOPWORDS: frozenset[str] = frozenset(
         "works",
         "worked",
         "developer",
+        "developers",
         "engineer",
         "software",
         "code",
