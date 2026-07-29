@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, TagChip, Avatar } from "@/components/shared/primitives";
 import { HighlightText } from "@/components/shared/HighlightText";
 import { builders, projects, flares, conversations, hackathons } from "@/mocks/seed";
-import { repositories } from "@/components/search/GlobalSearchModal";
+import { repositories, type RepositoryItem } from "@/mocks/repositories";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Search, X, MessageSquare, Trophy, GitBranch, Rss, Users, FolderGit2 } from "lucide-react";
@@ -72,7 +72,7 @@ function SearchPage() {
 
   const repos = useMemo(
     () =>
-      repositories.filter((r) =>
+      repositories.filter((r: RepositoryItem) =>
         (r.name + " " + r.description + " " + r.language).toLowerCase().includes(query),
       ),
     [query],
