@@ -78,7 +78,7 @@ export function ProfileCompletionChecklist({
 
       <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
         <Link
-          to="/profile"
+          to="/settings"
           className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
         >
           Complete Now <ChevronRight size={14} />

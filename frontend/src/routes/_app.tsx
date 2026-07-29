@@ -19,11 +19,6 @@ function AppLayoutWithProfileChecklist() {
     <div className="space-y-4">
       <ProfileCompletionChecklist
         userProfile={mockUserProfile}
-        onActionClick={(itemId) => {
-          if (itemId === "avatar" || itemId === "bio") {
-            window.location.href = "/settings";
-          }
-        }}
       />
       <SidebarProvider>
         <DashboardLayout />
