@@ -272,7 +272,6 @@ export function MarkdownEditor({
               )}
             />
 
-            {/* Autocomplete Dropdown */}
             {mentionQuery !== null && filteredUsers.length > 0 && (
               <div className="absolute left-3 bottom-full mb-1 z-50 w-64 rounded-md border border-border bg-surface shadow-lg py-1 overflow-hidden">
                 <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground border-b border-border flex items-center gap-1">
@@ -314,9 +313,6 @@ export function MarkdownEditor({
           </div>
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
     </div>
   );
 }
