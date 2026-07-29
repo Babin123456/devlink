@@ -195,14 +195,5 @@ export async function applyToFlare(
     ...payload,
     project_id: projectId,
     flare_id: flareId,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return requestJson<ApplicationResponse, any>({
-    url: `/applications`,
-    method: "POST",
-    body: {
-      ...payload,
-      project_id: projectId,
-      flare_id: flareId,
-    },
   });
 }
