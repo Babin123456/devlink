@@ -120,7 +120,6 @@ function AnalyticsPage() {
         }
       })
       .catch(() => {
-        // Use client fallback data
         if (isMounted) {
           setData({
             ...mockFallbackData,

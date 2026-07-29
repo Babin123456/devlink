@@ -1,6 +1,9 @@
 from functools import lru_cache
 
+# pyrefly: ignore [missing-import]
 from pydantic import Field
+
+# pyrefly: ignore [missing-import]
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -45,6 +48,7 @@ class Settings(BaseSettings):
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    EMAIL_VERIFICATION_TOKEN_EXPIRE_HOURS: int = 24
 
     PASSWORD_HASH_SCHEME: str = "bcrypt"
 
@@ -65,8 +69,10 @@ class Settings(BaseSettings):
     # ==========================================================
 
     ALLOWED_ORIGINS: str = (
-        "http://localhost:5173," "http://localhost:5174," "http://localhost:3000"
+        "http://localhost:5173,http://localhost:5174,http://localhost:3000"
     )
+
+    FRONTEND_URL: str = "http://localhost:5173"
 
     # ==========================================================
     # Email
@@ -94,9 +100,17 @@ class Settings(BaseSettings):
     # Uploads
     # ==========================================================
 
+    UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_SIZE_MB: int = 10
+    RESUME_MAX_SIZE_MB: int = 5
 
-    ALLOWED_IMAGE_TYPES: str = "image/png," "image/jpeg," "image/webp"
+    ALLOWED_IMAGE_TYPES: str = "image/png,image/jpeg,image/webp"
+
+    MEDIA_UPLOAD_DIR: str = "uploads/media"
+    MEDIA_QUALITY: int = 80
+    MEDIA_MAX_DIMENSION: int = 1200
+    MEDIA_THUMB_DIMENSION: int = 200
+    CDN_BASE_URL: str | None = None
 
     # ==========================================================
     # AI
@@ -117,7 +131,13 @@ class Settings(BaseSettings):
 
     DEFAULT_RATE_LIMIT: str = "100/minute"
     LOGIN_RATE_LIMIT: str = "5/minute"
-    REGISTER_RATE_LIMIT: str = "3/minute"
+    REGISTER_RATE_LIMIT: str = "3/hour"
+    MESSAGE_RATE_LIMIT: str = "30/minute"
+    SEARCH_RATE_LIMIT: str = "60/minute"
+    PROJECT_RATE_LIMIT: str = "100/minute"
+    PASSWORD_RESET_RATE_LIMIT: str = "3/15minutes"
+    COMMENT_RATE_LIMIT: str = "30/minute"
+    RECOMMENDATION_RATE_LIMIT: str = "20/minute"
 
     # ==========================================================
     # Security Headers
@@ -127,6 +147,8 @@ class Settings(BaseSettings):
     ENABLE_CSP: bool = True
     ENABLE_X_FRAME_OPTIONS: bool = True
     ENABLE_X_CONTENT_TYPE_OPTIONS: bool = True
+    ENABLE_DNS_PREFETCH_CONTROL: bool = True
+    ENABLE_CROSS_DOMAIN_POLICIES: bool = True
 
     # ==========================================================
     # Celery
@@ -134,6 +156,8 @@ class Settings(BaseSettings):
 
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
+
+    CELERY_TASK_ALWAYS_EAGER: bool = False
 
     # ==========================================================
     # WebSocket

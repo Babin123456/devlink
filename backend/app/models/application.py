@@ -7,11 +7,14 @@ from enum import Enum
 from sqlalchemy import (
     Boolean,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
     String,
     Text,
+    UniqueConstraint,
     func,
+)
+from sqlalchemy import (
+    Enum as SqlEnum,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -33,7 +36,13 @@ class Application(Base):
     """
 
     __tablename__ = "applications"
-
+    __table_args__ = (
+        UniqueConstraint(
+            "applicant_id",
+            "project_id",
+            name="uq_applicant_project",
+        ),
+    )
     # ==========================================================
     # Primary Key
     # ==========================================================
@@ -77,6 +86,7 @@ class Application(Base):
         SqlEnum(ApplicationStatus),
         default=ApplicationStatus.PENDING,
         nullable=False,
+        index=True,
     )
 
     message: Mapped[str | None] = mapped_column(
@@ -136,6 +146,7 @@ class Application(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
+        index=True,
     )
 
     updated_at: Mapped[datetime] = mapped_column(

@@ -7,11 +7,13 @@ from enum import Enum
 from sqlalchemy import (
     Boolean,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
     String,
     Text,
     func,
+)
+from sqlalchemy import (
+    Enum as SqlEnum,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -142,6 +144,7 @@ class Message(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
+        index=True,
     )
 
     updated_at: Mapped[datetime] = mapped_column(
@@ -162,4 +165,4 @@ class Message(Base):
     )
 
     def __repr__(self):
-        return f"<Message(" f"id={self.id}, " f"type='{self.type.value}'" f")>"
+        return f"<Message(id={self.id}, type='{self.type.value}')>"

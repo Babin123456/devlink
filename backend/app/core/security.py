@@ -2,9 +2,36 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
 from jose import JWTError, jwt
+import bcrypt
+
+_original_hashpw = bcrypt.hashpw
+
+
+def _patched_hashpw(password, salt):
+    if len(password) > 72:
+        return _original_hashpw(password[:72], salt)
+    return _original_hashpw(password, salt)
+
+
+bcrypt.hashpw = _patched_hashpw
 from passlib.context import CryptContext
 
 from app.core.config import settings
+import bcrypt
+
+_original_hashpw = bcrypt.hashpw
+
+
+def _patched_hashpw(password, salt):
+    if len(password) > 72:
+        return _original_hashpw(password[:72], salt)
+    return _original_hashpw(password, salt)
+
+
+bcrypt.hashpw = _patched_hashpw
+from passlib.context import CryptContext  # noqa: E402
+
+from app.core.config import settings  # noqa: E402
 
 # ------------------------------------------------------------------
 # Password Hashing
@@ -83,6 +110,9 @@ def create_access_token(
     )
 
 
+import uuid
+
+
 def create_refresh_token(
     user_id: str,
 ) -> str:
@@ -94,7 +124,32 @@ def create_refresh_token(
         subject=user_id,
         expires_delta=timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
         token_type="refresh",
+        extra={"jti": str(uuid.uuid4())},
     )
+
+
+def create_verification_token(
+    user_id: str,
+) -> str:
+    """
+    Generate email verification token.
+    """
+
+    return _create_token(
+        subject=user_id,
+        expires_delta=timedelta(hours=settings.EMAIL_VERIFICATION_TOKEN_EXPIRE_HOURS),
+        token_type="verification",
+    )
+
+
+def is_verification_token(token: str) -> bool:
+    """
+    Check if token is an email verification token.
+    """
+
+    payload = decode_token(token)
+
+    return payload.get("type") == "verification"
 
 
 # ------------------------------------------------------------------

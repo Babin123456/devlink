@@ -1,7 +1,15 @@
 from __future__ import annotations
 
+# pyrefly: ignore [missing-import]
+from uuid import UUID
+
+# pyrefly: ignore [missing-import]
 from fastapi import Depends, HTTPException, status
+
+# pyrefly: ignore [missing-import]
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
 from app.core.security import decode_token
@@ -14,6 +22,7 @@ from app.services.auth_service import AuthService
 # ---------------------------------------------------------------------
 
 security = HTTPBearer(auto_error=True)
+optional_security = HTTPBearer(auto_error=False)
 
 
 # ---------------------------------------------------------------------
@@ -21,12 +30,30 @@ security = HTTPBearer(auto_error=True)
 # ---------------------------------------------------------------------
 
 
-def get_database() -> Session:
-    """
-    Alias for get_db().
-    """
-
+def get_database():
     yield from get_db()
+
+
+def get_optional_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(optional_security),
+    db: Session = Depends(get_database),
+) -> User | None:
+    """
+    Returns the currently authenticated user if token is valid, else None.
+    """
+    if not credentials:
+        return None
+
+    try:
+        payload = decode_token(credentials.credentials)
+        user_id = payload.get("sub")
+        if not user_id:
+            return None
+        user_uuid = UUID(user_id)
+        auth_service = AuthService(db)
+        return auth_service.get_current_user(user_uuid)
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------------
@@ -56,7 +83,9 @@ def get_current_user(
                 detail="Invalid authentication token.",
             )
 
-    except Exception:
+        user_id = UUID(user_id)
+
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials.",
@@ -73,6 +102,26 @@ def get_current_user(
         )
 
     return user
+
+
+def get_optional_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(optional_security),
+    db: Session = Depends(get_database),
+) -> User | None:
+    """
+    Returns currently authenticated user if token present, or None if unauthenticated.
+    """
+    if not credentials:
+        return None
+    try:
+        payload = decode_token(credentials.credentials)
+        user_id = payload.get("sub")
+        if not user_id:
+            return None
+        auth_service = AuthService(db)
+        return auth_service.get_current_user(UUID(user_id))
+    except Exception:
+        return None
 
 
 # ---------------------------------------------------------------------
@@ -136,3 +185,68 @@ def get_current_admin(
         )
 
     return current_user
+
+
+# ---------------------------------------------------------------------
+# RBAC Permission Guards
+# ---------------------------------------------------------------------
+
+from app.core.rbac import has_org_permission, has_project_permission  # noqa: E402
+
+
+def require_org_permission(action: str):
+    """
+    Dependency factory to check organization level permissions.
+    Raises 404 if the org doesn't exist, 403 if the user lacks permission.
+    """
+
+    def dependency(
+        organization_id: UUID,
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_database),
+    ) -> User:
+        from app.models.organization import Organization as OrgModel
+
+        org = db.get(OrgModel, organization_id)
+        if not org:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Organization not found.",
+            )
+        if not has_org_permission(db, current_user.id, organization_id, action):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Permission denied.",
+            )
+        return current_user
+
+    return dependency
+
+
+def require_project_permission(action: str):
+    """
+    Dependency factory to check project level permissions.
+    Raises 404 if the project doesn't exist, 403 if the user lacks permission.
+    """
+
+    def dependency(
+        project_id: UUID,
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_database),
+    ) -> User:
+        from app.models.project import Project as ProjectModel
+
+        project = db.get(ProjectModel, project_id)
+        if not project:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Project not found.",
+            )
+        if not has_project_permission(db, current_user.id, project_id, action):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Permission denied.",
+            )
+        return current_user
+
+    return dependency

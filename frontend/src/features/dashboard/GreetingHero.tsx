@@ -1,47 +1,36 @@
 import { Card } from "@/components/shared/primitives";
-import { Flame, Sparkles, TrendingUp } from "lucide-react";
+import { Flame, Sparkles, TrendingUp, ArrowRight } from "lucide-react";
 import { currentUser } from "@/mocks/seed";
+import { Link } from "@tanstack/react-router";
 
 export function GreetingHero() {
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   const first = currentUser.name.split(" ")[0];
 
   return (
-    <Card className="p-5">
-      <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-        <div className="min-w-0">
-          <h1 className="text-[22px] font-bold tracking-tight text-foreground">
-            {greeting}, {first}! <span aria-hidden>👋</span>
-          </h1>
-          <p className="mt-1 text-[13px] italic text-muted-foreground">
-            "Code is like humor. When you have to explain it, it's bad." — Cory House
-          </p>
+    <Card className="flex flex-col gap-4 p-4 sm:p-5 sm:flex-row sm:items-center sm:justify-between rounded-2xl bg-card border-border/60">
+      <div className="min-w-0 flex-1">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+          {greeting}, {first}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Here's what's happening with your projects today.
+        </p>
+        <div className="mt-3 flex items-center gap-4">
+          <Link
+            to="/projects"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+          >
+            View active projects <ArrowRight size={14} />
+          </Link>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 md:min-w-[520px]">
-          <MiniStat
-            icon={<TrendingUp size={16} />}
-            tint="bg-info/10 text-info"
-            label="Project Progress"
-            value="75%"
-            progress={75}
-          />
-          <MiniStat
-            icon={<Flame size={16} />}
-            tint="bg-warning/10 text-warning"
-            label="Contribution Streak"
-            value="12 days"
-          />
-          <MiniStat
-            icon={<Sparkles size={16} />}
-            tint="bg-primary-soft text-primary"
-            label="AI Productivity Score"
-            value="96"
-            suffix="/100"
-            valueTint="text-success"
-          />
-        </div>
+      <div className="flex flex-row gap-3 sm:w-auto shrink-0 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
+        <MiniStat icon={<TrendingUp size={14} />} label="Progress" value="75%" progress={75} />
+        <MiniStat icon={<Flame size={14} />} label="Streak" value="12d" />
+        <MiniStat icon={<Sparkles size={14} />} label="AI Score" value="96" />
       </div>
     </Card>
   );
@@ -49,35 +38,29 @@ export function GreetingHero() {
 
 function MiniStat({
   icon,
-  tint,
   label,
   value,
-  suffix,
-  valueTint,
   progress,
 }: {
   icon: React.ReactNode;
-  tint: string;
   label: string;
   value: string;
-  suffix?: string;
-  valueTint?: string;
   progress?: number;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-md border border-border bg-background/50 p-3">
-      <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-md ${tint}`}>
+    <div className="flex flex-col justify-between gap-1.5 rounded-xl border border-border/50 bg-muted/20 p-3 min-w-[120px] sm:min-w-[130px] shrink-0">
+      <div className="flex items-center gap-1.5 text-muted-foreground">
         {icon}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[11px] font-medium text-muted-foreground">{label}</p>
-        <p className="text-[15px] font-bold text-foreground">
-          <span className={valueTint}>{value}</span>
-          {suffix && <span className="text-[12px] font-medium text-muted-foreground">{suffix}</span>}
-        </p>
+        <p className="text-[10px] font-medium uppercase tracking-wider truncate">{label}</p>
+      </div>
+      <div>
+        <p className="text-lg font-semibold tracking-tight text-foreground">{value}</p>
         {progress !== undefined && (
-          <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
-            <div className="h-full bg-primary" style={{ width: `${progress}%` }} />
+          <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted/50">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         )}
       </div>

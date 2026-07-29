@@ -7,11 +7,13 @@ from enum import Enum
 from sqlalchemy import (
     Boolean,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
     String,
     Text,
     func,
+)
+from sqlalchemy import (
+    Enum as SqlEnum,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -101,6 +103,7 @@ class AuditLog(Base):
     action: Mapped[AuditAction] = mapped_column(
         SqlEnum(AuditAction),
         nullable=False,
+        index=True,
     )
 
     resource_type: Mapped[str] = mapped_column(
@@ -144,6 +147,7 @@ class AuditLog(Base):
         Boolean,
         default=True,
         nullable=False,
+        index=True,
     )
 
     status_code: Mapped[int | None] = mapped_column()
@@ -169,9 +173,8 @@ class AuditLog(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
+        index=True,
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<AuditLog(" f"action='{self.action.value}', " f"user={self.user_id}" f")>"
-        )
+        return f"<AuditLog(action='{self.action.value}', user={self.user_id})>"

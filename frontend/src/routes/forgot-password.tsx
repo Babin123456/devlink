@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { APP_LOGO } from "@/lib/logo";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
 import { BackButton } from "@/components/shared/BackButton";
+import { LoadingButton } from "@/components/shared/LoadingButton";
+import { authApi } from "@/api/modules/auth";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
@@ -17,9 +18,29 @@ export const Route = createFileRoute("/forgot-password")({
 
 function ForgotPassword() {
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (submitting || !email) return;
+      setSubmitting(true);
+      try {
+        await authApi.forgotPassword(email);
+        setSent(true);
+        toast.success("Reset link sent");
+      } catch (err: unknown) {
+        toast.error((err as Error).message || "Failed to send reset link");
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [submitting, email],
+  );
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-background px-4">
-      <Link to="/" className="mb-6 flex items-center gap-2.5">
+      <Link to="/" className="mb-3 flex items-center gap-2">
         <img src={APP_LOGO} alt="DevLink" className="h-12 w-12 rounded-full" />
         <span className="text-[36px] font-bold tracking-tight text-foreground">DevLink</span>
       </Link>
@@ -34,33 +55,27 @@ function ForgotPassword() {
             Check your inbox — a reset link is on its way.
           </div>
         ) : (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSent(true);
-              toast.success("Reset link sent");
-            }}
-            className="mt-5"
-          >
+          <form onSubmit={handleSubmit} className="mt-5">
             <label className="mb-1 block text-[13px] font-semibold text-foreground">Email</label>
             <input
               type="email"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-md border border-border bg-surface px-3 py-[8px] text-[14px] text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
-            <button
+            <LoadingButton
               type="submit"
-              className="mt-4 w-full rounded-md bg-primary py-[9px] text-[14px] font-semibold text-primary-foreground hover:opacity-90 active:scale-[0.98]"
+              loading={submitting}
+              loadingText="Sending..."
+              className="mt-4 w-full py-[9px] text-[14px]"
             >
               Send reset link
-            </button>
+            </LoadingButton>
           </form>
         )}
-        <BackButton
-  to="/auth"
-  label="Back to sign in"
-/>
-      </div>  
+        <BackButton to="/auth" label="Back to sign in" />
+      </div>
     </div>
   );
 }

@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import uuid
 
+# pyrefly: ignore [missing-import]
 from fastapi import APIRouter, Depends, HTTPException, status
+
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
-from app.database.session import get_db
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_database
 from app.models.user import User
-from app.schemas.bookmark import BookmarkResponse
+from app.schemas.bookmark import BookmarkResponse, BookmarkTargetType
 from app.services.bookmark_service import BookmarkService
 
 router = APIRouter(
@@ -18,32 +20,35 @@ router = APIRouter(
 
 
 @router.post(
-    "/project/{project_id}",
+    "/{target_type}/{target_id}",
     response_model=BookmarkResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def bookmark_project(
-    project_id: uuid.UUID,
-    db: Session = Depends(get_db),
+def create_bookmark(
+    target_type: BookmarkTargetType,
+    target_id: uuid.UUID,
+    db: Session = Depends(get_database),
     current_user: User = Depends(get_current_user),
 ):
 
-    existing = BookmarkService.get_user_project_bookmark(
+    existing = BookmarkService.get_user_target_bookmark(
         db,
         current_user.id,
-        project_id,
+        target_type,
+        target_id,
     )
 
     if existing:
         raise HTTPException(
             status_code=400,
-            detail="Project already bookmarked",
+            detail="Already bookmarked",
         )
 
     return BookmarkService.create_bookmark(
         db,
         current_user.id,
-        project_id,
+        target_type,
+        target_id,
     )
 
 
@@ -53,7 +58,7 @@ def bookmark_project(
 )
 def get_bookmark(
     bookmark_id: uuid.UUID,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_database),
 ):
 
     bookmark = BookmarkService.get_bookmark(
@@ -76,7 +81,7 @@ def get_bookmark(
 )
 def my_bookmarks(
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_database),
 ):
 
     return BookmarkService.list_user_bookmarks(
@@ -86,50 +91,56 @@ def my_bookmarks(
 
 
 @router.get(
-    "/project/{project_id}",
+    "/{target_type}/{target_id}/all",
     response_model=list[BookmarkResponse],
 )
-def project_bookmarks(
-    project_id: uuid.UUID,
-    db: Session = Depends(get_db),
+def target_bookmarks(
+    target_type: BookmarkTargetType,
+    target_id: uuid.UUID,
+    db: Session = Depends(get_database),
 ):
 
-    return BookmarkService.list_project_bookmarks(
+    return BookmarkService.list_target_bookmarks(
         db,
-        project_id,
+        target_type,
+        target_id,
     )
 
 
 @router.get(
-    "/check/{project_id}",
+    "/check/{target_type}/{target_id}",
 )
 def check_bookmark(
-    project_id: uuid.UUID,
+    target_type: BookmarkTargetType,
+    target_id: uuid.UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_database),
 ):
 
     return {
         "bookmarked": BookmarkService.is_bookmarked(
             db,
             current_user.id,
-            project_id,
+            target_type,
+            target_id,
         )
     }
 
 
 @router.get(
-    "/project/{project_id}/count",
+    "/{target_type}/{target_id}/count",
 )
 def bookmark_count(
-    project_id: uuid.UUID,
-    db: Session = Depends(get_db),
+    target_type: BookmarkTargetType,
+    target_id: uuid.UUID,
+    db: Session = Depends(get_database),
 ):
 
     return {
         "count": BookmarkService.bookmark_count(
             db,
-            project_id,
+            target_type,
+            target_id,
         )
     }
 
@@ -140,7 +151,7 @@ def bookmark_count(
 )
 def remove_bookmark(
     bookmark_id: uuid.UUID,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_database),
 ):
 
     bookmark = BookmarkService.get_bookmark(
@@ -166,7 +177,7 @@ def remove_bookmark(
 )
 def remove_all_bookmarks(
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_database),
 ):
 
     BookmarkService.remove_all_user_bookmarks(

@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# DevLink pre-commit hook — runs lint-staged
+# Runs: ESLint, Prettier, and TypeScript typecheck on staged files
+cd frontend && npx lint-staged

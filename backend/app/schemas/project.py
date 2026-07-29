@@ -4,60 +4,154 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 from app.models.project import ProjectStage, ProjectVisibility
 
+# ==========================================================
+# Base Project Schema
+# ==========================================================
+
 
 class ProjectBase(BaseModel):
-    title: str = Field(..., max_length=200)
-    tagline: Optional[str] = Field(None, max_length=255)
-    description: str
+    title: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+    )
+
+    slug: Optional[str] = Field(
+        default=None,
+        max_length=200,
+    )
+
+    tagline: Optional[str] = Field(
+        default=None,
+        max_length=255,
+    )
+
+    description: str = Field(
+        ...,
+        min_length=1,
+    )
+
     stage: ProjectStage = ProjectStage.IDEA
     visibility: ProjectVisibility = ProjectVisibility.PUBLIC
+
     tech_stack: Optional[str] = None
-    repository_url: Optional[str] = Field(None, max_length=500)
-    website_url: Optional[str] = Field(None, max_length=500)
-    demo_url: Optional[str] = Field(None, max_length=500)
-    team_size: int = Field(1, ge=1)
-    max_team_size: int = Field(5, ge=1)
+
+    repository_url: Optional[str] = None
+    website_url: Optional[str] = None
+    demo_url: Optional[str] = None
+
+    team_size: int = 1
+    max_team_size: int = 5
     hiring: bool = True
-    logo_url: Optional[str] = Field(None, max_length=500)
-    banner_url: Optional[str] = Field(None, max_length=500)
+
+    logo_url: Optional[str] = None
+    banner_url: Optional[str] = None
+
+    language: Optional[str] = None
+    experience_level: Optional[str] = None
+    is_remote: bool = False
+    is_paid: bool = False
+    is_opensource: bool = False
+
+    scheduled_publish_at: Optional[datetime] = None
+    is_published: bool = True
+
+
+# ==========================================================
+# Create Project
+# ==========================================================
 
 
 class ProjectCreate(ProjectBase):
-    slug: Optional[str] = Field(None, max_length=200)
+    pass
+
+
+# ==========================================================
+# Update Project
+# ==========================================================
 
 
 class ProjectUpdate(BaseModel):
-    title: Optional[str] = Field(None, max_length=200)
-    tagline: Optional[str] = Field(None, max_length=255)
+    title: Optional[str] = None
+    slug: Optional[str] = None
+    tagline: Optional[str] = None
     description: Optional[str] = None
     stage: Optional[ProjectStage] = None
     visibility: Optional[ProjectVisibility] = None
     tech_stack: Optional[str] = None
-    repository_url: Optional[str] = Field(None, max_length=500)
-    website_url: Optional[str] = Field(None, max_length=500)
-    demo_url: Optional[str] = Field(None, max_length=500)
-    team_size: Optional[int] = Field(None, ge=1)
-    max_team_size: Optional[int] = Field(None, ge=1)
+    repository_url: Optional[str] = None
+    website_url: Optional[str] = None
+    demo_url: Optional[str] = None
+    team_size: Optional[int] = None
+    max_team_size: Optional[int] = None
     hiring: Optional[bool] = None
-    logo_url: Optional[str] = Field(None, max_length=500)
-    banner_url: Optional[str] = Field(None, max_length=500)
-    is_archived: Optional[bool] = None
+    logo_url: Optional[str] = None
+    banner_url: Optional[str] = None
+
+    language: Optional[str] = None
+    experience_level: Optional[str] = None
+    is_remote: Optional[bool] = None
+    is_paid: Optional[bool] = None
+    is_opensource: Optional[bool] = None
+
+    scheduled_publish_at: Optional[datetime] = None
+    is_published: Optional[bool] = None
+
+
+# ==========================================================
+# Project Response
+# ==========================================================
+
+
+class SimilarProjectWarning(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    title: str
+    slug: str
+    title_similarity: float
+    description_similarity: float
+
+
+class ProjectStatsResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    project_id: uuid.UUID
+    views: int
+    applicants: int
+    accepted_members: int
+    bookmark_count: int
 
 
 class ProjectResponse(ProjectBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    slug: str
     owner_id: uuid.UUID
+
     stars: int = 0
     views: int = 0
     applications_count: int = 0
+
     is_featured: bool = False
     is_archived: bool = False
+
     created_at: datetime
     updated_at: datetime
+
+    deleted_at: Optional[datetime] = None
+    deleted_by_id: Optional[uuid.UUID] = None
+    scheduled_publish_at: Optional[datetime] = None
+    is_published: bool = True
+
+
+class ProjectDraftCreate(ProjectBase):
+    pass
+
+
+class ProjectDraftUpdate(ProjectUpdate):
+    pass
