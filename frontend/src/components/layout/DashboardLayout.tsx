@@ -6,6 +6,7 @@ import { TopNavbar } from "./TopNavbar";
 import { RightPanel } from "./RightPanel";
 import { BottomNavigation } from "./BottomNavigation";
 import { FAB } from "./FAB";
+import { SectionErrorBoundary } from "@/components/errors/SectionErrorBoundary";
 
 export function DashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -38,14 +39,18 @@ export function DashboardLayout() {
               transition={{ duration: 0.18, ease: "easeOut" }}
               className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6"
             >
-              <Outlet />
+              <SectionErrorBoundary sectionName="Page View">
+                <Outlet />
+              </SectionErrorBoundary>
             </motion.div>
           </AnimatePresence>
         </main>
       </div>
 
       {/* ─── Desktop Right Activity Panel ─────────────────────────── */}
-      <RightPanel />
+      <SectionErrorBoundary sectionName="Right Activity Panel">
+        <RightPanel />
+      </SectionErrorBoundary>
 
       {/* ─── Mobile-only: Bottom Navigation & FAB ─────────────────── */}
       <BottomNavigation />
