@@ -64,9 +64,11 @@ from app.routers import (
 
 import asyncio
 
+
 async def check_presence_timeouts():
     """Background task to scan for inactive WebSocket connections and set status to away."""
     from app.routers.websockets import manager
+
     try:
         while True:
             await asyncio.sleep(15)  # scan every 15 seconds
@@ -185,6 +187,7 @@ app.add_middleware(
 )
 
 from pathlib import Path
+
 Path("uploads").mkdir(exist_ok=True)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")

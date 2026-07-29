@@ -12,7 +12,6 @@ from app.models.hackathon_registration import RegistrationStatus
 from app.models.hackathon_submission import SubmissionStatus
 from app.models.hackathon_team import TeamMemberRole
 
-
 # ==============================================================
 # Hackathon
 # ==============================================================
