@@ -50,6 +50,7 @@ from app.routers import (
     organizations,
     profile_summary,
     project_tags,
+    project_dashboards,
     projects,
     recommendations,
     repositories,
@@ -277,6 +278,7 @@ app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
 app.include_router(export.router, prefix="/api/users", tags=["Export"])
 app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
+app.include_router(project_dashboards.router, prefix="/api")
 app.include_router(builder_flares.router, prefix="/api/flare", tags=["Builder's Flare"])
 app.include_router(messages.router, prefix="/api/messages", tags=["Messages"])
 app.include_router(
