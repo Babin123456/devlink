@@ -1,7 +1,5 @@
 import { useId, useRef, useState } from "react";
 import { Eye, Pencil, Image as ImageIcon, Video, AtSign, Code2 } from "lucide-react";
-import { useId, useState, useRef } from "react";
-import { Eye, Pencil, AtSign } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Markdown } from "@/components/shared/Markdown";
 import { Avatar } from "@/components/shared/primitives";
@@ -109,6 +107,7 @@ export function MarkdownEditor({
     const snippet = "```\n\n```";
     // Caret lands on the blank line between the two fences.
     insertAtCursorInTextarea(snippet, 4);
+  };
   // Mention dropdown state
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionIndex, setMentionIndex] = useState(0);
@@ -206,7 +205,7 @@ export function MarkdownEditor({
           </p>
         </div>
 
-        <TabsContent value="write" className="mt-2">
+        <TabsContent value="write" className="relative mt-2">
           {tab === "write" && (
             <div className="mb-1.5 flex items-center gap-1 rounded-md border border-border bg-surface p-1">
               <button
@@ -256,8 +255,6 @@ export function MarkdownEditor({
               </button>
             </div>
           )}
-
-        <TabsContent value="write" className="relative mt-2">
           <textarea
             ref={textareaRef}
             value={value}

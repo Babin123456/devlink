@@ -482,7 +482,6 @@ class UserService:
 
         return user
 
-
     @staticmethod
     def create_user_report(
         db: Session,

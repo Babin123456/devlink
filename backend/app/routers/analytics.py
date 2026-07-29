@@ -27,7 +27,9 @@ router = APIRouter(prefix="/analytics", tags=["Analytics"])
 )
 def get_platform_analytics(
     db: Annotated[Session, Depends(get_db)],
-    days: int = Query(default=30, ge=1, le=365, description="Timeframe in days for daily breakdowns"),
+    days: int = Query(
+        default=30, ge=1, le=365, description="Timeframe in days for daily breakdowns"
+    ),
 ) -> PlatformAnalyticsResponse:
     return AnalyticsService.get_platform_analytics(db=db, days=days)
 

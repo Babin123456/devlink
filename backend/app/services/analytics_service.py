@@ -45,28 +45,29 @@ class AnalyticsService:
         # DAU: active in last 24h (last_login or created_at within 24h)
         dau_stmt = select(func.count(User.id)).where(
             User.is_active.is_(True),
-            (User.last_login >= h24_ago) | ((User.last_login.is_(None)) & (User.created_at >= h24_ago)),
+            (User.last_login >= h24_ago)
+            | ((User.last_login.is_(None)) & (User.created_at >= h24_ago)),
         )
         dau = db.scalar(dau_stmt) or 0
 
         # WAU: active in last 7 days
         wau_stmt = select(func.count(User.id)).where(
             User.is_active.is_(True),
-            (User.last_login >= d7_ago) | ((User.last_login.is_(None)) & (User.created_at >= d7_ago)),
+            (User.last_login >= d7_ago)
+            | ((User.last_login.is_(None)) & (User.created_at >= d7_ago)),
         )
         wau = db.scalar(wau_stmt) or 0
 
         # MAU: active in last 30 days
         mau_stmt = select(func.count(User.id)).where(
             User.is_active.is_(True),
-            (User.last_login >= d30_ago) | ((User.last_login.is_(None)) & (User.created_at >= d30_ago)),
+            (User.last_login >= d30_ago)
+            | ((User.last_login.is_(None)) & (User.created_at >= d30_ago)),
         )
         mau = db.scalar(mau_stmt) or 0
 
         # Daily DAU trend calculation over requested days
-        users_in_window = db.scalars(
-            select(User).where(User.is_active.is_(True))
-        ).all()
+        users_in_window = db.scalars(select(User).where(User.is_active.is_(True))).all()
 
         daily_active_map: Dict[str, set] = {}
         for i in range(days - 1, -1, -1):

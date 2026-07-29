@@ -166,4 +166,6 @@ def test_analytics_overview_endpoint():
     assert "wau" in data
     assert "mau" in data
     assert "retention_7d_pct" in data
-    assert "conversion" not in data or isinstance(data.get("profile_completion_pct"), (int, float))
+    assert "conversion" not in data or isinstance(
+        data.get("profile_completion_pct"), (int, float)
+    )

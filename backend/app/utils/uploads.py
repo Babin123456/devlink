@@ -59,7 +59,10 @@ def validate_image_upload(
         )
 
     normalized_content_type = (content_type or "").lower()
-    if normalized_content_type and normalized_content_type not in ALLOWED_IMAGE_MIME_TYPES:
+    if (
+        normalized_content_type
+        and normalized_content_type not in ALLOWED_IMAGE_MIME_TYPES
+    ):
         if not normalized_content_type.startswith("image/"):
             raise ValueError("Please upload a valid image file.")
 
@@ -114,4 +117,3 @@ def save_image_upload(
         "image_url": image_url,
         "thumbnail_url": thumbnail_url,
     }
-
