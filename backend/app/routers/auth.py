@@ -338,6 +338,12 @@ async def github_login(
     response_model=OAuthStateResponse,
     summary="Get LinkedIn OAuth State",
 )
+from app.schemas.auth import (  # noqa: E402
+    RefreshTokenRequest,
+    LogoutResponse,
+    CurrentUserResponse,
+)
+
 async def linkedin_authorize():
     state = secrets.token_urlsafe(32)
     await oauth_redis.setex(f"oauth:state:{state}", 600, "1")
