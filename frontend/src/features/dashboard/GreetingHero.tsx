@@ -18,7 +18,10 @@ export function GreetingHero() {
           Here's what's happening with your projects today.
         </p>
         <div className="mt-5 flex items-center gap-4">
-          <Link to="/projects" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+          <Link
+            to="/projects"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+          >
             View active projects <ArrowRight size={14} />
           </Link>
         </div>
@@ -31,17 +34,8 @@ export function GreetingHero() {
           value="75%"
           progress={75}
         />
-        <MiniStat
-          icon={<Flame size={14} />}
-          label="Contribution Streak"
-          value="12 days"
-        />
-        <MiniStat
-          icon={<Sparkles size={14} />}
-          label="AI Score"
-          value="96"
-          suffix="/100"
-        />
+        <MiniStat icon={<Flame size={14} />} label="Contribution Streak" value="12 days" />
+        <MiniStat icon={<Sparkles size={14} />} label="AI Score" value="96" suffix="/100" />
       </div>
     </Card>
   );
@@ -64,9 +58,7 @@ function MiniStat({
     <div className="flex flex-col justify-between gap-2 rounded-lg border border-border/50 bg-muted/20 p-4 sm:min-w-[150px]">
       <div className="flex items-center gap-2 text-muted-foreground">
         {icon}
-        <p className="text-[11px] font-medium uppercase tracking-wider">
-          {label}
-        </p>
+        <p className="text-[11px] font-medium uppercase tracking-wider">{label}</p>
       </div>
       <div>
         <p className="text-2xl font-semibold tracking-tight text-foreground">

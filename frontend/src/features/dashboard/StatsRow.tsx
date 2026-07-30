@@ -1,5 +1,15 @@
 import { Card } from "@/components/shared/primitives";
-import { Folder, Mail, MessageCircle, Share2, Users2, TrendingUp, TrendingDown, Minus, type LucideIcon } from "lucide-react";
+import {
+  Folder,
+  Mail,
+  MessageCircle,
+  Share2,
+  Users2,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  type LucideIcon,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { stats } from "@/mocks/seed";
 import { cn } from "@/lib/utils";
@@ -47,7 +57,11 @@ export function StatsRow() {
                 <span
                   className={cn(
                     "flex items-center gap-1 text-[11px] font-semibold tracking-wider",
-                    trend.positive === true ? "text-success" : trend.positive === false ? "text-destructive" : "text-muted-foreground"
+                    trend.positive === true
+                      ? "text-success"
+                      : trend.positive === false
+                        ? "text-destructive"
+                        : "text-muted-foreground",
                   )}
                 >
                   {trend.positive === true && <TrendingUp size={12} />}
@@ -57,12 +71,8 @@ export function StatsRow() {
                 </span>
               </div>
               <div className="mt-1">
-                <p className="text-2xl font-semibold tracking-tight text-foreground">
-                  {s.value}
-                </p>
-                <p className="mt-1 text-[13px] font-medium text-muted-foreground">
-                  {s.label}
-                </p>
+                <p className="text-2xl font-semibold tracking-tight text-foreground">{s.value}</p>
+                <p className="mt-1 text-[13px] font-medium text-muted-foreground">{s.label}</p>
               </div>
             </Card>
           </motion.div>

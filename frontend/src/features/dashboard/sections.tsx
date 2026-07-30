@@ -21,7 +21,7 @@ import {
   FileText,
   BarChart3,
   Trophy,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
@@ -148,7 +148,9 @@ export function SuggestedBuilders() {
             </div>
             <div className="mt-3">
               <p className="text-sm font-semibold text-foreground">{b.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{b.role} · {b.country}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {b.role} · {b.country}
+              </p>
             </div>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {b.skills.slice(0, 2).map((s) => (
@@ -186,9 +188,7 @@ export function TrendingProjects() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-foreground">{p.name}</p>
-              <p className="truncate text-xs text-muted-foreground mt-0.5">
-                {p.stack.join(" · ")}
-              </p>
+              <p className="truncate text-xs text-muted-foreground mt-0.5">{p.stack.join(" · ")}</p>
             </div>
             <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
               <span className="flex items-center gap-1.5">
@@ -211,11 +211,13 @@ export function AIRecommendations() {
       <SectionHeader title="AI Insights" />
       <div className="space-y-4 px-5 pb-5">
         <p className="text-sm text-foreground leading-relaxed">
-          You need a <span className="font-semibold">Backend Developer</span> for your
-          project <span className="font-semibold text-primary">AI Chatbot</span>
+          You need a <span className="font-semibold">Backend Developer</span> for your project{" "}
+          <span className="font-semibold text-primary">AI Chatbot</span>
         </p>
         <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-3">Top Match</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-primary mb-3">
+            Top Match
+          </p>
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <Avatar
@@ -274,9 +276,7 @@ export function MessagesPreview() {
               <Avatar src={c.with.avatar} alt={c.with.name} size={36} online={c.with.online} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-foreground">{c.with.name}</p>
-                <p className="truncate text-xs text-muted-foreground mt-0.5">
-                  {c.preview}
-                </p>
+                <p className="truncate text-xs text-muted-foreground mt-0.5">{c.preview}</p>
               </div>
               <span className="text-xs text-muted-foreground">{c.ago}</span>
             </Link>
@@ -348,9 +348,7 @@ export function UpcomingDeadlines() {
           >
             <div className="h-2 w-2 rounded-full bg-border" />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-foreground">
-                {d.project}
-              </p>
+              <p className="truncate text-sm font-semibold text-foreground">{d.project}</p>
               <p className="text-xs text-muted-foreground mt-0.5">{d.milestone}</p>
             </div>
             <span className={cn("whitespace-nowrap text-xs", sevTint[d.severity])}>
@@ -384,9 +382,7 @@ export function NotificationsFeed() {
               )}
             />
             <div className="min-w-0 flex-1">
-              <p className="text-sm text-foreground">
-                {n.text}
-              </p>
+              <p className="text-sm text-foreground">{n.text}</p>
               <p className="text-xs text-muted-foreground mt-1">{n.ago}</p>
             </div>
           </li>
