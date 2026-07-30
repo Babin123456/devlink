@@ -768,3 +768,113 @@ class AuthService:
             "success": True,
             "message": ("Password has been reset."),
         }
+
+    # =====================================================
+    # LinkedIn OAuth Login
+    # =====================================================
+
+    def linkedin_login(self, linkedin_user: dict, primary_email: str):
+        linkedin_id = str(linkedin_user["sub"])
+
+        user = self.db.scalar(
+            select(User).where(User.linkedin_id == linkedin_id)
+        )
+
+        if not user:
+            user = self.db.scalar(
+                select(User).where(User.email == primary_email)
+            )
+            if user:
+                user.linkedin_id = linkedin_id
+                if linkedin_user.get("picture"):
+                    user.profile_image = linkedin_user["picture"]
+                self.db.commit()
+            else:
+                import secrets
+                import string
+
+                alphabet = string.ascii_letters + string.digits + string.punctuation
+                random_password = "".join(
+                    secrets.choice(alphabet) for i in range(32)
+                )
+
+                name = linkedin_user.get("name") or "LinkedIn User"
+                name_parts = name.split(" ", 1)
+                first_name = name_parts[0][:100]
+                last_name = name_parts[1][:100] if len(name_parts) > 1 else ""
+
+                linkedin_username = (
+                    linkedin_user.get("preferred_username") or "linkedin_user"
+                ).lower()[:50]
+                base_username = linkedin_username
+                username = base_username
+                counter = 1
+                while self.get_user_by_username(username):
+                    suffix = str(counter)
+                    username = f"{base_username[:50 - len(suffix)]}{suffix}"
+                    counter += 1
+
+                user = User(
+                    first_name=first_name,
+                    last_name=last_name,
+                    username=username,
+                    email=primary_email,
+                    password_hash=hash_password(random_password),
+                    linkedin_id=linkedin_id,
+                    profile_image=linkedin_user.get("picture"),
+                    is_active=True,
+                    is_verified=True,
+                    created_at=datetime.now(timezone.utc),
+                    email_verified_at=datetime.now(timezone.utc),
+                )
+                self.db.add(user)
+                self.db.commit()
+                self.db.refresh(user)
+                event_bus.publish(
+                    "USER_REGISTERED",
+                    email=user.email,
+                    user_id=str(user.id),
+                )
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account is disabled.",
+            )
+        user.last_login = datetime.now(timezone.utc)
+        self.db.commit()
+
+        access_token = create_access_token(
+            str(user.id),
+            {
+                "username": user.username,
+                "email": user.email,
+            },
+        )
+
+        refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(
+            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+        )
+
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=refresh_token,
+            expires_at=expires_at,
+        )
+        self.db.commit()
+
+        event_bus.publish(
+            "USER_LOGIN",
+            email=user.email,
+            user_id=str(user.id),
+        )
+
+        return {
+            "success": True,
+            "message": "LinkedIn login successful.",
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "user": user,
+        }

@@ -234,21 +234,17 @@ export const hackathonsService = {
   update: (id: string, body: Partial<Hackathon>) =>
     withFallback(() => hackathonsApi.update(id, body), null),
 
-  delete: (id: string) =>
-    withFallback(() => hackathonsApi.delete(id), undefined),
+  delete: (id: string) => withFallback(() => hackathonsApi.delete(id), undefined),
 
   register: (id: string, body?: { motivation?: string }) =>
-    isBackendConfigured()
-      ? hackathonsApi.register(id, body)
-      : hackathonStore.register(id),
+    isBackendConfigured() ? hackathonsApi.register(id, body) : hackathonStore.register(id),
 
   cancelRegistration: (id: string) =>
     isBackendConfigured()
       ? hackathonsApi.cancelRegistration(id)
       : hackathonStore.cancelRegistration(id),
 
-  isRegistered: (id: string) =>
-    !isBackendConfigured() && hackathonStore.isRegistered(id),
+  isRegistered: (id: string) => !isBackendConfigured() && hackathonStore.isRegistered(id),
 
   getTeams: (id: string) =>
     isBackendConfigured()
@@ -261,14 +257,10 @@ export const hackathonsService = {
       : hackathonStore.createTeam(id, body),
 
   joinTeam: (teamId: string) =>
-    isBackendConfigured()
-      ? hackathonsApi.joinTeam(teamId)
-      : hackathonStore.joinTeam(teamId),
+    isBackendConfigured() ? hackathonsApi.joinTeam(teamId) : hackathonStore.joinTeam(teamId),
 
   leaveTeam: (teamId: string) =>
-    isBackendConfigured()
-      ? hackathonsApi.leaveTeam(teamId)
-      : hackathonStore.leaveTeam(teamId),
+    isBackendConfigured() ? hackathonsApi.leaveTeam(teamId) : hackathonStore.leaveTeam(teamId),
 
   getSubmissions: (id: string) =>
     isBackendConfigured()

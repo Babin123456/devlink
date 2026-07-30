@@ -145,6 +145,10 @@ function SettingsPage() {
                       <div>
                         <p className="text-sm font-medium text-foreground">Avatar</p>
                         <p className="text-xs text-muted-foreground">Recommended: 400x400px</p>
+                        <p className="text-xs font-semibold text-foreground">Avatar Photo</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          Drag & drop or crop before upload
+                        </p>
                       </div>
                       <Button
                         type="button"
@@ -160,7 +164,11 @@ function SettingsPage() {
                     <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-5 text-center">
                       <div className="relative h-16 w-full overflow-hidden rounded-md bg-muted">
                         {bannerUrl ? (
-                          <img src={bannerUrl} alt="Banner preview" className="h-full w-full object-cover" />
+                          <img
+                            src={bannerUrl}
+                            alt="Banner preview"
+                            className="h-full w-full object-cover"
+                          />
                         ) : (
                           <div className="h-full w-full bg-gradient-to-r from-primary/30 to-purple-500/30" />
                         )}
@@ -168,6 +176,10 @@ function SettingsPage() {
                       <div>
                         <p className="text-sm font-medium text-foreground">Banner</p>
                         <p className="text-xs text-muted-foreground">Recommended: 1200x400px</p>
+                        <p className="text-xs font-semibold text-foreground">Header Banner</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          3:1 aspect ratio landscape
+                        </p>
                       </div>
                       <Button
                         type="button"

@@ -5,7 +5,7 @@ import type { BookmarkTargetType } from "@/api/modules/bookmarks";
 import { cn } from "@/lib/utils";
 
 export function BookmarkToggleButton({
-  targetType,
+  targetType = "project",
   targetId,
   projectId,
   className,
@@ -15,11 +15,10 @@ export function BookmarkToggleButton({
   projectId?: string;
   className?: string;
 }) {
-  const resolvedTargetType = targetType ?? "project";
-  const resolvedTargetId = targetId ?? projectId ?? "";
-
-  const { data: status, isLoading } = useBookmarkStatus(resolvedTargetType, resolvedTargetId);
-  const toggleBookmark = useToggleBookmark(resolvedTargetType, resolvedTargetId);
+  const actualTargetType: BookmarkTargetType = targetType ?? "project";
+  const actualTargetId = targetId ?? projectId ?? "";
+  const { data: status, isLoading } = useBookmarkStatus(actualTargetType, actualTargetId);
+  const toggleBookmark = useToggleBookmark(actualTargetType, actualTargetId);
 
   if (isLoading) {
     return (

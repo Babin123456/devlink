@@ -66,7 +66,7 @@ Every incoming HTTP request traverses a series of security, rate limiting, and v
 ```mermaid
 graph TD
     Client[Client Browser / Application] -->|HTTP POST/GET Request| Ingress[Nginx Ingress / Reverse Proxy]
-    
+
     subgraph Middleware Pipeline
         Ingress --> Middleware1[RequestID Middleware: Tag X-Request-ID]
         Middleware1 --> Middleware2[Security Headers Middleware: CSP, HSTS, X-Frame]
@@ -80,10 +80,10 @@ graph TD
         Router --> Pydantic[Pydantic Schema Validation]
         Pydantic -->|Validation Error 422| ErrResponse[Return 422 Unprocessable Entity]
         Pydantic -->|Valid Payload| Service[Business Logic Service Layer]
-        
+
         Service -->|Query Cache| Redis[(Redis Cache)]
         Redis -->|Cache Hit| Service
-        
+
         Service -->|DB Query| ORM[SQLAlchemy Async Engine]
         ORM --> DB[(PostgreSQL Database)]
         DB --> ORM
@@ -108,7 +108,7 @@ graph TB
         UI[Pages & Layout Components]
         Routes[TanStack Router / App Routes]
         Contexts[Sidebar, Auth & Theme Contexts]
-        
+
         subgraph Feature Components
             ProfileComp[Profile & Teammate Cards]
             ProjectComp[Project Marketplace & Filters]
@@ -118,7 +118,7 @@ graph TB
 
         Query[TanStack React Query Cache]
         APIClient[Axios / Fetch API Client Layer]
-        
+
         UI --> Routes
         Routes --> Feature Components
         Feature Components --> Contexts
@@ -305,7 +305,7 @@ graph TB
     BackendPod2 --> PostgresMaster
     BackendPod1 --> RedisCluster
     BackendPod2 --> RedisCluster
-    
+
     BackendPod1 --> WorkerPod
     WorkerPod --> PostgresMaster
     WorkerPod --> RedisCluster
@@ -318,7 +318,7 @@ graph TB
 
 ## 🔗 Related Documentation
 
-* [API Reference](api.md)
-* [Development Setup](development.md)
-* [Deployment Guide](deployment.md)
-* [Coding Standards](coding-standards.md)
+- [API Reference](api.md)
+- [Development Setup](development.md)
+- [Deployment Guide](deployment.md)
+- [Coding Standards](coding-standards.md)

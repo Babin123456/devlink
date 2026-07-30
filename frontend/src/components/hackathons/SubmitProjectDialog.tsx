@@ -29,10 +29,21 @@ interface Errors {
 }
 
 function isUrl(v: string) {
-  try { new URL(v); return true; } catch { return false; }
+  try {
+    new URL(v);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-export function SubmitProjectDialog({ hackathonId, teams, open, onOpenChange, onSubmitted }: Props) {
+export function SubmitProjectDialog({
+  hackathonId,
+  teams,
+  open,
+  onOpenChange,
+  onSubmitted,
+}: Props) {
   const [teamId, setTeamId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -59,7 +70,11 @@ export function SubmitProjectDialog({ hackathonId, teams, open, onOpenChange, on
   }
 
   function handleClose() {
-    setTeamId(""); setTitle(""); setDescription(""); setRepoUrl(""); setDemoUrl("");
+    setTeamId("");
+    setTitle("");
+    setDescription("");
+    setRepoUrl("");
+    setDemoUrl("");
     setErrors({});
     onOpenChange(false);
   }
@@ -76,7 +91,11 @@ export function SubmitProjectDialog({ hackathonId, teams, open, onOpenChange, on
         demo_url: demoUrl.trim() || undefined,
       });
       toast.success("Project submitted! Good luck 🚀");
-      setTeamId(""); setTitle(""); setDescription(""); setRepoUrl(""); setDemoUrl("");
+      setTeamId("");
+      setTitle("");
+      setDescription("");
+      setRepoUrl("");
+      setDemoUrl("");
       onSubmitted();
     } catch {
       toast.error("Submission failed. Please try again.");
@@ -108,15 +127,22 @@ export function SubmitProjectDialog({ hackathonId, teams, open, onOpenChange, on
             </label>
             <select
               value={teamId}
-              onChange={(e) => { setTeamId(e.target.value); clrErr("team_id"); }}
+              onChange={(e) => {
+                setTeamId(e.target.value);
+                clrErr("team_id");
+              }}
               className={inp(errors.team_id)}
             >
               <option value="">Select your team…</option>
               {teams.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
               ))}
             </select>
-            {errors.team_id && <p className="mt-1 text-[12px] text-destructive">{errors.team_id}</p>}
+            {errors.team_id && (
+              <p className="mt-1 text-[12px] text-destructive">{errors.team_id}</p>
+            )}
           </div>
 
           {/* Title */}
@@ -126,7 +152,10 @@ export function SubmitProjectDialog({ hackathonId, teams, open, onOpenChange, on
             </label>
             <input
               value={title}
-              onChange={(e) => { setTitle(e.target.value); clrErr("title"); }}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                clrErr("title");
+              }}
               placeholder="e.g. EcoTracker AI"
               maxLength={200}
               className={inp(errors.title)}
@@ -141,12 +170,17 @@ export function SubmitProjectDialog({ hackathonId, teams, open, onOpenChange, on
             </label>
             <textarea
               value={description}
-              onChange={(e) => { setDescription(e.target.value); clrErr("description"); }}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                clrErr("description");
+              }}
               rows={4}
               placeholder="What does it do, how was it built, what's the impact?"
               className={`${inp(errors.description)} resize-none`}
             />
-            {errors.description && <p className="mt-1 text-[12px] text-destructive">{errors.description}</p>}
+            {errors.description && (
+              <p className="mt-1 text-[12px] text-destructive">{errors.description}</p>
+            )}
           </div>
 
           {/* URLs */}
@@ -157,11 +191,16 @@ export function SubmitProjectDialog({ hackathonId, teams, open, onOpenChange, on
               </label>
               <input
                 value={repoUrl}
-                onChange={(e) => { setRepoUrl(e.target.value); clrErr("repo_url"); }}
+                onChange={(e) => {
+                  setRepoUrl(e.target.value);
+                  clrErr("repo_url");
+                }}
                 placeholder="https://github.com/…"
                 className={inp(errors.repo_url)}
               />
-              {errors.repo_url && <p className="mt-1 text-[12px] text-destructive">{errors.repo_url}</p>}
+              {errors.repo_url && (
+                <p className="mt-1 text-[12px] text-destructive">{errors.repo_url}</p>
+              )}
             </div>
             <div>
               <label className="mb-1.5 block text-[13px] font-medium text-foreground">
@@ -169,22 +208,35 @@ export function SubmitProjectDialog({ hackathonId, teams, open, onOpenChange, on
               </label>
               <input
                 value={demoUrl}
-                onChange={(e) => { setDemoUrl(e.target.value); clrErr("demo_url"); }}
+                onChange={(e) => {
+                  setDemoUrl(e.target.value);
+                  clrErr("demo_url");
+                }}
                 placeholder="https://…"
                 className={inp(errors.demo_url)}
               />
-              {errors.demo_url && <p className="mt-1 text-[12px] text-destructive">{errors.demo_url}</p>}
+              {errors.demo_url && (
+                <p className="mt-1 text-[12px] text-destructive">{errors.demo_url}</p>
+              )}
             </div>
           </div>
         </div>
 
         <DialogFooter>
-          <button type="button" onClick={handleClose} disabled={loading}
-            className="rounded-md border border-border px-4 py-2 text-[13px] font-medium text-foreground hover:bg-muted disabled:opacity-50">
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={loading}
+            className="rounded-md border border-border px-4 py-2 text-[13px] font-medium text-foreground hover:bg-muted disabled:opacity-50"
+          >
             Cancel
           </button>
-          <button type="button" onClick={handleSubmit} disabled={loading}
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
+          >
             {loading && <Loader2 size={13} className="animate-spin" />}
             Submit project
           </button>

@@ -36,9 +36,9 @@ Please check the relevant option(s):
 
 Describe the key changes included in this pull request.
 
-- 
-- 
-- 
+-
+-
+-
 
 ---
 

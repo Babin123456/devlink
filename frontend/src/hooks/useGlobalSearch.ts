@@ -98,7 +98,7 @@ export function useGlobalSearch(options: UseGlobalSearchOptions = {}): UseGlobal
         setRecentSearches(updated);
       }
     },
-    [debouncedQuery, category, minQueryLength]
+    [debouncedQuery, category, minQueryLength],
   );
 
   const removeHistoryItem = useCallback((id: string) => {

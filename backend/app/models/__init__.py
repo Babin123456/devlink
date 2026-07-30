@@ -63,3 +63,4 @@ from .skill import Skill
 from .user import User
 from .user_report import UserReport
 from .user_skill import UserSkill
+from .verification_request import VerificationRequest  # noqa: F401
