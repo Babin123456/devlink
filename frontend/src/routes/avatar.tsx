@@ -234,29 +234,36 @@ function AvatarDemo() {
           </div>
         </Section>
 
-        {/* ── Section: boolean status shorthand ──────────────────────── */}
+        {/* ── Section: Drag & Drop Crop Uploader ────────────────────── */}
         <Section
-          id="boolean-status"
-          title="Boolean status shorthand"
-          description={"`status={true}` is shorthand for online, `status={false}` hides the dot."}
+          id="editable-crop-uploader"
+          title="Drag & Drop Crop Uploader (#575)"
+          description="Click or hover the editable avatar to test drag-and-drop, real-time preview, interactive crop (zoom/pan/rotate), and upload progress indicator."
         >
-          <div className="flex flex-col items-center gap-2">
-            <UserAvatar src={DEMO_IMG} name="Ada Lovelace" size="lg" status={true} id="bool-true" />
-            <span className="text-xs text-muted-foreground">status=true</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <UserAvatar
-              src={DEMO_IMG}
-              name="Ada Lovelace"
-              size="lg"
-              status={false}
-              id="bool-false"
-            />
-            <span className="text-xs text-muted-foreground">status=false</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <UserAvatar src={DEMO_IMG} name="Ada Lovelace" size="lg" id="bool-undefined" />
-            <span className="text-xs text-muted-foreground">no status</span>
+          <div className="flex flex-wrap items-center gap-8">
+            <div className="flex flex-col items-center gap-2">
+              <UserAvatar
+                src={DEMO_IMG}
+                name="Ada Lovelace"
+                size="2xl"
+                editable
+                status="online"
+                verified
+                id="editable-avatar-2xl"
+              />
+              <span className="text-xs font-semibold text-foreground">Click to Crop & Upload Avatar</span>
+            </div>
+
+            <div className="flex flex-col items-center gap-2">
+              <UserAvatar
+                name="Grace Hopper"
+                size="xl"
+                editable
+                status="away"
+                id="editable-avatar-xl"
+              />
+              <span className="text-xs font-semibold text-foreground">Editable Initials Avatar</span>
+            </div>
           </div>
         </Section>
       </div>

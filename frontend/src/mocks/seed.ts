@@ -39,6 +39,25 @@ export interface Builder {
   lastActiveAt: string | null;
   publicEmail?: string;
   verified?: boolean;
+  pinnedProjects?: string[];
+  contributions?: number;
+  followers?: number;
+  following?: number;
+  experience?: {
+    company: string;
+    role: string;
+    duration: string;
+  }[];
+  education?: {
+    school: string;
+    degree: string;
+    duration: string;
+  }[];
+  language?: string[];
+  activityTimeline?: {
+    title: string;
+    date: string;
+  }[];
 }
 export interface Project {
   id: ID;
@@ -197,6 +216,46 @@ export const builders: Builder[] = [
     lastActiveAt: ago(1),
     publicEmail: "priya@example.com",
     verified: true,
+    contributions: 842,
+    followers: 238,
+    following: 124,
+    language: ["English", "Hindi"],
+    pinnedProjects: ["AI Chatbot", "DevOps Dashboard"],
+    experience: [
+      {
+        company: "Google",
+        role: "Frontend Engineer",
+        duration: "2023- Present",
+      },
+      {
+        company: "StartupX",
+        role: "React Developer",
+        duration: "2021-2023",
+      },
+
+    ],
+    education: [
+      {
+        school: "IIT Delhi",
+        degree: "B.Tech Computer Science",
+        duration: "2017-2021",
+      },
+    ],
+    activityTimeline: [
+      {
+        title:"Joined DevLink",
+        date: "Jan 2024",
+      },
+      {
+        title:"Created AI Chatbot",
+        date: "Mar 2024",
+      },
+      {
+        title:"Reached 200 Followers",
+        date: "Jul 2024",
+      },
+
+    ]
   },
   {
     id: "b2",

@@ -271,12 +271,94 @@ export function MarkdownEditor({
               textareaClassName,
             )}
           />
+        {tab === "write" && (
+          <div className="mb-1.5 flex items-center gap-1 rounded-md border border-border bg-surface p-1">
+            <button
+              type="button"
+              onClick={handleEmoji}
+              aria-label="Insert emoji"
+              title="Emoji"
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-[14px] hover:bg-muted"
+            >
+              😀
+            </button>
+            <button
+              type="button"
+              onClick={handleImage}
+              aria-label="Insert image"
+              title="Image"
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <ImageIcon size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={handleVideo}
+              aria-label="Insert video"
+              title="Video"
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <Video size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={handleMention}
+              aria-label="Insert mention"
+              title="Mention"
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <AtSign size={14} />
+            </button>
+            <button
+              type="button"
+              onClick={handleCodeBlock}
+              aria-label="Insert code block"
+              title="Code Block"
+              className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <Code2 size={14} />
+            </button>
+          </div>
+        )}
 
-          {/* Autocomplete Dropdown */}
-          {mentionQuery !== null && filteredUsers.length > 0 && (
-            <div className="absolute left-3 bottom-full mb-1 z-50 w-64 rounded-md border border-border bg-surface shadow-lg py-1 overflow-hidden">
-              <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground border-b border-border flex items-center gap-1">
-                <AtSign size={12} /> Mention User
+          <div className="relative mt-2">
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={handleTextareaChange}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              rows={rows}
+              autoFocus={autoFocus}
+              className={cn(
+                "w-full resize-y rounded-md border border-border bg-surface p-3 font-mono text-[13px] leading-relaxed text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20",
+                textareaClassName,
+              )}
+            />
+
+            {/* Autocomplete Dropdown */}
+            {mentionQuery !== null && filteredUsers.length > 0 && (
+              <div className="absolute left-3 bottom-full mb-1 z-50 w-64 rounded-md border border-border bg-surface shadow-lg py-1 overflow-hidden">
+                <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground border-b border-border flex items-center gap-1">
+                  <AtSign size={12} /> Mention User
+                </div>
+                {filteredUsers.map((user, i) => (
+                  <button
+                    key={user.id}
+                    type="button"
+                    onClick={() => insertMention(user.id)}
+                    className={cn(
+                      "flex w-full items-center gap-2.5 px-3 py-2 text-left text-[12px] transition-colors",
+                      i === mentionIndex ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted text-foreground"
+                    )}
+                  >
+                    <Avatar src={user.avatar} alt={user.name} size={20} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[12px] font-medium">{user.name}</p>
+                      <p className="truncate text-[10px] text-muted-foreground">@{user.id}</p>
+                    </div>
+                  </button>
+                ))}
               </div>
               {filteredUsers.map((user, i) => (
                 <button
@@ -318,3 +400,8 @@ export function MarkdownEditor({
     </div>
   );
 }
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="preview" className="mt-2">

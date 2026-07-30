@@ -5,13 +5,16 @@ from pathlib import Path
 # pyrefly: ignore [missing-import]
 
 # pyrefly: ignore [missing-import]
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 # pyrefly: ignore [missing-import]
+
 from fastapi.middleware.cors import CORSMiddleware
 
 # pyrefly: ignore [missing-import]
+
 from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -25,12 +28,15 @@ from app.middleware.activity import ActivityTrackingMiddleware
 from app.middleware.rate_limit import limiter
 
 # pyrefly: ignore [missing-import]
+
 from slowapi.errors import RateLimitExceeded
 
 # pyrefly: ignore [missing-import]
+
 from slowapi.middleware import SlowAPIMiddleware
 
 # pyrefly: ignore [missing-import]
+
 from slowapi import _rate_limit_exceeded_handler
 
 from app.routers import (
@@ -88,6 +94,7 @@ async def lifespan(app: FastAPI):
     print("[INFO] DevLink Backend Starting...")
 
     # Start user presence timeout background task
+
     presence_task = asyncio.create_task(check_presence_timeouts())
 
     from app.core.events import event_bus
@@ -110,12 +117,12 @@ async def lifespan(app: FastAPI):
     print("[INFO] DevLink Backend Stopping...")
 
     # Cancel user presence timeout background task
+
     presence_task.cancel()
     try:
         await presence_task
     except asyncio.CancelledError:
         pass
-
     from app.core.cache import cache_manager
 
     cache_manager.disconnect()
@@ -328,11 +335,13 @@ async def custom_offline_docs():
 # Rate Limiting
 # ------------------------------------------------------------------
 
+
 app.state.limiter = limiter
 
 # ------------------------------------------------------------------
 # Standardized Exception Handlers
 # ------------------------------------------------------------------
+
 
 from fastapi.exceptions import HTTPException, RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -354,6 +363,7 @@ app.add_middleware(SlowAPIMiddleware)
 # Security Middleware
 # ------------------------------------------------------------------
 
+
 app.add_middleware(RequestIDMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(ActivityTrackingMiddleware)
@@ -361,6 +371,7 @@ app.add_middleware(ActivityTrackingMiddleware)
 # ------------------------------------------------------------------
 # CORS
 # ------------------------------------------------------------------
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -427,12 +438,15 @@ async def health_simple():
 # API Routers
 # ------------------------------------------------------------------
 
+
 from app.api.v1.router import api_v1_router
 
 # Include Versioned API v1 Router (/api/v1)
+
 app.include_router(api_v1_router)
 
 # Include Legacy Unversioned API Routers (/api) for Backward Compatibility
+
 from app.routers import (
     activities,
     analytics,
@@ -468,6 +482,7 @@ from app.routers import (
 )
 
 # Router inclusions
+
 
 app.include_router(media.router, prefix="/api")
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
