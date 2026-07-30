@@ -440,40 +440,8 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
                 )
 
 
-# ── Legacy chat endpoint (kept for backwards compatibility) ─────────────────
-
-
-@router.websocket("/chat/{user_id}")
-async def websocket_chat(websocket: WebSocket, user_id: str):
-    """Legacy unauthenticated chat endpoint.
-
-    .. deprecated::
-        Use ``/ws/collab?token=<jwt>`` instead.  This endpoint is kept
-        only so existing clients don't break during the transition.
-    """
-    await manager.connect(websocket, user_id)
-    try:
-        while True:
-            data = await websocket.receive_text()
-            message_data = json.loads(data)
-
-            msg_type = message_data.get("type", "message")
-            recipient_id = message_data.get("recipient_id")
-
-            payload = {
-                "sender_id": user_id,
-                "type": msg_type,
-                "content": message_data.get("content"),
-                "status": "delivered",
-            }
-
-            if recipient_id:
-                await manager.send_personal_message(payload, recipient_id)
-            else:
-                await manager.broadcast_to_all(payload)
-
-    except WebSocketDisconnect:
-        await manager.disconnect(websocket, user_id)
-        await manager.broadcast_to_all(
-            {"sender_id": user_id, "type": "status", "content": "offline"}
-        )
+# ── Legacy chat endpoint (removed) ──────────────────────────────────────────
+#
+# The unauthenticated `/ws/chat/{user_id}` endpoint has been removed
+# because it allowed anyone to connect as any user with zero authentication,
+# enabling user impersonation. Use `/ws/collab?token=<jwt>` instead.
