@@ -466,6 +466,7 @@ from app.routers import (
     issues,
     media,
     messages,
+    notification_templates,
     notifications,
     organizations,
     profile_summary,
@@ -534,4 +535,5 @@ app.include_router(health.router)
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
 app.include_router(saved_searches.router)
 app.include_router(hackathons.router, prefix="/api/hackathons", tags=["Hackathons"])
+app.include_router(notification_templates.router, prefix="/api", tags=["Notification Templates"])
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
