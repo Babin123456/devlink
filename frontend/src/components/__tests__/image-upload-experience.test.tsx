@@ -58,9 +58,7 @@ describe("ImageCropUploadModal (#575)", () => {
 
     fireEvent.change(input, { target: { files: [textFile] } });
 
-    expect(
-      await screen.findByText(/please select a valid image file/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/please select a valid image file/i)).toBeInTheDocument();
   });
 
   it("loads valid image file into preview & crop view", async () => {
@@ -124,9 +122,7 @@ describe("ImageCropUploadModal (#575)", () => {
 
 describe("UserAvatar with editable crop uploader", () => {
   it("renders hover camera icon overlay when editable", () => {
-    const { container } = render(
-      <UserAvatar name="Ada Lovelace" size="lg" editable />,
-    );
+    const { container } = render(<UserAvatar name="Ada Lovelace" size="lg" editable />);
 
     expect(container.querySelector(".lucide-camera")).toBeInTheDocument();
   });

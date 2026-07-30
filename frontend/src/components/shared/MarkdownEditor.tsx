@@ -146,14 +146,11 @@ export function MarkdownEditor({
     }
 
     const { selectionStart, selectionEnd } = textarea;
-    const { nextValue, selectionStart: newStart, selectionEnd: newEnd } = wrapSelection(
-      value,
-      selectionStart,
-      selectionEnd,
-      prefix,
-      suffix,
-      placeholderText,
-    );
+    const {
+      nextValue,
+      selectionStart: newStart,
+      selectionEnd: newEnd,
+    } = wrapSelection(value, selectionStart, selectionEnd, prefix, suffix, placeholderText);
 
     onChange(nextValue);
 
@@ -315,7 +312,11 @@ export function MarkdownEditor({
               <Divider />
               <ToolbarButton onClick={handleCodeBlock} icon={Code2} label="Code block" />
               <ToolbarButton onClick={handleMention} icon={AtSign} label="Mention" />
-              <ToolbarButton onClick={handleEmoji} label="Emoji" icon={() => <span className="text-[14px]">{"\u{1F600}"}</span>} />
+              <ToolbarButton
+                onClick={handleEmoji}
+                label="Emoji"
+                icon={() => <span className="text-[14px]">{"\u{1F600}"}</span>}
+              />
             </div>
           )}
 

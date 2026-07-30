@@ -251,7 +251,9 @@ function AvatarDemo() {
                 verified
                 id="editable-avatar-2xl"
               />
-              <span className="text-xs font-semibold text-foreground">Click to Crop & Upload Avatar</span>
+              <span className="text-xs font-semibold text-foreground">
+                Click to Crop & Upload Avatar
+              </span>
             </div>
 
             <div className="flex flex-col items-center gap-2">
@@ -262,7 +264,9 @@ function AvatarDemo() {
                 status="away"
                 id="editable-avatar-xl"
               />
-              <span className="text-xs font-semibold text-foreground">Editable Initials Avatar</span>
+              <span className="text-xs font-semibold text-foreground">
+                Editable Initials Avatar
+              </span>
             </div>
           </div>
         </Section>
