@@ -327,6 +327,7 @@ export const userService = {
 };
 
 export { teamMatchService } from "./teamMatch";
+export { auditService } from "./audit";
 
 export type {
   Builder,

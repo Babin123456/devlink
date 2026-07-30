@@ -9,7 +9,12 @@ from app.models.audit_log import (
     AuditAction,
     AuditLog,
 )
-
+from app.middleware.audit_context import (
+    audit_ip_address,
+    audit_user_agent,
+    audit_request_method,
+    audit_request_path,
+)
 
 class AuditLogService:
     """
@@ -20,10 +25,16 @@ class AuditLogService:
     def create_log(
         db: Session,
         *,
-        user_id: uuid.UUID | None,
+        actor_id: uuid.UUID | None,
         action: AuditAction,
-        resource_type: str,
-        resource_id: str | None = None,
+        entity_type: str,
+        entity_id: str | None = None,
+        target_user_id: uuid.UUID | None = None,
+        project_id: uuid.UUID | None = None,
+        organization_id: uuid.UUID | None = None,
+        old_values: dict | None = None,
+        new_values: dict | None = None,
+        metadata_info: dict | None = None,
         description: str | None = None,
         ip_address: str | None = None,
         user_agent: str | None = None,
@@ -35,15 +46,21 @@ class AuditLogService:
     ) -> AuditLog:
 
         log = AuditLog(
-            user_id=user_id,
+            actor_id=actor_id,
             action=action,
-            resource_type=resource_type,
-            resource_id=resource_id,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            target_user_id=target_user_id,
+            project_id=project_id,
+            organization_id=organization_id,
+            old_values=old_values,
+            new_values=new_values,
+            metadata_info=metadata_info,
             description=description,
-            ip_address=ip_address,
-            user_agent=user_agent,
-            request_method=request_method,
-            request_path=request_path,
+            ip_address=ip_address or audit_ip_address.get(),
+            user_agent=user_agent or audit_user_agent.get(),
+            request_method=request_method or audit_request_method.get(),
+            request_path=request_path or audit_request_path.get(),
             success=success,
             status_code=status_code,
             error_message=error_message,
@@ -69,26 +86,67 @@ class AuditLogService:
         *,
         skip: int = 0,
         limit: int = 100,
+        actor_id: uuid.UUID | None = None,
+        project_id: uuid.UUID | None = None,
+        organization_id: uuid.UUID | None = None,
+        action: AuditAction | None = None,
+        entity_type: str | None = None,
+    ) -> list[AuditLog]:
+
+        stmt = select(AuditLog)
+
+        if actor_id:
+            stmt = stmt.where(AuditLog.actor_id == actor_id)
+        if project_id:
+            stmt = stmt.where(AuditLog.project_id == project_id)
+        if organization_id:
+            stmt = stmt.where(AuditLog.organization_id == organization_id)
+        if action:
+            stmt = stmt.where(AuditLog.action == action)
+        if entity_type:
+            stmt = stmt.where(AuditLog.entity_type == entity_type)
+
+        stmt = stmt.order_by(AuditLog.created_at.desc()).offset(skip).limit(limit)
+
+        return list(db.scalars(stmt))
+
+    @staticmethod
+    def list_actor_logs(
+        db: Session,
+        actor_id: uuid.UUID,
     ) -> list[AuditLog]:
 
         stmt = (
             select(AuditLog)
+            .where(AuditLog.actor_id == actor_id)
             .order_by(AuditLog.created_at.desc())
-            .offset(skip)
-            .limit(limit)
         )
 
         return list(db.scalars(stmt))
 
     @staticmethod
-    def list_user_logs(
+    def list_project_logs(
         db: Session,
-        user_id: uuid.UUID,
+        project_id: uuid.UUID,
     ) -> list[AuditLog]:
 
         stmt = (
             select(AuditLog)
-            .where(AuditLog.user_id == user_id)
+            .where(AuditLog.project_id == project_id)
+            .order_by(AuditLog.created_at.desc())
+        )
+
+        return list(db.scalars(stmt))
+
+    @staticmethod
+    def list_organization_logs(
+        db: Session,
+        organization_id: uuid.UUID,
+    ) -> list[AuditLog]:
+
+        stmt = (
+            select(AuditLog)
+            .where(AuditLog.organization_id == organization_id)
             .order_by(AuditLog.created_at.desc())
         )
 
@@ -131,12 +189,12 @@ class AuditLogService:
         db.flush()
 
     @staticmethod
-    def delete_user_logs(
+    def delete_actor_logs(
         db: Session,
-        user_id: uuid.UUID,
+        actor_id: uuid.UUID,
     ) -> None:
 
-        stmt = select(AuditLog).where(AuditLog.user_id == user_id)
+        stmt = select(AuditLog).where(AuditLog.actor_id == actor_id)
 
         logs = list(db.scalars(stmt))
 
