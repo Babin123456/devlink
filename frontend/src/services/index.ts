@@ -7,6 +7,7 @@
 // switch to the real endpoints automatically.
 
 import * as seed from "@/mocks/seed";
+import { hackathonStore } from "@/mocks/hackathonStore";
 import {
   isBackendConfigured,
   projectsApi,
@@ -20,8 +21,16 @@ import {
   collectionsApi,
   recommendationsApi,
   searchApi,
+  issuesApi,
 } from "@/api";
-import type { BookmarkCollection, BookmarkCollectionWithBookmarks, TechStackResponse } from "@/api";
+import type {
+  BookmarkCollection,
+  BookmarkCollectionWithBookmarks,
+  TechStackResponse,
+  IssueCreateInput,
+  IssueUpdateInput,
+} from "@/api";
+import type { Hackathon } from "@/mocks/seed";
 
 const delay = 120;
 const mock = <T>(v: T): Promise<T> => new Promise((r) => setTimeout(() => r(v), delay));
@@ -76,7 +85,8 @@ export interface BackendActivity {
 }
 
 export const projectsService = {
-  list: () => withFallback(() => projectsApi.list(), seed.projects),
+  list: (params?: Record<string, unknown>) =>
+    withFallback(() => projectsApi.list(params), seed.projects),
   get: (id: string) =>
     withFallback(() => projectsApi.get(id), seed.projects.find((p) => p.id === id) ?? null),
   trending: () =>
@@ -149,6 +159,44 @@ export const messagesService = {
   thread: (id: string) => withFallback(() => messagesApi.thread(id), seed.messages[id] ?? []),
 };
 
+export const issuesService = {
+  list: (projectId: string, params?: { status?: string; skip?: number; limit?: number }) =>
+    isBackendConfigured() ? issuesApi.list(projectId, params) : Promise.resolve([]),
+
+  get: (projectId: string, issueId: string) =>
+    isBackendConfigured()
+      ? issuesApi.get(projectId, issueId)
+      : Promise.reject("Not implemented in mock"),
+
+  create: (projectId: string, body: IssueCreateInput) =>
+    isBackendConfigured()
+      ? issuesApi.create(projectId, body)
+      : Promise.reject("Not implemented in mock"),
+
+  update: (projectId: string, issueId: string, body: IssueUpdateInput) =>
+    isBackendConfigured()
+      ? issuesApi.update(projectId, issueId, body)
+      : Promise.reject("Not implemented in mock"),
+
+  remove: (projectId: string, issueId: string) =>
+    isBackendConfigured()
+      ? issuesApi.remove(projectId, issueId)
+      : Promise.reject("Not implemented in mock"),
+
+  checkDuplicates: (
+    projectId: string,
+    body: { title: string; description: string; threshold?: number },
+  ) =>
+    isBackendConfigured()
+      ? issuesApi.checkDuplicates(projectId, body)
+      : Promise.reject("Not implemented in mock"),
+
+  markAsDuplicate: (projectId: string, issueId: string, duplicateOfId: string) =>
+    isBackendConfigured()
+      ? issuesApi.markAsDuplicate(projectId, issueId, duplicateOfId)
+      : Promise.reject("Not implemented in mock"),
+};
+
 export const notificationsService = {
   list: async () => {
     if (typeof window !== "undefined") {
@@ -168,7 +216,75 @@ export const notificationsService = {
 };
 
 export const hackathonsService = {
-  list: () => withFallback(() => hackathonsApi.list(), seed.hackathons),
+  list: () =>
+    isBackendConfigured()
+      ? hackathonsApi.list().catch(() => hackathonStore.getAll())
+      : mock(hackathonStore.getAll()),
+
+  get: (id: string) =>
+    isBackendConfigured()
+      ? hackathonsApi.get(id).catch(() => hackathonStore.getById(id))
+      : mock(hackathonStore.getById(id)),
+
+  create: (body: Partial<Hackathon>) =>
+    isBackendConfigured()
+      ? hackathonsApi.create(body).catch(() => hackathonStore.create(body))
+      : hackathonStore.create(body),
+
+  update: (id: string, body: Partial<Hackathon>) =>
+    withFallback(() => hackathonsApi.update(id, body), null),
+
+  delete: (id: string) => withFallback(() => hackathonsApi.delete(id), undefined),
+
+  register: (id: string, body?: { motivation?: string }) =>
+    isBackendConfigured() ? hackathonsApi.register(id, body) : hackathonStore.register(id),
+
+  cancelRegistration: (id: string) =>
+    isBackendConfigured()
+      ? hackathonsApi.cancelRegistration(id)
+      : hackathonStore.cancelRegistration(id),
+
+  isRegistered: (id: string) => !isBackendConfigured() && hackathonStore.isRegistered(id),
+
+  getTeams: (id: string) =>
+    isBackendConfigured()
+      ? hackathonsApi.getTeams(id).catch(() => hackathonStore.getTeams(id))
+      : mock(hackathonStore.getTeams(id)),
+
+  createTeam: (id: string, body: { name: string; description?: string }) =>
+    isBackendConfigured()
+      ? hackathonsApi.createTeam(id, body)
+      : hackathonStore.createTeam(id, body),
+
+  joinTeam: (teamId: string) =>
+    isBackendConfigured() ? hackathonsApi.joinTeam(teamId) : hackathonStore.joinTeam(teamId),
+
+  leaveTeam: (teamId: string) =>
+    isBackendConfigured() ? hackathonsApi.leaveTeam(teamId) : hackathonStore.leaveTeam(teamId),
+
+  getSubmissions: (id: string) =>
+    isBackendConfigured()
+      ? hackathonsApi.getSubmissions(id).catch(() => hackathonStore.getSubmissions(id))
+      : mock(hackathonStore.getSubmissions(id)),
+
+  createSubmission: (
+    id: string,
+    body: {
+      team_id: string;
+      title: string;
+      description: string;
+      repo_url?: string;
+      demo_url?: string;
+    },
+  ) =>
+    isBackendConfigured()
+      ? hackathonsApi.createSubmission(id, body)
+      : hackathonStore.createSubmission(id, body),
+
+  getLeaderboard: (id: string) =>
+    isBackendConfigured()
+      ? hackathonsApi.getLeaderboard(id).catch(() => hackathonStore.getLeaderboard(id))
+      : mock(hackathonStore.getLeaderboard(id)),
 };
 
 export const techStackService = {
@@ -177,16 +293,23 @@ export const techStackService = {
       () => recommendationsApi.recommendTechStack(projectIdea),
       null as TechStackResponse | null,
     ),
+};
+
 export const searchService = {
   autocomplete: (q: string) =>
-    withFallback(async () => {
-      const res = await searchApi.autocomplete(q);
-      return res;
-    }, {
-      users: [],
-      projects: [],
-      skills: []
-    }), // In fallback we could just return empty or mock data, but we'll handle mock logic in the component for offline mode, or we can add it here.
+    withFallback(
+      async () => {
+        const res = await searchApi.autocomplete(q);
+        return res;
+      },
+      {
+        users: [],
+        projects: [],
+        skills: [],
+        organizations: [],
+        tags: [],
+      },
+    ), // In fallback we could just return empty or mock data, but we'll handle mock logic in the component for offline mode, or we can add it here.
 };
 
 export const userService = {
@@ -214,6 +337,9 @@ export type {
   Conversation,
   Notification,
   Hackathon,
+  HackathonTeam,
+  HackathonSubmission,
+  HackathonLeaderboardEntry,
   Deadline,
 } from "@/mocks/seed";
 

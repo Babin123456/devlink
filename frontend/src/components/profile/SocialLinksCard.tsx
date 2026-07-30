@@ -15,7 +15,10 @@ export interface SocialLinksCardProps {
     website: string;
   };
   errors?: Record<string, string>;
-  onFieldChange?: (field: "website" | "portfolioUrl" | "githubUrl" | "linkedinUrl", value: string) => void;
+  onFieldChange?: (
+    field: "website" | "portfolioUrl" | "githubUrl" | "linkedinUrl",
+    value: string,
+  ) => void;
 }
 
 interface LinkItem {
@@ -24,7 +27,16 @@ interface LinkItem {
   icon: ElementType;
 }
 
-export function SocialLinksCard({ githubUrl, linkedinUrl, portfolioUrl, website, editable = false, formValues, errors, onFieldChange }: SocialLinksCardProps) {
+export function SocialLinksCard({
+  githubUrl,
+  linkedinUrl,
+  portfolioUrl,
+  website,
+  editable = false,
+  formValues,
+  errors,
+  onFieldChange,
+}: SocialLinksCardProps) {
   const links: LinkItem[] = [
     { label: "GitHub", url: githubUrl, icon: Github },
     { label: "LinkedIn", url: linkedinUrl, icon: Linkedin },
@@ -52,14 +64,23 @@ export function SocialLinksCard({ githubUrl, linkedinUrl, portfolioUrl, website,
             { key: "linkedinUrl", label: "LinkedIn", value: formValues?.linkedinUrl ?? "" },
           ].map((field) => (
             <label key={field.key} className="block text-sm">
-              <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">{field.label}</span>
+              <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                {field.label}
+              </span>
               <input
                 value={field.value}
-                onChange={(event) => onFieldChange?.(field.key as "website" | "portfolioUrl" | "githubUrl" | "linkedinUrl", event.target.value)}
+                onChange={(event) =>
+                  onFieldChange?.(
+                    field.key as "website" | "portfolioUrl" | "githubUrl" | "linkedinUrl",
+                    event.target.value,
+                  )
+                }
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none ring-0 focus:border-primary"
                 placeholder="https://example.com"
               />
-              {errors?.[field.key] ? <p className="mt-1 text-xs text-red-500">{errors[field.key]}</p> : null}
+              {errors?.[field.key] ? (
+                <p className="mt-1 text-xs text-red-500">{errors[field.key]}</p>
+              ) : null}
             </label>
           ))}
         </div>

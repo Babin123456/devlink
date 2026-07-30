@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import uuid
 
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.core.cache import cached
 from app.models.activity import ActivityType
 from app.models.project import Project
-from app.schemas.project import ProjectCreate, ProjectUpdate
-from app.services.activity_service import ActivityService
-from app.core.cache import cached
 from app.schemas.project import (
     ProjectCreate,
     ProjectDraftCreate,
@@ -18,6 +18,7 @@ from app.schemas.project import (
     ProjectUpdate,
     SimilarProjectWarning,
 )
+from app.services.activity_service import ActivityService
 
 
 class ProjectService:
@@ -56,7 +57,7 @@ class ProjectService:
         db.refresh(db_project)
 
         # Create ProjectMember record for owner
-        from app.models.project_member import ProjectMember, MemberRole
+        from app.models.project_member import MemberRole, ProjectMember
 
         member = ProjectMember(
             project_id=db_project.id,
@@ -72,7 +73,8 @@ class ProjectService:
             activity_type=ActivityType.PROJECT_CREATED,
             title="Created project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="folder-plus",
             color="primary",
         )
@@ -86,6 +88,18 @@ class ProjectService:
         project_id: uuid.UUID,
     ) -> Project | None:
 
+        stmt = select(Project).where(
+            Project.id == project_id,
+            Project.deleted_at.is_(None),
+        )
+        return db.scalar(stmt)
+
+    @staticmethod
+    def get_project_including_deleted(
+        db: Session,
+        project_id: uuid.UUID,
+    ) -> Project | None:
+        """Retrieve a project regardless of soft-delete status (admin use)."""
         return db.get(Project, project_id)
 
     @staticmethod
@@ -98,7 +112,10 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.slug == slug)
+            .where(
+                Project.slug == slug,
+                Project.deleted_at.is_(None),
+            )
         )
         return db.scalar(stmt)
 
@@ -108,15 +125,39 @@ class ProjectService:
         db: Session,
         skip: int = 0,
         limit: int = 20,
+        language: str | None = None,
+        experience: str | None = None,
+        remote: bool | None = None,
+        paid: bool | None = None,
+        opensource: bool | None = None,
+        tech: str | None = None,
     ) -> list[Project]:
 
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.is_published.is_(True))
+            .where(
+                Project.deleted_at.is_(None),
+                Project.is_published.is_(True),
+            )
             .offset(skip)
             .limit(limit)
         )
+
+        if language:
+            stmt = stmt.where(Project.language == language)
+        if experience:
+            stmt = stmt.where(Project.experience == experience)
+        if remote is not None:
+            stmt = stmt.where(Project.is_remote == remote)
+        if paid is not None:
+            stmt = stmt.where(Project.is_paid == paid)
+        if opensource is not None:
+            stmt = stmt.where(Project.is_open_source == opensource)
+        if tech:
+            stmt = stmt.where(Project.tech_stack.ilike(f"%{tech}%"))
+
+        stmt = stmt.offset(skip).limit(limit)
 
         return list(db.scalars(stmt))
 
@@ -130,7 +171,10 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.owner_id == owner_id)
+            .where(
+                Project.owner_id == owner_id,
+                Project.deleted_at.is_(None),
+            )
         )
 
         return list(db.scalars(stmt))
@@ -163,7 +207,8 @@ class ProjectService:
             activity_type=ActivityType.PROJECT_UPDATED,
             title="Updated project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="pencil",
             color="info",
         )
@@ -187,7 +232,8 @@ class ProjectService:
             activity_type=ActivityType.PROJECT_ARCHIVED,
             title="Archived project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="archive",
             color="warning",
         )
@@ -255,9 +301,10 @@ class ProjectService:
         project_id: uuid.UUID,
     ) -> ProjectStatsResponse:
         from sqlalchemy import func, select
+
         from app.models.application import Application
         from app.models.bookmark import Bookmark
-        from app.models.project_member import ProjectMember, MemberRole
+        from app.models.project_member import MemberRole, ProjectMember
 
         project = db.get(Project, project_id)
         assert project is not None
@@ -301,47 +348,74 @@ class ProjectService:
             bookmark_count=bookmark_count,
         )
 
+    @staticmethod
+    def find_similar_projects(
+        db: Session,
+        title: str,
+        description: str,
+        title_threshold: float = 0.75,
+        description_threshold: float = 0.65,
+    ) -> list[SimilarProjectWarning]:
+        from difflib import SequenceMatcher
 
-@staticmethod
-def find_similar_projects(
-    db: Session,
-    title: str,
-    description: str,
-    title_threshold: float = 0.75,
-    description_threshold: float = 0.65,
-) -> list[SimilarProjectWarning]:
-    from difflib import SequenceMatcher
+        candidates = list(
+            db.scalars(select(Project).where(Project.is_archived.is_(False)))
+        )
 
-    candidates = list(db.scalars(select(Project).where(Project.is_archived.is_(False))))
+        results = []
+        title_lower = title.lower()
+        desc_lower = description.lower()
 
-    results = []
-    title_lower = title.lower()
-    desc_lower = description.lower()
+        for project in candidates:
+            title_sim = SequenceMatcher(
+                None, title_lower, project.title.lower()
+            ).ratio()
+            desc_sim = SequenceMatcher(
+                None, desc_lower, project.description.lower()
+            ).ratio()
 
-    for project in candidates:
-        title_sim = SequenceMatcher(None, title_lower, project.title.lower()).ratio()
-        desc_sim = SequenceMatcher(
-            None, desc_lower, project.description.lower()
-        ).ratio()
-
-        if title_sim >= title_threshold or desc_sim >= description_threshold:
-            results.append(
-                SimilarProjectWarning(
-                    id=project.id,
-                    title=project.title,
-                    slug=project.slug,
-                    title_similarity=round(title_sim, 2),
-                    description_similarity=round(desc_sim, 2),
+            if title_sim >= title_threshold or desc_sim >= description_threshold:
+                results.append(
+                    SimilarProjectWarning(
+                        id=project.id,
+                        title=project.title,
+                        slug=project.slug,
+                        title_similarity=round(title_sim, 2),
+                        description_similarity=round(desc_sim, 2),
+                    )
                 )
-            )
 
-    return results
+        return results
 
     @staticmethod
-    def delete_project(
+    def soft_delete_project(
+        db: Session,
+        db_project: Project,
+        deleted_by_id: uuid.UUID,
+    ) -> None:
+        """Mark a project as deleted without removing the row."""
+        db_project.deleted_at = func.now()
+        db_project.deleted_by_id = deleted_by_id
+        db.commit()
+
+    @staticmethod
+    def restore_soft_deleted_project(
+        db: Session,
+        db_project: Project,
+    ) -> Project:
+        """Restore a soft-deleted project."""
+        db_project.deleted_at = None
+        db_project.deleted_by_id = None
+        db.commit()
+        db.refresh(db_project)
+        return db_project
+
+    @staticmethod
+    def hard_delete_project(
         db: Session,
         db_project: Project,
     ) -> None:
+        """Permanently remove a project from the database (admin only)."""
         from app.models.project_member import ProjectMember
 
         # Explicitly delete member rows first to avoid SQLAlchemy FK nullification
@@ -456,7 +530,8 @@ def find_similar_projects(
             activity_type=ActivityType.PROJECT_CREATED,
             title="Published project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="folder-plus",
             color="primary",
         )

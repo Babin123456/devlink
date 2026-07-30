@@ -1,6 +1,6 @@
-"""Shared skill-name normalization helpers."""
-
 from __future__ import annotations
+
+"""Shared skill-name normalization helpers."""
 
 
 def normalize_skill_name(value: str) -> str:

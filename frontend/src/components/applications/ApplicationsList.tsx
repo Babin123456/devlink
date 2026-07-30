@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { UUID } from "@/lib/api";
+import type { UUID, ApplicationResponse } from "@/lib/api";
 import { getProjectApplications } from "@/lib/api";
 import { ApplicationStatusBadge } from "./ApplicationStatusBadge";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,7 @@ export function ApplicationsList({ projectId, className }: Props) {
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     if (!needle) return apps;
-    return apps.filter((a) => {
+    return apps.filter((a: ApplicationResponse) => {
       const hay = [
         a.message ?? "",
         a.portfolio_url ?? "",
@@ -102,7 +102,7 @@ export function ApplicationsList({ projectId, className }: Props) {
         </div>
       ) : (
         <ul className="mt-4 divide-y divide-border">
-          {filtered.map((a) => {
+          {filtered.map((a: ApplicationResponse) => {
             const isBusy =
               acceptMutation.isPending || rejectMutation.isPending || withdrawMutation.isPending;
             const canReview = a.status === "pending";

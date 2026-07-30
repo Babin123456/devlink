@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 """
 API router for the AI Repository Quality Analyzer.
 """
 
-from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 

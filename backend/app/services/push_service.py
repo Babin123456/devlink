@@ -3,23 +3,26 @@ from typing import List, Dict, Any
 
 logger = logging.getLogger(__name__)
 
+
 class PushNotificationService:
     """
     Service for sending Web/Mobile Push Notifications.
     Currently mocks the Firebase/OneSignal push logic.
     """
-    
+
     @staticmethod
-    def send_push(device_tokens: List[str], title: str, body: str, data: Dict[str, Any] = None) -> bool:
+    def send_push(
+        device_tokens: List[str], title: str, body: str, data: Dict[str, Any] = None
+    ) -> bool:
         """
         Send a push notification payload to the specified device tokens.
         """
         if not device_tokens:
             return False
-            
+
         logger.info(f"Mock Push sent to {len(device_tokens)} devices: {title}")
         logger.debug(f"Push Body: {body} | Data: {data}")
-        
+
         # Simulated Network Call to FCM or OneSignal
         # try:
         #     with httpx.Client() as client:
@@ -31,11 +34,13 @@ class PushNotificationService:
         # except Exception as e:
         #     logger.error(f"Push provider error: {e}")
         #     return False
-            
+
         return True
 
     @staticmethod
-    def notify_user(user_id: str, title: str, body: str, action_url: str = None) -> bool:
+    def notify_user(
+        user_id: str, title: str, body: str, action_url: str = None
+    ) -> bool:
         """
         Lookup user's device tokens and dispatch push notification.
         """

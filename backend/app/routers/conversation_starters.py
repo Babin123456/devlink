@@ -34,7 +34,7 @@ def generate_conversation_starters(
 ):
     """
     Generate AI-powered conversation starters for messaging a user.
-    
+
     Returns 3-5 context-aware suggestions based on both users' profiles,
     skills, and interests.
     """

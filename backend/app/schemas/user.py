@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, time
+from enum import Enum
 from typing import Optional
 
 # pyrefly: ignore [missing-import]
@@ -25,6 +26,29 @@ class AvailabilitySlot(BaseModel):
         if self.end_time <= self.start_time:
             raise ValueError("end_time must be after start_time")
         return self
+
+
+class PrivacyVisibility(str, Enum):
+    PUBLIC = "public"
+    FOLLOWERS = "followers"
+    AUTHENTICATED = "authenticated"
+    PRIVATE = "private"
+
+
+class PrivacySettings(BaseModel):
+    email: PrivacyVisibility = PrivacyVisibility.PRIVATE
+    github: PrivacyVisibility = PrivacyVisibility.PUBLIC
+    resume: PrivacyVisibility = PrivacyVisibility.PUBLIC
+    social_links: PrivacyVisibility = PrivacyVisibility.PUBLIC
+    availability: PrivacyVisibility = PrivacyVisibility.PUBLIC
+
+
+class PrivacySettingsUpdate(BaseModel):
+    email: Optional[PrivacyVisibility] = None
+    github: Optional[PrivacyVisibility] = None
+    resume: Optional[PrivacyVisibility] = None
+    social_links: Optional[PrivacyVisibility] = None
+    availability: Optional[PrivacyVisibility] = None
 
 
 # ==========================================================
@@ -68,6 +92,8 @@ class UserBase(BaseModel):
     company: Optional[str] = None
 
     open_to_work: bool = True
+    is_private: bool = False
+    privacy_settings: Optional[PrivacySettings] = Field(default_factory=PrivacySettings)
     availability: list[AvailabilitySlot] = Field(default_factory=list)
 
 
@@ -112,6 +138,8 @@ class UserUpdate(BaseModel):
     company: Optional[str] = None
 
     open_to_work: Optional[bool] = None
+    is_private: Optional[bool] = None
+    privacy_settings: Optional[PrivacySettingsUpdate] = None
     availability: Optional[list[AvailabilitySlot]] = None
 
 
@@ -145,6 +173,9 @@ class UserResponse(UserBase):
 
     created_at: datetime
     updated_at: datetime
+
+    deleted_at: Optional[datetime] = None
+    deleted_by_id: Optional[uuid.UUID] = None
 
 
 # ==========================================================
@@ -198,3 +229,21 @@ class UserMessage(BaseModel):
 class UsernameAvailabilityResponse(BaseModel):
     available: bool
     message: str
+
+
+# ==========================================================
+# Profile Completion Response
+# ==========================================================
+
+
+class ProfileCompletionResponse(BaseModel):
+    completion: int = Field(
+        ...,
+        ge=0,
+        le=100,
+        description="Profile completion percentage (0-100)",
+    )
+    missing: list[str] = Field(
+        ...,
+        description="List of missing profile factors",
+    )

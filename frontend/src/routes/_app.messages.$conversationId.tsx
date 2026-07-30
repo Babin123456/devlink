@@ -4,10 +4,8 @@ import { messagesService } from "@/services";
 import { Card, Avatar, Skeleton } from "@/components/shared/primitives";
 import { LoadingButton } from "@/components/shared/LoadingButton";
 import { ArrowLeft, Send, Sparkles } from "lucide-react";
-import { useState, useCallback } from "react";
-import { TypingIndicator } from "@/components/chat/TypingIndicator";
-import { ArrowLeft, Send } from "lucide-react";
 import { useState, useCallback, useEffect, useRef } from "react";
+import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { builders, conversations } from "@/mocks/seed";
 import { cn } from "@/lib/utils";
 import { conversationStartersApi, type ConversationStarterResponse } from "@/api";
@@ -242,13 +240,6 @@ function Thread() {
           )}
         </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setText("");
-          }}
-          className="flex items-center gap-2 border-t border-border p-3"
-        >
         {/* Inline typing label above the input for extra visibility. */}
         {themTyping && (
           <div className="px-4 pt-1">

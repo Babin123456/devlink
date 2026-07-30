@@ -11,7 +11,6 @@ from app.services.email_service import EmailService
 from app.services.push_service import PushNotificationService
 from app.services.user_service import UserService
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -43,7 +42,7 @@ def send_notification_task(self, payload: dict) -> str | None:
             message_id=_to_uuid(payload.get("message_id")),
             application_id=_to_uuid(payload.get("application_id")),
         )
-        
+
         user = UserService.get_user(db, _to_uuid(payload["recipient_id"]))
         if user:
             if user.email:
@@ -51,16 +50,16 @@ def send_notification_task(self, payload: dict) -> str | None:
                     to_email=user.email,
                     title=payload["title"],
                     message=payload["message"],
-                    action_url=payload.get("action_url")
+                    action_url=payload.get("action_url"),
                 )
-            
+
             PushNotificationService.notify_user(
                 user_id=str(user.id),
                 title=payload["title"],
                 body=payload["message"],
-                action_url=payload.get("action_url")
+                action_url=payload.get("action_url"),
             )
-            
+
         return str(notification.id) if notification else None
     except Exception as exc:
         db.rollback()

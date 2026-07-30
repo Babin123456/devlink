@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 """
 DevLink Validation Utilities
 
 Reusable validation functions used across the application.
 """
 
-from __future__ import annotations
 
 import re
 from urllib.parse import urlparse
@@ -297,3 +298,23 @@ def validate_file_size(size: int) -> None:
             status_code=400,
             detail="File exceeds maximum allowed size.",
         )
+
+
+# ==========================================================
+# Slugify Utility
+# ==========================================================
+
+
+def slugify(text: str) -> str:
+    """
+    Generate a URL-safe lowercase slug from text.
+
+    Example:
+    'DevLink Labs!' -> 'devlink-labs'
+    """
+    text = text.lower().strip()
+    # Replace non-alphanumeric characters with hyphens
+    text = re.sub(r"[^\w\s-]", "", text)
+    # Replace whitespace and repeated hyphens with a single hyphen
+    text = re.sub(r"[\s_-]+", "-", text)
+    return text.strip("-")

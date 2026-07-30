@@ -1,9 +1,8 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import lottie from "lottie-web";
 
-import { AppShell } from "@/components/layout/AppShell";
-import searchAnimation from "@/assets/404 Error - Doodle animation.json";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { SidebarProvider } from "@/context/SidebarContext";
 import { ProfileCompletionChecklist } from "@/components/profile/ProfileCompletionChecklist";
 
 const mockUserProfile = {
@@ -18,15 +17,10 @@ const mockUserProfile = {
 function AppLayoutWithProfileChecklist() {
   return (
     <div className="space-y-4">
-      <ProfileCompletionChecklist
-        userProfile={mockUserProfile}
-        onActionClick={(itemId) => {
-          if (itemId === "avatar" || itemId === "bio") {
-            window.location.href = "/settings";
-          }
-        }}
-      />
-      <AppShell />
+      <ProfileCompletionChecklist userProfile={mockUserProfile} />
+      <SidebarProvider>
+        <DashboardLayout />
+      </SidebarProvider>
     </div>
   );
 }
@@ -36,13 +30,20 @@ function AppNotFound() {
 
   useEffect(() => {
     if (!ref.current) return;
-    const anim = lottie.loadAnimation({
-      container: ref.current,
-      animationData: searchAnimation,
-      loop: true,
-      autoplay: true,
-    });
-    return () => anim.destroy();
+    let destroy: (() => void) | undefined;
+    Promise.all([import("lottie-web"), import("@/assets/404 Error - Doodle animation.json")]).then(
+      ([lottieMod, animMod]) => {
+        if (!ref.current) return;
+        const anim = lottieMod.default.loadAnimation({
+          container: ref.current,
+          animationData: animMod.default,
+          loop: true,
+          autoplay: true,
+        });
+        destroy = () => anim.destroy();
+      },
+    );
+    return () => destroy?.();
   }, []);
 
   return (

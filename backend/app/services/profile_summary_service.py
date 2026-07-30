@@ -27,6 +27,7 @@ class ProfileSummaryService:
         """Get OpenAI client."""
         try:
             from openai import OpenAI
+
             return OpenAI(api_key=settings.OPENAI_API_KEY)
         except ImportError:
             logger.warning("openai package not installed")
@@ -153,7 +154,7 @@ Return ONLY the summary text, nothing else."""
 
             # Enforce character limit
             if len(summary) > MAX_SUMMARY_LENGTH:
-                summary = summary[:MAX_SUMMARY_LENGTH - 3] + "..."
+                summary = summary[: MAX_SUMMARY_LENGTH - 3] + "..."
 
             return summary
 

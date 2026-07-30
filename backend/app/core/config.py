@@ -72,6 +72,8 @@ class Settings(BaseSettings):
         "http://localhost:5173,http://localhost:5174,http://localhost:3000"
     )
 
+    FRONTEND_URL: str = "http://localhost:5173"
+
     # ==========================================================
     # Email
     # ==========================================================
@@ -94,14 +96,24 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
 
+    LINKEDIN_CLIENT_ID: str = ""
+    LINKEDIN_CLIENT_SECRET: str = ""
+
     # ==========================================================
     # Uploads
     # ==========================================================
 
+    UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_SIZE_MB: int = 10
     RESUME_MAX_SIZE_MB: int = 5
 
     ALLOWED_IMAGE_TYPES: str = "image/png,image/jpeg,image/webp"
+
+    MEDIA_UPLOAD_DIR: str = "uploads/media"
+    MEDIA_QUALITY: int = 80
+    MEDIA_MAX_DIMENSION: int = 1200
+    MEDIA_THUMB_DIMENSION: int = 200
+    CDN_BASE_URL: str | None = None
 
     # ==========================================================
     # AI
@@ -127,6 +139,7 @@ class Settings(BaseSettings):
     SEARCH_RATE_LIMIT: str = "60/minute"
     PROJECT_RATE_LIMIT: str = "100/minute"
     PASSWORD_RESET_RATE_LIMIT: str = "3/15minutes"
+    COMMENT_RATE_LIMIT: str = "30/minute"
     RECOMMENDATION_RATE_LIMIT: str = "20/minute"
 
     # ==========================================================
@@ -134,11 +147,46 @@ class Settings(BaseSettings):
     # ==========================================================
 
     ENABLE_HSTS: bool = True
+    HSTS_HEADER_VALUE: str = "max-age=63072000; includeSubDomains; preload"
+
     ENABLE_CSP: bool = True
+    CSP_HEADER_VALUE: str = (
+        "default-src 'self'; "
+        "script-src 'self'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' https: data:; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none'; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self';"
+    )
+
     ENABLE_X_FRAME_OPTIONS: bool = True
+    X_FRAME_OPTIONS_VALUE: str = "DENY"
+
     ENABLE_X_CONTENT_TYPE_OPTIONS: bool = True
+
+    ENABLE_REFERRER_POLICY: bool = True
+    REFERRER_POLICY_VALUE: str = "strict-origin-when-cross-origin"
+
+    ENABLE_PERMISSIONS_POLICY: bool = True
+    PERMISSIONS_POLICY_VALUE: str = (
+        "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+    )
+
     ENABLE_DNS_PREFETCH_CONTROL: bool = True
     ENABLE_CROSS_DOMAIN_POLICIES: bool = True
+
+    ENABLE_COOP: bool = True
+    CROSS_ORIGIN_OPENER_POLICY: str = "same-origin"
+
+    ENABLE_CORP: bool = True
+    CROSS_ORIGIN_RESOURCE_POLICY: str = "same-origin"
+
+    ENABLE_COEP: bool = True
+    CROSS_ORIGIN_EMBEDDER_POLICY: str = "require-corp"
 
     # ==========================================================
     # Celery
