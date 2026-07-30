@@ -16,7 +16,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from app.core.config import settings
 from app.middleware.rate_limit import limiter
-from app.middleware.request_id import RequestIDMiddleware
+from app.middleware.structured_logging import StructuredLoggingMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.middleware.activity import ActivityTrackingMiddleware
 from app.middleware.rate_limit import limiter
@@ -116,7 +116,7 @@ app.add_middleware(SlowAPIMiddleware)
 # Security Middleware
 # ------------------------------------------------------------------
 
-app.add_middleware(RequestIDMiddleware)
+app.add_middleware(StructuredLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(ActivityTrackingMiddleware)
 
@@ -143,6 +143,8 @@ app.add_middleware(
         "Authorization",
         "Content-Type",
         "X-Requested-With",
+        "X-Request-ID",
+        "X-Correlation-ID"
     ],
 )
 

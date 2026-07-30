@@ -207,6 +207,7 @@ from app.schemas.auth import (  # noqa: E402
     RefreshTokenRequest,
     LogoutResponse,
     CurrentUserResponse,
+)
 
 
 @router.post(

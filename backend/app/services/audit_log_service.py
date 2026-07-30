@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -15,6 +16,8 @@ from app.middleware.audit_context import (
     audit_request_method,
     audit_request_path,
 )
+
+logger = structlog.get_logger("devlink.audit")
 
 class AuditLogService:
     """
@@ -45,6 +48,11 @@ class AuditLogService:
         error_message: str | None = None,
     ) -> AuditLog:
 
+        resolved_ip = ip_address or audit_ip_address.get()
+        resolved_ua = user_agent or audit_user_agent.get()
+        resolved_method = request_method or audit_request_method.get()
+        resolved_path = request_path or audit_request_path.get()
+
         log = AuditLog(
             actor_id=actor_id,
             action=action,
@@ -57,10 +65,10 @@ class AuditLogService:
             new_values=new_values,
             metadata_info=metadata_info,
             description=description,
-            ip_address=ip_address or audit_ip_address.get(),
-            user_agent=user_agent or audit_user_agent.get(),
-            request_method=request_method or audit_request_method.get(),
-            request_path=request_path or audit_request_path.get(),
+            ip_address=resolved_ip,
+            user_agent=resolved_ua,
+            request_method=resolved_method,
+            request_path=resolved_path,
             success=success,
             status_code=status_code,
             error_message=error_message,
@@ -69,6 +77,23 @@ class AuditLogService:
         db.add(log)
         db.flush()
         db.refresh(log)
+
+        logger.info(
+            "audit_event",
+            action=action.value,
+            actor_id=str(actor_id) if actor_id else None,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            target_user_id=str(target_user_id) if target_user_id else None,
+            project_id=str(project_id) if project_id else None,
+            organization_id=str(organization_id) if organization_id else None,
+            old_values=old_values,
+            new_values=new_values,
+            description=description,
+            ip_address=resolved_ip,
+            success=success,
+            status_code=status_code,
+        )
 
         return log
 
