@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 """
 Pydantic schemas for the AI Tech Stack Recommendation feature.
 """
 
-from __future__ import annotations
 
 from typing import Optional
 

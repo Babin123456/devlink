@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { notificationsService } from "@/services";
-import { Card } from "@/components/shared/primitives";
+import { Card, EmptyState } from "@/components/shared/primitives";
 import { cn } from "@/lib/utils";
-import { Bell } from "lucide-react";
 
 export const Route = createFileRoute("/_app/notifications")({
   head: () => ({
@@ -27,60 +26,37 @@ function NotificationsPage() {
           <h1 className="text-[22px] font-bold tracking-tight text-foreground">Notifications</h1>
           <p className="text-[13px] text-muted-foreground">Stay on top of what's happening.</p>
         </div>
-        <button className="rounded-md border border-border bg-surface px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-muted">
-          Mark all read
-        </button>
+        {data.length > 0 && (
+          <button className="rounded-md border border-border bg-surface px-3 py-1.5 text-[12px] font-medium text-foreground hover:bg-muted">
+            Mark all read
+          </button>
+        )}
       </div>
       <Card>
-        <ul className="divide-y divide-border">
-          {data.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Bell className="mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="text-lg font-semibold">No notifications yet</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                You're all caught up! New notifications will appear here.
-              </p>
-            </div>
-          ) : (
-            data.map((n) => (
+        {data.length === 0 ? (
+          <EmptyState title="No notifications" desc="You're all caught up!" />
+        ) : (
+          <ul className="divide-y divide-border">
+            {data.map((n) => (
               <li
                 key={n.id}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3",
-                  n.unread && "bg-primary-soft/30"
+                  n.unread && "bg-primary-soft/30",
                 )}
               >
                 <span
                   className={cn(
                     "h-2 w-2 shrink-0 rounded-full",
-                    n.unread ? "bg-primary" : "bg-transparent"
+                    n.unread ? "bg-primary" : "bg-transparent",
                   )}
                 />
-                <p className="min-w-0 flex-1 text-[13px] text-foreground">
-                  {n.text}
-                </p>
-                <span className="text-[11px] text-muted-foreground">
-                  {n.ago}
-                </span>
+                <p className="min-w-0 flex-1 text-[13px] text-foreground">{n.text}</p>
+                <span className="text-[11px] text-muted-foreground">{n.ago}</span>
               </li>
-            ))
-          )}
-          {data.map((n) => (
-            <li
-              key={n.id}
-              className={cn("flex items-center gap-3 px-4 py-3", n.unread && "bg-primary-soft/30")}
-            >
-              <span
-                className={cn(
-                  "h-2 w-2 shrink-0 rounded-full",
-                  n.unread ? "bg-primary" : "bg-transparent",
-                )}
-              />
-              <p className="min-w-0 flex-1 text-[13px] text-foreground">{n.text}</p>
-              <span className="text-[11px] text-muted-foreground">{n.ago}</span>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </ul>
+        )}
       </Card>
     </div>
   );

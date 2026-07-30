@@ -2,14 +2,28 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { projectsService } from "@/services";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
-import { ArrowLeft, Star, GitFork, Users2, Github, Copy, Check, Eye, Sparkles, X } from "lucide-react";
+import { api } from "@/api";
+import { ProjectDashboard } from "@/features/projects/components/ProjectDashboard";
+import {
+  ArrowLeft,
+  Star,
+  GitFork,
+  Users2,
+  Github,
+  Copy,
+  Check,
+  Eye,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { builders, activity, currentUser } from "@/mocks/seed";
 import { Markdown } from "@/components/shared/Markdown";
 import { BackButton } from "@/components/shared/BackButton";
 import { ShareProjectButton } from "@/components/shared/ShareProjectButton";
-import { projectTagsApi, type TagSuggestion } from "@/api";
+import { projectTagsApi } from "@/api";
+import { type TagSuggestion } from "@/api/modules/projectTags";
 import { toast } from "sonner";
 import { BookmarkToggleButton } from "@/components/shared/BookmarkToggleButton";
 import { addRecentlyViewedProject } from "@/lib/recentlyViewedProjects";
@@ -32,9 +46,26 @@ function ProjectDetail() {
     queryKey: ["project", projectId],
     queryFn: () => projectsService.get(projectId),
   });
-  const [tab, setTab] = useState<"overview" | "members" | "activity" | "repos">("overview");
+  const [tab, setTab] = useState<"overview" | "members" | "activity" | "repos" | "dashboard">(
+    "overview",
+  );
   const [copied, setCopied] = useState(false);
   const isOwner = p?.owner === currentUser.name;
+
+  const { data: dashboard } = useQuery({
+    queryKey: ["projectDashboard", projectId],
+    queryFn: () =>
+      api.get<{ members: { user_id: string; username: string; role: string }[] }>(
+        `/projects/${projectId}/dashboard`,
+      ),
+    retry: false,
+    enabled: !!p,
+  });
+
+  const memberObj = dashboard?.members?.find(
+    (m) => m.user_id === currentUser.id || m.username === currentUser.name,
+  );
+  const currentUserRole = isOwner ? "owner" : memberObj?.role || "";
 
   // Tag generator state
   const [showTagGenerator, setShowTagGenerator] = useState(false);
@@ -42,18 +73,21 @@ function ProjectDetail() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const tagMutation = useMutation({
-    mutationFn: () => projectTagsApi.generate({
-      title: p?.name || "",
-      description: p?.description || "",
-      tech_stack: p?.stack?.join(", "),
-    }),
+    mutationFn: () =>
+      projectTagsApi.generate({
+        title: p?.name || "",
+        description: p?.description || "",
+        tech_stack: p?.stack?.join(", "),
+      }),
     onSuccess: (data) => {
       setSuggestedTags(data.tags);
-      setSelectedTags(data.tags.map(t => t.name));
+      setSelectedTags(data.tags.map((t) => t.name));
     },
     onError: () => {
       toast.error("Failed to generate tags. Please try again.");
     },
+  });
+
   // Integrate RBAC hook
   const { can } = usePermissions(currentUser.id || "current-user-uuid");
   const hasInvitePermission = can("project:invite", {
@@ -61,8 +95,8 @@ function ProjectDetail() {
   });
 
   const toggleTag = (tagName: string) => {
-    setSelectedTags(prev =>
-      prev.includes(tagName) ? prev.filter(t => t !== tagName) : [...prev, tagName]
+    setSelectedTags((prev) =>
+      prev.includes(tagName) ? prev.filter((t) => t !== tagName) : [...prev, tagName],
     );
   };
 
@@ -78,7 +112,9 @@ function ProjectDetail() {
   if (isLoading) return <Card className="h-96 animate-pulse" />;
   if (!p) throw notFound();
 
-  const tabs = ["overview", "members", "activity", "repos"] as const;
+  const tabs = dashboard
+    ? (["overview", "members", "activity", "repos", "dashboard"] as const)
+    : (["overview", "members", "activity", "repos"] as const);
 
   return (
     <div className="space-y-4">
@@ -144,7 +180,7 @@ function ProjectDetail() {
                 : "border-transparent text-muted-foreground hover:text-foreground",
             )}
           >
-            {t}
+            {t === "dashboard" ? "Team Workspace" : t}
           </button>
         ))}
       </div>
@@ -207,7 +243,7 @@ function ProjectDetail() {
                               "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors",
                               selectedTags.includes(tag.name)
                                 ? "border-primary bg-primary/10 text-primary"
-                                : "border-border bg-surface text-muted-foreground hover:border-primary/50"
+                                : "border-border bg-surface text-muted-foreground hover:border-primary/50",
                             )}
                           >
                             {tag.name}
@@ -287,6 +323,9 @@ function ProjectDetail() {
             <span className="ml-auto text-[11px] text-muted-foreground">main · updated 2h ago</span>
           </div>
         </Card>
+      )}
+      {tab === "dashboard" && (
+        <ProjectDashboard projectId={projectId} currentUserRole={currentUserRole} />
       )}
     </div>
   );

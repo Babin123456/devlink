@@ -9,19 +9,43 @@ logger = logging.getLogger(__name__)
 
 MAX_TAGS = 10
 
+PREDEFINED_TAGS = [
+    "AI",
+    "Web",
+    "Mobile",
+    "Open Source",
+    "Blockchain",
+    "Cybersecurity",
+    "DevOps",
+    "Data Science",
+    "Backend",
+    "Frontend",
+    "Full Stack",
+    "Cloud",
+    "Game Dev",
+    "IoT",
+]
+
 
 class ProjectTagService:
     """
-    AI-powered project tag generator.
+    AI-powered project tag generator and predefined category manager.
 
-    Generates relevant tags based on project description and tech stack.
+    Generates relevant tags based on project description and tech stack,
+    and provides predefined project categories.
     """
+
+    @staticmethod
+    def get_predefined_tags() -> list[str]:
+        """Return the list of predefined project tags and categories."""
+        return PREDEFINED_TAGS
 
     @staticmethod
     def _get_client():
         """Get OpenAI client."""
         try:
             from openai import OpenAI
+
             return OpenAI(api_key=settings.OPENAI_API_KEY)
         except ImportError:
             logger.warning("openai package not installed")
@@ -34,6 +58,7 @@ class ProjectTagService:
     def _build_prompt(title: str, description: str, tech_stack: str | None) -> str:
         """Build the prompt for OpenAI to generate tags."""
         tech_text = f"\nTech Stack: {tech_stack}" if tech_stack else ""
+        predefined_str = ", ".join(PREDEFINED_TAGS)
 
         prompt = f"""Generate relevant tags for a developer project based on the following information.
 
@@ -43,12 +68,12 @@ Project Description: {description[:500]}
 
 Requirements:
 1. Generate 5-10 relevant tags
-2. Include technology tags (e.g., React, Python, FastAPI)
-3. Include category tags (e.g., AI, Web, Mobile, Backend)
+2. Consider using predefined category tags when applicable: {predefined_str}
+3. Include technology tags (e.g., React, Python, FastAPI)
 4. Include feature tags if relevant (e.g., Resume, NLP, Authentication)
 5. Keep tags concise (1-3 words each)
-6. Use PascalCase for multi-word tags (e.g., "Machine Learning")
-7. Prioritize specific technologies over generic terms
+6. Use PascalCase for multi-word tags (e.g., "Machine Learning", "Open Source")
+7. Prioritize specific technologies and core project categories
 
 Return as JSON array of objects with "name" and "confidence" fields.
 Confidence should be a number between 0 and 1.
@@ -117,10 +142,14 @@ Example:
                 cleaned_tags = []
                 for tag in tags[:MAX_TAGS]:
                     if isinstance(tag, dict) and "name" in tag:
-                        cleaned_tags.append({
-                            "name": tag["name"],
-                            "confidence": min(1.0, max(0.0, tag.get("confidence", 0.8))),
-                        })
+                        cleaned_tags.append(
+                            {
+                                "name": tag["name"],
+                                "confidence": min(
+                                    1.0, max(0.0, tag.get("confidence", 0.8))
+                                ),
+                            }
+                        )
                 if cleaned_tags:
                     return cleaned_tags
 
@@ -140,6 +169,34 @@ Example:
         text = f"{title} {description}".lower()
         default_tags = []
 
+        # Check predefined categories
+        category_keywords = {
+            "ai": "AI",
+            "artificial intelligence": "AI",
+            "web": "Web",
+            "website": "Web",
+            "mobile": "Mobile",
+            "android": "Mobile",
+            "ios": "Mobile",
+            "open source": "Open Source",
+            "blockchain": "Blockchain",
+            "crypto": "Blockchain",
+            "cybersecurity": "Cybersecurity",
+            "security": "Cybersecurity",
+            "devops": "DevOps",
+            "data science": "Data Science",
+            "backend": "Backend",
+            "frontend": "Frontend",
+            "full stack": "Full Stack",
+            "cloud": "Cloud",
+            "game": "Game Dev",
+            "iot": "IoT",
+        }
+
+        for keyword, tag in category_keywords.items():
+            if keyword in text:
+                default_tags.append({"name": tag, "confidence": 0.85})
+
         # Technology keywords
         tech_keywords = {
             "python": "Python",
@@ -157,7 +214,6 @@ Example:
             "docker": "Docker",
             "kubernetes": "Kubernetes",
             "aws": "AWS",
-            "ai": "AI",
             "machine learning": "Machine Learning",
             "nlp": "NLP",
             "deep learning": "Deep Learning",
@@ -167,11 +223,21 @@ Example:
             if keyword in text:
                 default_tags.append({"name": tag, "confidence": 0.7})
 
-        # Add generic tags if few found
-        if len(default_tags) < 3:
-            default_tags.extend([
-                {"name": "Web", "confidence": 0.5},
-                {"name": "Full Stack", "confidence": 0.4},
-            ])
+        # Deduplicate tags maintaining order
+        seen = set()
+        unique_tags = []
+        for t in default_tags:
+            if t["name"].lower() not in seen:
+                seen.add(t["name"].lower())
+                unique_tags.append(t)
 
-        return default_tags[:MAX_TAGS]
+        # Add generic tags if few found
+        if len(unique_tags) < 3:
+            unique_tags.extend(
+                [
+                    {"name": "Web", "confidence": 0.5},
+                    {"name": "Full Stack", "confidence": 0.4},
+                ]
+            )
+
+        return unique_tags[:MAX_TAGS]

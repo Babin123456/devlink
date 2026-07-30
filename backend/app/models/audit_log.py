@@ -7,11 +7,13 @@ from enum import Enum
 from sqlalchemy import (
     Boolean,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
     String,
     Text,
     func,
+)
+from sqlalchemy import (
+    Enum as SqlEnum,
 )
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -83,6 +85,8 @@ class AuditAction(str, Enum):
     FAILED_LOGIN = "failed_login"
     TOKEN_REVOKED = "token_revoked"
     API_ACCESS = "api_access"
+    API_TOKEN_CREATED = "api_token_created"
+    API_TOKEN_REVOKED = "api_token_revoked"
 
 
 class AuditLog(Base):

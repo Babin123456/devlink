@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 AI Repository Quality Analyzer Service.
 
@@ -13,7 +15,6 @@ Analyzes GitHub repositories and generates an overall quality score based on:
 Uses the GitHub API for data collection and OpenAI for generating suggestions.
 """
 
-from __future__ import annotations
 
 import logging
 import re

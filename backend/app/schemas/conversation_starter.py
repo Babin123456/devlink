@@ -8,11 +8,15 @@ from pydantic import BaseModel, Field
 
 class ConversationStarterRequest(BaseModel):
     """Request to generate conversation starters."""
-    target_user_id: uuid.UUID = Field(..., description="ID of the user to generate starters for")
+
+    target_user_id: uuid.UUID = Field(
+        ..., description="ID of the user to generate starters for"
+    )
 
 
 class ConversationStarterResponse(BaseModel):
     """Response containing conversation starter suggestions."""
+
     suggestions: list[str] = Field(
         ...,
         min_length=3,

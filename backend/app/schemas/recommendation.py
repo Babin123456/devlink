@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from typing import Optional
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -69,6 +70,7 @@ class RecommendationList(BaseModel):
 
     recommendations: list[ProjectRecommendation]
     total: int
+
 
 
 # ==========================================================
@@ -150,6 +152,52 @@ class RecommendationResponse(BaseModel):
     total: int
     limit: int
     results: list[RecommendedBuilder]
+
+
+# ==========================================================
+# Recommended Project
+# ==========================================================
+
+
+class RecommendedProject(BaseModel):
+    """A single project recommendation entry."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    project_id: uuid.UUID
+    title: str
+    description: Optional[str] = None
+    tech_stack: Optional[str] = None
+    owner_username: str
+    minimum_experience: int = 0
+    status: str
+
+    matched_skills: list[str] = Field(
+        default_factory=list,
+        description="Normalized names of required skills that matched the builder.",
+    )
+    matched_technologies: list[str] = Field(
+        default_factory=list,
+        description="Project tech-stack items matched by the builder.",
+    )
+    score: float = Field(..., description="Final weighted score (0.0 - 1.0).")
+    score_breakdown: ScoreBreakdown
+
+
+# ==========================================================
+# Project Recommendation Response
+# ==========================================================
+
+
+class ProjectRecommendationResponse(BaseModel):
+    """Ranked project recommendation list returned by the API."""
+
+    query_context: str = Field(
+        ..., description="What the recommendations were generated for."
+    )
+    total: int
+    limit: int
+    results: list[RecommendedProject]
 
 
 # ==========================================================

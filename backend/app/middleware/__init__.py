@@ -7,4 +7,5 @@ __all__ = [
     "StructuredLoggingMiddleware",
     "SecurityHeadersMiddleware",
     "limiter",
+    "ActivityTrackingMiddleware",
 ]

@@ -1,78 +1,42 @@
 # pyrefly: ignore [missing-import]
-import pytest
 import uuid
 
-# pyrefly: ignore [missing-import]
-from sqlalchemy import and_, select
+import pytest
 
 # pyrefly: ignore [missing-import]
-from sqlalchemy import create_engine
+from fastapi.testclient import TestClient
+
+# pyrefly: ignore [missing-import]
+# pyrefly: ignore [missing-import]
+from sqlalchemy import and_, create_engine, select
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import sessionmaker
 
 # pyrefly: ignore [missing-import]
-from fastapi.testclient import TestClient
+from sqlalchemy.pool import StaticPool
 
 from app.database.base import Base
-from app.dependencies import get_database
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_database
 from app.main import app
+from app.models.application import Application, ApplicationStatus  # noqa: F401
+from app.models.builder_flare import BuilderFlare, FlareStatus
+from app.models.conversation import Conversation, ConversationType
+from app.models.conversation_member import ConversationMember
+from app.models.follower import Follower  # noqa: F401
+from app.models.message import Message, MessageType  # noqa: F401
+from app.models.notification import Notification, NotificationType  # noqa: F401
+from app.models.project import Project, ProjectStage, ProjectVisibility
+from app.models.project_member import MemberRole, ProjectMember
 
 # Import all models to register on Base.metadata
 from app.models.user import User
-from app.models.project import Project, ProjectStage, ProjectVisibility
-from app.models.follower import Follower  # noqa: F401
-from app.models.conversation import Conversation, ConversationType
-from app.models.conversation_member import ConversationMember
-from app.models.message import Message, MessageType  # noqa: F401
-from app.models.notification import Notification, NotificationType  # noqa: F401
-from app.models.application import Application, ApplicationStatus  # noqa: F401
-from app.models.builder_flare import BuilderFlare, FlareStatus
-from app.models.project_member import ProjectMember, MemberRole
-
+from app.schemas.application import ApplicationCreate
+from app.schemas.message import MessageCreate
+from app.services.application_service import ApplicationService
 from app.services.follower_service import FollowerService
 from app.services.message_service import MessageService
-from app.services.application_service import ApplicationService
 from app.services.notification_service import NotificationService
-from app.schemas.message import MessageCreate
-from app.schemas.application import ApplicationCreate
-
-# pyrefly: ignore [missing-import]
-from sqlalchemy.pool import StaticPool
-
-# Setup in-memory SQLite database
-engine = create_engine(
-    "sqlite:///:memory:",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-@pytest.fixture(scope="function")
-def db():
-    # Recreate schema for clean database per test
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-@pytest.fixture(scope="function")
-def client(db):
-    def override_get_db():
-        try:
-            yield db
-        finally:
-            pass
-
-    app.dependency_overrides[get_database] = override_get_db
-    yield TestClient(app)
-    app.dependency_overrides.clear()
 
 
 def create_test_user(db, email, username):
@@ -193,7 +157,9 @@ def test_application_notifications(db):
     db.refresh(flare)
 
     # Applicant submits application
-    app_create = ApplicationCreate(message="I want to join")
+    app_create = ApplicationCreate(
+        project_id=project.id, flare_id=flare.id, message="I want to join"
+    )
     application = ApplicationService.create_application(
         db,
         applicant_id=applicant.id,
@@ -209,12 +175,24 @@ def test_application_notifications(db):
     assert notifs[0].type == NotificationType.APPLICATION_ACCEPTED
     assert notifs[0].sender_id == owner.id
 
-    # Reset notifications and test reject
+    # Reset notifications and test reject on a new pending application
     db.delete(notifs[0])
     db.commit()
 
-    ApplicationService.reject_application(db, application)
-    notifs = NotificationService.list_notifications(db, recipient_id=applicant.id)
+    applicant2 = create_test_user(db, "applicant2@example.com", "applicant2")
+    app_create2 = ApplicationCreate(
+        project_id=project.id, flare_id=flare.id, message="I also want to join"
+    )
+    application2 = ApplicationService.create_application(
+        db,
+        applicant_id=applicant2.id,
+        project_id=project.id,
+        flare_id=flare.id,
+        application=app_create2,
+    )
+
+    ApplicationService.reject_application(db, application2)
+    notifs = NotificationService.list_notifications(db, recipient_id=applicant2.id)
     assert len(notifs) == 1
     assert notifs[0].type == NotificationType.APPLICATION_REJECTED
 

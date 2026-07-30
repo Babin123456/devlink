@@ -5,6 +5,7 @@ This guide provides step-by-step instructions for deploying DevLink across local
 ---
 
 ## Table of Contents
+
 - [Prerequisites](#prerequisites)
 - [Environment Variables](#environment-variables)
 - [Local Setup](#local-setup)
@@ -19,12 +20,12 @@ This guide provides step-by-step instructions for deploying DevLink across local
 
 Before starting, ensure your host environment meets the following minimum requirements:
 
-* **OS**: Linux (Ubuntu 22.04 LTS recommended), macOS, or Windows WSL2
-* **Node.js**: v20.x or higher
-* **Python**: v3.11 or higher
-* **PostgreSQL**: v15 or higher
-* **Redis**: v7.0 or higher
-* **Docker & Docker Compose**: v24.0+ / v2.20+ (for containerized setup)
+- **OS**: Linux (Ubuntu 22.04 LTS recommended), macOS, or Windows WSL2
+- **Node.js**: v20.x or higher
+- **Python**: v3.11 or higher
+- **PostgreSQL**: v15 or higher
+- **Redis**: v7.0 or higher
+- **Docker & Docker Compose**: v24.0+ / v2.20+ (for containerized setup)
 
 ---
 
@@ -110,7 +111,7 @@ DevLink can be containerized and run seamlessly using Docker Compose.
 ### Docker Compose Configuration (`docker-compose.yml`)
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
@@ -304,6 +305,6 @@ sudo certbot renew --dry-run
 
 ## Related Documentation
 
-* [Architecture Documentation](architecture.md)
-* [Development Guide](development.md)
-* [Coding Standards](coding-standards.md)
+- [Architecture Documentation](architecture.md)
+- [Development Guide](development.md)
+- [Coding Standards](coding-standards.md)

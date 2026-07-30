@@ -121,7 +121,9 @@ export function ActivityFeed({ actorId, targetId, targetType }: ActivityFeedProp
         ) : activities.length === 0 ? (
           <div className="p-12 text-center bg-gray-50 rounded-lg border border-gray-200 border-dashed">
             <p className="text-gray-500 font-medium">No activities found</p>
-            <p className="text-sm text-gray-400 mt-1">Check back later or try a different filter.</p>
+            <p className="text-sm text-gray-400 mt-1">
+              Check back later or try a different filter.
+            </p>
           </div>
         ) : (
           <div className="space-y-3">

@@ -113,7 +113,9 @@ export function ResumeUploadCard({ resumeUrl, editable = false }: ResumeUploadCa
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-medium text-foreground">Resume ready to share</p>
-              <p className="text-xs text-muted-foreground">Your latest PDF is attached to this profile.</p>
+              <p className="text-xs text-muted-foreground">
+                Your latest PDF is attached to this profile.
+              </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <a
@@ -155,7 +157,9 @@ export function ResumeUploadCard({ resumeUrl, editable = false }: ResumeUploadCa
         )}
       </div>
 
-      {isUploading ? <p className="mt-3 text-sm text-muted-foreground">Uploading your resume…</p> : null}
+      {isUploading ? (
+        <p className="mt-3 text-sm text-muted-foreground">Uploading your resume…</p>
+      ) : null}
       {error ? (
         <div className="mt-3 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-600">
           <XCircle size={16} className="mt-0.5 shrink-0" />

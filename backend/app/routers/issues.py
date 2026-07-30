@@ -89,7 +89,11 @@ def list_project_issues(
     db: Session = Depends(get_database),
 ):
     """List all issues for a project."""
-    stmt = select(Issue).where(Issue.project_id == project_id).order_by(Issue.created_at.desc())
+    stmt = (
+        select(Issue)
+        .where(Issue.project_id == project_id)
+        .order_by(Issue.created_at.desc())
+    )
     return list(db.scalars(stmt))
 
 
@@ -175,6 +179,8 @@ def override_difficulty(
     db.flush()
     db.refresh(issue)
     return issue
+
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 

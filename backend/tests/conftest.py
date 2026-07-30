@@ -8,10 +8,12 @@ from sqlalchemy.pool import StaticPool
 from sqlalchemy.dialects.sqlite.base import SQLiteTypeCompiler
 import app.core.security
 
+
 def visit_ARRAY(self, type_, **kw):
     return "JSON"
-SQLiteTypeCompiler.visit_ARRAY = visit_ARRAY
 
+
+SQLiteTypeCompiler.visit_ARRAY = visit_ARRAY
 
 
 class MockPwdContext:
@@ -81,7 +83,6 @@ def setup_db():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
-    app.dependency_overrides.clear()
 
 
 @pytest.fixture(scope="function")

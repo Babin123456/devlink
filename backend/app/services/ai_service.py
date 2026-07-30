@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 AI-powered tech stack recommendation service.
 
@@ -5,7 +7,6 @@ Uses OpenAI to recommend technologies for new projects based on the project idea
 Falls back to a rule-based default when OpenAI is unavailable.
 """
 
-from __future__ import annotations
 
 import json
 import logging

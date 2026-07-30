@@ -5,6 +5,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, Optional, Tuple
 
 import redis
+
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -110,7 +111,7 @@ def cached(ttl: int = 300, key_prefix: str = ""):
         def wrapper(*args, **kwargs):
             import sys
 
-            if "pytest" in sys.modules:
+            if cache_manager._is_testing:
                 return func(*args, **kwargs)
 
             # Filter kwargs to remove non-serializable FastAPI objects
@@ -122,8 +123,13 @@ def cached(ttl: int = 300, key_prefix: str = ""):
                 if "Session" in type(v).__name__ or "Request" in type(v).__name__:
                     continue
                 safe_kwargs[k] = str(v)
-            
-            safe_args = [str(a) for a in args if "Session" not in type(a).__name__ and "Request" not in type(a).__name__]
+
+            safe_args = [
+                str(a)
+                for a in args
+                if "Session" not in type(a).__name__
+                and "Request" not in type(a).__name__
+            ]
 
             # Generate a consistent cache key
             cache_key = f"{key_prefix}:{func.__name__}:{safe_args}:{safe_kwargs}"
@@ -158,18 +164,20 @@ def cached(ttl: int = 300, key_prefix: str = ""):
                         elif hasattr(item, "dict"):
                             processed_list.append(item.dict())
                         elif hasattr(item, "__dict__"):
-                            processed_list.append({
-                                k: str(v)
-                                for k, v in item.__dict__.items()
-                                if not k.startswith("_")
-                            })
+                            processed_list.append(
+                                {
+                                    k: str(v)
+                                    for k, v in item.__dict__.items()
+                                    if not k.startswith("_")
+                                }
+                            )
                         else:
                             processed_list.append(item)
                     store_value = processed_list
-                    
+
                 cache_manager.set(cache_key, store_value, ttl)
 
-            return result
+            return store_value if result is not None else result
 
         return wrapper
 

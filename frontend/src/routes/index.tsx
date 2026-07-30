@@ -3,6 +3,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { APP_LOGO } from "@/lib/logo";
 import { motion } from "framer-motion";
 import { Sparkles, Users2, MessageSquare, Trophy, Github, ArrowRight, Check } from "lucide-react";
+import { Sun, Moon, X, Menu } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { useTheme } from "@/hooks/useTheme";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -49,9 +52,9 @@ function Landing() {
             <a href="#features" className="hover:text-foreground">
               Features
             </a>
-            <a href="#builders" className="hover:text-foreground">
+            <Link to="/builders" className="hover:text-foreground">
               Builders
-            </a>
+            </Link>
             <a href="#pricing" className="hover:text-foreground">
               Pricing
             </a>
@@ -111,13 +114,13 @@ function Landing() {
                 Features
               </a>
 
-              <a
-                href="#builders"
+              <Link
+                to="/builders"
                 className="text-sm text-foreground"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Builders
-              </a>
+              </Link>
 
               <a
                 href="#pricing"
