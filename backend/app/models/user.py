@@ -267,6 +267,12 @@ class User(Base):
         unique=True,
     )
 
+    linkedin_id: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        unique=True,
+    )
+
     # ------------------------------------------------------------------
     # Soft Delete
     # ------------------------------------------------------------------

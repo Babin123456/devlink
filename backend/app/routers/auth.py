@@ -2,6 +2,7 @@ from uuid import UUID
 
 # pyrefly: ignore [missing-import]
 import uuid
+import redis
 from fastapi import (
     APIRouter,
     Depends,
@@ -187,8 +188,11 @@ def logout(
     return auth_service.logout(user_id, refresh_token_str=refresh_token_str)
 
 
+oauth_redis = redis.from_url(settings.REDIS_URL, decode_responses=True)
+
+
 import httpx  # noqa: E402
-from app.schemas.auth import GitHubLoginRequest  # noqa: E402
+from app.schemas.auth import GitHubLoginRequest, LinkedInLoginRequest, OAuthStateResponse  # noqa: E402
 
 
 @router.post(
@@ -276,6 +280,107 @@ async def github_login(
 
     auth_service = AuthService(db)
     return auth_service.github_login(github_user, primary_email)
+
+
+# ==========================================================
+# LinkedIn OAuth Authorization (CSRF State)
+# ==========================================================
+
+
+@router.get(
+    "/linkedin/authorize",
+    response_model=OAuthStateResponse,
+    summary="Get LinkedIn OAuth State",
+)
+async def linkedin_authorize():
+    state = secrets.token_urlsafe(32)
+    await oauth_redis.setex(f"oauth:state:{state}", 600, "1")
+    return OAuthStateResponse(state=state)
+
+
+# ==========================================================
+# LinkedIn OAuth Login
+# ==========================================================
+
+
+@router.post(
+    "/linkedin",
+    response_model=AuthResponse,
+    summary="LinkedIn OAuth Login",
+)
+@limiter.limit(LOGIN_LIMIT)
+async def linkedin_login(
+    request: Request,
+    payload: LinkedInLoginRequest,
+    db: Session = Depends(get_database),
+):
+    if not settings.LINKEDIN_CLIENT_ID or not settings.LINKEDIN_CLIENT_SECRET:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="LinkedIn OAuth is not configured.",
+        )
+
+    state = payload.state
+    if not state:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing OAuth state parameter.",
+        )
+    state_key = f"oauth:state:{state}"
+    state_valid = await oauth_redis.get(state_key)
+    if not state_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired OAuth state.",
+        )
+    await oauth_redis.delete(state_key)
+
+    token_url = "https://www.linkedin.com/oauth/v2/accessToken"
+    headers = {"Accept": "application/json"}
+    data = {
+        "client_id": settings.LINKEDIN_CLIENT_ID,
+        "client_secret": settings.LINKEDIN_CLIENT_SECRET,
+        "code": payload.code,
+        "grant_type": "authorization_code",
+        "redirect_uri": "",
+    }
+
+    async with httpx.AsyncClient() as client:
+        token_res = await client.post(token_url, data=data, headers=headers)
+        if token_res.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Failed to exchange code for LinkedIn token.",
+            )
+        token_data = token_res.json()
+        if "error" in token_data:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=token_data.get("error_description", "Invalid LinkedIn code."),
+            )
+
+        access_token = token_data["access_token"]
+
+        user_res = await client.get(
+            "https://api.linkedin.com/v2/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        if user_res.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Failed to fetch LinkedIn profile.",
+            )
+        linkedin_user = user_res.json()
+
+        primary_email = linkedin_user.get("email")
+        if not primary_email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A verified email is required for LinkedIn login.",
+            )
+
+    auth_service = AuthService(db)
+    return auth_service.linkedin_login(linkedin_user, primary_email)
 
 
 # ==========================================================
