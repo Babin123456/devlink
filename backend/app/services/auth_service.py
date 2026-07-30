@@ -82,6 +82,7 @@ class AuthService:
         user: User,
         new_password: str,
     ) -> bool:
+
         if verify_password(new_password, user.password_hash):
             return True
         histories = (

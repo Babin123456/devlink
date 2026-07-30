@@ -18,5 +18,5 @@ function OrganizationProfilePage() {
     hiring: true,
   };
 
-  return <OrganizationProfile organizationData={mockOrgData} />;
+  return <OrganizationProfile organizationData={mockOrgData} orgId={orgId} />;
 }

@@ -21,6 +21,7 @@ from app.routers import (
     organizations,
     profile_summary,
     project_tags,
+    project_dashboards,
     projects,
     recommendations,
     repositories,
@@ -55,6 +56,7 @@ api_v1_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_v1_router.include_router(blocks.router, prefix="/blocks", tags=["User Blocks"])
 api_v1_router.include_router(export.router, prefix="/users", tags=["Export"])
 api_v1_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
+api_v1_router.include_router(project_dashboards.router)
 api_v1_router.include_router(
     builder_flares.router, prefix="/flare", tags=["Builder's Flare"]
 )
