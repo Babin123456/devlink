@@ -156,3 +156,21 @@ def log_security_event(event: str, user: str | None = None, ip: str | None = Non
 
 def log_exception(exc: Exception) -> None:
     logger.exception("unhandled_exception", exc_info=exc)
+
+
+def log_request(
+    request_id: str,
+    method: str,
+    path: str,
+    status_code: int,
+    duration_ms: float,
+) -> None:
+    logger.info(
+        "http_request",
+        request_id=request_id,
+        correlation_id=request_id,
+        method=method,
+        path=path,
+        status_code=status_code,
+        duration_ms=round(duration_ms, 2),
+    )
