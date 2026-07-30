@@ -97,7 +97,6 @@ export function EmptyState({
   desc,
   action,
   className,
-  icon: Icon,
   illustration,
 }: {
   icon?: ComponentType<{ className?: string; size?: number }> | ReactNode;
@@ -105,7 +104,6 @@ export function EmptyState({
   desc?: string;
   action?: ReactNode;
   className?: string;
-  icon?: React.ComponentType<{ size?: number; className?: string }>;
   illustration?: "empty-box" | "no-results" | "no-messages" | "no-notifications" | "no-bookmarks" | "no-projects";
 }) {
   const isComponent =
@@ -116,21 +114,13 @@ export function EmptyState({
     : null;
 
   return (
-    <div
-      className={cn("flex flex-col items-center justify-center py-12 px-4 text-center", className)}
-    >
-      <div className="relative mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm transition-transform hover:scale-105">
-        {IconComp ? (
-          <IconComp className="h-7 w-7 text-primary" />
-        ) : (
-          <div className="text-2xl">{Icon as ReactNode}</div>
-    <div className="flex flex-col items-center justify-center py-12 text-center animate-in fade-in duration-200">
+    <div className={cn("flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in duration-200", className)}>
       <div className="mb-4">
         {illustration ? (
           <EmptyIllustration variant={illustration} />
         ) : (
-          <div className="mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft text-primary shadow-xs">
-            {Icon ? <Icon size={24} /> : "✨"}
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft text-primary shadow-xs">
+            {IconComp ? <IconComp size={24} /> : (Icon as ReactNode) ?? "\u2728"}
           </div>
         )}
       </div>
