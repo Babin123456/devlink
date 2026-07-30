@@ -1,7 +1,6 @@
 version: "3.9"
 
 services:
-
   # ==========================================================
   # PostgreSQL
   # ==========================================================
@@ -11,11 +10,11 @@ services:
     container_name: devlink-postgres
 
     restart: unless-stopped
-    
+
     environment:
-     POSTGRES_DB: devlink
-     POSTGRES_USER: postgres
-     POSTGRES_PASSWORD: devlink123
+      POSTGRES_DB: devlink
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devlink123
 
     ports:
       - "5432:5432"
@@ -119,7 +118,6 @@ services:
       --concurrency=2
 
 volumes:
-
   postgres_data:
 
   redis_data:

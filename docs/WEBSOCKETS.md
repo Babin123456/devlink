@@ -35,16 +35,16 @@ DevLink uses WebSockets to deliver real-time updates to team members without pag
 
 #### `ConnectionManager` API
 
-| Method | Description |
-|--------|-------------|
-| `connect(websocket, user_id)` | Accept the WebSocket and register it under `user_id` |
-| `disconnect(websocket, user_id)` | Remove a single WebSocket connection; if no connections remain, remove user from all rooms |
-| `join_room(room_id, user_id)` | Add `user_id` to room `room_id` |
-| `leave_room(room_id, user_id)` | Remove `user_id` from room `room_id` |
-| `get_room_members(room_id)` | Return the set of user_ids currently in `room_id` |
-| `send_personal_message(message, user_id)` | Send `message` to every active connection for `user_id` |
-| `broadcast_to_room(room_id, message)` | Broadcast `message` to every user in `room_id` |
-| `broadcast_to_all(message)` | Broadcast `message` to every connected user (use sparingly) |
+| Method                                    | Description                                                                                |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `connect(websocket, user_id)`             | Accept the WebSocket and register it under `user_id`                                       |
+| `disconnect(websocket, user_id)`          | Remove a single WebSocket connection; if no connections remain, remove user from all rooms |
+| `join_room(room_id, user_id)`             | Add `user_id` to room `room_id`                                                            |
+| `leave_room(room_id, user_id)`            | Remove `user_id` from room `room_id`                                                       |
+| `get_room_members(room_id)`               | Return the set of user_ids currently in `room_id`                                          |
+| `send_personal_message(message, user_id)` | Send `message` to every active connection for `user_id`                                    |
+| `broadcast_to_room(room_id, message)`     | Broadcast `message` to every user in `room_id`                                             |
+| `broadcast_to_all(message)`               | Broadcast `message` to every connected user (use sparingly)                                |
 
 ### Frontend (`frontend/src/api/ws.ts`)
 
@@ -57,17 +57,17 @@ DevLink uses WebSockets to deliver real-time updates to team members without pag
 
 #### `WsClient` API
 
-| Method | Description |
-|--------|-------------|
-| `connect()` | Open the WebSocket connection (idempotent) |
-| `disconnect()` | Close the connection and stop auto-reconnect |
-| `on(handler)` | Register an event handler; returns an unsubscribe function |
-| `send(payload)` | Send a JSON payload to the server |
-| `joinProject(projectId)` | Join a project room |
-| `leaveProject(projectId)` | Leave a project room |
-| `sendProjectMessage(projectId, content)` | Send a chat message to a project room |
-| `notifyTaskUpdate(projectId, taskId, status)` | Notify a project room of a task status change |
-| `notifyProjectUpdate(projectId, changes)` | Notify a project room of project metadata changes |
+| Method                                        | Description                                                |
+| --------------------------------------------- | ---------------------------------------------------------- |
+| `connect()`                                   | Open the WebSocket connection (idempotent)                 |
+| `disconnect()`                                | Close the connection and stop auto-reconnect               |
+| `on(handler)`                                 | Register an event handler; returns an unsubscribe function |
+| `send(payload)`                               | Send a JSON payload to the server                          |
+| `joinProject(projectId)`                      | Join a project room                                        |
+| `leaveProject(projectId)`                     | Leave a project room                                       |
+| `sendProjectMessage(projectId, content)`      | Send a chat message to a project room                      |
+| `notifyTaskUpdate(projectId, taskId, status)` | Notify a project room of a task status change              |
+| `notifyProjectUpdate(projectId, changes)`     | Notify a project room of project metadata changes          |
 
 ---
 
@@ -103,63 +103,79 @@ Invalid or missing tokens result in a **`4001` (policy violation)** WebSocket cl
 
 The client sends JSON messages with a `type` field:
 
-| Type | Fields | Description |
-|------|--------|-------------|
-| `join` | `project_id` | Join a project room to receive project-scoped events |
-| `leave` | `project_id` | Leave a project room |
-| `message` | `project_id`, `content` | Send a chat message to all members of a project room |
-| `task_update` | `project_id`, `task_id`, `status` | Notify room members that a task's status changed |
-| `project_update` | `project_id`, `changes` | Notify room members that project metadata changed |
+| Type             | Fields                            | Description                                          |
+| ---------------- | --------------------------------- | ---------------------------------------------------- |
+| `join`           | `project_id`                      | Join a project room to receive project-scoped events |
+| `leave`          | `project_id`                      | Leave a project room                                 |
+| `message`        | `project_id`, `content`           | Send a chat message to all members of a project room |
+| `task_update`    | `project_id`, `task_id`, `status` | Notify room members that a task's status changed     |
+| `project_update` | `project_id`, `changes`           | Notify room members that project metadata changed    |
 
 **Examples:**
 
 ```json
-{"type": "join", "project_id": "550e8400-e29b-41d4-a716-446655440000"}
+{ "type": "join", "project_id": "550e8400-e29b-41d4-a716-446655440000" }
 ```
 
 ```json
-{"type": "message", "project_id": "550e8400-...", "content": "Hey team!"}
+{ "type": "message", "project_id": "550e8400-...", "content": "Hey team!" }
 ```
 
 ```json
-{"type": "task_update", "project_id": "550e8400-...", "task_id": "task-42", "status": "done"}
+{
+  "type": "task_update",
+  "project_id": "550e8400-...",
+  "task_id": "task-42",
+  "status": "done"
+}
 ```
 
 ### Server → Client
 
 Every event has a `type` field plus event-specific fields:
 
-| Type | Fields | Description |
-|------|--------|-------------|
-| `connected` | `user_id` | Connection established and authenticated |
-| `team.member_joined` | `project_id`, `user_id` | A team member joined the project room |
-| `team.member_left` | `project_id`, `user_id` | A team member left the project room |
-| `project.updated` | `project_id`, `user_id`, `changes` | Project metadata changed |
-| `message.new` | `project_id`, `user_id`, `content` | A new chat message arrived in the room |
-| `task.status_changed` | `project_id`, `user_id`, `task_id`, `status` | A task's status changed |
-| `error` | `message` | An error occurred (e.g. invalid JSON, unknown message type) |
-| `status` | `sender_id`, `content` | Legacy presence status (from `/ws/chat/{user_id}`) |
+| Type                  | Fields                                       | Description                                                 |
+| --------------------- | -------------------------------------------- | ----------------------------------------------------------- |
+| `connected`           | `user_id`                                    | Connection established and authenticated                    |
+| `team.member_joined`  | `project_id`, `user_id`                      | A team member joined the project room                       |
+| `team.member_left`    | `project_id`, `user_id`                      | A team member left the project room                         |
+| `project.updated`     | `project_id`, `user_id`, `changes`           | Project metadata changed                                    |
+| `message.new`         | `project_id`, `user_id`, `content`           | A new chat message arrived in the room                      |
+| `task.status_changed` | `project_id`, `user_id`, `task_id`, `status` | A task's status changed                                     |
+| `error`               | `message`                                    | An error occurred (e.g. invalid JSON, unknown message type) |
+| `status`              | `sender_id`, `content`                       | Legacy presence status (from `/ws/chat/{user_id}`)          |
 
 **Examples:**
 
 ```json
-{"type": "connected", "user_id": "550e8400-e29b-41d4-a716-446655440000"}
+{ "type": "connected", "user_id": "550e8400-e29b-41d4-a716-446655440000" }
 ```
 
 ```json
-{"type": "team.member_joined", "project_id": "proj-1", "user_id": "user-abc"}
+{ "type": "team.member_joined", "project_id": "proj-1", "user_id": "user-abc" }
 ```
 
 ```json
-{"type": "message.new", "project_id": "proj-1", "user_id": "user-abc", "content": "Hello team!"}
+{
+  "type": "message.new",
+  "project_id": "proj-1",
+  "user_id": "user-abc",
+  "content": "Hello team!"
+}
 ```
 
 ```json
-{"type": "task.status_changed", "project_id": "proj-1", "user_id": "user-abc", "task_id": "task-42", "status": "done"}
+{
+  "type": "task.status_changed",
+  "project_id": "proj-1",
+  "user_id": "user-abc",
+  "task_id": "task-42",
+  "status": "done"
+}
 ```
 
 ```json
-{"type": "error", "message": "Unknown message type: bogus"}
+{ "type": "error", "message": "Unknown message type: bogus" }
 ```
 
 ---
@@ -255,7 +271,10 @@ ws.notifyTaskUpdate(projectId, "task-42", "done");
 ### Notify team of project metadata changes
 
 ```typescript
-ws.notifyProjectUpdate(projectId, { title: "New Project Name", status: "active" });
+ws.notifyProjectUpdate(projectId, {
+  title: "New Project Name",
+  status: "active",
+});
 ```
 
 ### Full React component example
@@ -317,14 +336,14 @@ export function ProjectChat({ projectId }: { projectId: string }) {
 
 The frontend client automatically reconnects with exponential backoff:
 
-| Attempt | Delay |
-|---------|-------|
-| 1 | 1s |
-| 2 | 2s |
-| 3 | 4s |
-| 4 | 8s |
-| 5 | 16s |
-| 6+ | 30s (capped) |
+| Attempt | Delay        |
+| ------- | ------------ |
+| 1       | 1s           |
+| 2       | 2s           |
+| 3       | 4s           |
+| 4       | 8s           |
+| 5       | 16s          |
+| 6+      | 30s (capped) |
 
 ### How it works
 
@@ -430,16 +449,16 @@ async def send_personal_message(self, message: dict, user_id: str) -> None:
 
 8 tests covering:
 
-| Test | Description |
-|------|-------------|
-| `test_ws_rejects_missing_token` | Connection without a token is closed |
-| `test_ws_rejects_invalid_token` | Connection with an invalid JWT is closed |
-| `test_ws_accepts_valid_token` | A valid JWT receives a `connected` event |
-| `test_ws_join_and_leave_project` | Joining/leaving a room broadcasts member events |
-| `test_ws_message_broadcast` | A message sent to a room is broadcast as `message.new` |
-| `test_ws_task_status_change` | A `task_update` is broadcast as `task.status_changed` |
-| `test_ws_invalid_json_returns_error` | Malformed JSON returns an `error` event without closing |
-| `test_ws_unknown_message_type_returns_error` | Unknown message types return an `error` event |
+| Test                                         | Description                                             |
+| -------------------------------------------- | ------------------------------------------------------- |
+| `test_ws_rejects_missing_token`              | Connection without a token is closed                    |
+| `test_ws_rejects_invalid_token`              | Connection with an invalid JWT is closed                |
+| `test_ws_accepts_valid_token`                | A valid JWT receives a `connected` event                |
+| `test_ws_join_and_leave_project`             | Joining/leaving a room broadcasts member events         |
+| `test_ws_message_broadcast`                  | A message sent to a room is broadcast as `message.new`  |
+| `test_ws_task_status_change`                 | A `task_update` is broadcast as `task.status_changed`   |
+| `test_ws_invalid_json_returns_error`         | Malformed JSON returns an `error` event without closing |
+| `test_ws_unknown_message_type_returns_error` | Unknown message types return an `error` event           |
 
 ### Running tests
 
@@ -467,10 +486,10 @@ npx eslint src/api/ws.ts
 
 ### Backend endpoints
 
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
+| Endpoint                 | Method    | Auth              | Description                           |
+| ------------------------ | --------- | ----------------- | ------------------------------------- |
 | `/ws/collab?token=<jwt>` | WebSocket | JWT (query param) | Authenticated real-time collaboration |
-| `/ws/chat/{user_id}` | WebSocket | None (deprecated) | Legacy unauthenticated chat |
+| `/ws/chat/{user_id}`     | WebSocket | None (deprecated) | Legacy unauthenticated chat           |
 
 ### Frontend exports
 
@@ -510,12 +529,16 @@ ws.notifyProjectUpdate(projectId: string, changes: Record<string, unknown>): voi
 The legacy endpoint is kept for backwards compatibility but is deprecated. To migrate:
 
 **Before (legacy):**
+
 ```typescript
 const socket = new WebSocket(`ws://api/ws/chat/${userId}`);
-socket.send(JSON.stringify({ type: "message", recipient_id: "user-2", content: "hi" }));
+socket.send(
+  JSON.stringify({ type: "message", recipient_id: "user-2", content: "hi" }),
+);
 ```
 
 **After (authenticated):**
+
 ```typescript
 import { ws } from "@/api/ws";
 
@@ -532,14 +555,14 @@ ws.sendProjectMessage("project-1", "hi");
 
 ### Key differences
 
-| Feature | Legacy `/ws/chat/{user_id}` | New `/ws/collab` |
-|---------|----------------------------|------------------|
-| Authentication | None (user_id in URL) | JWT (query param) |
-| Rooms | No rooms (broadcast all) | Project-scoped rooms |
-| Events | `message`, `status` | 7 typed events |
-| Auto-reconnect | No | Yes (exponential backoff) |
-| Multi-tab | No (one connection per user_id) | Yes (multiple connections per user) |
-| Graceful leave | Broadcasts "offline" to all | Notifies only joined rooms |
+| Feature        | Legacy `/ws/chat/{user_id}`     | New `/ws/collab`                    |
+| -------------- | ------------------------------- | ----------------------------------- |
+| Authentication | None (user_id in URL)           | JWT (query param)                   |
+| Rooms          | No rooms (broadcast all)        | Project-scoped rooms                |
+| Events         | `message`, `status`             | 7 typed events                      |
+| Auto-reconnect | No                              | Yes (exponential backoff)           |
+| Multi-tab      | No (one connection per user_id) | Yes (multiple connections per user) |
+| Graceful leave | Broadcasts "offline" to all     | Notifies only joined rooms          |
 
 ---
 

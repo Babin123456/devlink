@@ -2,7 +2,7 @@
 
 ## 📌 Overview
 
-This document outlines the API versioning strategy and migration policy for the DevLink developer collaboration platform. 
+This document outlines the API versioning strategy and migration policy for the DevLink developer collaboration platform.
 
 As the platform evolves, API versioning ensures that updates, feature enhancements, and refactoring can occur without disrupting active frontend clients, third-party integrations, or mobile applications.
 
@@ -13,14 +13,16 @@ As the platform evolves, API versioning ensures that updates, feature enhancemen
 DevLink follows **URL Path Versioning** for explicit, predictable, and cache-friendly API routing.
 
 ### Base URLs
-* **Current Versioned API**: `/api/v1`
-  * Example: `https://api.devlink.app/api/v1/auth/login`
-  * Example: `https://api.devlink.app/api/v1/projects`
-* **Legacy Unversioned API (Backward Compatibility)**: `/api`
-  * Example: `https://api.devlink.app/api/projects`
-  * *Note*: Unversioned `/api` routes map to the current stable API version (`v1`).
+
+- **Current Versioned API**: `/api/v1`
+  - Example: `https://api.devlink.app/api/v1/auth/login`
+  - Example: `https://api.devlink.app/api/v1/projects`
+- **Legacy Unversioned API (Backward Compatibility)**: `/api`
+  - Example: `https://api.devlink.app/api/projects`
+  - _Note_: Unversioned `/api` routes map to the current stable API version (`v1`).
 
 ### Version Root Metadata
+
 Requesting `GET /api` or `GET /api/v1` returns current versioning status and metadata:
 
 ```json
@@ -39,14 +41,18 @@ Requesting `GET /api` or `GET /api/v1` returns current versioning status and met
 ## ⚖️ Breaking vs. Non-Breaking Changes
 
 ### Non-Breaking Changes (In-place updates to current version)
+
 Non-breaking changes **do not** require incrementing the API version number:
+
 - Adding new API endpoints (e.g. `POST /api/v1/projects/{id}/star`).
 - Adding optional query parameters or optional request body fields.
 - Adding new response body properties.
 - Performance optimizations and internal bug fixes.
 
 ### Breaking Changes (Requires new major API version, e.g., `v2`)
+
 Breaking changes **require** introducing a new major version prefix (e.g., `/api/v2`):
+
 - Removing or renaming existing endpoints or fields.
 - Changing data types of response fields (e.g., string ID to integer ID).
 - Altering authentication mechanisms or response structures.
@@ -59,10 +65,12 @@ Breaking changes **require** introducing a new major version prefix (e.g., `/api
 When a major API version (e.g. `v1`) is superseded by a newer version (e.g. `v2`), DevLink follows a structured deprecation lifecycle:
 
 ### 1. Announcement & Grace Period
+
 - Standard deprecation period is **6 months** minimum before retiring an old version.
 - Developer notifications via developer docs, release notes, and OpenAPI specs.
 
 ### 2. HTTP Deprecation Headers
+
 Deprecated endpoints will return standard HTTP response headers:
 
 ```http
@@ -72,6 +80,7 @@ Link: <https://docs.devlink.app/api/migration/v1-to-v2>; rel="successor-version"
 ```
 
 ### 3. Retirement (Sunset)
+
 - Upon reaching the `Sunset` date, requests to the retired version return `410 Gone`:
 
 ```json

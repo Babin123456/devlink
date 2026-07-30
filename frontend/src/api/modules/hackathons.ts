@@ -1,5 +1,10 @@
 import { api } from "../client";
-import type { Hackathon, HackathonTeam, HackathonSubmission, HackathonLeaderboardEntry } from "@/mocks/seed";
+import type {
+  Hackathon,
+  HackathonTeam,
+  HackathonSubmission,
+  HackathonLeaderboardEntry,
+} from "@/mocks/seed";
 
 export type { HackathonSubmission, HackathonLeaderboardEntry };
 
@@ -18,7 +23,8 @@ export const hackathonsApi = {
     api.post<HackathonTeam>(`/api/hackathons/${id}/teams`, body),
   joinTeam: (teamId: string) => api.post<void>(`/api/hackathons/teams/${teamId}/join`),
   leaveTeam: (teamId: string) => api.delete<void>(`/api/hackathons/teams/${teamId}/leave`),
-  getSubmissions: (id: string) => api.get<HackathonSubmission[]>(`/api/hackathons/${id}/submissions`),
+  getSubmissions: (id: string) =>
+    api.get<HackathonSubmission[]>(`/api/hackathons/${id}/submissions`),
   createSubmission: (
     id: string,
     body: {
@@ -29,5 +35,6 @@ export const hackathonsApi = {
       demo_url?: string;
     },
   ) => api.post<HackathonSubmission>(`/api/hackathons/${id}/submissions`, body),
-  getLeaderboard: (id: string) => api.get<HackathonLeaderboardEntry[]>(`/api/hackathons/${id}/leaderboard`),
+  getLeaderboard: (id: string) =>
+    api.get<HackathonLeaderboardEntry[]>(`/api/hackathons/${id}/leaderboard`),
 };

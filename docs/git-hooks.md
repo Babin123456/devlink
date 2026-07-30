@@ -9,10 +9,10 @@ DevLink uses [Husky](https://typicode.github.io/husky/) and [lint-staged](https:
 Husky triggers `lint-staged` via the `.husky/pre-commit` hook.  
 `lint-staged` runs only on staged files, keeping the feedback loop fast.
 
-| File pattern | Command |
-| :--- | :--- |
-| `src/**/*.{ts,tsx}` | `eslint --fix --max-warnings=0` + `prettier --write` |
-| `src/**/*.{js,jsx,json,css,md}` | `prettier --write` |
+| File pattern                    | Command                                              |
+| :------------------------------ | :--------------------------------------------------- |
+| `src/**/*.{ts,tsx}`             | `eslint --fix --max-warnings=0` + `prettier --write` |
+| `src/**/*.{js,jsx,json,css,md}` | `prettier --write`                                   |
 
 ## What runs on every push
 
@@ -59,10 +59,10 @@ git push --no-verify
 
 ## Configuration Files
 
-| File | Purpose |
-| :--- | :--- |
-| `.husky/pre-commit` | Runs lint-staged on staged files |
-| `.husky/pre-push` | Runs TypeScript typecheck |
+| File                                    | Purpose                           |
+| :-------------------------------------- | :-------------------------------- |
+| `.husky/pre-commit`                     | Runs lint-staged on staged files  |
+| `.husky/pre-push`                       | Runs TypeScript typecheck         |
 | `frontend/package.json` → `lint-staged` | Defines commands per file pattern |
-| `frontend/eslint.config.js` | ESLint rules |
-| `frontend/.prettierrc` | Prettier formatting rules |
+| `frontend/eslint.config.js`             | ESLint rules                      |
+| `frontend/.prettierrc`                  | Prettier formatting rules         |
