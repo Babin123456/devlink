@@ -13,7 +13,7 @@ beforeEach(() => {
     scale: vi.fn(),
     drawImage: vi.fn(),
     restore: vi.fn(),
-  }) as any;
+  }) as unknown as CanvasRenderingContext2D;
 
   HTMLCanvasElement.prototype.toBlob = vi.fn().mockImplementation((callback) => {
     callback(new Blob(["fake-image-bytes"], { type: "image/webp" }));
@@ -21,9 +21,11 @@ beforeEach(() => {
 
   // Mock HTMLImageElement image loading in jsdom
   Object.defineProperty(global.Image.prototype, "src", {
-    set(src: string) {
+    set(this: HTMLImageElement) {
       setTimeout(() => {
-        if (this.onload) this.onload();
+        if (this.onload) {
+          (this.onload as unknown as () => void)();
+        }
       }, 10);
     },
   });
@@ -55,7 +57,9 @@ describe("ImageCropUploadModal (#575)", () => {
     );
 
     const input = screen.getByTestId("file-input");
-    const textFile = new File(["hello text"], "doc.txt", { type: "text/plain" });
+    const textFile = new File(["hello text"], "doc.txt", {
+      type: "text/plain",
+    });
 
     fireEvent.change(input, { target: { files: [textFile] } });
 
@@ -64,9 +68,11 @@ describe("ImageCropUploadModal (#575)", () => {
 
   it("loads valid image file into preview & crop view", async () => {
     vi.spyOn(FileReader.prototype, "readAsDataURL").mockImplementation(function (this: FileReader) {
-      Object.defineProperty(this, "result", { value: "data:image/png;base64,fakebytes" });
+      Object.defineProperty(this, "result", {
+        value: "data:image/png;base64,fakebytes",
+      });
       if (this.onload) {
-        this.onload({ target: this } as any);
+        this.onload({ target: this } as unknown as ProgressEvent<FileReader>);
       }
     });
 
@@ -80,7 +86,9 @@ describe("ImageCropUploadModal (#575)", () => {
     );
 
     const input = screen.getByTestId("file-input");
-    const imageFile = new File(["dummy image content"], "avatar.png", { type: "image/png" });
+    const imageFile = new File(["dummy image content"], "avatar.png", {
+      type: "image/png",
+    });
 
     fireEvent.change(input, { target: { files: [imageFile] } });
 
@@ -93,9 +101,11 @@ describe("ImageCropUploadModal (#575)", () => {
 
   it("triggers upload and shows progress indicator bar on click", async () => {
     vi.spyOn(FileReader.prototype, "readAsDataURL").mockImplementation(function (this: FileReader) {
-      Object.defineProperty(this, "result", { value: "data:image/png;base64,fakebytes" });
+      Object.defineProperty(this, "result", {
+        value: "data:image/png;base64,fakebytes",
+      });
       if (this.onload) {
-        this.onload({ target: this } as any);
+        this.onload({ target: this } as unknown as ProgressEvent<FileReader>);
       }
     });
 
@@ -110,7 +120,9 @@ describe("ImageCropUploadModal (#575)", () => {
     );
 
     const input = screen.getByTestId("file-input");
-    const imageFile = new File(["dummy image content"], "avatar.png", { type: "image/png" });
+    const imageFile = new File(["dummy image content"], "avatar.png", {
+      type: "image/png",
+    });
 
     fireEvent.change(input, { target: { files: [imageFile] } });
 
