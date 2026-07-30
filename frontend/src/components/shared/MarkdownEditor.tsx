@@ -257,62 +257,47 @@ export function MarkdownEditor({
             </div>
           )}
 
-        <TabsContent value="write" className="relative mt-2">
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={handleTextareaChange}
-            onKeyDown={handleKeyDown}
-            placeholder={placeholder}
-            rows={rows}
-            autoFocus={autoFocus}
-            className={cn(
-              "w-full resize-y rounded-md border border-border bg-surface p-3 font-mono text-[13px] leading-relaxed text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20",
-              textareaClassName,
-            )}
-          />
+          <div className="relative mt-2">
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={handleTextareaChange}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              rows={rows}
+              autoFocus={autoFocus}
+              className={cn(
+                "w-full resize-y rounded-md border border-border bg-surface p-3 font-mono text-[13px] leading-relaxed text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20",
+                textareaClassName,
+              )}
+            />
 
-          {/* Autocomplete Dropdown */}
-          {mentionQuery !== null && filteredUsers.length > 0 && (
-            <div className="absolute left-3 bottom-full mb-1 z-50 w-64 rounded-md border border-border bg-surface shadow-lg py-1 overflow-hidden">
-              <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground border-b border-border flex items-center gap-1">
-                <AtSign size={12} /> Mention User
+            {/* Autocomplete Dropdown */}
+            {mentionQuery !== null && filteredUsers.length > 0 && (
+              <div className="absolute left-3 bottom-full mb-1 z-50 w-64 rounded-md border border-border bg-surface shadow-lg py-1 overflow-hidden">
+                <div className="px-2 py-1 text-[11px] font-semibold text-muted-foreground border-b border-border flex items-center gap-1">
+                  <AtSign size={12} /> Mention User
+                </div>
+                {filteredUsers.map((user, i) => (
+                  <button
+                    key={user.id}
+                    type="button"
+                    onClick={() => insertMention(user.id)}
+                    className={cn(
+                      "flex w-full items-center gap-2.5 px-3 py-2 text-left text-[12px] transition-colors",
+                      i === mentionIndex ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted text-foreground"
+                    )}
+                  >
+                    <Avatar src={user.avatar} alt={user.name} size={20} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[12px] font-medium">{user.name}</p>
+                      <p className="truncate text-[10px] text-muted-foreground">@{user.id}</p>
+                    </div>
+                  </button>
+                ))}
               </div>
-              {filteredUsers.map((user, i) => (
-                <button
-                  key={user.id}
-                  type="button"
-                  onClick={() => insertMention(user.id)}
-                  className={cn(
-                    "flex w-full items-center gap-2.5 px-3 py-2 text-left text-[12px] transition-colors",
-                    i === mentionIndex ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted text-foreground"
-                  )}
-                >
-                  <Avatar src={user.avatar} alt={user.name} size={20} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[12px] font-medium">{user.name}</p>
-                    <p className="truncate text-[10px] text-muted-foreground">@{user.id}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="preview" className="mt-2">
-          <div
-            id={previewId}
-            className="rounded-md border border-dashed border-border bg-surface p-3"
-            style={{ minHeight: `${rows * 1.6}em` }}
-          >
-            {value.trim() ? (
-              <Markdown content={value} />
-            ) : (
-              <p className="text-[13px] text-muted-foreground">Nothing to preview yet.</p>
             )}
           </div>
         </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
+
+        <TabsContent value="preview" className="mt-2">
