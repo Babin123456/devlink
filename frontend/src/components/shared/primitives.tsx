@@ -1,8 +1,9 @@
 import { cn, getInitials } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode, type ComponentType } from "react";
 import { motion } from "framer-motion";
 import { useCardAnimation } from "@/lib/animations";
+import { FolderKanban, BellOff, MessageSquareDashed, UserX, SearchX, Sparkles } from "lucide-react";
 
 export function SectionHeader({
   title,
@@ -91,19 +92,38 @@ export function AnimatedCard({
 }
 
 export function EmptyState({
+  icon: Icon = Sparkles,
   title,
   desc,
   action,
+  className,
   icon: Icon,
   illustration,
 }: {
+  icon?: ComponentType<{ className?: string; size?: number }> | ReactNode;
   title: string;
   desc?: string;
   action?: ReactNode;
+  className?: string;
   icon?: React.ComponentType<{ size?: number; className?: string }>;
   illustration?: "empty-box" | "no-results" | "no-messages" | "no-notifications" | "no-bookmarks" | "no-projects";
 }) {
+  const isComponent =
+    typeof Icon === "function" ||
+    (typeof Icon === "object" && Icon !== null && "render" in (Icon as object));
+  const IconComp = isComponent
+    ? (Icon as ComponentType<{ className?: string; size?: number }>)
+    : null;
+
   return (
+    <div
+      className={cn("flex flex-col items-center justify-center py-12 px-4 text-center", className)}
+    >
+      <div className="relative mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm transition-transform hover:scale-105">
+        {IconComp ? (
+          <IconComp className="h-7 w-7 text-primary" />
+        ) : (
+          <div className="text-2xl">{Icon as ReactNode}</div>
     <div className="flex flex-col items-center justify-center py-12 text-center animate-in fade-in duration-200">
       <div className="mb-4">
         {illustration ? (
@@ -114,11 +134,71 @@ export function EmptyState({
           </div>
         )}
       </div>
-      <p className="text-[14px] font-semibold text-foreground">{title}</p>
-      {desc && <p className="mt-1 max-w-xs text-[13px] text-muted-foreground">{desc}</p>}
+      <h3 className="text-[15px] font-semibold tracking-tight text-foreground">{title}</h3>
+      {desc && (
+        <p className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted-foreground">{desc}</p>
+      )}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );
+}
+
+export function NoProjectsEmptyState({
+  title = "No projects found",
+  desc = "There are no projects available right now. Create a new project to start collaborating!",
+  action,
+}: {
+  title?: string;
+  desc?: string;
+  action?: ReactNode;
+}) {
+  return <EmptyState icon={FolderKanban} title={title} desc={desc} action={action} />;
+}
+
+export function NoNotificationsEmptyState({
+  title = "No notifications yet",
+  desc = "You're all caught up! Updates and notifications will appear here as they arrive.",
+}: {
+  title?: string;
+  desc?: string;
+}) {
+  return <EmptyState icon={BellOff} title={title} desc={desc} />;
+}
+
+export function NoMessagesEmptyState({
+  title = "No messages",
+  desc = "Your inbox is empty. Connect with other developers or start a conversation from a profile.",
+  action,
+}: {
+  title?: string;
+  desc?: string;
+  action?: ReactNode;
+}) {
+  return <EmptyState icon={MessageSquareDashed} title={title} desc={desc} action={action} />;
+}
+
+export function NoConnectionsEmptyState({
+  title = "No connections found",
+  desc = "We couldn't find any developers matching your filter criteria.",
+  action,
+}: {
+  title?: string;
+  desc?: string;
+  action?: ReactNode;
+}) {
+  return <EmptyState icon={UserX} title={title} desc={desc} action={action} />;
+}
+
+export function NoSearchResultsEmptyState({
+  title = "No results found",
+  desc = "No matching items found for your search query. Try searching with different keywords.",
+  action,
+}: {
+  title?: string;
+  desc?: string;
+  action?: ReactNode;
+}) {
+  return <EmptyState icon={SearchX} title={title} desc={desc} action={action} />;
 }
 
 function EmptyIllustration({ variant }: { variant: string }) {

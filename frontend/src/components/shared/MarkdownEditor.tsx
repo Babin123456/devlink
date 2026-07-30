@@ -114,13 +114,16 @@ export function MarkdownEditor({
   const [mentionPos, setMentionPos] = useState<{ start: number; end: number } | null>(null);
 
   // Filter builders based on typed @query
-  const filteredUsers = mentionQuery !== null
-    ? builders.filter(
-        (b) =>
-          b.name.toLowerCase().includes(mentionQuery.toLowerCase()) ||
-          b.id.toLowerCase().includes(mentionQuery.toLowerCase())
-      ).slice(0, 5)
-    : [];
+  const filteredUsers =
+    mentionQuery !== null
+      ? builders
+          .filter(
+            (b) =>
+              b.name.toLowerCase().includes(mentionQuery.toLowerCase()) ||
+              b.id.toLowerCase().includes(mentionQuery.toLowerCase()),
+          )
+          .slice(0, 5)
+      : [];
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
@@ -205,6 +208,69 @@ export function MarkdownEditor({
           </p>
         </div>
 
+        <TabsContent value="write" className="relative mt-2">
+          {tab === "write" && (
+            <div className="mb-1.5 flex items-center gap-1 rounded-md border border-border bg-surface p-1">
+              <button
+                type="button"
+                onClick={handleEmoji}
+                aria-label="Insert emoji"
+                title="Emoji"
+                className="inline-flex h-7 w-7 items-center justify-center rounded text-[14px] hover:bg-muted"
+              >
+                😀
+              </button>
+              <button
+                type="button"
+                onClick={handleImage}
+                aria-label="Insert image"
+                title="Image"
+                className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <ImageIcon size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={handleVideo}
+                aria-label="Insert video"
+                title="Video"
+                className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <Video size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={handleMention}
+                aria-label="Insert mention"
+                title="Mention"
+                className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <AtSign size={14} />
+              </button>
+              <button
+                type="button"
+                onClick={handleCodeBlock}
+                aria-label="Insert code block"
+                title="Code Block"
+                className="inline-flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <Code2 size={14} />
+              </button>
+            </div>
+          )}
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={handleTextareaChange}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            rows={rows}
+            autoFocus={autoFocus}
+            className={cn(
+              "w-full resize-y rounded-md border border-border bg-surface p-3 font-mono text-[13px] leading-relaxed text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20",
+              textareaClassName,
+            )}
+          />
         {tab === "write" && (
           <div className="mb-1.5 flex items-center gap-1 rounded-md border border-border bg-surface p-1">
             <button
@@ -294,6 +360,46 @@ export function MarkdownEditor({
                   </button>
                 ))}
               </div>
+              {filteredUsers.map((user, i) => (
+                <button
+                  key={user.id}
+                  type="button"
+                  onClick={() => insertMention(user.id)}
+                  className={cn(
+                    "flex w-full items-center gap-2.5 px-3 py-2 text-left text-[12px] transition-colors",
+                    i === mentionIndex
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "hover:bg-muted text-foreground",
+                  )}
+                >
+                  <Avatar src={user.avatar} alt={user.name} size={20} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[12px] font-medium">{user.name}</p>
+                    <p className="truncate text-[10px] text-muted-foreground">@{user.id}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="preview" className="mt-2">
+          <div
+            id={previewId}
+            className="rounded-md border border-dashed border-border bg-surface p-3"
+            style={{ minHeight: `${rows * 1.6}em` }}
+          >
+            {value.trim() ? (
+              <Markdown content={value} />
+            ) : (
+              <p className="text-[13px] text-muted-foreground">Nothing to preview yet.</p>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
             )}
           </div>
         </TabsContent>

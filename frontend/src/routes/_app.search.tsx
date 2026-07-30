@@ -128,11 +128,7 @@ function SearchPage() {
                 key={item.id}
                 className="group flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-[12px] text-foreground hover:border-primary/50 transition-colors"
               >
-                <button
-                  type="button"
-                  onClick={() => setQ(item.query)}
-                  className="hover:underline"
-                >
+                <button type="button" onClick={() => setQ(item.query)} className="hover:underline">
                   {item.query}
                 </button>
                 <button
