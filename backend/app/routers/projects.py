@@ -49,11 +49,25 @@ def create_project(
             detail="Project slug already exists",
         )
 
-    return ProjectService.create_project(
+    new_project = ProjectService.create_project(
         db=db,
         owner_id=current_user.id,
         project=project,
     )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.PROJECT_CREATED,
+        entity_type="project",
+        entity_id=str(new_project.id),
+        project_id=new_project.id,
+        new_values=project.model_dump(exclude_unset=True),
+    )
+
+    return new_project
 
 
 @router.post(
@@ -187,11 +201,30 @@ def update_project(
             detail="Project not found",
         )
 
-    return ProjectService.update_project(
+    old_values = {}
+    for key in project.model_dump(exclude_unset=True).keys():
+        old_values[key] = getattr(db_project, key, None)
+
+    updated_project = ProjectService.update_project(
         db,
         db_project,
         project,
     )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.PROJECT_UPDATED,
+        entity_type="project",
+        entity_id=str(updated_project.id),
+        project_id=updated_project.id,
+        old_values=old_values,
+        new_values=project.model_dump(exclude_unset=True),
+    )
+
+    return updated_project
 
 
 @router.patch(
@@ -217,10 +250,23 @@ def archive_project(
             detail="Project not found",
         )
 
-    return ProjectService.archive_project(
+    archived_project = ProjectService.archive_project(
         db,
         project,
     )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.PROJECT_ARCHIVED,
+        entity_type="project",
+        entity_id=str(archived_project.id),
+        project_id=archived_project.id,
+    )
+
+    return archived_project
 
 
 @router.patch(
@@ -246,10 +292,23 @@ def restore_project(
             detail="Project not found",
         )
 
-    return ProjectService.restore_project(
+    restored_project = ProjectService.restore_project(
         db,
         project,
     )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.PROJECT_RESTORED,
+        entity_type="project",
+        entity_id=str(restored_project.id),
+        project_id=restored_project.id,
+    )
+
+    return restored_project
 
 
 @router.patch(
@@ -390,6 +449,17 @@ def delete_project(
         project,
     )
 
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.PROJECT_DELETED,
+        entity_type="project",
+        entity_id=str(project_id),
+        project_id=project_id,
+    )
+
 
 @router.post(
     "/{project_id}/invite/{user_id}",
@@ -461,6 +531,18 @@ def invite_user(
         recipient_id=user_id,
         sender_id=current_user.id,
         notification=notification_data,
+    )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.INVITATION_SENT,
+        entity_type="project",
+        entity_id=str(project_id),
+        project_id=project_id,
+        target_user_id=user_id,
     )
 
     return {"message": "User invited successfully"}

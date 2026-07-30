@@ -193,12 +193,35 @@ def update_me(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
 ):
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
 
-    return UserService.update_user(
+    # Extract old values for fields that are being updated
+    old_values = {}
+    for key in user.model_dump(exclude_unset=True).keys():
+        old_values[key] = getattr(current_user, key, None)
+
+    updated_user = UserService.update_user(
         db,
         current_user,
         user,
     )
+
+    new_values = user.model_dump(exclude_unset=True)
+
+    AuditLogService.create_log(
+        db=db,
+        actor_id=updated_user.id,
+        action=AuditAction.PROFILE_UPDATED,
+        entity_type="user",
+        entity_id=str(updated_user.id),
+        target_user_id=updated_user.id,
+        old_values=old_values,
+        new_values=new_values,
+        description="User updated their profile",
+    )
+
+    return updated_user
 
 
 @router.post(

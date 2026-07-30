@@ -120,6 +120,9 @@ app.add_middleware(RequestIDMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(ActivityTrackingMiddleware)
 
+from app.middleware.audit_context import AuditContextMiddleware
+app.add_middleware(AuditContextMiddleware)
+
 # ------------------------------------------------------------------
 # CORS
 # ------------------------------------------------------------------
@@ -229,6 +232,8 @@ app.include_router(bookmarks.router)
 app.include_router(bookmark_collections.router)
 app.include_router(activities.router)
 app.include_router(conversations.router)
+from app.routers import audit
+app.include_router(audit.router, prefix="/api", tags=["Audit"])
 app.include_router(issues.router, prefix="/api/issues", tags=["Issues"])
 app.include_router(profile_summary.router, prefix="/api/profile-summary", tags=["Profile Summary"])
 app.include_router(conversation_starters.router, prefix="/api/conversation-starters", tags=["Conversation Starters"])

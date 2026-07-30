@@ -42,11 +42,25 @@ def create_organization(
             detail="Organization slug already exists",
         )
 
-    return OrganizationService.create_organization(
+    new_org = OrganizationService.create_organization(
         db=db,
         owner_id=current_user.id,
         organization=organization,
     )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.ORGANIZATION_CREATED,
+        entity_type="organization",
+        entity_id=str(new_org.id),
+        organization_id=new_org.id,
+        new_values=organization.model_dump(exclude_unset=True),
+    )
+
+    return new_org
 
 
 @router.get(
@@ -170,11 +184,30 @@ def update_organization(
             detail="Organization not found",
         )
 
-    return OrganizationService.update_organization(
+    old_values = {}
+    for key in organization.model_dump(exclude_unset=True).keys():
+        old_values[key] = getattr(db_organization, key, None)
+
+    updated_org = OrganizationService.update_organization(
         db,
         db_organization,
         organization,
     )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.ORGANIZATION_UPDATED,
+        entity_type="organization",
+        entity_id=str(updated_org.id),
+        organization_id=updated_org.id,
+        old_values=old_values,
+        new_values=organization.model_dump(exclude_unset=True),
+    )
+
+    return updated_org
 
 
 @router.patch(
@@ -336,4 +369,15 @@ def delete_organization(
     OrganizationService.delete_organization(
         db,
         organization,
+    )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.ORGANIZATION_DELETED,
+        entity_type="organization",
+        entity_id=str(organization_id),
+        organization_id=organization_id,
     )
