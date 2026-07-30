@@ -7,14 +7,19 @@ import { cn } from "@/lib/utils";
 export function BookmarkToggleButton({
   targetType,
   targetId,
+  projectId,
   className,
 }: {
-  targetType: BookmarkTargetType;
-  targetId: string;
+  targetType?: BookmarkTargetType;
+  targetId?: string;
+  projectId?: string;
   className?: string;
 }) {
-  const { data: status, isLoading } = useBookmarkStatus(targetType, targetId);
-  const toggleBookmark = useToggleBookmark(targetType, targetId);
+  const resolvedTargetType = targetType ?? "project";
+  const resolvedTargetId = targetId ?? projectId ?? "";
+
+  const { data: status, isLoading } = useBookmarkStatus(resolvedTargetType, resolvedTargetId);
+  const toggleBookmark = useToggleBookmark(resolvedTargetType, resolvedTargetId);
 
   if (isLoading) {
     return (

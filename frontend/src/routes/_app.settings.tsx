@@ -2,8 +2,10 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/shared/primitives";
+import { UserAvatar } from "@/components/user-avatar";
+import { ImageCropUploadModal } from "@/components/shared/ImageCropUploadModal";
 import { DeleteAccountModal } from "@/components/settings/DeleteAccountModal";
-import { Trash2, Eye, EyeOff, Download } from "lucide-react";
+import { Trash2, Eye, EyeOff, Download, Camera, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { currentUser } from "@/mocks/seed";
@@ -34,6 +36,14 @@ function SettingsPage() {
   const [savingPassword, setSavingPassword] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  // Avatar & Banner state
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(currentUser.avatar);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(
+    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&h=400&fit=crop&auto=format",
+  );
 
   const handleConfirmDelete = async () => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -73,46 +83,122 @@ function SettingsPage() {
           <p className="text-[15px] font-semibold text-foreground">{tab}</p>
           <div className="mt-4 space-y-4">
             {tab === "Account" && (
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  if (savingAccount) return;
-                  setSavingAccount(true);
-                  try {
-                    await new Promise((r) => setTimeout(r, 800));
-                    toast.success("Saved");
-                  } finally {
-                    setSavingAccount(false);
-                  }
-                }}
-                className="space-y-4"
-              >
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className={lbl}>Full name</label>
-                    <input className={inp} defaultValue={currentUser.name} />
+              <div className="space-y-6">
+                {/* Profile Media Section */}
+                <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-4">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Profile Media
+                  </h3>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {/* Avatar Upload Container */}
+                    <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-4 text-center">
+                      <UserAvatar
+                        src={avatarUrl}
+                        name={currentUser.name}
+                        size="xl"
+                        editable
+                        onImageUpload={(url) => setAvatarUrl(url)}
+                      />
+                      <div>
+                        <p className="text-xs font-semibold text-foreground">Avatar Photo</p>
+                        <p className="text-[11px] text-muted-foreground">Drag & drop or crop before upload</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsAvatarModalOpen(true)}
+                        className="h-8 gap-1.5 text-xs"
+                      >
+                        <Upload size={13} />
+                        Change Avatar
+                      </Button>
+                    </div>
+
+                    {/* Banner Upload Container */}
+                    <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-4 text-center">
+                      <div className="relative h-16 w-full overflow-hidden rounded-md bg-muted">
+                        {bannerUrl ? (
+                          <img src={bannerUrl} alt="Banner preview" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="h-full w-full bg-gradient-to-r from-primary/30 to-purple-500/30" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-foreground">Header Banner</p>
+                        <p className="text-[11px] text-muted-foreground">3:1 aspect ratio landscape</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsBannerModalOpen(true)}
+                        className="h-8 gap-1.5 text-xs"
+                      >
+                        <Camera size={13} />
+                        Edit Banner
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (savingAccount) return;
+                    setSavingAccount(true);
+                    try {
+                      await new Promise((r) => setTimeout(r, 800));
+                      toast.success("Saved");
+                    } finally {
+                      setSavingAccount(false);
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className={lbl}>Full name</label>
+                      <input className={inp} defaultValue={currentUser.name} />
+                    </div>
+                    <div>
+                      <label className={lbl}>Username</label>
+                      <input className={inp} defaultValue={currentUser.handle} />
+                    </div>
                   </div>
                   <div>
-                    <label className={lbl}>Username</label>
-                    <input className={inp} defaultValue={currentUser.handle} />
+                    <label className={lbl}>Email</label>
+                    <input className={inp} defaultValue="nancy@devlink.io" />
                   </div>
-                </div>
-                <div>
-                  <label className={lbl}>Email</label>
-                  <input className={inp} defaultValue="nancy@devlink.io" />
-                </div>
-                <div>
-                  <label className={lbl}>Bio</label>
-                  <textarea
-                    rows={3}
-                    className={inp}
-                    defaultValue="Product engineer. React / Postgres / Rust."
-                  />
-                </div>
-                <LoadingButton type="submit" loading={savingAccount} loadingText="Saving...">
-                  Save changes
-                </LoadingButton>
-              </form>
+                  <div>
+                    <label className={lbl}>Bio</label>
+                    <textarea
+                      rows={3}
+                      className={inp}
+                      defaultValue="Product engineer. React / Postgres / Rust."
+                    />
+                  </div>
+                  <LoadingButton type="submit" loading={savingAccount} loadingText="Saving...">
+                    Save changes
+                  </LoadingButton>
+                </form>
+
+                <ImageCropUploadModal
+                  isOpen={isAvatarModalOpen}
+                  onClose={() => setIsAvatarModalOpen(false)}
+                  onUploadSuccess={(url) => setAvatarUrl(url)}
+                  mode="avatar"
+                  title="Upload Avatar Image"
+                />
+
+                <ImageCropUploadModal
+                  isOpen={isBannerModalOpen}
+                  onClose={() => setIsBannerModalOpen(false)}
+                  onUploadSuccess={(url) => setBannerUrl(url)}
+                  mode="banner"
+                  title="Upload Header Banner"
+                />
+              </div>
             )}
             {tab === "Appearance" && (
               <div className="space-y-3 text-[13px] text-foreground">
