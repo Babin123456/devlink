@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { copyText } from "@/lib/clipboard";
 import { ReportUserModal } from "@/components/shared/ReportUserModal";
+import SkillsCard from "@/components/profile/SkillsCard";
+import ExperienceCard from "@/components/profile/ExperienceCard";
 
 export const Route = createFileRoute("/_app/profile/$username")({
   head: ({ params }) => ({
@@ -231,6 +233,23 @@ function ProfilePage() {
             </p>
             <p className="mt-2 text-[13px] text-foreground">{b.bio}</p>
             <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
+              <div>
+                <span className="font-semibold">{b.followers ?? 0}</span>
+                <span className="m-1 text-muted-foreground">Followers</span>
+
+              </div>
+              <div>
+                <span className="font-semibold">{b.following ?? 0}</span>
+                <span className="m-1 text-muted-foreground">Following</span>
+
+              </div>
+              <div>
+                <span className="font-semibold">{b.contributions?? 0}</span>
+                <span className="ml-1 text-muted-foreground">Contributions</span>
+
+              </div>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
               <span className="inline-flex items-center gap-1">
                 <MapPin size={12} /> {b.country}
               </span>
@@ -383,14 +402,28 @@ function ProfilePage() {
 
       <div className="grid gap-4 lg:grid-cols-3 items-start">
         <div className="flex flex-col gap-4">
-          <Card className="p-4">
+          {/* <Card className="p-4">
             <p className="text-[13px] font-semibold text-foreground">Skills</p>
             <div className="mt-3 flex flex-wrap gap-1">
               {b.skills.map((s) => (
                 <TagChip key={s}>{s}</TagChip>
               ))}
             </div>
-          </Card>
+          </Card> */}
+          <SkillsCard skills={b.profileSkills ?? []} />
+          <ExperienceCard role={b.role} company={b.company} experienceLevel={b.experienceLevel} />
+
+          {b.pinnedProjects?.length ? (
+            <Card className="p-4">
+              <p className="text-[13px] font-semibold text-foreground">Pinned Projects</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {b.pinnedProjects.map((project) => (
+                  <TagChip key={project}>{project}</TagChip>
+                ))}
+              </div>
+            </Card>
+          ):null }
+
           {b.badges && b.badges.length > 0 && (
             <Card className="p-4">
               <p className="text-[13px] font-semibold text-foreground">Badges</p>
