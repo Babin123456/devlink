@@ -23,10 +23,44 @@ export function EmptySearchState({
         xmlns="http://www.w3.org/2000/svg"
         className="mb-4 animate-in zoom-in-50 duration-300"
       >
-        <circle cx="50" cy="45" r="25" stroke="var(--muted-foreground)" strokeWidth="2" opacity="0.25" />
-        <line x1="68" y1="63" x2="80" y2="75" stroke="var(--muted-foreground)" strokeWidth="3" opacity="0.2" strokeLinecap="round" />
-        <line x1="42" y1="42" x2="58" y2="42" stroke="var(--primary)" strokeWidth="2" opacity="0.3" strokeLinecap="round" />
-        <line x1="42" y1="50" x2="54" y2="50" stroke="var(--primary)" strokeWidth="2" opacity="0.2" strokeLinecap="round" />
+        <circle
+          cx="50"
+          cy="45"
+          r="25"
+          stroke="var(--muted-foreground)"
+          strokeWidth="2"
+          opacity="0.25"
+        />
+        <line
+          x1="68"
+          y1="63"
+          x2="80"
+          y2="75"
+          stroke="var(--muted-foreground)"
+          strokeWidth="3"
+          opacity="0.2"
+          strokeLinecap="round"
+        />
+        <line
+          x1="42"
+          y1="42"
+          x2="58"
+          y2="42"
+          stroke="var(--primary)"
+          strokeWidth="2"
+          opacity="0.3"
+          strokeLinecap="round"
+        />
+        <line
+          x1="42"
+          y1="50"
+          x2="54"
+          y2="50"
+          stroke="var(--primary)"
+          strokeWidth="2"
+          opacity="0.2"
+          strokeLinecap="round"
+        />
         <circle cx="35" cy="25" r="3" fill="var(--primary)" opacity="0.15" />
       </svg>
       <p className="text-[14px] font-semibold text-foreground">{title}</p>

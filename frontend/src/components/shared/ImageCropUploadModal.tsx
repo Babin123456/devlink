@@ -1,7 +1,22 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Upload, ZoomIn, ZoomOut, RotateCw, RefreshCw, Image as ImageIcon, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  Upload,
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+  RefreshCw,
+  Image as ImageIcon,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { uploadImage } from "@/services/imageUpload";
 import { cn } from "@/lib/utils";

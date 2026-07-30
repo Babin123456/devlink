@@ -19,11 +19,6 @@ export function BookmarkToggleButton({
   const actualTargetId = targetId ?? projectId ?? "";
   const { data: status, isLoading } = useBookmarkStatus(actualTargetType, actualTargetId);
   const toggleBookmark = useToggleBookmark(actualTargetType, actualTargetId);
-  const resolvedTargetType = targetType ?? "project";
-  const resolvedTargetId = targetId ?? projectId ?? "";
-
-  const { data: status, isLoading } = useBookmarkStatus(resolvedTargetType, resolvedTargetId);
-  const toggleBookmark = useToggleBookmark(resolvedTargetType, resolvedTargetId);
 
   if (isLoading) {
     return (

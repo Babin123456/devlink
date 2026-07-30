@@ -97,7 +97,6 @@ export function EmptyState({
   desc,
   action,
   className,
-  icon: Icon,
   illustration,
 }: {
   icon?: ComponentType<{ className?: string; size?: number }> | ReactNode;
@@ -105,8 +104,13 @@ export function EmptyState({
   desc?: string;
   action?: ReactNode;
   className?: string;
-  icon?: React.ComponentType<{ size?: number; className?: string }>;
-  illustration?: "empty-box" | "no-results" | "no-messages" | "no-notifications" | "no-bookmarks" | "no-projects";
+  illustration?:
+    | "empty-box"
+    | "no-results"
+    | "no-messages"
+    | "no-notifications"
+    | "no-bookmarks"
+    | "no-projects";
 }) {
   const isComponent =
     typeof Icon === "function" ||
@@ -117,20 +121,17 @@ export function EmptyState({
 
   return (
     <div
-      className={cn("flex flex-col items-center justify-center py-12 px-4 text-center", className)}
+      className={cn(
+        "flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in duration-200",
+        className,
+      )}
     >
-      <div className="relative mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm transition-transform hover:scale-105">
-        {IconComp ? (
-          <IconComp className="h-7 w-7 text-primary" />
-        ) : (
-          <div className="text-2xl">{Icon as ReactNode}</div>
-    <div className="flex flex-col items-center justify-center py-12 text-center animate-in fade-in duration-200">
       <div className="mb-4">
         {illustration ? (
           <EmptyIllustration variant={illustration} />
         ) : (
-          <div className="mb-3 grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft text-primary shadow-xs">
-            {Icon ? <Icon size={24} /> : "✨"}
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft text-primary shadow-xs">
+            {IconComp ? <IconComp size={24} /> : ((Icon as ReactNode) ?? "\u2728")}
           </div>
         )}
       </div>
@@ -213,50 +214,183 @@ function EmptyIllustration({ variant }: { variant: string }) {
     >
       {variant === "empty-box" && (
         <>
-          <rect x="30" y="30" width="60" height="50" rx="6" stroke="var(--muted-foreground)" strokeWidth="2" opacity="0.3" />
-          <rect x="40" y="40" width="40" height="30" rx="4" stroke="var(--primary)" strokeWidth="2" opacity="0.4" />
-          <line x1="50" y1="50" x2="70" y2="50" stroke="var(--primary)" strokeWidth="2" opacity="0.3" strokeLinecap="round" />
-          <line x1="50" y1="58" x2="65" y2="58" stroke="var(--primary)" strokeWidth="2" opacity="0.2" strokeLinecap="round" />
+          <rect
+            x="30"
+            y="30"
+            width="60"
+            height="50"
+            rx="6"
+            stroke="var(--muted-foreground)"
+            strokeWidth="2"
+            opacity="0.3"
+          />
+          <rect
+            x="40"
+            y="40"
+            width="40"
+            height="30"
+            rx="4"
+            stroke="var(--primary)"
+            strokeWidth="2"
+            opacity="0.4"
+          />
+          <line
+            x1="50"
+            y1="50"
+            x2="70"
+            y2="50"
+            stroke="var(--primary)"
+            strokeWidth="2"
+            opacity="0.3"
+            strokeLinecap="round"
+          />
+          <line
+            x1="50"
+            y1="58"
+            x2="65"
+            y2="58"
+            stroke="var(--primary)"
+            strokeWidth="2"
+            opacity="0.2"
+            strokeLinecap="round"
+          />
           <circle cx="35" cy="25" r="3" fill="var(--primary)" opacity="0.2" />
           <circle cx="85" cy="22" r="2" fill="var(--primary)" opacity="0.15" />
         </>
       )}
       {variant === "no-results" && (
         <>
-          <circle cx="50" cy="45" r="25" stroke="var(--muted-foreground)" strokeWidth="2" opacity="0.25" />
-          <line x1="68" y1="63" x2="80" y2="75" stroke="var(--muted-foreground)" strokeWidth="3" opacity="0.2" strokeLinecap="round" />
-          <line x1="42" y1="42" x2="58" y2="42" stroke="var(--primary)" strokeWidth="2" opacity="0.3" strokeLinecap="round" />
-          <line x1="42" y1="50" x2="54" y2="50" stroke="var(--primary)" strokeWidth="2" opacity="0.2" strokeLinecap="round" />
+          <circle
+            cx="50"
+            cy="45"
+            r="25"
+            stroke="var(--muted-foreground)"
+            strokeWidth="2"
+            opacity="0.25"
+          />
+          <line
+            x1="68"
+            y1="63"
+            x2="80"
+            y2="75"
+            stroke="var(--muted-foreground)"
+            strokeWidth="3"
+            opacity="0.2"
+            strokeLinecap="round"
+          />
+          <line
+            x1="42"
+            y1="42"
+            x2="58"
+            y2="42"
+            stroke="var(--primary)"
+            strokeWidth="2"
+            opacity="0.3"
+            strokeLinecap="round"
+          />
+          <line
+            x1="42"
+            y1="50"
+            x2="54"
+            y2="50"
+            stroke="var(--primary)"
+            strokeWidth="2"
+            opacity="0.2"
+            strokeLinecap="round"
+          />
           <circle cx="35" cy="25" r="3" fill="var(--primary)" opacity="0.15" />
         </>
       )}
       {variant === "no-messages" && (
         <>
-          <rect x="25" y="25" width="70" height="40" rx="8" stroke="var(--muted-foreground)" strokeWidth="2" opacity="0.25" />
-          <path d="M40 35 L55 35 M40 45 L65 45 M40 55 L50 55" stroke="var(--primary)" strokeWidth="2" opacity="0.3" strokeLinecap="round" />
+          <rect
+            x="25"
+            y="25"
+            width="70"
+            height="40"
+            rx="8"
+            stroke="var(--muted-foreground)"
+            strokeWidth="2"
+            opacity="0.25"
+          />
+          <path
+            d="M40 35 L55 35 M40 45 L65 45 M40 55 L50 55"
+            stroke="var(--primary)"
+            strokeWidth="2"
+            opacity="0.3"
+            strokeLinecap="round"
+          />
           <circle cx="35" cy="20" r="2" fill="var(--primary)" opacity="0.15" />
           <circle cx="88" cy="22" r="2.5" fill="var(--primary)" opacity="0.2" />
         </>
       )}
       {variant === "no-notifications" && (
         <>
-          <path d="M50 25 C42 25 38 30 38 38 L38 55 L32 55 L68 55 L62 55 L62 38 C62 30 58 25 50 25" stroke="var(--muted-foreground)" strokeWidth="2" opacity="0.25" strokeLinejoin="round" />
+          <path
+            d="M50 25 C42 25 38 30 38 38 L38 55 L32 55 L68 55 L62 55 L62 38 C62 30 58 25 50 25"
+            stroke="var(--muted-foreground)"
+            strokeWidth="2"
+            opacity="0.25"
+            strokeLinejoin="round"
+          />
           <circle cx="50" cy="68" r="4" stroke="var(--primary)" strokeWidth="2" opacity="0.3" />
           <circle cx="35" cy="22" r="2" fill="var(--primary)" opacity="0.15" />
         </>
       )}
       {variant === "no-bookmarks" && (
         <>
-          <path d="M35 25 L35 70 L50 58 L65 70 L65 25 Z" stroke="var(--muted-foreground)" strokeWidth="2" opacity="0.25" strokeLinejoin="round" />
-          <line x1="42" y1="35" x2="58" y2="35" stroke="var(--primary)" strokeWidth="2" opacity="0.2" strokeLinecap="round" />
+          <path
+            d="M35 25 L35 70 L50 58 L65 70 L65 25 Z"
+            stroke="var(--muted-foreground)"
+            strokeWidth="2"
+            opacity="0.25"
+            strokeLinejoin="round"
+          />
+          <line
+            x1="42"
+            y1="35"
+            x2="58"
+            y2="35"
+            stroke="var(--primary)"
+            strokeWidth="2"
+            opacity="0.2"
+            strokeLinecap="round"
+          />
           <circle cx="30" cy="22" r="2.5" fill="var(--primary)" opacity="0.15" />
         </>
       )}
       {variant === "no-projects" && (
         <>
-          <rect x="30" y="25" width="25" height="25" rx="4" stroke="var(--muted-foreground)" strokeWidth="2" opacity="0.25" />
-          <rect x="65" y="30" width="25" height="25" rx="4" stroke="var(--primary)" strokeWidth="2" opacity="0.3" />
-          <rect x="45" y="60" width="25" height="25" rx="4" stroke="var(--muted-foreground)" strokeWidth="2" opacity="0.2" />
+          <rect
+            x="30"
+            y="25"
+            width="25"
+            height="25"
+            rx="4"
+            stroke="var(--muted-foreground)"
+            strokeWidth="2"
+            opacity="0.25"
+          />
+          <rect
+            x="65"
+            y="30"
+            width="25"
+            height="25"
+            rx="4"
+            stroke="var(--primary)"
+            strokeWidth="2"
+            opacity="0.3"
+          />
+          <rect
+            x="45"
+            y="60"
+            width="25"
+            height="25"
+            rx="4"
+            stroke="var(--muted-foreground)"
+            strokeWidth="2"
+            opacity="0.2"
+          />
           <circle cx="35" cy="20" r="2" fill="var(--primary)" opacity="0.15" />
           <circle cx="90" cy="22" r="2" fill="var(--primary)" opacity="0.1" />
         </>
@@ -345,7 +479,6 @@ export function Avatar({
   );
 }
 
-
 // export function NoNotificationsEmptyState() {
 //   return (
 //     <EmptyState
@@ -364,7 +497,6 @@ export function Avatar({
 // }) {
 //   return <EmptyState title={title} desc={desc} />;
 // }
-
 
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cn("animate-pulse rounded-xl bg-muted/70", className)} />;
