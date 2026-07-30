@@ -2,9 +2,9 @@ Here's the complete `docs/WEBSOCKETS.md` documentation file:
 
 ---
 
-## 📁 `docs/WEBSOCKETS.md` (NEW — full contents)
+## `docs/WEBSOCKETS.md` (NEW — full contents)
 
-````markdown
+
 # Real-Time Team Collaboration (WebSockets)
 
 ## Overview
