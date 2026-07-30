@@ -7,17 +7,25 @@ from enum import Enum
 from sqlalchemy import (
     Boolean,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
     Integer,
     String,
     Text,
     func,
 )
+from sqlalchemy import (
+    Enum as SqlEnum,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
+
+# Forward reference for type annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 
 class OrganizationType(str, Enum):
@@ -177,7 +185,30 @@ class Organization(Base):
 
     owner = relationship(
         "User",
+        foreign_keys=[owner_id],
         backref="organizations",
+    )
+
+    # ==========================================================
+    # Soft Delete
+    # ==========================================================
+
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
+    )
+
+    deleted_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+    )
+
+    deleted_by: Mapped[User | None] = relationship(
+        "User",
+        foreign_keys=[deleted_by_id],
     )
 
     # ==========================================================
@@ -199,8 +230,5 @@ class Organization(Base):
 
     def __repr__(self):
         return (
-            f"<Organization("
-            f"name='{self.name}', "
-            f"type='{self.organization_type.value}'"
-            f")>"
+            f"<Organization(name='{self.name}', type='{self.organization_type.value}')>"
         )

@@ -7,51 +7,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.database.base import Base
-from app.dependencies import get_database, get_current_user
+from app.dependencies import get_database
 from app.main import app
 from app.models.user import User
-from app.models.project import Project, ProjectStage, ProjectVisibility
+from app.models.project import ProjectStage, ProjectVisibility
 from app.schemas.project import ProjectCreate
 from app.services.project_service import ProjectService
-
-engine = create_engine(
-    "sqlite://",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-
-
-@event.listens_for(engine, "connect")
-def _set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.close()
-
-
-TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-    finally:
-        db.close()
-
-
-@pytest.fixture(autouse=True)
-def setup_db():
-    app.dependency_overrides[get_database] = override_get_db
-    Base.metadata.create_all(bind=engine)
-
-    yield
-
-    Base.metadata.drop_all(bind=engine)
-    app.dependency_overrides.clear()
 
 
 def _create_user(db, email: str, username: str) -> User:
@@ -162,9 +123,8 @@ def test_list_projects_does_not_increment_views():
     db.close()
 
 
-import pytest
-import uuid
-from fastapi.testclient import TestClient
+import pytest  # noqa: E402
+import uuid  # noqa: E402
 
 
 def test_create_project(client: TestClient, register_and_login):

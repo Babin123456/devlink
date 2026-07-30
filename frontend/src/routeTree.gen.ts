@@ -9,13 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AvatarRouteImport } from './routes/avatar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PortfolioUsernameRouteImport } from './routes/portfolio.$username'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppSearchRouteImport } from './routes/_app.search'
+import { Route as AppRepositoryQualityRouteImport } from './routes/_app.repository-quality'
 import { Route as AppProjectsRouteImport } from './routes/_app.projects'
 import { Route as AppOrganizationsRouteImport } from './routes/_app.organizations'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
@@ -32,11 +35,23 @@ import { Route as AppProjectsProjectIdRouteImport } from './routes/_app.projects
 import { Route as AppProfileUsernameRouteImport } from './routes/_app.profile.$username'
 import { Route as AppOrganizationsOrgIdRouteImport } from './routes/_app.organizations.$orgId'
 import { Route as AppMessagesConversationIdRouteImport } from './routes/_app.messages.$conversationId'
+import { Route as AppHackathonsHackathonIdRouteImport } from './routes/_app.hackathons.$hackathonId'
 import { Route as AppBuildersBuilderIdRouteImport } from './routes/_app.builders.$builderId'
+import { Route as AppProjectsProjectIdIssuesRouteImport } from './routes/_app.projects.$projectId.issues'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvatarRoute = AvatarRouteImport.update({
+  id: '/avatar',
+  path: '/avatar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -66,6 +81,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
 const AppSearchRoute = AppSearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRepositoryQualityRoute = AppRepositoryQualityRouteImport.update({
+  id: '/repository-quality',
+  path: '/repository-quality',
   getParentRoute: () => AppRoute,
 } as any)
 const AppProjectsRoute = AppProjectsRouteImport.update({
@@ -149,94 +169,123 @@ const AppMessagesConversationIdRoute =
     path: '/$conversationId',
     getParentRoute: () => AppMessagesRoute,
   } as any)
+const AppHackathonsHackathonIdRoute =
+  AppHackathonsHackathonIdRouteImport.update({
+    id: '/$hackathonId',
+    path: '/$hackathonId',
+    getParentRoute: () => AppHackathonsRoute,
+  } as any)
 const AppBuildersBuilderIdRoute = AppBuildersBuilderIdRouteImport.update({
   id: '/$builderId',
   path: '/$builderId',
   getParentRoute: () => AppBuildersRoute,
 } as any)
+const AppProjectsProjectIdIssuesRoute =
+  AppProjectsProjectIdIssuesRouteImport.update({
+    id: '/issues',
+    path: '/issues',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/avatar': typeof AvatarRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/analytics': typeof AppAnalyticsRoute
   '/bookmarks': typeof AppBookmarksRoute
   '/builders': typeof AppBuildersRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
   '/feed': typeof AppFeedRoute
   '/flares': typeof AppFlaresRoute
-  '/hackathons': typeof AppHackathonsRoute
+  '/hackathons': typeof AppHackathonsRouteWithChildren
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
   '/organizations': typeof AppOrganizationsRouteWithChildren
   '/projects': typeof AppProjectsRouteWithChildren
+  '/repository-quality': typeof AppRepositoryQualityRoute
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
   '/builders/$builderId': typeof AppBuildersBuilderIdRoute
+  '/hackathons/$hackathonId': typeof AppHackathonsHackathonIdRoute
   '/messages/$conversationId': typeof AppMessagesConversationIdRoute
   '/organizations/$orgId': typeof AppOrganizationsOrgIdRoute
   '/profile/$username': typeof AppProfileUsernameRoute
-  '/projects/$projectId': typeof AppProjectsProjectIdRoute
+  '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
   '/organizations/': typeof AppOrganizationsIndexRoute
+  '/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/avatar': typeof AvatarRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/analytics': typeof AppAnalyticsRoute
   '/bookmarks': typeof AppBookmarksRoute
   '/builders': typeof AppBuildersRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
   '/feed': typeof AppFeedRoute
   '/flares': typeof AppFlaresRoute
-  '/hackathons': typeof AppHackathonsRoute
+  '/hackathons': typeof AppHackathonsRouteWithChildren
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
   '/projects': typeof AppProjectsRouteWithChildren
+  '/repository-quality': typeof AppRepositoryQualityRoute
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
   '/builders/$builderId': typeof AppBuildersBuilderIdRoute
+  '/hackathons/$hackathonId': typeof AppHackathonsHackathonIdRoute
   '/messages/$conversationId': typeof AppMessagesConversationIdRoute
   '/organizations/$orgId': typeof AppOrganizationsOrgIdRoute
   '/profile/$username': typeof AppProfileUsernameRoute
-  '/projects/$projectId': typeof AppProjectsProjectIdRoute
+  '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
   '/organizations': typeof AppOrganizationsIndexRoute
+  '/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/avatar': typeof AvatarRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/bookmarks': typeof AppBookmarksRoute
   '/_app/builders': typeof AppBuildersRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/flares': typeof AppFlaresRoute
-  '/_app/hackathons': typeof AppHackathonsRoute
+  '/_app/hackathons': typeof AppHackathonsRouteWithChildren
   '/_app/messages': typeof AppMessagesRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/organizations': typeof AppOrganizationsRouteWithChildren
   '/_app/projects': typeof AppProjectsRouteWithChildren
+  '/_app/repository-quality': typeof AppRepositoryQualityRoute
   '/_app/search': typeof AppSearchRoute
   '/_app/settings': typeof AppSettingsRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
   '/_app/builders/$builderId': typeof AppBuildersBuilderIdRoute
+  '/_app/hackathons/$hackathonId': typeof AppHackathonsHackathonIdRoute
   '/_app/messages/$conversationId': typeof AppMessagesConversationIdRoute
   '/_app/organizations/$orgId': typeof AppOrganizationsOrgIdRoute
   '/_app/profile/$username': typeof AppProfileUsernameRoute
-  '/_app/projects/$projectId': typeof AppProjectsProjectIdRoute
+  '/_app/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
   '/_app/organizations/': typeof AppOrganizationsIndexRoute
+  '/_app/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/avatar'
     | '/forgot-password'
+    | '/reset-password'
     | '/analytics'
     | '/bookmarks'
     | '/builders'
@@ -248,20 +297,25 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/organizations'
     | '/projects'
+    | '/repository-quality'
     | '/search'
     | '/settings'
     | '/portfolio/$username'
     | '/builders/$builderId'
+    | '/hackathons/$hackathonId'
     | '/messages/$conversationId'
     | '/organizations/$orgId'
     | '/profile/$username'
     | '/projects/$projectId'
     | '/organizations/'
+    | '/projects/$projectId/issues'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/avatar'
     | '/forgot-password'
+    | '/reset-password'
     | '/analytics'
     | '/bookmarks'
     | '/builders'
@@ -272,21 +326,26 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/projects'
+    | '/repository-quality'
     | '/search'
     | '/settings'
     | '/portfolio/$username'
     | '/builders/$builderId'
+    | '/hackathons/$hackathonId'
     | '/messages/$conversationId'
     | '/organizations/$orgId'
     | '/profile/$username'
     | '/projects/$projectId'
     | '/organizations'
+    | '/projects/$projectId/issues'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/auth'
+    | '/avatar'
     | '/forgot-password'
+    | '/reset-password'
     | '/_app/analytics'
     | '/_app/bookmarks'
     | '/_app/builders'
@@ -298,32 +357,51 @@ export interface FileRouteTypes {
     | '/_app/notifications'
     | '/_app/organizations'
     | '/_app/projects'
+    | '/_app/repository-quality'
     | '/_app/search'
     | '/_app/settings'
     | '/portfolio/$username'
     | '/_app/builders/$builderId'
+    | '/_app/hackathons/$hackathonId'
     | '/_app/messages/$conversationId'
     | '/_app/organizations/$orgId'
     | '/_app/profile/$username'
     | '/_app/projects/$projectId'
     | '/_app/organizations/'
+    | '/_app/projects/$projectId/issues'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
+  AvatarRoute: typeof AvatarRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   PortfolioUsernameRoute: typeof PortfolioUsernameRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/forgot-password': {
       id: '/forgot-password'
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/avatar': {
+      id: '/avatar'
+      path: '/avatar'
+      fullPath: '/avatar'
+      preLoaderRoute: typeof AvatarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -366,6 +444,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof AppSearchRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/repository-quality': {
+      id: '/_app/repository-quality'
+      path: '/repository-quality'
+      fullPath: '/repository-quality'
+      preLoaderRoute: typeof AppRepositoryQualityRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/projects': {
@@ -480,12 +565,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMessagesConversationIdRouteImport
       parentRoute: typeof AppMessagesRoute
     }
+    '/_app/hackathons/$hackathonId': {
+      id: '/_app/hackathons/$hackathonId'
+      path: '/$hackathonId'
+      fullPath: '/hackathons/$hackathonId'
+      preLoaderRoute: typeof AppHackathonsHackathonIdRouteImport
+      parentRoute: typeof AppHackathonsRoute
+    }
     '/_app/builders/$builderId': {
       id: '/_app/builders/$builderId'
       path: '/$builderId'
       fullPath: '/builders/$builderId'
       preLoaderRoute: typeof AppBuildersBuilderIdRouteImport
       parentRoute: typeof AppBuildersRoute
+    }
+    '/_app/projects/$projectId/issues': {
+      id: '/_app/projects/$projectId/issues'
+      path: '/issues'
+      fullPath: '/projects/$projectId/issues'
+      preLoaderRoute: typeof AppProjectsProjectIdIssuesRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
     }
   }
 }
@@ -500,6 +599,18 @@ const AppBuildersRouteChildren: AppBuildersRouteChildren = {
 
 const AppBuildersRouteWithChildren = AppBuildersRoute._addFileChildren(
   AppBuildersRouteChildren,
+)
+
+interface AppHackathonsRouteChildren {
+  AppHackathonsHackathonIdRoute: typeof AppHackathonsHackathonIdRoute
+}
+
+const AppHackathonsRouteChildren: AppHackathonsRouteChildren = {
+  AppHackathonsHackathonIdRoute: AppHackathonsHackathonIdRoute,
+}
+
+const AppHackathonsRouteWithChildren = AppHackathonsRoute._addFileChildren(
+  AppHackathonsRouteChildren,
 )
 
 interface AppMessagesRouteChildren {
@@ -527,12 +638,23 @@ const AppOrganizationsRouteChildren: AppOrganizationsRouteChildren = {
 const AppOrganizationsRouteWithChildren =
   AppOrganizationsRoute._addFileChildren(AppOrganizationsRouteChildren)
 
+interface AppProjectsProjectIdRouteChildren {
+  AppProjectsProjectIdIssuesRoute: typeof AppProjectsProjectIdIssuesRoute
+}
+
+const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
+  AppProjectsProjectIdIssuesRoute: AppProjectsProjectIdIssuesRoute,
+}
+
+const AppProjectsProjectIdRouteWithChildren =
+  AppProjectsProjectIdRoute._addFileChildren(AppProjectsProjectIdRouteChildren)
+
 interface AppProjectsRouteChildren {
-  AppProjectsProjectIdRoute: typeof AppProjectsProjectIdRoute
+  AppProjectsProjectIdRoute: typeof AppProjectsProjectIdRouteWithChildren
 }
 
 const AppProjectsRouteChildren: AppProjectsRouteChildren = {
-  AppProjectsProjectIdRoute: AppProjectsProjectIdRoute,
+  AppProjectsProjectIdRoute: AppProjectsProjectIdRouteWithChildren,
 }
 
 const AppProjectsRouteWithChildren = AppProjectsRoute._addFileChildren(
@@ -546,11 +668,12 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppFeedRoute: typeof AppFeedRoute
   AppFlaresRoute: typeof AppFlaresRoute
-  AppHackathonsRoute: typeof AppHackathonsRoute
+  AppHackathonsRoute: typeof AppHackathonsRouteWithChildren
   AppMessagesRoute: typeof AppMessagesRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppOrganizationsRoute: typeof AppOrganizationsRouteWithChildren
   AppProjectsRoute: typeof AppProjectsRouteWithChildren
+  AppRepositoryQualityRoute: typeof AppRepositoryQualityRoute
   AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppProfileUsernameRoute: typeof AppProfileUsernameRoute
@@ -563,11 +686,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppFeedRoute: AppFeedRoute,
   AppFlaresRoute: AppFlaresRoute,
-  AppHackathonsRoute: AppHackathonsRoute,
+  AppHackathonsRoute: AppHackathonsRouteWithChildren,
   AppMessagesRoute: AppMessagesRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,
   AppOrganizationsRoute: AppOrganizationsRouteWithChildren,
   AppProjectsRoute: AppProjectsRouteWithChildren,
+  AppRepositoryQualityRoute: AppRepositoryQualityRoute,
   AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppProfileUsernameRoute: AppProfileUsernameRoute,
@@ -579,7 +703,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
+  AvatarRoute: AvatarRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   PortfolioUsernameRoute: PortfolioUsernameRoute,
 }
 export const routeTree = rootRouteImport

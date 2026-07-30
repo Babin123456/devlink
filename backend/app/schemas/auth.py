@@ -1,11 +1,13 @@
 from __future__ import annotations
-from app.schemas.user import CurrentUser
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
 # pyrefly: ignore [missing-import]
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+from app.schemas.user import CurrentUser
 
 # ==========================================================
 # Register
@@ -42,6 +44,18 @@ class LoginRequest(BaseModel):
     )
 
 
+class GitHubLoginRequest(BaseModel):
+    code: str
+
+
+class GitHubLoginRequest(BaseModel):  # noqa: F811
+    code: str
+
+
+class GitHubLoginRequest(BaseModel):
+    code: str
+
+
 # ==========================================================
 # JWT Tokens
 # ==========================================================
@@ -64,6 +78,9 @@ class TokenPayload(BaseModel):
 # ==========================================================
 
 
+from app.schemas.user import UserResponse  # noqa: E402
+
+
 class AuthResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -73,6 +90,7 @@ class AuthResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+    user: Optional[UserResponse] = None
 
     user: CurrentUser
 
@@ -86,14 +104,34 @@ class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
 
-# ==========================================================
-# Logout
-# ==========================================================
+class LogoutRequest(BaseModel):
+    refresh_token: Optional[str] = None
 
 
 class LogoutResponse(BaseModel):
     success: bool = True
     message: str = "Successfully logged out."
+
+
+# ==========================================================
+# Sessions & Devices
+# ==========================================================
+
+
+class SessionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    device_name: Optional[str] = None
+    device_type: Optional[str] = None
+    browser: Optional[str] = None
+    operating_system: Optional[str] = None
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    is_current: bool = False
+    created_at: datetime
+    last_used_at: Optional[datetime] = None
+    expires_at: datetime
 
 
 # ==========================================================

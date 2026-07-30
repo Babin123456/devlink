@@ -5,6 +5,7 @@ import { Card, TagChip, Avatar } from "@/components/shared/primitives";
 import { Markdown } from "@/components/shared/Markdown";
 import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
 import { LoadingButton } from "@/components/shared/LoadingButton";
+import { BookmarkToggleButton } from "@/components/shared/BookmarkToggleButton";
 import { Heart, MessageCircle, Send, Flame } from "lucide-react";
 import { useState, useCallback } from "react";
 import { currentUser, builders } from "@/mocks/seed";
@@ -69,6 +70,7 @@ function FlareCard({ flare }: { flare: Flare }) {
               <button className="inline-flex items-center gap-1 hover:text-primary">
                 <MessageCircle size={12} /> {flare.comments}
               </button>
+              <BookmarkToggleButton targetType="flare" targetId={flare.id} />
             </div>
           </div>
         </div>
@@ -133,7 +135,7 @@ function FlaresPage() {
                   loadingText="Posting..."
                   onClick={handlePost}
                   size="sm"
-                  className="inline-flex items-center gap-1.5"
+                  className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
                 >
                   <Send size={12} /> Post
                 </LoadingButton>

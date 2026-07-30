@@ -1,16 +1,21 @@
 from __future__ import annotations
 
+
 import uuid
 from datetime import datetime
 
 from sqlalchemy import (
     Boolean,
     DateTime,
+    ForeignKey,
     String,
     Text,
+    JSON,
     func,
 )
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
@@ -72,6 +77,13 @@ class User(Base):
     # Profile
     # ------------------------------------------------------------------
 
+    badges: Mapped[list[str]] = mapped_column(
+        ARRAY(String).with_variant(JSON, "sqlite"),
+        default=list,
+        server_default="[]",
+        nullable=False,
+    )
+
     headline: Mapped[str | None] = mapped_column(
         String(150),
         nullable=True,
@@ -102,8 +114,19 @@ class User(Base):
         nullable=True,
     )
 
+    availability: Mapped[list] = mapped_column(
+        JSON,
+        nullable=True,
+        default=list,
+    )
+
     website: Mapped[str | None] = mapped_column(
         String(255),
+        nullable=True,
+    )
+
+    resume_url: Mapped[str | None] = mapped_column(
+        String(500),
         nullable=True,
     )
 
@@ -152,6 +175,38 @@ class User(Base):
         nullable=False,
     )
 
+    is_private: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    privacy_settings: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
+        default=lambda: {
+            "email": "private",
+            "github": "public",
+            "resume": "public",
+            "social_links": "public",
+            "availability": "public",
+        },
+    )
+
+    def get_privacy_settings(self) -> dict:
+        defaults = {
+            "email": "private",
+            "github": "public",
+            "resume": "public",
+            "social_links": "public",
+            "availability": "public",
+        }
+        if not self.privacy_settings:
+            return defaults
+        res = dict(defaults)
+        res.update(self.privacy_settings)
+        return res
+
     # ------------------------------------------------------------------
     # Authentication
     # ------------------------------------------------------------------
@@ -187,11 +242,15 @@ class User(Base):
     )
 
     last_seen: Mapped[datetime | None] = mapped_column(
-    last_active_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
     )
 
+    last_active_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        default=datetime.utcnow,
+        nullable=True,
+    )
     # ------------------------------------------------------------------
     # OAuth
     # ------------------------------------------------------------------
@@ -206,6 +265,29 @@ class User(Base):
         String(100),
         nullable=True,
         unique=True,
+    )
+
+    # ------------------------------------------------------------------
+    # Soft Delete
+    # ------------------------------------------------------------------
+
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
+    )
+
+    deleted_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+    )
+
+    deleted_by: Mapped[User | None] = relationship(
+        "User",
+        foreign_keys=[deleted_by_id],
+        remote_side="User.id",
     )
 
     # ------------------------------------------------------------------
@@ -241,12 +323,13 @@ class User(Base):
             return False
         threshold = getattr(self, "_online_threshold", 300)
         from datetime import datetime, timezone
+
         now = datetime.now(timezone.utc)
-        
+
         last_seen = self.last_seen
         if last_seen.tzinfo is None:
             last_seen = last_seen.replace(tzinfo=timezone.utc)
-            
+
         return (now - last_seen).total_seconds() < threshold
 
     # ------------------------------------------------------------------
@@ -254,4 +337,4 @@ class User(Base):
     # ------------------------------------------------------------------
 
     def __repr__(self) -> str:
-        return f"<User(" f"username='{self.username}', " f"email='{self.email}'" f")>"
+        return f"<User(username='{self.username}', email='{self.email}')>"

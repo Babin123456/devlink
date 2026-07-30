@@ -12,6 +12,7 @@ export interface AuthUser {
   username: string;
   full_name?: string;
   avatar?: string;
+  profile_image?: string;
 }
 export interface AuthResponse extends AuthTokens {
   user: AuthUser;
@@ -23,14 +24,18 @@ export const authApi = {
     tokenStore.set(res.access_token, res.refresh_token);
     return res;
   },
-  async login(input: { email: string; password: string }) {
+async login(input: { email: string; password: string }) {
     const res = await api.post<AuthResponse>("/api/auth/login", input, { auth: false });
     tokenStore.set(res.access_token, res.refresh_token);
     return res;
   },
-  async logout() {
+  async githubLogin(code: string) {
+    const res = await api.post<AuthResponse>("/api/auth/github", { code }, { auth: false });
+    tokenStore.set(res.access_token, res.refresh_token);
+    return res;
+  },  async logout() {
     try {
-      await api.post<void>("/api/auth/logout");
+      await api.post<void>("/api/auth/logout", { refresh_token: tokenStore.getRefresh() });
     } finally {
       tokenStore.clear();
     }
@@ -39,5 +44,9 @@ export const authApi = {
   forgotPassword: (email: string) =>
     api.post<{ ok: true }>("/api/auth/forgot-password", { email }, { auth: false }),
   resetPassword: (token: string, password: string) =>
-    api.post<{ ok: true }>("/api/auth/reset-password", { token, password }, { auth: false }),
+    api.post<{ ok: true }>(
+      "/api/auth/reset-password",
+      { token, new_password: password },
+      { auth: false },
+    ),
 };

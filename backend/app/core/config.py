@@ -69,8 +69,10 @@ class Settings(BaseSettings):
     # ==========================================================
 
     ALLOWED_ORIGINS: str = (
-        "http://localhost:5173," "http://localhost:5174," "http://localhost:3000"
+        "http://localhost:5173,http://localhost:5174,http://localhost:3000"
     )
+
+    FRONTEND_URL: str = "http://localhost:5173"
 
     # ==========================================================
     # Email
@@ -98,9 +100,17 @@ class Settings(BaseSettings):
     # Uploads
     # ==========================================================
 
+    UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_SIZE_MB: int = 10
+    RESUME_MAX_SIZE_MB: int = 5
 
-    ALLOWED_IMAGE_TYPES: str = "image/png," "image/jpeg," "image/webp"
+    ALLOWED_IMAGE_TYPES: str = "image/png,image/jpeg,image/webp"
+
+    MEDIA_UPLOAD_DIR: str = "uploads/media"
+    MEDIA_QUALITY: int = 80
+    MEDIA_MAX_DIMENSION: int = 1200
+    MEDIA_THUMB_DIMENSION: int = 200
+    CDN_BASE_URL: str | None = None
 
     # ==========================================================
     # AI
@@ -126,6 +136,7 @@ class Settings(BaseSettings):
     SEARCH_RATE_LIMIT: str = "60/minute"
     PROJECT_RATE_LIMIT: str = "100/minute"
     PASSWORD_RESET_RATE_LIMIT: str = "3/15minutes"
+    COMMENT_RATE_LIMIT: str = "30/minute"
     RECOMMENDATION_RATE_LIMIT: str = "20/minute"
 
     # ==========================================================

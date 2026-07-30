@@ -1,37 +1,31 @@
-import { createFileRoute, Link, useNavigate, useRouterState, Outlet } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  useNavigate,
+  useChildMatches,
+  Outlet,
+} from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { buildersService } from "@/services";
 import type { Builder } from "@/services";
-import { Card, AnimatedCard, TagChip, Avatar, Skeleton, EmptyState } from "@/components/shared/primitives";
+import {
+  Card,
+  AnimatedCard,
+  TagChip,
+  Avatar,
+  Skeleton,
+  EmptyState,
+} from "@/components/shared/primitives";
 import { HighlightText } from "@/components/shared/HighlightText";
 import { LastActive } from "@/components/shared/LastActive";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
-import {
-  Search,
-  Sparkles,
-  Calendar,
-  Briefcase,
-  Check,
-  Bookmark,
-} from "lucide-react";
+
+import { Search, Sparkles, Calendar, Briefcase, Check, Bookmark, BadgeCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants } from "@/lib/animations";
 
-type BuildersSearch = {
-  tab?: "discover" | "matches" | "connections";
-};
-
-const VALID_TABS = ["discover", "matches", "connections"] as const;
-
 export const Route = createFileRoute("/_app/builders")({
-  validateSearch: (search: Record<string, unknown>): BuildersSearch => {
-    const rawTab = search.tab as string;
-    const tab = (VALID_TABS as readonly string[]).includes(rawTab)
-      ? (rawTab as "discover" | "matches" | "connections")
-      : "discover";
-    return { tab };
-  },
   head: () => ({
     meta: [
       { title: "Builders — DevLink" },
@@ -63,7 +57,8 @@ function AIMatchCard({ builder }: { builder: Builder }) {
   const remainingCount = builder.skills.length - 3;
   const matchPercentage = `${builder.matchScore}%`;
   const experienceText = `${builder.yearsExp} Yrs`;
-  const availabilityText = builder.availability ? builder.availability.split(" (")[0] : "Full-time";
+  const rawAvailability = (builder as Builder & { availability?: string }).availability;
+  const availabilityText = rawAvailability ? rawAvailability.split(" (")[0] : "Full-time";
 
   return (
     <motion.div
@@ -104,8 +99,14 @@ function AIMatchCard({ builder }: { builder: Builder }) {
               params={{ builderId: builder.id }}
               className="block hover:underline"
             >
-              <h3 className="font-bold text-foreground text-[20px] leading-tight truncate">
+              <h3 className="font-bold text-foreground text-[20px] leading-tight truncate flex items-center gap-1">
                 {builder.name}
+                {builder.verified && (
+                  <BadgeCheck
+                    className="text-primary shrink-0 h-5 w-5"
+                    aria-label="Verified User"
+                  />
+                )}
               </h3>
             </Link>
             <p className="text-muted-foreground text-[13px] font-medium mt-0.5 truncate">
@@ -203,16 +204,18 @@ function AIMatchCard({ builder }: { builder: Builder }) {
 }
 
 function BuildersPage() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { tab } = Route.useSearch();
+  const childMatches = useChildMatches();
+  const search = Route.useSearch() as { tab?: string };
+  const tab = search.tab;
   const navigate = useNavigate({ from: Route.fullPath });
   const [q, setQ] = useState("");
   const { data = [], isLoading } = useQuery({
     queryKey: ["builders", tab],
-    queryFn: tab === "matches" ? buildersService.matches : buildersService.list,
+    queryFn: () => (tab === "matches" ? buildersService.matches() : buildersService.list()),
   });
 
   const [connections, setConnections] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
     try {
       const stored = localStorage.getItem("devlink:connections");
       return stored ? JSON.parse(stored) : [];
@@ -229,19 +232,24 @@ function BuildersPage() {
     });
   };
 
-  const isDetails = pathname.split("/").filter(Boolean).length > 1;
+  const baseData = useMemo(
+    () => (tab === "connections" ? data.filter((b) => connections.includes(b.id)) : data),
+    [data, tab, connections],
+  );
 
-  if (isDetails) {
+  const filtered = useMemo(
+    () =>
+      baseData.filter(
+        (b) =>
+          b.name.toLowerCase().includes(q.toLowerCase()) ||
+          b.skills.some((s) => s.toLowerCase().includes(q.toLowerCase())),
+      ),
+    [baseData, q],
+  );
+
+  if (childMatches.length > 0) {
     return <Outlet />;
   }
-
-  const baseData = tab === "connections" ? data.filter((b) => connections.includes(b.id)) : data;
-
-  const filtered = baseData.filter(
-    (b) =>
-      b.name.toLowerCase().includes(q.toLowerCase()) ||
-      b.skills.some((s) => s.toLowerCase().includes(q.toLowerCase())),
-  );
 
   const tabs = [
     { k: "discover", label: "Discover" },
@@ -261,9 +269,10 @@ function BuildersPage() {
           {tabs.map((t) => (
             <button
               key={t.k}
+              type="button"
               onClick={() => navigate({ search: (prev) => ({ ...prev, tab: t.k }) })}
               className={cn(
-                "rounded px-2.5 py-1 text-[12px] font-medium transition-colors cursor-pointer",
+                "rounded px-2.5 py-1 text-[12px] font-medium transition-colors",
                 tab === t.k
                   ? "bg-primary text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground",
@@ -281,23 +290,29 @@ function BuildersPage() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by name or skill…"
+            placeholder="Search by builder name or skill..."
             className="w-full rounded-md border border-border bg-surface py-[7px] pl-9 pr-3 text-[13px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 8 }).map((_, i) => (
+      <motion.div
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        role="status"
+        aria-busy={isLoading || undefined}
+      >
+        {isLoading ? (
+          Array.from({ length: 8 }).map((_, i) => (
             <Card key={i} className="p-4 text-center">
               <div className="mx-auto w-fit">
                 <Skeleton className="h-16 w-16 shrink-0 rounded-full" />
               </div>
               <Skeleton className="mx-auto mt-2 h-4 w-28" />
-              <Skeleton className="mx-auto h-3 w-20" />
-              <Skeleton className="mx-auto h-3 w-36" />
-              <Skeleton className="mx-auto mt-1 h-3 w-24" />
+              <Skeleton className="mx-auto mt-1 h-3 w-20" />
+              <Skeleton className="mx-auto mt-1 h-3 w-36" />
               <div className="mt-2 flex flex-wrap justify-center gap-1">
                 <Skeleton className="h-5 w-14" />
                 <Skeleton className="h-5 w-12" />
@@ -309,60 +324,38 @@ function BuildersPage() {
                 <Skeleton className="h-7 flex-1" />
               </div>
             </Card>
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        q !== "" ? (
-          <EmptyState
-            variant="search"
-            title="No builders found"
-            desc={`We couldn't find any developers or skills matching "${q}".`}
-          />
-        ) : tab === "connections" ? (
-          <EmptyState
-            variant="connections"
-            title="No connections yet"
-            desc="Start connecting with other builders to collaborate, share flares, and message them."
-            action={
-              <button
-                onClick={() => navigate({ search: (prev) => ({ ...prev, tab: "discover" }) })}
-                className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90 cursor-pointer"
-              >
-                Discover builders
-              </button>
-            }
-          />
+          ))
+        ) : filtered.length === 0 ? (
+          <div className="col-span-full">
+            <EmptyState
+              title="No builders found"
+              desc="We couldn't find any developers matching your criteria."
+            />
+          </div>
+        ) : tab === "matches" ? (
+          filtered.map((b) => <AIMatchCard key={b.id} builder={b} />)
         ) : (
-          <EmptyState
-            variant="default"
-            title="No builders yet"
-            desc="No builders are currently available in this section."
-          />
-        )
-      ) : tab === "matches" ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((b) => (
-            <AIMatchCard key={b.id} builder={b} />
-          ))}
-        </div>
-      ) : (
-        <motion.div
-          className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {filtered.map((b, i) => {
+          filtered.map((b, i) => {
             const isConnected = connections.includes(b.id);
             return (
               <Link key={b.id} to="/builders/$builderId" params={{ builderId: b.id }}>
-                <AnimatedCard interactive index={i} className="p-4 text-center h-full flex flex-col justify-between">
+                <AnimatedCard
+                  interactive
+                  index={i}
+                  className="p-4 text-center h-full flex flex-col justify-between"
+                >
                   <div>
                     <div className="mx-auto w-fit">
                       <Avatar src={b.avatar} alt={b.name} size={64} online={b.online} />
                     </div>
-                    <p className="mt-2 text-[14px] font-semibold text-foreground">
+                    <p className="mt-2 text-[14px] font-semibold text-foreground flex items-center justify-center gap-1">
                       <HighlightText text={b.name} query={q} />
+                      {b.verified && (
+                        <BadgeCheck
+                          className="text-primary h-3.5 w-3.5"
+                          aria-label="Verified User"
+                        />
+                      )}
                     </p>
                     <p className="text-[12px] text-muted-foreground">
                       <HighlightText text={b.role} query={q} />
@@ -378,12 +371,15 @@ function BuildersPage() {
                         </TagChip>
                       ))}
                     </div>
-                    <p className="mt-2 text-[12px] font-semibold text-success">
-                      {b.matchScore}% Match
-                    </p>
+                    {b.matchScore && (
+                      <p className="mt-2 text-[12px] font-semibold text-success">
+                        {b.matchScore}% Match
+                      </p>
+                    )}
                   </div>
                   <div className="mt-3 flex gap-1.5">
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -399,6 +395,7 @@ function BuildersPage() {
                       {isConnected ? "Connected" : "Connect"}
                     </button>
                     <button
+                      type="button"
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -411,9 +408,9 @@ function BuildersPage() {
                 </AnimatedCard>
               </Link>
             );
-          })}
-        </motion.div>
-      )}
+          })
+        )}
+      </motion.div>
     </div>
   );
 }

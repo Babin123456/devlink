@@ -1,17 +1,25 @@
 import { Bookmark, BookmarkCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToggleBookmark, useBookmarkStatus } from "@/hooks/useBookmark";
+import type { BookmarkTargetType } from "@/api/modules/bookmarks";
 import { cn } from "@/lib/utils";
 
 export function BookmarkToggleButton({
+  targetType,
+  targetId,
   projectId,
   className,
 }: {
-  projectId: string;
+  targetType?: BookmarkTargetType;
+  targetId?: string;
+  projectId?: string;
   className?: string;
 }) {
-  const { data: status, isLoading } = useBookmarkStatus(projectId);
-  const toggleBookmark = useToggleBookmark(projectId);
+  const resolvedTargetType = targetType ?? "project";
+  const resolvedTargetId = targetId ?? projectId ?? "";
+
+  const { data: status, isLoading } = useBookmarkStatus(resolvedTargetType, resolvedTargetId);
+  const toggleBookmark = useToggleBookmark(resolvedTargetType, resolvedTargetId);
 
   if (isLoading) {
     return (

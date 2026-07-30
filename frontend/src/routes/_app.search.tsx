@@ -2,11 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, TagChip, Avatar } from "@/components/shared/primitives";
 import { HighlightText } from "@/components/shared/HighlightText";
 import { builders, projects, flares } from "@/mocks/seed";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Search, X, Building2, Rss } from "lucide-react";
+import { Search, X, Building2, Rss, History } from "lucide-react";
+import { useGlobalSearch } from "@/hooks/useGlobalSearch";
 
-const tabs = ["Developers", "Projects", "Posts", "Organizations"] as const;
+const tabs = ["Developers", "Projects", "Skills", "Posts", "Organizations"] as const;
 type Tab = (typeof tabs)[number];
 
 const organizations = [
@@ -34,47 +35,69 @@ export const Route = createFileRoute("/_app/search")({
 });
 
 function SearchPage() {
-  const [q, setQ] = useState("");
+  const {
+    query: q,
+    setQuery: setQ,
+    recentSearches,
+    removeHistoryItem,
+    clearHistory,
+    clear,
+  } = useGlobalSearch({ debounceMs: 200 });
+
   const [tab, setTab] = useState<Tab>("Developers");
 
   const query = q.toLowerCase();
 
-  const devs = builders.filter((b) =>
-    (b.name + " " + b.skills.join(" ")).toLowerCase().includes(query),
+  const skillSet = useMemo(
+    () =>
+      Array.from(new Set(builders.flatMap((b) => b.skills))).filter((s) =>
+        s.toLowerCase().includes(query),
+      ),
+    [query],
   );
 
-  const projs = projects.filter((p) =>
-    (p.name + " " + p.stack.join(" ")).toLowerCase().includes(query),
+  const devs = useMemo(
+    () => builders.filter((b) => (b.name + " " + b.skills.join(" ")).toLowerCase().includes(query)),
+    [query],
   );
 
-  const posts = flares.filter((f) =>
-    (f.author.name + " " + f.content + " " + f.tags.join(" ")).toLowerCase().includes(query),
+  const projs = useMemo(
+    () => projects.filter((p) => (p.name + " " + p.stack.join(" ")).toLowerCase().includes(query)),
+    [query],
   );
 
-  const orgs = organizations.filter((o) =>
-    (o.name + " " + o.description).toLowerCase().includes(query),
+  const posts = useMemo(
+    () =>
+      flares.filter((f) =>
+        (f.author.name + " " + f.content + " " + f.tags.join(" ")).toLowerCase().includes(query),
+      ),
+    [query],
+  );
+
+  const orgs = useMemo(
+    () => organizations.filter((o) => (o.name + " " + o.description).toLowerCase().includes(query)),
+    [query],
   );
 
   return (
     <div className="space-y-4">
+      {/* Search Bar */}
       <div className="relative">
         <Search
           size={16}
           className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
         />
-
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search DevLink…"
+          placeholder="Search DevLink for developers, projects, or skills..."
           className="w-full rounded-md border border-border bg-surface py-2.5 pl-10 pr-10 text-[14px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           autoFocus
         />
-
         {q && (
           <button
             type="button"
-            onClick={() => setQ("")}
+            onClick={clear}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             aria-label="Clear search"
           >
@@ -83,6 +106,50 @@ function SearchPage() {
         )}
       </div>
 
+      {/* Recent Search History Section */}
+      {!q && recentSearches.length > 0 && (
+        <Card className="p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-[13px] font-medium text-foreground">
+              <History size={14} className="text-muted-foreground" />
+              <span>Recent Searches</span>
+            </div>
+            <button
+              type="button"
+              onClick={clearHistory}
+              className="text-[12px] font-medium text-muted-foreground hover:text-destructive transition-colors"
+            >
+              Clear all
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentSearches.map((item) => (
+              <div
+                key={item.id}
+                className="group flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-[12px] text-foreground hover:border-primary/50 transition-colors"
+              >
+                <button
+                  type="button"
+                  onClick={() => setQ(item.query)}
+                  className="hover:underline"
+                >
+                  {item.query}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeHistoryItem(item.id)}
+                  className="text-muted-foreground hover:text-destructive opacity-70 group-hover:opacity-100 transition-opacity"
+                  aria-label={`Remove ${item.query} from history`}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Filter Tabs */}
       <div className="flex items-center gap-1 rounded-md border border-border bg-surface p-0.5">
         {tabs.map((t) => (
           <button
@@ -100,6 +167,7 @@ function SearchPage() {
         ))}
       </div>
 
+      {/* Tab Contents */}
       {tab === "Developers" && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {devs.length === 0 ? (
@@ -156,6 +224,27 @@ function SearchPage() {
                   </div>
                 </Card>
               </Link>
+            ))
+          )}
+        </div>
+      )}
+
+      {tab === "Skills" && (
+        <div className="flex flex-wrap gap-2">
+          {skillSet.length === 0 ? (
+            <EmptyState query={q} label="skills" />
+          ) : (
+            skillSet.map((skill) => (
+              <button
+                key={skill}
+                type="button"
+                onClick={() => setQ(skill)}
+                className="text-left outline-none"
+              >
+                <TagChip className="cursor-pointer px-3 py-1.5 text-[12px]">
+                  <HighlightText text={skill} query={q} />
+                </TagChip>
+              </button>
             ))
           )}
         </div>
@@ -239,7 +328,7 @@ function SearchPage() {
 
 function EmptyState({ query, label }: { query: string; label: string }) {
   return (
-    <Card className="p-5 text-center text-[13px] text-muted-foreground">
+    <Card className="col-span-full p-5 text-center text-[13px] text-muted-foreground">
       No {label} found{query ? ` for "${query}"` : ""}.
     </Card>
   );

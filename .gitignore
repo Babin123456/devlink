@@ -1,17 +1,13 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Virtual Environment
-backend/venv/
+# Python virtual environments
+.venv/
+backend/.venv/
 venv/
+env/
 
-# Logs
-backend/logs/
-*.log
+# Python cache
+__pycache__/
+*.py[cod]
 
-# OS files
-.DS_Store
-Thumbs.db
+# Root-level Node (husky / lint-staged only)
+node_modules/
+package-lock.json
