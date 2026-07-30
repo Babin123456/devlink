@@ -26,7 +26,15 @@ export const Route = createFileRoute("/_app/search")({
 });
 
 function SearchPage() {
-  const [q, setQ] = useState("");
+  const {
+    query: q,
+    setQuery: setQ,
+    recentSearches,
+    removeHistoryItem,
+    clearHistory,
+    clear,
+  } = useGlobalSearch({ debounceMs: 200 });
+
   const [tab, setTab] = useState<Tab>("Developers");
 
   const debouncedQ = useDebounce(q, 200);
@@ -102,7 +110,7 @@ function SearchPage() {
         {q && (
           <button
             type="button"
-            onClick={() => setQ("")}
+            onClick={clear}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             aria-label="Clear search"
           >
@@ -128,6 +136,7 @@ function SearchPage() {
         ))}
       </div>
 
+      {/* Tab Contents */}
       {tab === "Developers" && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {devs.length === 0 ? (

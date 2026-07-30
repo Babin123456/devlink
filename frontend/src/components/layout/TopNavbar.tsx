@@ -139,14 +139,17 @@ function IconButton({
   children,
   count,
   to,
+  ariaLabel,
 }: {
   children: React.ReactNode;
   count?: number;
   to: string;
+  ariaLabel: string;
 }) {
   return (
     <Link
       to={to}
+      aria-label={ariaLabel}
       className="relative grid h-9 w-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
     >
       {children}
