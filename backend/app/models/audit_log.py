@@ -8,6 +8,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    JSON,
     String,
     Text,
     func,
@@ -165,9 +166,15 @@ class AuditLog(Base):
     # Changes & Metadata (JSON)
     # ==========================================================
 
-    old_values: Mapped[dict | None] = mapped_column(JSONB)
-    new_values: Mapped[dict | None] = mapped_column(JSONB)
-    metadata_info: Mapped[dict | None] = mapped_column(JSONB)
+    old_values: Mapped[dict | None] = mapped_column(
+        JSONB().with_variant(JSON, "sqlite")
+    )
+    new_values: Mapped[dict | None] = mapped_column(
+        JSONB().with_variant(JSON, "sqlite")
+    )
+    metadata_info: Mapped[dict | None] = mapped_column(
+        JSONB().with_variant(JSON, "sqlite")
+    )
 
     # ==========================================================
     # Request Information
