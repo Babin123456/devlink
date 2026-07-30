@@ -37,9 +37,7 @@ function HackathonDetail() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>(getInitialTab);
   const [registerOpen, setRegisterOpen] = useState(false);
-  const [registered, setRegistered] = useState(() =>
-    hackathonsService.isRegistered(hackathonId),
-  );
+  const [registered, setRegistered] = useState(() => hackathonsService.isRegistered(hackathonId));
 
   const { data: hackathon, isLoading } = useQuery({
     queryKey: ["hackathon", hackathonId],
@@ -100,9 +98,7 @@ function HackathonDetail() {
     new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   const canRegister =
-    !registered &&
-    hackathon.status !== "completed" &&
-    hackathon.status !== "cancelled";
+    !registered && hackathon.status !== "completed" && hackathon.status !== "cancelled";
 
   return (
     <div className="space-y-4">
@@ -135,9 +131,7 @@ function HackathonDetail() {
             {hackathon.theme && (
               <p className="mt-0.5 text-[13px] text-muted-foreground">{hackathon.theme}</p>
             )}
-            <p className="mt-2 text-[13px] text-foreground line-clamp-3">
-              {hackathon.description}
-            </p>
+            <p className="mt-2 text-[13px] text-foreground line-clamp-3">{hackathon.description}</p>
             <div className="mt-3 flex flex-wrap gap-3 text-[12px] text-muted-foreground">
               <span className="inline-flex items-center gap-1">
                 <Calendar size={12} /> {formatDate(hackathon.starts_at)} —{" "}

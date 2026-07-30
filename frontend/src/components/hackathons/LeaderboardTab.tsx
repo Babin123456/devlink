@@ -114,11 +114,7 @@ export function LeaderboardTab({ hackathonId }: Props) {
                       )}
                       aria-label={`Rank ${style.label}`}
                     >
-                      {entry.rank <= 3 ? (
-                        <Medal size={13} />
-                      ) : (
-                        entry.rank
-                      )}
+                      {entry.rank <= 3 ? <Medal size={13} /> : entry.rank}
                     </span>
                   </td>
                   <td className="break-words px-4 py-3 font-medium text-foreground">
@@ -181,7 +177,13 @@ export function LeaderboardTab({ hackathonId }: Props) {
 function ScoreBar({ score }: { score: number }) {
   const pct = Math.min(100, Math.max(0, score));
   const color =
-    pct >= 80 ? "bg-success" : pct >= 60 ? "bg-primary" : pct >= 40 ? "bg-warning" : "bg-destructive";
+    pct >= 80
+      ? "bg-success"
+      : pct >= 60
+        ? "bg-primary"
+        : pct >= 40
+          ? "bg-warning"
+          : "bg-destructive";
 
   return (
     <div className="inline-flex items-center gap-2">

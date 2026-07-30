@@ -55,7 +55,8 @@ export const projectsApi = {
   }) => api.get<ExtendedProject[]>("/api/projects", { query }),
   get: (id: string) => api.get<ExtendedProject>(`/api/projects/${id}`),
   create: (body: Partial<ExtendedProject>) => api.post<ExtendedProject>("/api/projects", body),
-  update: (id: string, body: Partial<ExtendedProject>) => api.put<ExtendedProject>(`/api/projects/${id}`, body),
+  update: (id: string, body: Partial<ExtendedProject>) =>
+    api.put<ExtendedProject>(`/api/projects/${id}`, body),
   remove: (id: string) => api.delete<void>(`/api/projects/${id}`),
   apply: (id: string, message: string, role?: string) =>
     api.post<void>(`/api/projects/${id}/apply`, { message, role }),

@@ -8,19 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Added initial `CHANGELOG.md` following the Keep a Changelog specification.
 
 ### Changed
+
 - None.
 
 ### Deprecated
+
 - None.
 
 ### Removed
+
 - None.
 
 ### Fixed
+
 - None.
 
 ### Security
+
 - None.

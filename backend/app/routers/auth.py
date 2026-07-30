@@ -193,6 +193,35 @@ oauth_redis = redis.from_url(settings.REDIS_URL, decode_responses=True)
 
 import httpx  # noqa: E402
 from app.schemas.auth import GitHubLoginRequest, LinkedInLoginRequest, OAuthStateResponse  # noqa: E402
+# ==========================================================
+# GitHub OAuth Authorization (CSRF State)
+# ==========================================================
+
+# Redis client for OAuth state storage
+oauth_redis = redis.from_url(settings.REDIS_URL, decode_responses=True)
+
+
+@router.get(
+    "/github/authorize",
+    response_model=OAuthStateResponse,
+    summary="Get GitHub OAuth State",
+)
+async def github_authorize():
+    """
+    Generate a CSRF state parameter for GitHub OAuth flow.
+    The state is stored in Redis with a 10-minute TTL.
+    Frontend should include this state when redirecting to GitHub's authorize URL.
+    """
+    state = secrets.token_urlsafe(32)
+    await oauth_redis.setex(f"oauth:state:{state}", 600, "1")
+    return OAuthStateResponse(state=state)
+
+
+import httpx  # noqa: E402
+import redis
+import secrets
+from app.schemas.auth import GitHubLoginRequest, OAuthStateResponse  # noqa: E402
+from app.core.config import settings
 
 
 @router.post(
@@ -214,6 +243,23 @@ async def github_login(
             status_code=status.HTTP_501_NOT_IMPLEMENTED,
             detail="GitHub OAuth is not configured.",
         )
+
+    # Validate CSRF state
+    state = payload.state
+    if not state:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing OAuth state parameter.",
+        )
+
+    state_key = f"oauth:state:{state}"
+    state_valid = await oauth_redis.get(state_key)
+    if not state_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired OAuth state.",
+        )
+    await oauth_redis.delete(state_key)
 
     # 1. Exchange code for access token
     token_url = "https://github.com/login/oauth/access_token"
