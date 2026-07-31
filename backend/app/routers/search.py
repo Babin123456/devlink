@@ -12,7 +12,7 @@ from app.schemas.search_index import (
 from app.services.search_service import SearchService
 from app.services.search_index_service import SearchIndexService
 from app.services.search_analytics_service import SearchAnalyticsService
-from app.api.deps import get_current_user_optional, get_current_user
+from app.dependencies import get_optional_current_user as get_current_user_optional, get_current_user
 from app.models.user import User, UserRole
 import time
 import uuid
@@ -193,6 +193,10 @@ def run_search_benchmark(
 ):
     """Benchmarks query execution latency comparing Inverted Index search vs Naive SQL ILIKE search."""
     return SearchIndexService.run_benchmark(db=db, query=q, iterations=iterations)
+
+
+@router.get(
+    "/analytics",
     summary="Get search analytics dashboard metrics",
 )
 def get_analytics(
@@ -202,5 +206,6 @@ def get_analytics(
 ):
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Admin only")
-        
+
     return SearchAnalyticsService.get_dashboard_metrics(db, days=days)
+
