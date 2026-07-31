@@ -8,6 +8,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    JSON,
     String,
     Text,
     func,
@@ -187,10 +188,9 @@ class Notification(Base):
 
     # Metadata for additional data (like payload)
     metadata_info: Mapped[dict | None] = mapped_column(
-        JSONB,
-    )
-
-    # ==========================================================
+        JSONB().with_variant(JSON, "sqlite"),
+        default=dict,
+    )# ==========================================================
     # Related Resources (Legacy, consider moving to metadata_info)
     # ==========================================================
 
