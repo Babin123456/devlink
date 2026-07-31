@@ -18,6 +18,7 @@ from app.routers import (
     issues,
     messages,
     notifications,
+    oauth_linking,
     organizations,
     profile_summary,
     project_tags,
@@ -53,6 +54,7 @@ async def v1_root():
 
 # Router inclusions under /api/v1
 api_v1_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_v1_router.include_router(oauth_linking.router)
 api_v1_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_v1_router.include_router(blocks.router, prefix="/blocks", tags=["User Blocks"])
 api_v1_router.include_router(export.router, prefix="/users", tags=["Export"])
