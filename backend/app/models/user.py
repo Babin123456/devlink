@@ -21,6 +21,14 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.database.base import Base
 
 
+from enum import Enum
+
+class UserRole(str, Enum):
+    USER = "user"
+    ADMIN = "admin"
+    MODERATOR = "moderator"
+
+
 class User(Base):
     """
     DevLink User Model

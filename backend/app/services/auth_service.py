@@ -5,6 +5,9 @@ from typing import Optional
 from uuid import UUID
 
 from app.services.email_service import EmailService
+from app.services.suspicious_login_service import SuspiciousLoginService
+from app.services.audit_log_service import AuditLogService
+from app.models.audit_log import AuditAction
 from app.core.config import settings
 
 # pyrefly: ignore [missing-import]
@@ -176,7 +179,28 @@ class AuthService:
         user = self.get_user_by_email(payload.email)
 
         if not user:
-            print("USER NOT FOUND:", payload.email)
+            # Log failed login and check suspicious signals
+            AuditLogService.create_log(
+                db=self.db,
+                actor_id=None,
+                action=AuditAction.FAILED_LOGIN,
+                entity_type="user_session",
+                entity_id=payload.email,
+                description=f"Failed login attempt for email {payload.email}",
+                ip_address=ip_address,
+                user_agent=user_agent,
+                metadata_info={"email": payload.email},
+                success=False,
+            )
+            self.db.commit()
+            SuspiciousLoginService.evaluate_login_attempt(
+                db=self.db,
+                email=payload.email,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                user=None,
+                is_success=False,
+            )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password.",
@@ -185,20 +209,71 @@ class AuthService:
             payload.password,
             user.password_hash,
         ):
-            print("PASSWORD MISMATCH:", payload.password, user.password_hash)
+            # Log failed login and check suspicious signals
+            AuditLogService.create_log(
+                db=self.db,
+                actor_id=user.id,
+                action=AuditAction.FAILED_LOGIN,
+                entity_type="user_session",
+                entity_id=str(user.id),
+                target_user_id=user.id,
+                description=f"Failed password authentication for {payload.email}",
+                ip_address=ip_address,
+                user_agent=user_agent,
+                metadata_info={"email": payload.email},
+                success=False,
+            )
+            self.db.commit()
+            SuspiciousLoginService.evaluate_login_attempt(
+                db=self.db,
+                email=payload.email,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                user=user,
+                is_success=False,
+            )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password.",
             )
         if not user.is_active:
-            print("USER INACTIVE")
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Account is disabled.",
             )
+
+        # Check suspicious login signals for successful login
+        suspicious_result = SuspiciousLoginService.evaluate_login_attempt(
+            db=self.db,
+            email=payload.email,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            user=user,
+            is_success=True,
+        )
+
         user.last_login = datetime.now(timezone.utc)
         user.last_seen = datetime.now(timezone.utc)
         user.last_active_at = datetime.now(timezone.utc)
+
+        # Record successful login audit log
+        AuditLogService.create_log(
+            db=self.db,
+            actor_id=user.id,
+            action=AuditAction.LOGIN,
+            entity_type="user_session",
+            entity_id=str(user.id),
+            target_user_id=user.id,
+            description=f"User logged in from {ip_address or 'Unknown IP'}",
+            ip_address=ip_address,
+            user_agent=user_agent,
+            metadata_info={
+                "email": payload.email,
+                "is_suspicious": suspicious_result.is_suspicious,
+                "signals": suspicious_result.signals,
+            },
+            success=True,
+        )
 
         self.db.flush()
 

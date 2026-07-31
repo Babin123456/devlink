@@ -58,6 +58,7 @@ class NotificationType(str, Enum):
     WELCOME = "welcome"
     PASSWORD_RESET = "password_reset"
     ROLE_CHANGE = "role_change"
+    SECURITY_ALERT = "security_alert"
 
 
 class NotificationPreference(Base):

@@ -56,6 +56,9 @@ def get_optional_current_user(
         return None
 
 
+get_current_user_optional = get_optional_current_user
+
+
 # ---------------------------------------------------------------------
 # Current User
 # ---------------------------------------------------------------------
