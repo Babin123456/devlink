@@ -7,7 +7,7 @@ from sqlalchemy import Float, ForeignKey, Integer, String, Text, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
-from app.db.base import Base
+from app.database.base import Base
 
 
 class SearchQueryLog(Base):
