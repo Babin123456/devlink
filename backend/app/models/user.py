@@ -13,10 +13,8 @@ from sqlalchemy import (
     JSON,
     func,
 )
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
 
@@ -229,6 +227,16 @@ class User(Base):
         Boolean,
         default=False,
         nullable=False,
+    )
+
+    # System-level RBAC role (issue #357).
+    # Controls platform-wide permissions independent of org/project membership.
+    # Values: admin, maintainer, organization_owner, project_owner, contributor, user
+    system_role: Mapped[str] = mapped_column(
+        String(50),
+        default="user",
+        nullable=False,
+        index=True,
     )
 
     verification_status: Mapped[str] = mapped_column(
