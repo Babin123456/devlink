@@ -24,6 +24,11 @@ PROJECT_INVITE = "project:invite"
 PROJECT_ARCHIVE = "project:archive"
 PROJECT_RESTORE = "project:restore"
 PROJECT_VIEW = "project:view"
+PROJECT_MANAGE_ROLES = "project:manage_roles"
+PROJECT_TRANSFER_OWNERSHIP = "project:transfer_ownership"
+PROJECT_REMOVE_MEMBERS = "project:remove_members"
+PROJECT_EDIT_CONTENT = "project:edit_content"
+PROJECT_REVIEW = "project:review"
 
 # Mapping roles to exact permissions list
 ORG_ROLE_PERMISSIONS = {
@@ -45,6 +50,11 @@ PROJECT_ROLE_PERMISSIONS = {
         PROJECT_ARCHIVE,
         PROJECT_RESTORE,
         PROJECT_VIEW,
+        PROJECT_MANAGE_ROLES,
+        PROJECT_TRANSFER_OWNERSHIP,
+        PROJECT_REMOVE_MEMBERS,
+        PROJECT_EDIT_CONTENT,
+        PROJECT_REVIEW,
     },
     MemberRole.CO_OWNER: {
         PROJECT_UPDATE,
@@ -52,10 +62,44 @@ PROJECT_ROLE_PERMISSIONS = {
         PROJECT_ARCHIVE,
         PROJECT_RESTORE,
         PROJECT_VIEW,
+        PROJECT_MANAGE_ROLES,
+        PROJECT_REMOVE_MEMBERS,
+        PROJECT_EDIT_CONTENT,
+        PROJECT_REVIEW,
     },
-    MemberRole.ADMIN: {PROJECT_UPDATE, PROJECT_INVITE, PROJECT_VIEW},
-    MemberRole.MAINTAINER: {PROJECT_UPDATE, PROJECT_INVITE, PROJECT_VIEW},
-    MemberRole.MEMBER: {PROJECT_VIEW},
+    MemberRole.ADMIN: {
+        PROJECT_UPDATE,
+        PROJECT_INVITE,
+        PROJECT_VIEW,
+        PROJECT_MANAGE_ROLES,
+        PROJECT_REMOVE_MEMBERS,
+        PROJECT_EDIT_CONTENT,
+        PROJECT_REVIEW,
+    },
+    MemberRole.MAINTAINER: {
+        PROJECT_UPDATE,
+        PROJECT_INVITE,
+        PROJECT_VIEW,
+        PROJECT_MANAGE_ROLES,
+        PROJECT_REMOVE_MEMBERS,
+        PROJECT_EDIT_CONTENT,
+        PROJECT_REVIEW,
+    },
+    MemberRole.CONTRIBUTOR: {
+        PROJECT_VIEW,
+        PROJECT_EDIT_CONTENT,
+        PROJECT_REVIEW,
+    },
+    MemberRole.REVIEWER: {
+        PROJECT_VIEW,
+        PROJECT_REVIEW,
+    },
+    MemberRole.VIEWER: {
+        PROJECT_VIEW,
+    },
+    MemberRole.MEMBER: {
+        PROJECT_VIEW,
+    },
 }
 
 

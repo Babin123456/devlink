@@ -504,6 +504,8 @@ app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
 app.include_router(export.router, prefix="/api/users", tags=["Export"])
 app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
+from app.routers import project_members
+app.include_router(project_members.router, prefix="/api")
 app.include_router(project_dashboards.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api", tags=["Analytics"])
 app.include_router(builder_flares.router, prefix="/api/flare", tags=["Builder's Flare"])
