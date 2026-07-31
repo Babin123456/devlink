@@ -191,7 +191,7 @@ def run_search_benchmark(
     iterations: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_database),
 ):
-"""Benchmarks query execution latency comparing Inverted Index search vs Naive SQL ILIKE search."""
+    """Benchmarks query execution latency comparing Inverted Index search vs Naive SQL ILIKE search."""
     return SearchIndexService.run_benchmark(db=db, query=q, iterations=iterations)
 
 
@@ -208,3 +208,4 @@ def get_analytics(
         raise HTTPException(status_code=403, detail="Admin only")
         
     return SearchAnalyticsService.get_dashboard_metrics(db, days=days)
+    
