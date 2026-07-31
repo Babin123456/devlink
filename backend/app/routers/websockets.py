@@ -374,6 +374,40 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
                         status=data.get("status", ""),
                     ),
                 )
+                
+            # ── Chat Conversations ───────────────────────────────────────
+            elif msg_type == "chat.join" and data.get("conversation_id"):
+                conv_id = data["conversation_id"]
+                manager.join_room(conv_id, user_id)
+                logger.info("User %s joined conversation %s", user_id, conv_id)
+
+            elif msg_type == "chat.leave" and data.get("conversation_id"):
+                conv_id = data["conversation_id"]
+                manager.leave_room(conv_id, user_id)
+                logger.info("User %s left conversation %s", user_id, conv_id)
+
+            elif msg_type == "chat.message" and data.get("conversation_id"):
+                conv_id = data["conversation_id"]
+                await manager.broadcast_to_room(
+                    conv_id,
+                    _event(
+                        "chat.message.new",
+                        conversation_id=conv_id,
+                        user_id=user_id,
+                        content=data.get("content", ""),
+                    ),
+                )
+                
+            elif msg_type == "chat.typing" and data.get("conversation_id"):
+                conv_id = data["conversation_id"]
+                await manager.broadcast_to_room(
+                    conv_id,
+                    _event(
+                        "chat.typing",
+                        conversation_id=conv_id,
+                        user_id=user_id,
+                    ),
+                )
 
             # ── Project update ───────────────────────────────────────────
             elif msg_type == "project_update" and project_id:
