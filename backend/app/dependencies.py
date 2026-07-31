@@ -157,6 +157,18 @@ def get_optional_current_user(
 
 
 # ---------------------------------------------------------------------
+# Current User ID
+# ---------------------------------------------------------------------
+
+
+def get_current_user_id(current_user: User = Depends(get_current_user)) -> str:
+    """
+    Returns the currently authenticated user's ID as a string.
+    """
+    return str(current_user.id)
+
+
+# ---------------------------------------------------------------------
 # Active User
 # ---------------------------------------------------------------------
 
