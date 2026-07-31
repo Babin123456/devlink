@@ -13,6 +13,7 @@ from app.models.organization import Organization, OrganizationType
 from app.models.project import Project, ProjectStage, ProjectVisibility
 from app.models.skill import Skill
 from app.models.user import User
+from tests.conftest import TestingSessionLocal
 
 # ---------------------------------------------------------------------
 # Helpers

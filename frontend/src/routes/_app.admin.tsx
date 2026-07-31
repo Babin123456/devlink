@@ -15,6 +15,13 @@ export const Route = createFileRoute("/_app/admin")({
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Admin Console</h1>
         <p className="text-muted-foreground">Manage your platform and view audit logs.</p>
+        
+        <div className="flex gap-4 border-b pb-2 mt-4">
+          <a href="/admin/audit-logs" className="text-blue-600 hover:underline">Audit Logs</a>
+          <a href="/admin/notifications" className="text-blue-600 hover:underline">Notifications</a>
+          <a href="/admin/maintenance" className="text-blue-600 hover:underline">Maintenance Mode</a>
+          <a href="/admin/search-analytics" className="text-blue-600 hover:underline">Search Analytics</a>
+        </div>
       </div>
       <Outlet />
     </div>

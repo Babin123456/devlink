@@ -120,6 +120,15 @@ def get_current_user(
     return user
 
 
+def get_current_user_id(
+    current_user: User = Depends(get_current_user),
+) -> UUID:
+    """
+    Returns UUID of the currently authenticated user.
+    """
+    return current_user.id
+
+
 def get_optional_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(optional_security),
     db: Session = Depends(get_database),

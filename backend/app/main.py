@@ -25,6 +25,7 @@ from app.middleware.rate_limit import limiter
 from app.middleware.structured_logging import StructuredLoggingMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.middleware.activity import ActivityTrackingMiddleware
+from app.middleware.maintenance import MaintenanceMiddleware
 from app.middleware.rate_limit import limiter
 
 # pyrefly: ignore [missing-import]
@@ -68,6 +69,7 @@ from app.routers import (
     search,
     saved_searches,
     media,
+    maintenance,
 )
 
 
@@ -367,9 +369,13 @@ app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(StructuredLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(ActivityTrackingMiddleware)
+app.add_middleware(MaintenanceMiddleware)
 
 from app.middleware.audit_context import AuditContextMiddleware
 app.add_middleware(AuditContextMiddleware)
+
+from app.middleware.org_audit_logging import OrganizationAuditMiddleware
+app.add_middleware(OrganizationAuditMiddleware)
 
 # ------------------------------------------------------------------
 # CORS
@@ -486,6 +492,7 @@ from app.routers import (
     users,
     verification,
     websockets,
+    graph,
 )
 
 # Router inclusions
@@ -504,6 +511,8 @@ app.include_router(messages.router, prefix="/api/messages", tags=["Messages"])
 app.include_router(
     notifications.router, prefix="/api/notifications", tags=["Notifications"]
 )
+from app.routers import admin_notifications
+app.include_router(admin_notifications.router, prefix="/api")
 
 app.include_router(followers.router, prefix="/api/followers", tags=["Followers"])
 app.include_router(bookmarks.router)
@@ -540,11 +549,13 @@ app.include_router(applications.router)
 app.include_router(skills.router)
 app.include_router(users.router)
 app.include_router(websockets.router)
+app.include_router(graph.router, prefix="/api")
 app.include_router(recommendations.router)
 app.include_router(
     repository_quality.router, prefix="/api", tags=["Repository Quality"]
 )
 app.include_router(health.router)
+app.include_router(maintenance.router, prefix="/api")
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
 app.include_router(saved_searches.router)
 app.include_router(hackathons.router, prefix="/api/hackathons", tags=["Hackathons"])

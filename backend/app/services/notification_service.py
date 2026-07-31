@@ -22,62 +22,6 @@ class NotificationService:
     """
 
     @staticmethod
-    def create_notification(
-        db: Session,
-        recipient_id: uuid.UUID,
-        sender_id: uuid.UUID | None,
-        notification: NotificationCreate,
-    ) -> Notification:
-
-        # Check for existing unread duplicate notification
-        stmt = select(Notification).where(
-            Notification.recipient_id == recipient_id,
-            Notification.type == notification.type,
-            Notification.is_read.is_(False),
-        )
-        if sender_id is not None:
-            stmt = stmt.where(Notification.sender_id == sender_id)
-        if notification.project_id is not None:
-            stmt = stmt.where(Notification.project_id == notification.project_id)
-        if notification.conversation_id is not None:
-            stmt = stmt.where(
-                Notification.conversation_id == notification.conversation_id
-            )
-        if notification.application_id is not None:
-            stmt = stmt.where(
-                Notification.application_id == notification.application_id
-            )
-
-        existing = db.scalars(stmt).first()
-        if existing:
-            existing.message = notification.message
-            existing.title = notification.title
-            existing.created_at = datetime.utcnow()
-            db.flush()
-            db.refresh(existing)
-            return existing
-
-        db_notification = Notification(
-            recipient_id=recipient_id,
-            sender_id=sender_id,
-            type=notification.type,
-            title=notification.title,
-            message=notification.message,
-            action_url=notification.action_url,
-            image_url=notification.image_url,
-            project_id=notification.project_id,
-            conversation_id=notification.conversation_id,
-            message_id=notification.message_id,
-            application_id=notification.application_id,
-        )
-
-        db.add(db_notification)
-        db.flush()
-        db.refresh(db_notification)
-
-        return db_notification
-
-    @staticmethod
     def notify(
         db: Session,
         recipient_id,
@@ -91,28 +35,43 @@ class NotificationService:
         conversation_id=None,
         message_id=None,
         application_id=None,
+        channels=None,
+        priority=None,
     ):
         if sender_id is not None and recipient_id == sender_id:
             return None
 
-        notification = NotificationCreate(
-            recipient_id=recipient_id,
-            type=type,
-            title=title,
-            message=message,
-            action_url=action_url,
-            image_url=image_url,
-            project_id=project_id,
-            conversation_id=conversation_id,
-            message_id=message_id,
-            application_id=application_id,
-        )
+        from app.services.notifications import dispatcher
+        from app.models.notification import NotificationType, NotificationPriority
 
-        return NotificationService.create_notification(
+        if not isinstance(type, NotificationType):
+            try:
+                type = NotificationType(type)
+            except ValueError:
+                pass
+        
+        if not priority:
+            priority = NotificationPriority.NORMAL
+
+        metadata_info = {
+            "project_id": str(project_id) if project_id else None,
+            "conversation_id": str(conversation_id) if conversation_id else None,
+            "message_id": str(message_id) if message_id else None,
+            "application_id": str(application_id) if application_id else None,
+        }
+
+        return dispatcher.dispatch(
             db=db,
             recipient_id=recipient_id,
             sender_id=sender_id,
-            notification=notification,
+            notification_type=type,
+            title=title,
+            message=message,
+            channels=channels,
+            priority=priority,
+            metadata_info=metadata_info,
+            action_url=action_url,
+            image_url=image_url,
         )
 
     @staticmethod

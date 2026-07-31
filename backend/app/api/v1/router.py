@@ -17,9 +17,12 @@ from app.routers import (
     health,
     messages,
     notifications,
+    oauth_linking,
+    org_audit_logs,
     organizations,
     profile_summary,
     project_tags,
+    project_documents,
     project_dashboards,
     projects,
     recommendations,
@@ -51,15 +54,19 @@ async def v1_root():
 
 # Router inclusions under /api/v1
 api_v1_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_v1_router.include_router(oauth_linking.router)
 api_v1_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_v1_router.include_router(blocks.router, prefix="/blocks", tags=["User Blocks"])
 api_v1_router.include_router(export.router, prefix="/users", tags=["Export"])
 api_v1_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
+api_v1_router.include_router(project_documents.router)
 api_v1_router.include_router(project_dashboards.router)
 api_v1_router.include_router(
     builder_flares.router, prefix="/flare", tags=["Builder's Flare"]
 )
 api_v1_router.include_router(messages.router, prefix="/messages", tags=["Messages"])
+api_v1_router.include_router(organizations.router, prefix="/organizations", tags=["Organizations"])
+api_v1_router.include_router(org_audit_logs.router)
 api_v1_router.include_router(
     notifications.router, prefix="/notifications", tags=["Notifications"]
 )

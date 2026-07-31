@@ -68,9 +68,9 @@ class User(Base):
         nullable=False,
     )
 
-    password_hash: Mapped[str] = mapped_column(
+    password_hash: Mapped[str | None] = mapped_column(
         String(255),
-        nullable=False,
+        nullable=True,
     )
 
     # ------------------------------------------------------------------
@@ -280,6 +280,12 @@ class User(Base):
         unique=True,
     )
 
+    gitlab_id: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        unique=True,
+    )
+
     # ------------------------------------------------------------------
     # Soft Delete
     # ------------------------------------------------------------------
@@ -295,7 +301,7 @@ class User(Base):
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
-    )
+     index=True,)
 
     deleted_by: Mapped[User | None] = relationship(
         "User",
