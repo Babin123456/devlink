@@ -28,7 +28,7 @@ def _to_uuid(value: str | None) -> uuid.UUID | None:
 def send_notification_task(self, payload: dict) -> str | None:
     db = SessionLocal()
     try:
-        notification = NotificationService.notify(
+        notifications = NotificationService.notify(
             db,
             recipient_id=_to_uuid(payload["recipient_id"]),
             sender_id=_to_uuid(payload.get("sender_id")),
@@ -45,14 +45,6 @@ def send_notification_task(self, payload: dict) -> str | None:
 
         user = UserService.get_user(db, _to_uuid(payload["recipient_id"]))
         if user:
-            if user.email:
-                EmailService.send_notification_email(
-                    to_email=user.email,
-                    title=payload["title"],
-                    message=payload["message"],
-                    action_url=payload.get("action_url"),
-                )
-
             PushNotificationService.notify_user(
                 user_id=str(user.id),
                 title=payload["title"],
@@ -60,7 +52,11 @@ def send_notification_task(self, payload: dict) -> str | None:
                 action_url=payload.get("action_url"),
             )
 
-        return str(notification.id) if notification else None
+        # Return the first database notification ID if any
+        for n in (notifications or []):
+            if n.channel == "database":
+                return str(n.id)
+        return None
     except Exception as exc:
         db.rollback()
         logger.exception("send_notification_task failed; retrying")

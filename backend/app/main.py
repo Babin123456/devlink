@@ -504,6 +504,8 @@ app.include_router(messages.router, prefix="/api/messages", tags=["Messages"])
 app.include_router(
     notifications.router, prefix="/api/notifications", tags=["Notifications"]
 )
+from app.routers import admin_notifications
+app.include_router(admin_notifications.router, prefix="/api")
 
 app.include_router(followers.router, prefix="/api/followers", tags=["Followers"])
 app.include_router(bookmarks.router)
