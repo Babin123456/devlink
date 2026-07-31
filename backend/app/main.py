@@ -492,6 +492,7 @@ from app.routers import (
     users,
     verification,
     websockets,
+    graph,
 )
 
 # Router inclusions
@@ -548,6 +549,7 @@ app.include_router(applications.router)
 app.include_router(skills.router)
 app.include_router(users.router)
 app.include_router(websockets.router)
+app.include_router(graph.router, prefix="/api")
 app.include_router(recommendations.router)
 app.include_router(
     repository_quality.router, prefix="/api", tags=["Repository Quality"]
