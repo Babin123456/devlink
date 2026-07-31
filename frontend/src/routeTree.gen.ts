@@ -20,6 +20,9 @@ import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 import { Route as AppBookmarksRouteImport } from './routes/_app.bookmarks'
 import { Route as AppBuildersRouteImport } from './routes/_app.builders'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppDesignSystemRouteImport } from './routes/_app.design-system'
+import { Route as AppFeedRouteImport } from './routes/_app.feed'
+import { Route as AppFlaresRouteImport } from './routes/_app.flares'
 import { Route as AppFeedRouteImport } from './routes/_app.feed'
 import { Route as AppFlaresRouteImport } from './routes/_app.flares'
 import { Route as AppGraphRouteImport } from './routes/_app.graph'
@@ -96,6 +99,21 @@ const AppBuildersRoute = AppBuildersRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDesignSystemRoute = AppDesignSystemRouteImport.update({
+  id: '/design-system',
+  path: '/design-system',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFeedRoute = AppFeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFlaresRoute = AppFlaresRouteImport.update({
+  id: '/flares',
+  path: '/flares',
   getParentRoute: () => AppRoute,
 } as any)
 const AppFeedRoute = AppFeedRouteImport.update({
@@ -229,6 +247,9 @@ export interface FileRoutesByFullPath {
   '/bookmarks': typeof AppBookmarksRoute
   '/builders': typeof AppBuildersRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+  '/design-system': typeof AppDesignSystemRoute
+  '/feed': typeof AppFeedRoute
+  '/flares': typeof AppFlaresRoute
   '/feed': typeof AppFeedRoute
   '/flares': typeof AppFlaresRoute
   '/graph': typeof AppGraphRoute
@@ -264,6 +285,9 @@ export interface FileRoutesByTo {
   '/bookmarks': typeof AppBookmarksRoute
   '/builders': typeof AppBuildersRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+  '/design-system': typeof AppDesignSystemRoute
+  '/feed': typeof AppFeedRoute
+  '/flares': typeof AppFlaresRoute
   '/feed': typeof AppFeedRoute
   '/flares': typeof AppFlaresRoute
   '/graph': typeof AppGraphRoute
@@ -300,6 +324,9 @@ export interface FileRoutesById {
   '/_app/bookmarks': typeof AppBookmarksRoute
   '/_app/builders': typeof AppBuildersRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/design-system': typeof AppDesignSystemRoute
+  '/_app/feed': typeof AppFeedRoute
+  '/_app/flares': typeof AppFlaresRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/flares': typeof AppFlaresRoute
   '/_app/graph': typeof AppGraphRoute
@@ -337,6 +364,9 @@ export interface FileRouteTypes {
     | '/bookmarks'
     | '/builders'
     | '/dashboard'
+    | '/design-system'
+    | '/feed'
+    | '/flares'
     | '/feed'
     | '/flares'
     | '/graph'
@@ -372,6 +402,9 @@ export interface FileRouteTypes {
     | '/bookmarks'
     | '/builders'
     | '/dashboard'
+    | '/design-system'
+    | '/feed'
+    | '/flares'
     | '/feed'
     | '/flares'
     | '/graph'
@@ -407,6 +440,9 @@ export interface FileRouteTypes {
     | '/_app/bookmarks'
     | '/_app/builders'
     | '/_app/dashboard'
+    | '/_app/design-system'
+    | '/_app/feed'
+    | '/_app/flares'
     | '/_app/feed'
     | '/_app/flares'
     | '/_app/graph'
@@ -519,6 +555,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/design-system': {
+      id: '/_app/design-system'
+      path: '/design-system'
+      fullPath: '/design-system'
+      preLoaderRoute: typeof AppDesignSystemRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/feed': {
@@ -789,6 +832,9 @@ interface AppRouteChildren {
   AppBookmarksRoute: typeof AppBookmarksRoute
   AppBuildersRoute: typeof AppBuildersRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
+  AppDesignSystemRoute: typeof AppDesignSystemRoute
+  AppFeedRoute: typeof AppFeedRoute
+  AppFlaresRoute: typeof AppFlaresRoute
   AppFeedRoute: typeof AppFeedRoute
   AppFlaresRoute: typeof AppFlaresRoute
   AppGraphRoute: typeof AppGraphRoute
@@ -809,6 +855,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppBookmarksRoute: AppBookmarksRoute,
   AppBuildersRoute: AppBuildersRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
+  AppDesignSystemRoute: AppDesignSystemRoute,
   AppFeedRoute: AppFeedRoute,
   AppFlaresRoute: AppFlaresRoute,
   AppGraphRoute: AppGraphRoute,
