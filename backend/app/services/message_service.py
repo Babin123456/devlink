@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Dict, Tuple
 
 # pyrefly: ignore [missing-import]
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session, selectinload
@@ -217,9 +217,9 @@ class MessageService:
         conversation_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(Message).where(Message.conversation_id == conversation_id)
+        stmt = select(func.count()).select_from(Message).where(Message.conversation_id == conversation_id)
 
-        return len(list(db.scalars(stmt)))
+        return db.scalar(stmt) or 0
 
     # ==========================================================
     # Typing indicator

@@ -20,6 +20,7 @@ export const Route = createFileRoute("/_app/admin")({
           <a href="/admin/audit-logs" className="text-blue-600 hover:underline">Audit Logs</a>
           <a href="/admin/notifications" className="text-blue-600 hover:underline">Notifications</a>
           <a href="/admin/maintenance" className="text-blue-600 hover:underline">Maintenance Mode</a>
+          <a href="/admin/search-analytics" className="text-blue-600 hover:underline">Search Analytics</a>
         </div>
       </div>
       <Outlet />
