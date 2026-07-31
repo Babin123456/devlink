@@ -256,7 +256,7 @@ class Project(Base):
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
-    )
+     index=True,)
 
     deleted_by: Mapped[User | None] = relationship(
         "User",
