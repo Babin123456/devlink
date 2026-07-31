@@ -5,6 +5,13 @@ from sqlalchemy.orm import Session
 from app.dependencies import get_database
 from app.schemas.search import SearchAutocompleteResponse
 from app.services.search_service import SearchService
+from app.services.search_analytics_service import SearchAnalyticsService
+from app.api.deps import get_current_user_optional, get_current_user
+from app.models.user import User, UserRole
+import time
+import uuid
+from pydantic import BaseModel
+from fastapi import HTTPException
 
 router = APIRouter()
 
@@ -16,15 +23,44 @@ def full_search(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_database),
+    user: Optional[User] = Depends(get_current_user_optional),
 ):
     """Full-text paginated search across Users, Projects, Organizations, Skills, and Tags."""
-    return SearchService.search(
+    start_time = time.time()
+    
+    results = SearchService.search(
         db=db,
         q=q,
         category=category,
         page=page,
         limit=limit,
     )
+    
+    latency_ms = (time.time() - start_time) * 1000
+    
+    # Calculate total results returned in this page
+    total_results = 0
+    if category:
+        # results is a dictionary with a single key for the category
+        for v in results.values():
+            total_results += len(v)
+    else:
+        for k, v in results.items():
+            if isinstance(v, list):
+                total_results += len(v)
+                
+    if q.strip():
+        # Log the search asynchronously ideally, but we do it synchronously here
+        SearchAnalyticsService.log_search(
+            db=db,
+            query=q,
+            results_count=total_results,
+            latency_ms=latency_ms,
+            user_id=user.id if user else None,
+            filters={"category": category} if category else None
+        )
+        
+    return results
 
 
 @router.get(
@@ -52,3 +88,57 @@ def suggestions(
 ):
     """Returns a flat list of matching query suggestion strings."""
     return SearchService.suggestions(db=db, q=q, limit=limit)
+
+
+class TrackClickRequest(BaseModel):
+    query: str
+    clicked_entity_type: str
+    clicked_entity_id: uuid.UUID
+
+@router.post(
+    "/track-click",
+    summary="Track a click from search results",
+)
+def track_click(
+    request: TrackClickRequest,
+    db: Session = Depends(get_database),
+    user: Optional[User] = Depends(get_current_user_optional),
+):
+    """Track which entity a user clicked from their search results."""
+    # Find the most recent search query for this user/session with this query string
+    from sqlalchemy import select
+    from app.models.search_analytics import SearchQueryLog
+    
+    stmt = select(SearchQueryLog).where(SearchQueryLog.query == request.query)
+    if user:
+        stmt = stmt.where(SearchQueryLog.user_id == user.id)
+        
+    stmt = stmt.order_by(SearchQueryLog.created_at.desc()).limit(1)
+    
+    log = db.scalar(stmt)
+    if not log:
+        return {"status": "ignored"}
+        
+    SearchAnalyticsService.log_click(
+        db=db,
+        search_query_id=log.id,
+        clicked_entity_type=request.clicked_entity_type,
+        clicked_entity_id=request.clicked_entity_id,
+        user_id=user.id if user else None,
+    )
+    return {"status": "success"}
+
+
+@router.get(
+    "/analytics",
+    summary="Get search analytics dashboard metrics",
+)
+def get_analytics(
+    days: int = Query(30, ge=1, le=365),
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin only")
+        
+    return SearchAnalyticsService.get_dashboard_metrics(db, days=days)
