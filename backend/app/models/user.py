@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import (
     Boolean,
@@ -19,6 +20,14 @@ from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
+
+
+class UserRole(str, Enum):
+    """Application-level user role."""
+
+    ADMIN = "admin"
+    MEMBER = "member"
+    VIEWER = "viewer"
 
 
 class User(Base):
