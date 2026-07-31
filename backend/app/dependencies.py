@@ -404,4 +404,3 @@ def require_roles(*allowed_roles: SystemRole):
         return current_user
 
     return dependency
-    

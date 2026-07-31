@@ -53,7 +53,6 @@ from app.core.rbac import (
 from app.models.organization_member import OrgMemberRole
 from app.models.project_member import MemberRole
 
-
 # ─── SystemRole enum tests ──────────────────────────────────────────────────
 
 
@@ -378,9 +377,7 @@ class TestUnauthorizedActionsBlocked:
 
     def test_user_cannot_access_admin_endpoint(self, client, register_and_login):
         """A regular USER should get 403 on an admin-only endpoint."""
-        user_id, token = register_and_login(
-            "user@test.com", "testuser", "Passw0rd!"
-        )
+        user_id, token = register_and_login("user@test.com", "testuser", "Passw0rd!")
 
         response = client.get(
             "/api/admin/users",
@@ -388,13 +385,9 @@ class TestUnauthorizedActionsBlocked:
         )
         assert response.status_code in (403, 404)
 
-    def test_admin_can_access_admin_endpoint(
-        self, client, db, register_and_login
-    ):
+    def test_admin_can_access_admin_endpoint(self, client, db, register_and_login):
         """An ADMIN user should be able to access admin endpoints."""
-        user_id, token = register_and_login(
-            "admin@test.com", "adminuser", "Passw0rd!"
-        )
+        user_id, token = register_and_login("admin@test.com", "adminuser", "Passw0rd!")
 
         from app.models.user import User
 

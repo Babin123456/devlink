@@ -309,7 +309,8 @@ class User(Base):
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
-     index=True,)
+        index=True,
+    )
 
     deleted_by: Mapped[User | None] = relationship(
         "User",

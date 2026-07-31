@@ -158,11 +158,11 @@ class IssueService:
         # Since source_issue_id is a placeholder right now, we just mock the existing check or use a single IN clause if we had a real ID
         # Here we simulate fetching all existing at once for the given duplicates (assuming source_issue_id is fixed per request in a real scenario)
         # For the placeholder logic, we'll keep the loop but avoid the DB query by knowing uuid4() is never in the DB.
-        
+
         duplicate_ids = [result["issue_id"] for result in similar_issues]
         if not duplicate_ids:
             return []
-            
+
         suggestions = []
         for result in similar_issues:
             suggestion = DuplicateSuggestion(
