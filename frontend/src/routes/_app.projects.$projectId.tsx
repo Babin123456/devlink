@@ -84,8 +84,10 @@ function ProjectDetail() {
       setSuggestedTags(data.tags);
       setSelectedTags(data.tags.map((t) => t.name));
     },
-    onError: () => {
-      toast.error("Failed to generate tags. Please try again.");
+    onError: (err) => {
+      const msg = err instanceof Error ? err.message : "Please try again.";
+      toast.error(`Failed to generate tags. ${msg}`);
+      setSuggestedTags([]);
     },
   });
 
