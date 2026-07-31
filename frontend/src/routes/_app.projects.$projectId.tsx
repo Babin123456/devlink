@@ -4,6 +4,7 @@ import { projectsService } from "@/services";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
 import { api } from "@/api";
 import { ProjectDashboard } from "@/features/projects/components/ProjectDashboard";
+import { CollaborativeWorkspace } from "@/components/projects/CollaborativeWorkspace";
 import {
   ArrowLeft,
   Star,
@@ -46,7 +47,7 @@ function ProjectDetail() {
     queryKey: ["project", projectId],
     queryFn: () => projectsService.get(projectId),
   });
-  const [tab, setTab] = useState<"overview" | "members" | "activity" | "repos" | "dashboard">(
+  const [tab, setTab] = useState<"overview" | "workspace" | "members" | "activity" | "repos" | "dashboard">(
     "overview",
   );
   const [copied, setCopied] = useState(false);
@@ -113,8 +114,8 @@ function ProjectDetail() {
   if (!p) throw notFound();
 
   const tabs = dashboard
-    ? (["overview", "members", "activity", "repos", "dashboard"] as const)
-    : (["overview", "members", "activity", "repos"] as const);
+    ? (["overview", "workspace", "members", "activity", "repos", "dashboard"] as const)
+    : (["overview", "workspace", "members", "activity", "repos"] as const);
 
   return (
     <div className="space-y-4">
@@ -323,6 +324,9 @@ function ProjectDetail() {
             <span className="ml-auto text-[11px] text-muted-foreground">main · updated 2h ago</span>
           </div>
         </Card>
+      )}
+      {tab === "workspace" && (
+        <CollaborativeWorkspace projectId={projectId} />
       )}
       {tab === "dashboard" && (
         <ProjectDashboard projectId={projectId} currentUserRole={currentUserRole} />
