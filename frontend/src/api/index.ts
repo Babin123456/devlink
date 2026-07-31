@@ -63,6 +63,8 @@ export type {
 } from "./modules/repositoryQuality";
 export { exportApi } from "./modules/export";
 export type { UserExportData, ExportResponse } from "./modules/export";
+export { auditApi } from "./modules/audit";
+export type { AuditLog, AuditLogQuery } from "./modules/audit";
 export type {
   BookmarkResponse as BookmarkItem,
   BookmarkCheckResponse,
