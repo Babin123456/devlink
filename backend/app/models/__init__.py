@@ -70,3 +70,4 @@ from .announcement import Announcement as Announcement
 from .user_report import UserReport
 from .user_skill import UserSkill
 from .verification_request import VerificationRequest  # noqa: F401
+from .maintenance import MaintenanceWindow

@@ -159,6 +159,19 @@ async function coreFetch(path: string, opts: RequestOptions, attempt = 0): Promi
     throw new ApiError(err instanceof Error ? err.message : "Network error", 0, null);
   }
 
+  if (res.status === 503) {
+    try {
+      const payload = await res.clone().json();
+      if (payload?.detail === "Maintenance Mode") {
+        if (window.location.pathname !== "/maintenance") {
+          window.location.href = "/maintenance";
+        }
+      }
+    } catch (e) {
+      // Not JSON, ignore
+    }
+  }
+
   if (res.status === 401 && auth && !path.includes("/auth/")) {
     const newToken = await refreshAccessToken();
     if (newToken) {
