@@ -48,6 +48,15 @@ function buildUrl(path: string, query?: RequestOptions["query"]): string {
 // Single-flight refresh: parallel 401s share one refresh call.
 let refreshInFlight: Promise<string | null> | null = null;
 
+// Session Correlation ID for distributed tracing
+let sessionCorrelationId = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('x-correlation-id') : null;
+if (!sessionCorrelationId) {
+  sessionCorrelationId = `corr_${crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '') : Math.random().toString(36).slice(2)}`;
+  if (typeof sessionStorage !== 'undefined') {
+    sessionStorage.setItem('x-correlation-id', sessionCorrelationId);
+  }
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   if (!isBackendConfigured()) return null;
   const refresh = tokenStore.getRefresh();
@@ -104,6 +113,11 @@ async function coreFetch(path: string, opts: RequestOptions, attempt = 0): Promi
     const token = tokenStore.getAccess();
     if (token) finalHeaders.set("Authorization", `Bearer ${token}`);
   }
+
+  // Structured Logging Headers
+  finalHeaders.set("X-Correlation-ID", sessionCorrelationId!);
+  finalHeaders.set("X-Request-ID", `req_${crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '') : Math.random().toString(36).slice(2)}`);
+
 
   const init: RequestInit = {
     ...rest,

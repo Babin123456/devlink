@@ -8,6 +8,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    JSON,
     String,
     Text,
     func,
@@ -15,10 +16,30 @@ from sqlalchemy import (
 from sqlalchemy import (
     Enum as SqlEnum,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
+
+
+class NotificationStatus(str, Enum):
+    PENDING = "pending"
+    SENT = "sent"
+    FAILED = "failed"
+    READ = "read"
+
+
+class NotificationPriority(str, Enum):
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    URGENT = "urgent"
+
+
+class NotificationChannel(str, Enum):
+    DATABASE = "database"
+    EMAIL = "email"
+    WEBSOCKET = "websocket"
 
 
 class NotificationType(str, Enum):
@@ -33,6 +54,53 @@ class NotificationType(str, Enum):
     BUILDER_FLARE = "builder_flare"
     SYSTEM = "system"
     AI = "ai"
+    # New types from prompt
+    WELCOME = "welcome"
+    PASSWORD_RESET = "password_reset"
+    ROLE_CHANGE = "role_change"
+
+
+class NotificationPreference(Base):
+    """
+    User notification preferences for different channels and types.
+    """
+
+    __tablename__ = "notification_preferences"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+
+    # Global Channel Toggles
+    email_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    websocket_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    database_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # Event Toggles
+    project_updates: Mapped[bool] = mapped_column(Boolean, default=True)
+    invitations: Mapped[bool] = mapped_column(Boolean, default=True)
+    role_changes: Mapped[bool] = mapped_column(Boolean, default=True)
+    marketing_emails: Mapped[bool] = mapped_column(Boolean, default=False)
+    system_alerts: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    user = relationship("User", backref="notification_preferences")
 
 
 class Notification(Base):
@@ -77,6 +145,27 @@ class Notification(Base):
     type: Mapped[NotificationType] = mapped_column(
         SqlEnum(NotificationType),
         nullable=False,
+        index=True,
+    )
+
+    channel: Mapped[NotificationChannel] = mapped_column(
+        SqlEnum(NotificationChannel),
+        nullable=False,
+        default=NotificationChannel.DATABASE,
+    )
+
+    status: Mapped[NotificationStatus] = mapped_column(
+        SqlEnum(NotificationStatus),
+        nullable=False,
+        default=NotificationStatus.PENDING,
+        index=True,
+    )
+
+    priority: Mapped[NotificationPriority] = mapped_column(
+        SqlEnum(NotificationPriority),
+        nullable=False,
+        default=NotificationPriority.NORMAL,
+        index=True,
     )
 
     title: Mapped[str] = mapped_column(
@@ -97,8 +186,12 @@ class Notification(Base):
         String(500),
     )
 
-    # ==========================================================
-    # Related Resources
+    # Metadata for additional data (like payload)
+    metadata_info: Mapped[dict | None] = mapped_column(
+        JSONB().with_variant(JSON, "sqlite"),
+        default=dict,
+    )# ==========================================================
+    # Related Resources (Legacy, consider moving to metadata_info)
     # ==========================================================
 
     project_id: Mapped[uuid.UUID | None] = mapped_column(
@@ -133,6 +226,15 @@ class Notification(Base):
     )
 
     read_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        index=True,
+    )
+
+    sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+    )
+
+    scheduled_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
     )
 
@@ -191,5 +293,5 @@ class Notification(Base):
 
     def __repr__(self) -> str:
         return (
-            f"<Notification(type='{self.type.value}', recipient={self.recipient_id})>"
+            f"<Notification(type='{self.type.value}', recipient={self.recipient_id}, status={self.status})>"
         )

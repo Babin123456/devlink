@@ -40,6 +40,12 @@ from app.core.security import hash_password
 from app.services.user_service import UserService
 from app.core.cache import cached
 from app.utils.validators import validate_username
+from app.utils.uploads import (
+    validate_resume_upload,
+    save_resume_upload,
+    validate_image_upload,
+    save_image_upload,
+)
 
 router = APIRouter(
     tags=["Users"],
@@ -298,12 +304,35 @@ def update_me(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
 ):
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
 
-    return UserService.update_user(
+    # Extract old values for fields that are being updated
+    old_values = {}
+    for key in user.model_dump(exclude_unset=True).keys():
+        old_values[key] = getattr(current_user, key, None)
+
+    updated_user = UserService.update_user(
         db,
         current_user,
         user,
     )
+
+    new_values = user.model_dump(exclude_unset=True)
+
+    AuditLogService.create_log(
+        db=db,
+        actor_id=updated_user.id,
+        action=AuditAction.PROFILE_UPDATED,
+        entity_type="user",
+        entity_id=str(updated_user.id),
+        target_user_id=updated_user.id,
+        old_values=old_values,
+        new_values=new_values,
+        description="User updated their profile",
+    )
+
+    return updated_user
 
 
 @router.post(
@@ -329,6 +358,38 @@ async def upload_resume(
     full_resume_url = str(request.base_url).rstrip("/") + resume_url
 
     return UserService.update_resume_url(db, current_user, full_resume_url)
+
+
+@router.post(
+    "/me/avatar",
+    response_model=UserResponse,
+    summary="Upload and optimize user profile avatar",
+)
+async def upload_avatar(
+    request: Request,
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+
+    contents = await file.read()
+    try:
+        validate_image_upload(file.filename, file.content_type, len(contents))
+        saved = save_image_upload(
+            contents=contents,
+            filename=file.filename,
+            subfolder="avatars",
+            user_id=current_user.id,
+            max_dimensions=(400, 400),
+            thumb_dimensions=(150, 150),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    full_avatar_url = str(request.base_url).rstrip("/") + str(saved["image_url"])
+    return UserService.update_profile_image(db, current_user, full_avatar_url)
 
 
 @router.delete(

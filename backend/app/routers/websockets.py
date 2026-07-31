@@ -414,6 +414,108 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
                     user_id,
                 )
 
+            # ── Document Collaboration Events ───────────────────────────
+            elif msg_type == "doc.join" and project_id:
+                manager.join_room(project_id, user_id)
+                await manager.broadcast_to_room(
+                    project_id,
+                    _event(
+                        "doc.user_joined",
+                        project_id=project_id,
+                        user_id=user_id,
+                        doc_id=data.get("doc_id", ""),
+                    ),
+                )
+
+            elif msg_type == "doc.edit" and project_id:
+                doc_id = data.get("doc_id", "")
+                content = data.get("content", "")
+                title = data.get("title")
+                base_version = data.get("base_version")
+
+                from app.database.session import SessionLocal
+                from app.services.project_document_service import ProjectDocumentService
+                db_session = SessionLocal()
+                try:
+                    doc_uuid = UUID(doc_id) if doc_id else None
+                    if doc_uuid:
+                        updated_doc, is_conflict = ProjectDocumentService.update_document(
+                            db_session,
+                            doc_id=doc_uuid,
+                            user_id=UUID(user_id) if user_id else user_id,
+                            title=title,
+                            content=content,
+                            base_version=base_version,
+                        )
+                        event_payload = _event(
+                            "doc.updated",
+                            project_id=project_id,
+                            doc_id=doc_id,
+                            user_id=user_id,
+                            content=updated_doc.content,
+                            title=updated_doc.title,
+                            version=updated_doc.version,
+                            conflict=is_conflict,
+                        )
+                        await manager.broadcast_to_room(project_id, event_payload)
+
+                        if is_conflict:
+                            await manager.send_personal_message(
+                                _event(
+                                    "doc.conflict",
+                                    doc_id=doc_id,
+                                    version=updated_doc.version,
+                                    server_content=updated_doc.content,
+                                    message="Conflict detected. Merged with server version.",
+                                ),
+                                user_id,
+                            )
+                    else:
+                        await manager.broadcast_to_room(
+                            project_id,
+                            _event(
+                                "doc.updated",
+                                project_id=project_id,
+                                doc_id=doc_id,
+                                user_id=user_id,
+                                content=content,
+                                title=title,
+                                version=(base_version or 1) + 1,
+                                conflict=False,
+                            ),
+                        )
+                except Exception as exc:
+                    logger.warning("Error updating document in websocket: %s", exc)
+                    await manager.broadcast_to_room(
+                        project_id,
+                        _event(
+                            "doc.updated",
+                            project_id=project_id,
+                            doc_id=doc_id,
+                            user_id=user_id,
+                            content=content,
+                            title=title,
+                            version=(base_version or 1) + 1,
+                            conflict=False,
+                        ),
+                    )
+                finally:
+                    db_session.close()
+
+            elif msg_type == "doc.cursor" and project_id:
+                await manager.broadcast_to_room(
+                    project_id,
+                    _event(
+                        "doc.cursor_moved",
+                        project_id=project_id,
+                        doc_id=data.get("doc_id", ""),
+                        user_id=user_id,
+                        cursor_offset=data.get("cursor_offset", 0),
+                        selection_start=data.get("selection_start"),
+                        selection_end=data.get("selection_end"),
+                    ),
+                )
+
             # ── Unknown message type ─────────────────────────────────────
             else:
                 await manager.send_personal_message(

@@ -53,16 +53,16 @@ DevLink is an open-source developer collaboration platform. Developers can creat
 
 ### Desktop
 
-| Dashboard | Features |
-|-----------|-----------|
+| Dashboard                                                        | Features                                                        |
+| ---------------------------------------------------------------- | --------------------------------------------------------------- |
 | <img src="assets/screenshots/desktop-dashboard.png" width="450"> | <img src="assets/screenshots/desktop-features.png" width="450"> |
 
 **Dashboard** – Main dashboard displaying the application's overview.
 
 **Features** – Highlights the core functionality available to users.
 
-| Pricing | Login |
-|---------|--------|
+| Pricing                                                        | Login                                                        |
+| -------------------------------------------------------------- | ------------------------------------------------------------ |
 | <img src="assets/screenshots/desktop-pricing.png" width="450"> | <img src="assets/screenshots/desktop-login.png" width="450"> |
 
 **Pricing** – Displays available pricing plans.
@@ -73,15 +73,14 @@ DevLink is an open-source developer collaboration platform. Developers can creat
 
 ### Mobile
 
-| Dashboard | Features |
-|-----------|-----------|
+| Dashboard                                                       | Features                                                       |
+| --------------------------------------------------------------- | -------------------------------------------------------------- |
 | <img src="assets/screenshots/mobile-dashboard.png" width="220"> | <img src="assets/screenshots/mobile-features.png" width="220"> |
 
 **Mobile Dashboard** – Responsive dashboard view.
 
 **Mobile Features** – Responsive features page.
 M
-
 
 - React
 - TypeScript
@@ -91,23 +90,23 @@ M
 
 ## Features
 
-| Feature | Description |
-| :--- | :--- |
-| Developer Profiles | Portfolio pages with skills, GitHub repository links, experience, and social links |
-| Project Marketplace | Browse, create, and apply to open-source projects and team openings |
-| Team Applications | Role-based application submission with status tracking and owner review |
-| Real-Time Messaging | WebSocket direct messaging with conversation threads and presence indicators |
-| Notifications | Real-time event notifications for applications, messages, and activity |
-| Builder Activity Feed | Community updates, project announcements, and contributor flares |
-| Followers & Activity | Follow developers and track their public activity feed |
-| Search & Discovery | Full-text search across developers, projects, issues, and skills |
-| Saved Searches | Store and manage custom search queries with alert support |
-| Bookmarks | Save projects to personal bookmark collections |
-| Project Issues | Issue tracking linked to projects |
-| Repository Linking | Connect GitHub repositories to project profiles with quality scoring |
-| Organizations | Create and manage organization workspaces |
-| Contributor Matching | Match contributors to projects based on skills and availability |
-| Project Recommendations | Recommend relevant projects to developers based on their profile |
+| Feature                 | Description                                                                        |
+| :---------------------- | :--------------------------------------------------------------------------------- |
+| Developer Profiles      | Portfolio pages with skills, GitHub repository links, experience, and social links |
+| Project Marketplace     | Browse, create, and apply to open-source projects and team openings                |
+| Team Applications       | Role-based application submission with status tracking and owner review            |
+| Real-Time Messaging     | WebSocket direct messaging with conversation threads and presence indicators       |
+| Notifications           | Real-time event notifications for applications, messages, and activity             |
+| Builder Activity Feed   | Community updates, project announcements, and contributor flares                   |
+| Followers & Activity    | Follow developers and track their public activity feed                             |
+| Search & Discovery      | Full-text search across developers, projects, issues, and skills                   |
+| Saved Searches          | Store and manage custom search queries with alert support                          |
+| Bookmarks               | Save projects to personal bookmark collections                                     |
+| Project Issues          | Issue tracking linked to projects                                                  |
+| Repository Linking      | Connect GitHub repositories to project profiles with quality scoring               |
+| Organizations           | Create and manage organization workspaces                                          |
+| Contributor Matching    | Match contributors to projects based on skills and availability                    |
+| Project Recommendations | Recommend relevant projects to developers based on their profile                   |
 
 ---
 
@@ -115,53 +114,55 @@ M
 
 ### Frontend
 
-| Technology | Purpose |
-| :--- | :--- |
-| React 19 | UI library |
-| TypeScript 5.8 | Type safety |
-| Vite 8 | Build tool and development server |
-| Tailwind CSS v4 | Styling |
-| TanStack Router v1 | Client-side routing |
-| TanStack Query v5 | Server state and data fetching |
-| Framer Motion | Animations |
+| Technology         | Purpose                           |
+| :----------------- | :-------------------------------- |
+| React 19           | UI library                        |
+| TypeScript 5.8     | Type safety                       |
+| Vite 8             | Build tool and development server |
+| Tailwind CSS v4    | Styling                           |
+| TanStack Router v1 | Client-side routing               |
+| TanStack Query v5  | Server state and data fetching    |
+| Framer Motion      | Animations                        |
 
 ### Backend
 
-| Technology | Purpose |
-| :--- | :--- |
-| Python 3.11+ | Runtime |
-| FastAPI | REST API framework |
-| Pydantic v2 | Request validation and serialization |
-| SQLAlchemy 2.0 | ORM and async query engine |
-| Asyncpg | Async PostgreSQL driver |
-| Alembic | Database schema migrations |
+| Technology     | Purpose                              |
+| :------------- | :----------------------------------- |
+| Python 3.11+   | Runtime                              |
+| FastAPI        | REST API framework                   |
+| Pydantic v2    | Request validation and serialization |
+| SQLAlchemy 2.0 | ORM and async query engine           |
+| Asyncpg        | Async PostgreSQL driver              |
+| Alembic        | Database schema migrations           |
 
 ### Database & Infrastructure
 
-| Technology | Purpose |
-| :--- | :--- |
-| PostgreSQL 15+ | Primary relational database |
-| Redis 7+ | Caching and Pub/Sub broker |
-| Celery | Asynchronous task processing |
+| Technology     | Purpose                      |
+| :------------- | :--------------------------- |
+| PostgreSQL 15+ | Primary relational database  |
+| Redis 7+       | Caching and Pub/Sub broker   |
+| Celery         | Asynchronous task processing |
 
 ### DevOps
 
-| Technology | Purpose |
-| :--- | :--- |
+| Technology              | Purpose                                |
+| :---------------------- | :------------------------------------- |
 | Docker & Docker Compose | Containerization and local environment |
-| DevContainers | VS Code and GitHub Codespaces support |
-| GitHub Actions | CI/CD pipelines |
+| DevContainers           | VS Code and GitHub Codespaces support  |
+| GitHub Actions          | CI/CD pipelines                        |
 
 ---
 
 ## Getting Started
 
+> 📖 **Complete Setup & Troubleshooting Guide**: See our detailed [Environment Setup Guide](docs/environment-setup.md) for required software, environment variables, step-by-step onboarding, and common errors resolution matrix.
+
 ### Prerequisites
 
 - Node.js 20+
 - Python 3.11+
-- Docker & Docker Compose *(recommended)*
-- PostgreSQL 15+ and Redis 7+ *(if running without Docker)*
+- Docker & Docker Compose _(recommended)_
+- PostgreSQL 15+ and Redis 7+ _(if running without Docker)_
 
 ### Option 1 — Docker Compose (Recommended)
 
@@ -171,11 +172,11 @@ cd devlink
 docker-compose -f docker-compose.dev.yml up --build
 ```
 
-| Service | URL |
-| :--- | :--- |
-| Frontend | `http://localhost:5173` |
-| Backend API | `http://localhost:8000` |
-| Swagger UI | `http://localhost:8000/docs` |
+| Service     | URL                          |
+| :---------- | :--------------------------- |
+| Frontend    | `http://localhost:5173`      |
+| Backend API | `http://localhost:8000`      |
+| Swagger UI  | `http://localhost:8000/docs` |
 
 ### Option 2 — Manual Setup
 
@@ -229,25 +230,26 @@ Swagger UI:
 ```
 http://localhost:8000/docs
 ```
+
 ### Backend (`backend/.env`)
 
-| Variable | Required | Description |
-| :--- | :---: | :--- |
-| `DATABASE_URL` | Yes | PostgreSQL async connection string |
-| `REDIS_URL` | Yes | Redis connection URI |
-| `SECRET_KEY` | Yes | Secret for JWT token signing |
-| `ENVIRONMENT` | No | `development`, `staging`, or `production` |
-| `GITHUB_CLIENT_ID` | No | GitHub OAuth App client ID |
-| `GITHUB_CLIENT_SECRET` | No | GitHub OAuth App client secret |
-| `OPENAI_API_KEY` | No | OpenAI key for profile summary and recommendations |
-| `CORS_ORIGINS` | No | Allowed CORS origins (JSON array) |
+| Variable               | Required | Description                                        |
+| :--------------------- | :------: | :------------------------------------------------- |
+| `DATABASE_URL`         |   Yes    | PostgreSQL async connection string                 |
+| `REDIS_URL`            |   Yes    | Redis connection URI                               |
+| `SECRET_KEY`           |   Yes    | Secret for JWT token signing                       |
+| `ENVIRONMENT`          |    No    | `development`, `staging`, or `production`          |
+| `GITHUB_CLIENT_ID`     |    No    | GitHub OAuth App client ID                         |
+| `GITHUB_CLIENT_SECRET` |    No    | GitHub OAuth App client secret                     |
+| `OPENAI_API_KEY`       |    No    | OpenAI key for profile summary and recommendations |
+| `CORS_ORIGINS`         |    No    | Allowed CORS origins (JSON array)                  |
 
 ### Frontend (`frontend/.env`)
 
-| Variable | Required | Description |
-| :--- | :---: | :--- |
-| `VITE_API_URL` | Yes | Backend API base URL |
-| `VITE_APP_NAME` | No | Application display name |
+| Variable        | Required | Description              |
+| :-------------- | :------: | :----------------------- |
+| `VITE_API_URL`  |   Yes    | Backend API base URL     |
+| `VITE_APP_NAME` |    No    | Application display name |
 
 ---
 
@@ -333,13 +335,13 @@ Full deployment instructions are in [docs/deployment.md](docs/deployment.md).
 
 ## Roadmap
 
-| Version | Planned Features | Status |
-| :--- | :--- | :--- |
-| `v0.1.0` | User authentication, developer profiles, project marketplace, GitHub OAuth | Completed |
-| `v0.2.0` | WebSocket messaging, team applications, notifications, repository linking | Completed |
+| Version  | Planned Features                                                                          | Status      |
+| :------- | :---------------------------------------------------------------------------------------- | :---------- |
+| `v0.1.0` | User authentication, developer profiles, project marketplace, GitHub OAuth                | Completed   |
+| `v0.2.0` | WebSocket messaging, team applications, notifications, repository linking                 | Completed   |
 | `v0.3.0` | Builder flares, saved searches, bookmark collections, contributor matching, organizations | In Progress |
-| `v0.4.0` | Project issue tracking, project analytics, extended search filters | Planned |
-| `v1.0.0` | Mobile application, public REST API, advanced integrations | Planned |
+| `v0.4.0` | Project issue tracking, project analytics, extended search filters                        | Planned     |
+| `v1.0.0` | Mobile application, public REST API, advanced integrations                                | Planned     |
 
 ---
 
@@ -378,6 +380,7 @@ See [CHANGELOG.md](CHANGELOG.md) for a full list of changes across releases.
 ---
 
 ## License
+
 IT License — see [LICENSE](LICENSE) for details.
 
 ## ⭐ If you like DevLink, consider giving the repository a star!
@@ -388,4 +391,3 @@ Building the future of developer collaboration.
 
 </p>
 ...
-

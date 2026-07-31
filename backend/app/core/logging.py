@@ -2,145 +2,160 @@ from __future__ import annotations
 
 import logging
 import logging.config
+import sys
 from pathlib import Path
+from typing import Any, Dict
+
+import structlog
+from structlog.types import EventDict
 
 from app.core.config import settings
 
 # ---------------------------------------------------------------------
-# Create logs directory
+# Constants
 # ---------------------------------------------------------------------
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 LOG_DIR = BASE_DIR / "logs"
-
 LOG_DIR.mkdir(parents=True, exist_ok=True)
-
 LOG_FILE = LOG_DIR / "devlink.log"
 
-# ---------------------------------------------------------------------
-# Logging Configuration
-# ---------------------------------------------------------------------
-
-LOGGING_CONFIG = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "default": {
-            "format": ("[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s"),
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-        },
-        "access": {
-            "format": (
-                "%(asctime)s | %(levelname)s | %(clientip)s | %(request)s | %(status)s"
-            ),
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "default",
-            "level": settings.LOG_LEVEL,
-        },
-        "file": {
-            "class": "logging.FileHandler",
-            "filename": str(LOG_FILE),
-            "formatter": "default",
-            "encoding": "utf-8",
-            "level": settings.LOG_LEVEL,
-        },
-    },
-    "root": {
-        "handlers": [
-            "console",
-            "file",
-        ],
-        "level": settings.LOG_LEVEL,
-    },
+SENSITIVE_KEYS = {
+    "password",
+    "token",
+    "secret",
+    "authorization",
+    "cookie",
+    "refreshtoken",
+    "apikey",
+    "access_token",
+    "refresh_token"
 }
 
+# ---------------------------------------------------------------------
+# Processors
+# ---------------------------------------------------------------------
+
+def redact_sensitive_data(logger: logging.Logger, name: str, event_dict: EventDict) -> EventDict:
+    """
+    Recursively redact sensitive keys from log payload.
+    """
+    def redact(obj: Any) -> Any:
+        if isinstance(obj, dict):
+            return {
+                k: "[REDACTED]" if k.lower() in SENSITIVE_KEYS else redact(v)
+                for k, v in obj.items()
+            }
+        if isinstance(obj, list):
+            return [redact(item) for item in obj]
+        return obj
+
+    # Redact event_dict in place
+    for k, v in list(event_dict.items()):
+        if k.lower() in SENSITIVE_KEYS:
+            event_dict[k] = "[REDACTED]"
+        elif isinstance(v, (dict, list)):
+            event_dict[k] = redact(v)
+            
+    return event_dict
+
+
+shared_processors = [
+    structlog.contextvars.merge_contextvars,
+    structlog.stdlib.add_logger_name,
+    structlog.stdlib.add_log_level,
+    structlog.processors.TimeStamper(fmt="iso"),
+    structlog.processors.StackInfoRenderer(),
+    structlog.processors.format_exc_info,
+    redact_sensitive_data,
+]
 
 # ---------------------------------------------------------------------
-# Configure Logging
+# Setup Logging
 # ---------------------------------------------------------------------
 
-logging.config.dictConfig(LOGGING_CONFIG)
+def configure_logging() -> None:
+    # Setup structlog
+    structlog.configure(
+        processors=shared_processors + [
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter
+        ],
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        wrapper_class=structlog.stdlib.BoundLogger,
+        cache_logger_on_first_use=True,
+    )
 
+    # Output renderer based on env
+    renderer = (
+        structlog.dev.ConsoleRenderer()
+        if settings.ENVIRONMENT == "development"
+        else structlog.processors.JSONRenderer()
+    )
+
+    formatter = structlog.stdlib.ProcessorFormatter(
+        foreign_pre_chain=shared_processors,
+        processors=[
+            structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+            renderer,
+        ],
+    )
+
+    # Standard logging setup
+    handler_console = logging.StreamHandler(sys.stdout)
+    handler_console.setFormatter(formatter)
+    
+    handler_file = logging.FileHandler(LOG_FILE, encoding="utf-8")
+    handler_file.setFormatter(formatter)
+
+    root_logger = logging.getLogger()
+    root_logger.handlers = []  # Clear default handlers
+    
+    # Set log level based on env
+    level = logging.DEBUG if settings.DEBUG else logging.INFO
+    root_logger.setLevel(level)
+    
+    root_logger.addHandler(handler_console)
+    root_logger.addHandler(handler_file)
+    
+    # Mute noisy loggers
+    logging.getLogger("uvicorn.access").handlers = [handler_console, handler_file]
+    logging.getLogger("uvicorn.access").propagate = False
+    logging.getLogger("uvicorn.error").handlers = [handler_console, handler_file]
+    logging.getLogger("uvicorn.error").propagate = False
+
+# Call immediately
+configure_logging()
 
 # ---------------------------------------------------------------------
 # Logger Factory
 # ---------------------------------------------------------------------
 
-
-def get_logger(name: str) -> logging.Logger:
-    """
-    Return a configured logger.
-
-    Example:
-        logger = get_logger(__name__)
-    """
-    return logging.getLogger(name)
-
-
-# ---------------------------------------------------------------------
-# Application Logger
-# ---------------------------------------------------------------------
+def get_logger(name: str) -> structlog.stdlib.BoundLogger:
+    """Return a structlog logger configured for the application."""
+    return structlog.get_logger(name)
 
 logger = get_logger("devlink")
 
-
 # ---------------------------------------------------------------------
-# Startup Logs
+# Helpers
 # ---------------------------------------------------------------------
-
 
 def log_startup() -> None:
-    logger.info("=" * 60)
-    logger.info("Starting DevLink Backend")
-    logger.info(f"Environment : {settings.ENVIRONMENT}")
-    logger.info(f"Debug       : {settings.DEBUG}")
-    logger.info(f"Version     : {settings.APP_VERSION}")
-    logger.info("=" * 60)
-
-
-# ---------------------------------------------------------------------
-# Shutdown Logs
-# ---------------------------------------------------------------------
-
-
-def log_shutdown() -> None:
-    logger.info("=" * 60)
-    logger.info("Stopping DevLink Backend")
-    logger.info("=" * 60)
-
-
-# ---------------------------------------------------------------------
-# Security Logging
-# ---------------------------------------------------------------------
-
-
-def log_security_event(
-    event: str,
-    user: str | None = None,
-    ip: str | None = None,
-) -> None:
-    """
-    Log security-related events.
-
-    Examples:
-        Failed login
-        Password reset
-        Token refresh
-        Account lock
-    """
-
-    logger.warning(
-        f"[SECURITY] {event} | user={user or 'anonymous'} | ip={ip or 'unknown'}"
+    logger.info(
+        "starting_devlink_backend",
+        environment=settings.ENVIRONMENT,
+        debug=settings.DEBUG,
+        version=settings.APP_VERSION
     )
 
+def log_shutdown() -> None:
+    logger.info("stopping_devlink_backend")
 
-# ---------------------------------------------------------------------
-# API Logging
-# ---------------------------------------------------------------------
+def log_security_event(event: str, user: str | None = None, ip: str | None = None) -> None:
+    logger.warning("security_event", event=event, target_user=user, ip_address=ip)
+
+def log_exception(exc: Exception) -> None:
+    logger.exception("unhandled_exception", exc_info=exc)
 
 
 def log_request(
@@ -151,14 +166,11 @@ def log_request(
     duration_ms: float,
 ) -> None:
     logger.info(
-        f"[{request_id}] {method} {path} status={status_code} time={duration_ms:.2f}ms"
+        "http_request",
+        request_id=request_id,
+        correlation_id=request_id,
+        method=method,
+        path=path,
+        status_code=status_code,
+        duration_ms=round(duration_ms, 2),
     )
-
-
-# ---------------------------------------------------------------------
-# Exception Logging
-# ---------------------------------------------------------------------
-
-
-def log_exception(exc: Exception) -> None:
-    logger.exception(str(exc))

@@ -2,6 +2,9 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { projectsService } from "@/services";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
+import { api } from "@/api";
+import { ProjectDashboard } from "@/features/projects/components/ProjectDashboard";
+import { CollaborativeWorkspace } from "@/components/projects/CollaborativeWorkspace";
 import {
   ArrowLeft,
   Star,
@@ -44,9 +47,26 @@ function ProjectDetail() {
     queryKey: ["project", projectId],
     queryFn: () => projectsService.get(projectId),
   });
-  const [tab, setTab] = useState<"overview" | "members" | "activity" | "repos">("overview");
+  const [tab, setTab] = useState<"overview" | "workspace" | "members" | "activity" | "repos" | "dashboard">(
+    "overview",
+  );
   const [copied, setCopied] = useState(false);
   const isOwner = p?.owner === currentUser.name;
+
+  const { data: dashboard } = useQuery({
+    queryKey: ["projectDashboard", projectId],
+    queryFn: () =>
+      api.get<{ members: { user_id: string; username: string; role: string }[] }>(
+        `/projects/${projectId}/dashboard`,
+      ),
+    retry: false,
+    enabled: !!p,
+  });
+
+  const memberObj = dashboard?.members?.find(
+    (m) => m.user_id === currentUser.id || m.username === currentUser.name,
+  );
+  const currentUserRole = isOwner ? "owner" : memberObj?.role || "";
 
   // Tag generator state
   const [showTagGenerator, setShowTagGenerator] = useState(false);
@@ -64,8 +84,10 @@ function ProjectDetail() {
       setSuggestedTags(data.tags);
       setSelectedTags(data.tags.map((t) => t.name));
     },
-    onError: () => {
-      toast.error("Failed to generate tags. Please try again.");
+    onError: (err) => {
+      const msg = err instanceof Error ? err.message : "Please try again.";
+      toast.error(`Failed to generate tags. ${msg}`);
+      setSuggestedTags([]);
     },
   });
 
@@ -93,7 +115,9 @@ function ProjectDetail() {
   if (isLoading) return <Card className="h-96 animate-pulse" />;
   if (!p) throw notFound();
 
-  const tabs = ["overview", "members", "activity", "repos"] as const;
+  const tabs = dashboard
+    ? (["overview", "workspace", "members", "activity", "repos", "dashboard"] as const)
+    : (["overview", "workspace", "members", "activity", "repos"] as const);
 
   return (
     <div className="space-y-4">
@@ -159,7 +183,7 @@ function ProjectDetail() {
                 : "border-transparent text-muted-foreground hover:text-foreground",
             )}
           >
-            {t}
+            {t === "dashboard" ? "Team Workspace" : t}
           </button>
         ))}
       </div>
@@ -302,6 +326,12 @@ function ProjectDetail() {
             <span className="ml-auto text-[11px] text-muted-foreground">main · updated 2h ago</span>
           </div>
         </Card>
+      )}
+      {tab === "workspace" && (
+        <CollaborativeWorkspace projectId={projectId} />
+      )}
+      {tab === "dashboard" && (
+        <ProjectDashboard projectId={projectId} currentUserRole={currentUserRole} />
       )}
     </div>
   );

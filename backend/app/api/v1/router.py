@@ -18,9 +18,12 @@ from app.routers import (
     issues,
     messages,
     notifications,
+    oauth_linking,
     organizations,
     profile_summary,
     project_tags,
+    project_documents,
+    project_dashboards,
     projects,
     recommendations,
     repositories,
@@ -51,10 +54,13 @@ async def v1_root():
 
 # Router inclusions under /api/v1
 api_v1_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_v1_router.include_router(oauth_linking.router)
 api_v1_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_v1_router.include_router(blocks.router, prefix="/blocks", tags=["User Blocks"])
 api_v1_router.include_router(export.router, prefix="/users", tags=["Export"])
 api_v1_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
+api_v1_router.include_router(project_documents.router)
+api_v1_router.include_router(project_dashboards.router)
 api_v1_router.include_router(
     builder_flares.router, prefix="/flare", tags=["Builder's Flare"]
 )
@@ -94,4 +100,6 @@ api_v1_router.include_router(repository_quality.router, tags=["Repository Qualit
 api_v1_router.include_router(health.router)
 api_v1_router.include_router(search.router, prefix="/search", tags=["Search"])
 api_v1_router.include_router(saved_searches.router)
-api_v1_router.include_router(hackathons.router, prefix="/hackathons", tags=["Hackathons"])
+api_v1_router.include_router(
+    hackathons.router, prefix="/hackathons", tags=["Hackathons"]
+)
