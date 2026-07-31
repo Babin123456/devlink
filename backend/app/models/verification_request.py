@@ -27,7 +27,7 @@ class VerificationRequest(Base):
     )
     reviewed_by: Mapped[str | None] = mapped_column(
         String(36), ForeignKey("users.id"), nullable=True
-    )
+    , index=True)
     reviewed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )

@@ -9,7 +9,9 @@ import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { builders, conversations } from "@/mocks/seed";
 import { cn } from "@/lib/utils";
 import { conversationStartersApi, type ConversationStarterResponse } from "@/api";
-
+import { useAuth } from "@/contexts/auth-context";
+import { useChatWebSocket } from "@/hooks/useChatWebSocket";
+import { useQueryClient } from "@tanstack/react-query";
 export const Route = createFileRoute("/_app/messages/$conversationId")({
   head: () => ({ meta: [{ title: "Chat — DevLink" }] }),
   component: Thread,
@@ -36,15 +38,23 @@ function Thread() {
     mutationFn: () => conversationStartersApi.generate(conversationId),
     onSuccess: (data) => setStarters(data),
   });
-  // ---- Typing indicator (issue #337) ----
-  // `themTyping` is true when the other participant is typing. In this
-  // mock-driven UI we simulate the remote party typing shortly after the
-  // local user starts typing, so the indicator is visibly exercised. In a
-  // real deployment this flag would be driven by polling
-  // GET /api/messages/conversation/:id/typing (or a WebSocket push).
-  const [themTyping, setThemTyping] = useState(false);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Use the websocket hook for real-time messaging and typing
+  const { isConnected, typingUsers, broadcastMessage, broadcastTyping } = useChatWebSocket(
+    conversationId,
+    user?.id || "",
+    useCallback((msg: any) => {
+      // Invalidate thread query when a new message arrives via WS
+      queryClient.invalidateQueries({ queryKey: ["thread", conversationId] });
+      // Invalidate conversations list to update latest preview/timestamp
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    }, [queryClient, conversationId])
+  );
+
+  const themTyping = typingUsers.length > 0;
   const lastTypingPingRef = useRef<number>(0);
-  const typingSimTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Notify the server that the local user is typing. Debounced to once
   // per second so we don't hammer the endpoint. Failures are swallowed —
@@ -78,23 +88,13 @@ function Thread() {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setText(e.target.value);
       notifyTyping();
-
-      // Simulate the remote party typing back after a short delay, so the
-      // indicator is visible in the mock-driven UI. Remove this block in
-      // a real deployment where typing state comes from the server.
-      if (typingSimTimerRef.current) clearTimeout(typingSimTimerRef.current);
-      typingSimTimerRef.current = setTimeout(() => {
-        setThemTyping(true);
-        setTimeout(() => setThemTyping(false), 2600);
-      }, 900);
     },
     [notifyTyping],
   );
 
-  // Clean up the simulation timer + clear typing on unmount.
+  // Clear typing on unmount.
   useEffect(() => {
     return () => {
-      if (typingSimTimerRef.current) clearTimeout(typingSimTimerRef.current);
       clearTyping();
     };
   }, [clearTyping]);
@@ -104,16 +104,24 @@ function Thread() {
       e.preventDefault();
       if (!text.trim() || submitting) return;
       setSubmitting(true);
-      setThemTyping(false);
       clearTyping();
       try {
-        await new Promise((r) => setTimeout(r, 400));
+        // Optimistic UI could be added here, but for simplicity we rely on React Query
+        await messagesService.send(conversationId, text);
         setText("");
+        // Notify others via WS
+        broadcastMessage(text);
+        
+        // Invalidate queries to reload thread and conversations
+        queryClient.invalidateQueries({ queryKey: ["thread", conversationId] });
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      } catch (err) {
+        console.error("Failed to send message", err);
       } finally {
         setSubmitting(false);
       }
     },
-    [text, submitting, clearTyping],
+    [text, submitting, clearTyping, conversationId, broadcastMessage, queryClient],
   );
 
   return (

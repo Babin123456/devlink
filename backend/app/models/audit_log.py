@@ -81,6 +81,11 @@ class AuditAction(str, Enum):
     ORGANIZATION_CREATED = "organization_created"
     ORGANIZATION_UPDATED = "organization_updated"
     ORGANIZATION_DELETED = "organization_deleted"
+    MEMBER_INVITED = "member_invited"
+    MEMBER_REMOVED = "member_removed"
+    ROLE_UPDATED = "role_updated"
+    API_KEY_CREATED = "api_key_created"
+    API_KEY_REVOKED = "api_key_revoked"
 
     # Security
     FAILED_LOGIN = "failed_login"

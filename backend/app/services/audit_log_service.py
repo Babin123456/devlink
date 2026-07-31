@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import uuid
 
+from datetime import datetime
+import csv
+import io
 import structlog
-from sqlalchemy import select
+from sqlalchemy import select, or_, func
 from sqlalchemy.orm import Session
 
 from app.models.audit_log import (
@@ -227,3 +230,113 @@ class AuditLogService:
             db.delete(log)
 
         db.flush()
+
+    @staticmethod
+    def search_org_audit_logs(
+        db: Session,
+        organization_id: uuid.UUID,
+        user_id: uuid.UUID | None = None,
+        event_type: str | None = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        page: int = 1,
+        limit: int = 20,
+    ) -> dict:
+        stmt = select(AuditLog).where(AuditLog.organization_id == organization_id)
+
+        if user_id:
+            stmt = stmt.where(
+                or_(
+                    AuditLog.actor_id == user_id,
+                    AuditLog.target_user_id == user_id,
+                )
+            )
+
+        if event_type:
+            event_clean = event_type.strip().lower()
+            stmt = stmt.where(func.lower(AuditLog.action).contains(event_clean))
+
+        if start_date:
+            stmt = stmt.where(AuditLog.created_at >= start_date)
+
+        if end_date:
+            stmt = stmt.where(AuditLog.created_at <= end_date)
+
+        # Count total matches
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_count = db.scalar(count_stmt) or 0
+
+        # Pagination
+        offset = (page - 1) * limit
+        paginated_stmt = (
+            stmt.order_by(AuditLog.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+
+        items = list(db.scalars(paginated_stmt))
+        pages = (total_count + limit - 1) // limit if limit > 0 else 1
+
+        return {
+            "items": items,
+            "total": total_count,
+            "page": page,
+            "limit": limit,
+            "pages": pages,
+        }
+
+    @staticmethod
+    def export_org_audit_logs_csv(
+        db: Session,
+        organization_id: uuid.UUID,
+        user_id: uuid.UUID | None = None,
+        event_type: str | None = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> str:
+        search_result = AuditLogService.search_org_audit_logs(
+            db=db,
+            organization_id=organization_id,
+            user_id=user_id,
+            event_type=event_type,
+            start_date=start_date,
+            end_date=end_date,
+            page=1,
+            limit=10000,
+        )
+        logs = search_result["items"]
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(
+            [
+                "ID",
+                "Timestamp",
+                "Action",
+                "Actor ID",
+                "Target User ID",
+                "Entity Type",
+                "Entity ID",
+                "Description",
+                "IP Address",
+            ]
+        )
+
+        for log in logs:
+            action_str = log.action.value if hasattr(log.action, "value") else str(log.action)
+            writer.writerow(
+                [
+                    str(log.id),
+                    log.created_at.isoformat() if log.created_at else "",
+                    action_str,
+                    str(log.actor_id) if log.actor_id else "",
+                    str(log.target_user_id) if log.target_user_id else "",
+                    log.entity_type or "",
+                    str(log.entity_id) if log.entity_id else "",
+                    log.description or "",
+                    log.ip_address or "",
+                ]
+            )
+
+        return output.getvalue()
+
