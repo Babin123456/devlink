@@ -25,6 +25,7 @@ import { copyText } from "@/lib/clipboard";
 import { ReportUserModal } from "@/components/shared/ReportUserModal";
 import SkillsCard from "@/components/profile/SkillsCard";
 import ExperienceCard from "@/components/profile/ExperienceCard";
+import { ProfileViewersList } from "@/components/profile/ProfileViewersList";
 
 export const Route = createFileRoute("/_app/profile/$username")({
   head: ({ params }) => ({
@@ -441,6 +442,9 @@ function ProfilePage() {
           </p>
         )}
       </Card>
+
+      {me && <ProfileViewersList className="mt-4" />}
+
 
       <div className="grid gap-4 lg:grid-cols-3 items-start">
         <div className="flex flex-col gap-4">
