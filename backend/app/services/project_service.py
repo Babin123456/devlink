@@ -88,7 +88,7 @@ class ProjectService:
         project_id: uuid.UUID,
     ) -> Project | None:
 
-        stmt = select(Project).where(
+        stmt = select(Project).options(selectinload(Project.owner)).where(
             Project.id == project_id,
             Project.deleted_at.is_(None),
         )
@@ -100,7 +100,8 @@ class ProjectService:
         project_id: uuid.UUID,
     ) -> Project | None:
         """Retrieve a project regardless of soft-delete status (admin use)."""
-        return db.get(Project, project_id)
+        stmt = select(Project).options(selectinload(Project.owner)).where(Project.id == project_id)
+        return db.scalar(stmt)
 
     @staticmethod
     @cached(ttl=300, key_prefix="proj")

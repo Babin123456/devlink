@@ -67,7 +67,7 @@ class HackathonSubmission(Base):
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
-    )
+     index=True,)
 
     # ==========================================================
     # Submission Details
