@@ -371,6 +371,9 @@ app.add_middleware(ActivityTrackingMiddleware)
 from app.middleware.audit_context import AuditContextMiddleware
 app.add_middleware(AuditContextMiddleware)
 
+from app.middleware.org_audit_logging import OrganizationAuditMiddleware
+app.add_middleware(OrganizationAuditMiddleware)
+
 # ------------------------------------------------------------------
 # CORS
 # ------------------------------------------------------------------
