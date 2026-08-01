@@ -25,9 +25,7 @@ from sqlalchemy.orm import Session
 
 from app.middleware.rate_limit import (
     limiter,
-    LOGIN_LIMIT,
-    PASSWORD_RESET_LIMIT,
-    REGISTER_LIMIT,
+    AUTH_LIMIT,
 )
 from app.dependencies import get_database
 from app.schemas.auth import (
@@ -66,7 +64,7 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
 )
-@limiter.limit(REGISTER_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 def register(
     request: Request,
     payload: RegisterRequest,
@@ -93,7 +91,7 @@ def register(
     response_model=AuthResponse,
     summary="Login",
 )
-@limiter.limit(LOGIN_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 def login(
     request: Request,
     payload: LoginRequest,
@@ -444,7 +442,7 @@ async def linkedin_login(
     response_model=CurrentUserResponse,
     summary="Current authenticated user",
 )
-@limiter.limit("30/minute")
+@limiter.limit(AUTH_LIMIT)
 def me(
     request: Request,
     user_id: str = Depends(get_current_user_id),
@@ -466,7 +464,7 @@ def me(
     response_model=AuthResponse,
     summary="Refresh JWT",
 )
-@limiter.limit("10/minute")
+@limiter.limit(AUTH_LIMIT)
 def refresh(
     request: Request,
     payload: RefreshTokenRequest,
@@ -503,7 +501,7 @@ def refresh(
     response_model=LogoutResponse,
     summary="Logout",
 )
-@limiter.limit("10/minute")
+@limiter.limit(AUTH_LIMIT)
 def logout(
     request: Request,
     payload: LogoutRequest,
@@ -684,7 +682,7 @@ from app.schemas.auth import (  # noqa: E402
     response_model=SuccessResponse,
     summary="Change Password",
 )
-@limiter.limit("5/minute")
+@limiter.limit(AUTH_LIMIT)
 def change_password(
     request: Request,
     payload: ChangePasswordRequest,
@@ -711,7 +709,7 @@ def change_password(
     response_model=ForgotPasswordResponse,
     summary="Forgot Password",
 )
-@limiter.limit(PASSWORD_RESET_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 def forgot_password(
     request: Request,
     payload: ForgotPasswordRequest,
@@ -735,7 +733,7 @@ def forgot_password(
     response_model=SuccessResponse,
     summary="Reset Password",
 )
-@limiter.limit(PASSWORD_RESET_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 def reset_password(
     request: Request,
     payload: ResetPasswordRequest,
@@ -758,7 +756,7 @@ def reset_password(
     response_model=VerifyEmailResponse,
     summary="Verify Email",
 )
-@limiter.limit("5/minute")
+@limiter.limit(AUTH_LIMIT)
 def verify_email(
     request: Request,
     payload: VerifyEmailRequest,
@@ -793,7 +791,7 @@ def verify_email(
     response_model=SuccessResponse,
     summary="Resend Verification Email",
 )
-@limiter.limit("3/hour")
+@limiter.limit(AUTH_LIMIT)
 def resend_verification(
     request: Request,
     payload: ResendVerificationEmailRequest,
