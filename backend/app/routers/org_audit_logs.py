@@ -27,10 +27,19 @@ router = APIRouter(
 )
 def get_organization_audit_logs(
     org_id: uuid.UUID,
-    user_id: Optional[uuid.UUID] = Query(None, description="Filter by actor or target user ID"),
-    event_type: Optional[str] = Query(None, description="Filter by event action type e.g. member_invited, role_updated"),
-    start_date: Optional[datetime] = Query(None, description="Filter start date ISO timestamp"),
-    end_date: Optional[datetime] = Query(None, description="Filter end date ISO timestamp"),
+    user_id: Optional[uuid.UUID] = Query(
+        None, description="Filter by actor or target user ID"
+    ),
+    event_type: Optional[str] = Query(
+        None,
+        description="Filter by event action type e.g. member_invited, role_updated",
+    ),
+    start_date: Optional[datetime] = Query(
+        None, description="Filter start date ISO timestamp"
+    ),
+    end_date: Optional[datetime] = Query(
+        None, description="Filter end date ISO timestamp"
+    ),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
@@ -83,7 +92,8 @@ def create_organization_audit_log(
         entity_id=payload.entity_id,
         target_user_id=target_uuid,
         organization_id=org_id,
-        description=payload.description or f"Action {payload.action} performed in organization",
+        description=payload.description
+        or f"Action {payload.action} performed in organization",
         metadata_info=payload.metadata_info,
     )
     db.commit()

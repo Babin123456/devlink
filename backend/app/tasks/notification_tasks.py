@@ -53,7 +53,7 @@ def send_notification_task(self, payload: dict) -> str | None:
             )
 
         # Return the first database notification ID if any
-        for n in (notifications or []):
+        for n in notifications or []:
             if n.channel == "database":
                 return str(n.id)
         return None

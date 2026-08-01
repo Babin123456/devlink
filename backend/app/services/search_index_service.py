@@ -20,8 +20,31 @@ from app.schemas.search_index import (
 )
 
 STOP_WORDS = {
-    "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "he",
-    "in", "is", "it", "its", "of", "on", "that", "the", "to", "was", "were", "will", "with"
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "for",
+    "from",
+    "has",
+    "he",
+    "in",
+    "is",
+    "it",
+    "its",
+    "of",
+    "on",
+    "that",
+    "the",
+    "to",
+    "was",
+    "were",
+    "will",
+    "with",
 }
 
 
@@ -36,17 +59,21 @@ class SearchAnalyticsStore:
     def __init__(self):
         self.logs: List[Dict[str, Any]] = []
 
-    def record_search(self, query: str, category: Optional[str], result_count: int, latency_ms: float):
+    def record_search(
+        self, query: str, category: Optional[str], result_count: int, latency_ms: float
+    ):
         q_norm = query.strip().lower()
         if not q_norm:
             return
-        self.logs.append({
-            "query": q_norm,
-            "category": category or "all",
-            "result_count": result_count,
-            "latency_ms": latency_ms,
-            "timestamp": time.time(),
-        })
+        self.logs.append(
+            {
+                "query": q_norm,
+                "category": category or "all",
+                "result_count": result_count,
+                "latency_ms": latency_ms,
+                "timestamp": time.time(),
+            }
+        )
 
     def get_metrics(self) -> SearchAnalyticsMetric:
         if not self.logs:
@@ -62,11 +89,15 @@ class SearchAnalyticsStore:
         avg_latency = sum(l["latency_ms"] for l in self.logs) / total_searches
 
         query_counts = Counter(l["query"] for l in self.logs)
-        top_queries = [{"query": q, "count": count} for q, count in query_counts.most_common(5)]
+        top_queries = [
+            {"query": q, "count": count} for q, count in query_counts.most_common(5)
+        ]
 
         zero_logs = [l["query"] for l in self.logs if l["result_count"] == 0]
         zero_counts = Counter(zero_logs)
-        zero_result_queries = [{"query": q, "count": count} for q, count in zero_counts.most_common(5)]
+        zero_result_queries = [
+            {"query": q, "count": count} for q, count in zero_counts.most_common(5)
+        ]
 
         cat_counts = Counter(l["category"] for l in self.logs)
 
@@ -167,7 +198,11 @@ class GlobalSearchIndex:
             if not doc:
                 continue
 
-            if category and category.lower() != "all" and doc["entity_type"].lower() != category.lower():
+            if (
+                category
+                and category.lower() != "all"
+                and doc["entity_type"].lower() != category.lower()
+            ):
                 continue
 
             results.append(
@@ -215,7 +250,11 @@ class SearchIndexService:
                     "bio": (u.bio, 1.0),
                 },
                 popularity_boost=1.0 if u.is_verified else 0.0,
-                metadata={"user_id": str(u.id), "username": u.username, "avatar": u.profile_image},
+                metadata={
+                    "user_id": str(u.id),
+                    "username": u.username,
+                    "avatar": u.profile_image,
+                },
             )
 
         # 2. Projects
@@ -223,7 +262,9 @@ class SearchIndexService:
         for p in projects:
             doc_id = f"project_{p.id}"
             title_text = getattr(p, "title", None) or getattr(p, "name", "Project")
-            stack_text = getattr(p, "tech_stack", None) or " ".join(getattr(p, "stack", []) or [])
+            stack_text = getattr(p, "tech_stack", None) or " ".join(
+                getattr(p, "stack", []) or []
+            )
             engine.add_document(
                 doc_id=doc_id,
                 entity_type="projects",
@@ -235,7 +276,11 @@ class SearchIndexService:
                     "description": (p.description, 2.0),
                 },
                 popularity_boost=float(getattr(p, "stars", 0) or 0),
-                metadata={"project_id": str(p.id), "title": title_text, "stars": getattr(p, "stars", 0)},
+                metadata={
+                    "project_id": str(p.id),
+                    "title": title_text,
+                    "stars": getattr(p, "stars", 0),
+                },
             )
 
         # 3. Organizations
@@ -270,7 +315,10 @@ class SearchIndexService:
                     "content": (m.content, 2.0),
                 },
                 popularity_boost=0.0,
-                metadata={"message_id": str(m.id), "conversation_id": str(m.conversation_id)},
+                metadata={
+                    "message_id": str(m.id),
+                    "conversation_id": str(m.conversation_id),
+                },
             )
 
         # 5. Skills
@@ -305,7 +353,10 @@ class SearchIndexService:
                     "category": (ps.category, 3.0),
                 },
                 popularity_boost=0.0,
-                metadata={"project_skill_id": str(ps.id), "project_id": str(ps.project_id)},
+                metadata={
+                    "project_skill_id": str(ps.id),
+                    "project_id": str(ps.project_id),
+                },
             )
 
         engine.is_indexed = True
@@ -322,7 +373,10 @@ class SearchIndexService:
     ) -> SearchIndexedResponse:
         start_time = time.perf_counter()
 
-        if not search_index_engine.is_indexed or len(search_index_engine.documents) == 0:
+        if (
+            not search_index_engine.is_indexed
+            or len(search_index_engine.documents) == 0
+        ):
             cls.reindex_all(db)
 
         results = search_index_engine.search(
@@ -354,7 +408,9 @@ class SearchIndexService:
         return analytics_store.get_metrics()
 
     @classmethod
-    def run_benchmark(cls, db: Session, query: str = "dev", iterations: int = 10) -> SearchBenchmarkReport:
+    def run_benchmark(
+        cls, db: Session, query: str = "dev", iterations: int = 10
+    ) -> SearchBenchmarkReport:
         if not search_index_engine.is_indexed:
             cls.reindex_all(db)
 
@@ -362,7 +418,9 @@ class SearchIndexService:
         sql_start = time.perf_counter()
         pattern = f"%{query}%"
         for _ in range(iterations):
-            db.query(User).filter(or_(User.username.ilike(pattern), User.first_name.ilike(pattern))).all()
+            db.query(User).filter(
+                or_(User.username.ilike(pattern), User.first_name.ilike(pattern))
+            ).all()
             db.query(Project).filter(Project.title.ilike(pattern)).all()
             db.query(Organization).filter(Organization.name.ilike(pattern)).all()
         sql_elapsed = (time.perf_counter() - sql_start) * 1000.0 / iterations
@@ -376,7 +434,9 @@ class SearchIndexService:
         # Prevent division by zero
         idx_elapsed = max(idx_elapsed, 0.05)
         speedup = round(sql_elapsed / idx_elapsed, 2)
-        reduction = round(max(0.0, ((sql_elapsed - idx_elapsed) / sql_elapsed) * 100.0), 1)
+        reduction = round(
+            max(0.0, ((sql_elapsed - idx_elapsed) / sql_elapsed) * 100.0), 1
+        )
 
         return SearchBenchmarkReport(
             query=query,
