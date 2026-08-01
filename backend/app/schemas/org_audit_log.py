@@ -29,7 +29,10 @@ class OrgAuditLogPaginatedResponse(BaseModel):
 
 
 class CreateOrgAuditLogRequest(BaseModel):
-    action: str = Field(..., description="Audit action e.g. member_invited, role_updated, project_created, settings_changed")
+    action: str = Field(
+        ...,
+        description="Audit action e.g. member_invited, role_updated, project_created, settings_changed",
+    )
     target_user_id: Optional[str] = None
     entity_type: str = "organization"
     entity_id: Optional[str] = None

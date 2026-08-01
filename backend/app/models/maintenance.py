@@ -6,7 +6,8 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.base import Base
+from app.database.base import Base
+
 
 class MaintenanceWindow(Base):
     __tablename__ = "maintenance_windows"

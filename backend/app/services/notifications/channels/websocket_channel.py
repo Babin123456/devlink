@@ -30,7 +30,7 @@ class WebSocketChannel(NotificationChannel):
         action_url: str | None = None,
         image_url: str | None = None,
     ) -> Notification | None:
-        
+
         payload = {
             "type": "notification",
             "notification_type": notification_type.value,
@@ -52,7 +52,9 @@ class WebSocketChannel(NotificationChannel):
             # Use asyncio.run to send the message
             asyncio.run(manager.send_personal_message(payload, str(recipient_id)))
         except Exception as e:
-            logger.error(f"Failed to send websocket notification to {recipient_id}: {e}")
+            logger.error(
+                f"Failed to send websocket notification to {recipient_id}: {e}"
+            )
 
         # WebSockets do not create DB records on their own
         return None

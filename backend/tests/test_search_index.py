@@ -6,7 +6,11 @@ from app.models.user import User
 from app.models.project import Project
 from app.models.organization import Organization
 from app.models.skill import Skill
-from app.services.search_index_service import SearchIndexService, search_index_engine, analytics_store
+from app.services.search_index_service import (
+    SearchIndexService,
+    search_index_engine,
+    analytics_store,
+)
 
 
 @pytest.fixture
@@ -75,7 +79,9 @@ def test_execute_search_query_matching(db, seed_search_data):
 def test_search_category_filter(db, seed_search_data):
     SearchIndexService.reindex_all(db)
 
-    res = SearchIndexService.execute_search(db, query="React", category="projects", limit=10)
+    res = SearchIndexService.execute_search(
+        db, query="React", category="projects", limit=10
+    )
     for item in res.results:
         assert item.entity_type == "projects"
 
