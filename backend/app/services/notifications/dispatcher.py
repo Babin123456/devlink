@@ -4,13 +4,19 @@ from typing import Any, List
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.notification import Notification, NotificationType, NotificationPriority, NotificationPreference
+from app.models.notification import (
+    Notification,
+    NotificationType,
+    NotificationPriority,
+    NotificationPreference,
+)
 from app.services.notifications.channels.base import NotificationChannel
 from app.services.notifications.channels.database_channel import DatabaseChannel
 from app.services.notifications.channels.email_channel import EmailChannel
 from app.services.notifications.channels.websocket_channel import WebSocketChannel
 
 logger = logging.getLogger(__name__)
+
 
 class NotificationDispatcher:
     def __init__(self):
@@ -20,8 +26,12 @@ class NotificationDispatcher:
             "websocket": WebSocketChannel(),
         }
 
-    def _get_user_preferences(self, db: Session, user_id: uuid.UUID) -> NotificationPreference:
-        stmt = select(NotificationPreference).where(NotificationPreference.user_id == user_id)
+    def _get_user_preferences(
+        self, db: Session, user_id: uuid.UUID
+    ) -> NotificationPreference:
+        stmt = select(NotificationPreference).where(
+            NotificationPreference.user_id == user_id
+        )
         prefs = db.scalars(stmt).first()
         if not prefs:
             prefs = NotificationPreference(user_id=user_id)
@@ -29,7 +39,9 @@ class NotificationDispatcher:
             db.flush()
         return prefs
 
-    def _should_send_channel(self, channel_name: str, prefs: NotificationPreference) -> bool:
+    def _should_send_channel(
+        self, channel_name: str, prefs: NotificationPreference
+    ) -> bool:
         if channel_name == "database" and not prefs.database_enabled:
             return False
         if channel_name == "email" and not prefs.email_enabled:
@@ -38,12 +50,18 @@ class NotificationDispatcher:
             return False
         return True
 
-    def _should_send_type(self, n_type: NotificationType, prefs: NotificationPreference) -> bool:
+    def _should_send_type(
+        self, n_type: NotificationType, prefs: NotificationPreference
+    ) -> bool:
         if n_type in (NotificationType.PROJECT_UPDATE, NotificationType.PROJECT_INVITE):
             return prefs.project_updates or prefs.invitations
         if n_type == NotificationType.ROLE_CHANGE:
             return prefs.role_changes
-        if n_type in (NotificationType.SYSTEM, NotificationType.WELCOME, NotificationType.PASSWORD_RESET):
+        if n_type in (
+            NotificationType.SYSTEM,
+            NotificationType.WELCOME,
+            NotificationType.PASSWORD_RESET,
+        ):
             return prefs.system_alerts
         return True
 
@@ -61,11 +79,13 @@ class NotificationDispatcher:
         action_url: str | None = None,
         image_url: str | None = None,
     ) -> List[Notification]:
-        
+
         prefs = self._get_user_preferences(db, recipient_id)
-        
+
         if not self._should_send_type(notification_type, prefs):
-            logger.info(f"Notification {notification_type} disabled by user {recipient_id}")
+            logger.info(
+                f"Notification {notification_type} disabled by user {recipient_id}"
+            )
             return []
 
         if not channels:
@@ -75,7 +95,7 @@ class NotificationDispatcher:
         for channel_name in channels:
             if not self._should_send_channel(channel_name, prefs):
                 continue
-            
+
             channel = self.channels.get(channel_name)
             if not channel:
                 logger.warning(f"Unknown notification channel: {channel_name}")
@@ -101,5 +121,6 @@ class NotificationDispatcher:
 
         db.commit()
         return results
+
 
 dispatcher = NotificationDispatcher()

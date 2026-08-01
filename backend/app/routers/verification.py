@@ -127,9 +127,7 @@ def review_verification_request(
     if not request:
         raise HTTPException(status_code=404, detail="Verification request not found")
     if request.status != "pending":
-        raise HTTPException(
-            status_code=400, detail="Request has already been reviewed"
-        )
+        raise HTTPException(status_code=400, detail="Request has already been reviewed")
 
     request.status = payload.status
     request.reviewed_by = admin_id

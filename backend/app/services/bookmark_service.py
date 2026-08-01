@@ -115,10 +115,14 @@ class BookmarkService:
         target_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(func.count()).select_from(Bookmark).where(
-            and_(
-                Bookmark.target_type == target_type,
-                Bookmark.target_id == target_id,
+        stmt = (
+            select(func.count())
+            .select_from(Bookmark)
+            .where(
+                and_(
+                    Bookmark.target_type == target_type,
+                    Bookmark.target_id == target_id,
+                )
             )
         )
 

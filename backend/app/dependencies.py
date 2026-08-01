@@ -169,6 +169,18 @@ def get_optional_current_user(
 
 
 # ---------------------------------------------------------------------
+# Current User ID
+# ---------------------------------------------------------------------
+
+
+def get_current_user_id(current_user: User = Depends(get_current_user)) -> str:
+    """
+    Returns the currently authenticated user's ID as a string.
+    """
+    return str(current_user.id)
+
+
+# ---------------------------------------------------------------------
 # Active User
 # ---------------------------------------------------------------------
 
@@ -343,6 +355,66 @@ def require_project_permission(action: str):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Permission denied.",
+            )
+        return current_user
+
+    return dependency
+
+
+# ---------------------------------------------------------------------
+# System-Level RBAC Guards (issue #357)
+# ---------------------------------------------------------------------
+
+from app.core.rbac import (  # noqa: E402
+    SystemRole,
+    has_system_permission,
+    has_system_role,
+)
+
+
+def require_system_permission(action: str):
+    """Dependency factory to check system-level permissions.
+
+    Checks the user's system_role against SYSTEM_ROLE_PERMISSIONS.
+    Superusers always pass.
+    """
+
+    def dependency(
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_database),
+    ) -> User:
+        if not has_system_permission(db, current_user.id, action):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"System permission required: {action}",
+            )
+        return current_user
+
+    return dependency
+
+
+def require_roles(*allowed_roles: SystemRole):
+    """Dependency factory to check that the user has one of the specified system roles.
+
+    Superusers always pass.  Usage::
+
+        @router.post("/admin/users", dependencies=[Depends(require_roles(SystemRole.ADMIN))])
+        def list_all_users(...): ...
+
+    Args:
+        *allowed_roles: One or more :class:`SystemRole` values. The user
+            must hold at least one to pass the check.
+    """
+
+    def dependency(
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_database),
+    ) -> User:
+        if not has_system_role(db, current_user.id, *allowed_roles):
+            role_names = ", ".join(r.value for r in allowed_roles)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"One of the following roles required: {role_names}",
             )
         return current_user
 
