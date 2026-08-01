@@ -22,7 +22,7 @@ CONVERSATION_STARTER_LIMIT = "10/minute"
 
 
 @router.post(
-    "/conversation-starters",
+    "",
     response_model=ConversationStarterResponse,
 )
 @limiter.limit(CONVERSATION_STARTER_LIMIT)

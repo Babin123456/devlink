@@ -143,6 +143,14 @@ class Settings(BaseSettings):
     RECOMMENDATION_RATE_LIMIT: str = "20/minute"
 
     # ==========================================================
+    # Request Tracing / Correlation IDs
+    # ==========================================================
+
+    CORRELATION_ID_HEADER: str = "X-Correlation-ID"
+    REQUEST_ID_HEADER: str = "X-Request-ID"
+    ENABLE_REQUEST_TRACING: bool = True
+
+    # ==========================================================
     # Security Headers
     # ==========================================================
 

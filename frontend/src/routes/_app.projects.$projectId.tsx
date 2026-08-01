@@ -1,9 +1,11 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { projectsService } from "@/services";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
 import { api } from "@/api";
 import { ProjectDashboard } from "@/features/projects/components/ProjectDashboard";
+import { CollaborativeWorkspace } from "@/components/projects/CollaborativeWorkspace";
+import { ProjectMembersList } from "@/features/projects/components/ProjectMembersList";
 import {
   ArrowLeft,
   Star,
@@ -29,6 +31,7 @@ import { BookmarkToggleButton } from "@/components/shared/BookmarkToggleButton";
 import { addRecentlyViewedProject } from "@/lib/recentlyViewedProjects";
 
 import { usePermissions } from "@/hooks/usePermissions";
+import { ProjectTimeline } from "@/components/project/ProjectTimeline";
 
 export const Route = createFileRoute("/_app/projects/$projectId")({
   head: ({ params }) => ({
@@ -46,7 +49,7 @@ function ProjectDetail() {
     queryKey: ["project", projectId],
     queryFn: () => projectsService.get(projectId),
   });
-  const [tab, setTab] = useState<"overview" | "members" | "activity" | "repos" | "dashboard">(
+  const [tab, setTab] = useState<"overview" | "workspace" | "members" | "activity" | "repos" | "dashboard">(
     "overview",
   );
   const [copied, setCopied] = useState(false);
@@ -83,8 +86,10 @@ function ProjectDetail() {
       setSuggestedTags(data.tags);
       setSelectedTags(data.tags.map((t) => t.name));
     },
-    onError: () => {
-      toast.error("Failed to generate tags. Please try again.");
+    onError: (err) => {
+      const msg = err instanceof Error ? err.message : "Please try again.";
+      toast.error(`Failed to generate tags. ${msg}`);
+      setSuggestedTags([]);
     },
   });
 
@@ -113,8 +118,8 @@ function ProjectDetail() {
   if (!p) throw notFound();
 
   const tabs = dashboard
-    ? (["overview", "members", "activity", "repos", "dashboard"] as const)
-    : (["overview", "members", "activity", "repos"] as const);
+    ? (["overview", "workspace", "members", "activity", "repos", "dashboard"] as const)
+    : (["overview", "workspace", "members", "activity", "repos"] as const);
 
   return (
     <div className="space-y-4">
@@ -183,6 +188,13 @@ function ProjectDetail() {
             {t === "dashboard" ? "Team Workspace" : t}
           </button>
         ))}
+        <Link
+          to="/projects/$projectId/issues"
+          params={{ projectId }}
+          className="border-b-2 border-transparent px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Issues
+        </Link>
       </div>
 
       {tab === "overview" && (
@@ -281,22 +293,13 @@ function ProjectDetail() {
               )}
             </div>
           </Card>
+
+          <ProjectTimeline className="mt-6" />
         </div>
       )}
       {tab === "members" && (
-        <Card>
-          <ul className="divide-y divide-border">
-            {builders.slice(0, p.members).map((b) => (
-              <li key={b.id} className="flex items-center gap-3 px-4 py-3">
-                <Avatar src={b.avatar} alt={b.name} size={36} online={b.online} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-semibold text-foreground">{b.name}</p>
-                  <p className="text-[12px] text-muted-foreground">{b.role}</p>
-                </div>
-                <TagChip>{b.matchScore}% match</TagChip>
-              </li>
-            ))}
-          </ul>
+        <Card className="p-6">
+          <ProjectMembersList projectId={projectId} currentUserId={currentUser.id} isOwner={isOwner} />
         </Card>
       )}
       {tab === "activity" && (
@@ -323,6 +326,9 @@ function ProjectDetail() {
             <span className="ml-auto text-[11px] text-muted-foreground">main · updated 2h ago</span>
           </div>
         </Card>
+      )}
+      {tab === "workspace" && (
+        <CollaborativeWorkspace projectId={projectId} />
       )}
       {tab === "dashboard" && (
         <ProjectDashboard projectId={projectId} currentUserRole={currentUserRole} />

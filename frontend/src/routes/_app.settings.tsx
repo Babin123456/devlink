@@ -5,6 +5,7 @@ import { Card } from "@/components/shared/primitives";
 import { UserAvatar } from "@/components/user-avatar";
 import { ImageCropUploadModal } from "@/components/shared/ImageCropUploadModal";
 import { DeleteAccountModal } from "@/components/settings/DeleteAccountModal";
+import { OAuthAccountsSection } from "@/components/settings/OAuthAccountsSection";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -474,6 +475,10 @@ function SettingsPage() {
                     </Button>
                   </div>
                 </form>
+
+                <Separator />
+
+                <OAuthAccountsSection />
 
                 <Separator />
 

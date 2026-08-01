@@ -24,6 +24,7 @@ from .notification import Notification  # noqa: F401
 from .organization import Organization  # noqa: F401
 from .organization_member import OrganizationMember, OrgMemberRole  # noqa: F401
 from .project import Project  # noqa: F401
+from .project_document import ProjectDocument  # noqa: F401
 from .project_view import ProjectView  # noqa: F401
 from .project_member import ProjectMember  # noqa: F401
 from .project_skill import ProjectSkill  # noqa: F401
@@ -69,3 +70,6 @@ from .announcement import Announcement as Announcement
 from .user_report import UserReport
 from .user_skill import UserSkill
 from .verification_request import VerificationRequest  # noqa: F401
+from .maintenance import MaintenanceWindow
+from .search_analytics import SearchQueryLog, SearchClickLog
+from .webhook import WebhookDelivery, WebhookDeadLetterQueue, WebhookDeliveryStatus

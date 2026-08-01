@@ -8,6 +8,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    JSON,
     String,
     Text,
     func,
@@ -57,6 +58,7 @@ class NotificationType(str, Enum):
     WELCOME = "welcome"
     PASSWORD_RESET = "password_reset"
     ROLE_CHANGE = "role_change"
+    SECURITY_ALERT = "security_alert"
 
 
 class NotificationPreference(Base):
@@ -187,31 +189,34 @@ class Notification(Base):
 
     # Metadata for additional data (like payload)
     metadata_info: Mapped[dict | None] = mapped_column(
-        JSONB,
-    )
-
-    # ==========================================================
+        JSONB().with_variant(JSON, "sqlite"),
+        default=dict,
+    )  # ==========================================================
     # Related Resources (Legacy, consider moving to metadata_info)
     # ==========================================================
 
     project_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("projects.id", ondelete="SET NULL"),
+        index=True,
     )
 
     conversation_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("conversations.id", ondelete="SET NULL"),
+        index=True,
     )
 
     message_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("messages.id", ondelete="SET NULL"),
+        index=True,
     )
 
     application_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("applications.id", ondelete="SET NULL"),
+        index=True,
     )
 
     # ==========================================================
@@ -292,6 +297,4 @@ class Notification(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<Notification(type='{self.type.value}', recipient={self.recipient_id}, status={self.status})>"
-        )
+        return f"<Notification(type='{self.type.value}', recipient={self.recipient_id}, status={self.status})>"

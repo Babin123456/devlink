@@ -42,13 +42,8 @@ def get_predefined_tags():
 
 
 @router.post(
-    "/project-tags",
+    "",
     response_model=ProjectTagResponse,
-)
-@router.post(
-    "/generate",
-    response_model=ProjectTagResponse,
-    include_in_schema=False,
 )
 @limiter.limit(PROJECT_TAG_LIMIT)
 def generate_project_tags(
@@ -70,3 +65,18 @@ def generate_project_tags(
     )
 
     return ProjectTagResponse(tags=tags)
+
+
+@router.post(
+    "/generate",
+    response_model=ProjectTagResponse,
+    include_in_schema=False,
+)
+@limiter.limit(PROJECT_TAG_LIMIT)
+def generate_project_tags_alias(
+    request: Request,
+    body: ProjectTagRequest,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    return generate_project_tags(request, body, db, current_user)

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import and_, select
+from sqlalchemy import and_, select, func
 from sqlalchemy.orm import Session
 
 from app.models.bookmark import Bookmark, BookmarkTargetType
@@ -115,14 +115,18 @@ class BookmarkService:
         target_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(Bookmark).where(
-            and_(
-                Bookmark.target_type == target_type,
-                Bookmark.target_id == target_id,
+        stmt = (
+            select(func.count())
+            .select_from(Bookmark)
+            .where(
+                and_(
+                    Bookmark.target_type == target_type,
+                    Bookmark.target_id == target_id,
+                )
             )
         )
 
-        return len(list(db.scalars(stmt)))
+        return db.scalar(stmt) or 0
 
     @staticmethod
     def remove_bookmark(

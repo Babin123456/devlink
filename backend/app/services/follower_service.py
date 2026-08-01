@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 
 # pyrefly: ignore [missing-import]
-from sqlalchemy import and_, select
+from sqlalchemy import and_, select, func
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
@@ -147,9 +147,13 @@ class FollowerService:
         user_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(Follower).where(Follower.following_id == user_id)
+        stmt = (
+            select(func.count())
+            .select_from(Follower)
+            .where(Follower.following_id == user_id)
+        )
 
-        return len(list(db.scalars(stmt)))
+        return db.scalar(stmt) or 0
 
     @staticmethod
     def following_count(
@@ -157,9 +161,13 @@ class FollowerService:
         user_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(Follower).where(Follower.follower_id == user_id)
+        stmt = (
+            select(func.count())
+            .select_from(Follower)
+            .where(Follower.follower_id == user_id)
+        )
 
-        return len(list(db.scalars(stmt)))
+        return db.scalar(stmt) or 0
 
     @staticmethod
     def mutual_followers(
