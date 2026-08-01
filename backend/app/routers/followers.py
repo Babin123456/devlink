@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from typing import Optional
 
 # pyrefly: ignore [missing-import]
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -8,10 +9,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_current_user, get_database
+from app.dependencies import get_current_user, get_database, get_optional_current_user
 from app.models.notification import NotificationType
 from app.models.user import User
-from app.schemas.follower import FollowerResponse
+from app.schemas.follower import FollowerResponse, FollowStatusResponse
 from app.services.follower_service import FollowerService
 from app.services.notification_service import NotificationService
 
@@ -208,4 +209,30 @@ def mutual_followers(
         db,
         current_user.id,
         user_id,
+    )
+
+
+@router.get(
+    "/{user_id}/status",
+    response_model=FollowStatusResponse,
+    summary="Get combined follow status for a user",
+)
+def get_follow_status(
+    user_id: uuid.UUID,
+    current_user: Optional[User] = Depends(get_optional_current_user),
+    db: Session = Depends(get_database),
+):
+    """
+    Returns is_following, follower_count, and following_count in a single
+    request.  is_following is always False when the caller is not authenticated.
+    """
+    is_following = (
+        FollowerService.is_following(db, current_user.id, user_id)
+        if current_user is not None
+        else False
+    )
+    return FollowStatusResponse(
+        is_following=is_following,
+        follower_count=FollowerService.follower_count(db, user_id),
+        following_count=FollowerService.following_count(db, user_id),
     )

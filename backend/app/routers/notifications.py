@@ -209,6 +209,8 @@ def delete_notification(
 
 
 from pydantic import BaseModel
+
+
 class NotificationPreferenceUpdate(BaseModel):
     email_enabled: bool | None = None
     websocket_enabled: bool | None = None
@@ -219,13 +221,16 @@ class NotificationPreferenceUpdate(BaseModel):
     marketing_emails: bool | None = None
     system_alerts: bool | None = None
 
+
 @router.get("/preferences")
 def get_preferences(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
 ):
     from app.services.notifications import dispatcher
+
     return dispatcher._get_user_preferences(db, current_user.id)
+
 
 @router.put("/preferences")
 def update_preferences(
@@ -234,12 +239,13 @@ def update_preferences(
     db: Session = Depends(get_database),
 ):
     from app.services.notifications import dispatcher
+
     db_prefs = dispatcher._get_user_preferences(db, current_user.id)
-    
+
     update_data = prefs.model_dump(exclude_unset=True)
     for k, v in update_data.items():
         setattr(db_prefs, k, v)
-    
+
     db.commit()
     db.refresh(db_prefs)
     return db_prefs

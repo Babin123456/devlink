@@ -1,10 +1,11 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { projectsService } from "@/services";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
 import { api } from "@/api";
 import { ProjectDashboard } from "@/features/projects/components/ProjectDashboard";
 import { CollaborativeWorkspace } from "@/components/projects/CollaborativeWorkspace";
+import { ProjectMembersList } from "@/features/projects/components/ProjectMembersList";
 import {
   ArrowLeft,
   Star,
@@ -186,6 +187,13 @@ function ProjectDetail() {
             {t === "dashboard" ? "Team Workspace" : t}
           </button>
         ))}
+        <Link
+          to="/projects/$projectId/issues"
+          params={{ projectId }}
+          className="border-b-2 border-transparent px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Issues
+        </Link>
       </div>
 
       {tab === "overview" && (
@@ -287,19 +295,8 @@ function ProjectDetail() {
         </div>
       )}
       {tab === "members" && (
-        <Card>
-          <ul className="divide-y divide-border">
-            {builders.slice(0, p.members).map((b) => (
-              <li key={b.id} className="flex items-center gap-3 px-4 py-3">
-                <Avatar src={b.avatar} alt={b.name} size={36} online={b.online} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-semibold text-foreground">{b.name}</p>
-                  <p className="text-[12px] text-muted-foreground">{b.role}</p>
-                </div>
-                <TagChip>{b.matchScore}% match</TagChip>
-              </li>
-            ))}
-          </ul>
+        <Card className="p-6">
+          <ProjectMembersList projectId={projectId} currentUserId={currentUser.id} isOwner={isOwner} />
         </Card>
       )}
       {tab === "activity" && (

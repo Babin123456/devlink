@@ -217,7 +217,11 @@ class MessageService:
         conversation_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(func.count()).select_from(Message).where(Message.conversation_id == conversation_id)
+        stmt = (
+            select(func.count())
+            .select_from(Message)
+            .where(Message.conversation_id == conversation_id)
+        )
 
         return db.scalar(stmt) or 0
 

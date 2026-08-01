@@ -374,7 +374,7 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
                         status=data.get("status", ""),
                     ),
                 )
-                
+
             # ── Chat Conversations ───────────────────────────────────────
             elif msg_type == "chat.join" and data.get("conversation_id"):
                 conv_id = data["conversation_id"]
@@ -397,7 +397,7 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
                         content=data.get("content", ""),
                     ),
                 )
-                
+
             elif msg_type == "chat.typing" and data.get("conversation_id"):
                 conv_id = data["conversation_id"]
                 await manager.broadcast_to_room(
@@ -469,17 +469,20 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
 
                 from app.database.session import SessionLocal
                 from app.services.project_document_service import ProjectDocumentService
+
                 db_session = SessionLocal()
                 try:
                     doc_uuid = UUID(doc_id) if doc_id else None
                     if doc_uuid:
-                        updated_doc, is_conflict = ProjectDocumentService.update_document(
-                            db_session,
-                            doc_id=doc_uuid,
-                            user_id=UUID(user_id) if user_id else user_id,
-                            title=title,
-                            content=content,
-                            base_version=base_version,
+                        updated_doc, is_conflict = (
+                            ProjectDocumentService.update_document(
+                                db_session,
+                                doc_id=doc_uuid,
+                                user_id=UUID(user_id) if user_id else user_id,
+                                title=title,
+                                content=content,
+                                base_version=base_version,
+                            )
                         )
                         event_payload = _event(
                             "doc.updated",

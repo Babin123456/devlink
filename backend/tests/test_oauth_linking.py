@@ -127,7 +127,9 @@ def test_unlink_oauth_account_success(client, user_with_password, auth_headers):
     assert providers["github"]["is_linked"] is False
 
 
-def test_unlink_oauth_account_sole_auth_prevention(client, oauth_only_user, auth_headers):
+def test_unlink_oauth_account_sole_auth_prevention(
+    client, oauth_only_user, auth_headers
+):
     # Attempt to unlink google_id when user has no password and google is their only auth method
     res = client.post(
         "/api/v1/users/me/oauth-accounts/unlink",

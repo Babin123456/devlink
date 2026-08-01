@@ -13,22 +13,29 @@ from app.middleware.rate_limit import limiter
 
 router = APIRouter(prefix="/graph", tags=["Graph"])
 
+
 @router.get("/dependencies")
 @limiter.limit("30/minute")
 def get_dependency_graph(
     request: Request,
     db: Session = Depends(get_database),
-    limit: int = Query(50, le=200)
+    limit: int = Query(50, le=200),
 ):
     nodes = []
     edges = []
 
     # Helper to add node if not exists
     node_ids = set()
-    
+
     def add_node(id_str, label, type_name):
         if id_str not in node_ids:
-            nodes.append({"id": id_str, "data": {"label": label, "type": type_name}, "type": type_name})
+            nodes.append(
+                {
+                    "id": id_str,
+                    "data": {"label": label, "type": type_name},
+                    "type": type_name,
+                }
+            )
             node_ids.add(id_str)
 
     # 1. Projects and their required skills
@@ -43,27 +50,35 @@ def get_dependency_graph(
             if skill:
                 s_id = f"skill_{skill.id}"
                 add_node(s_id, skill.name, "skill")
-                edges.append({
-                    "id": f"e_{p_id}_{s_id}",
-                    "source": p_id,
-                    "target": s_id,
-                    "label": "requires",
-                    "type": "default"
-                })
+                edges.append(
+                    {
+                        "id": f"e_{p_id}_{s_id}",
+                        "source": p_id,
+                        "target": s_id,
+                        "label": "requires",
+                        "type": "default",
+                    }
+                )
 
         # Project -> Members (Users)
-        for pm in db.query(ProjectMember).filter(ProjectMember.project_id == p.id).all():
+        for pm in (
+            db.query(ProjectMember).filter(ProjectMember.project_id == p.id).all()
+        ):
             user = db.query(User).filter(User.id == pm.user_id).first()
             if user:
                 u_id = f"user_{user.id}"
                 add_node(u_id, user.username, "user")
-                edges.append({
-                    "id": f"e_{u_id}_{p_id}",
-                    "source": u_id,
-                    "target": p_id,
-                    "label": pm.role.value if hasattr(pm.role, "value") else str(pm.role),
-                    "type": "default"
-                })
+                edges.append(
+                    {
+                        "id": f"e_{u_id}_{p_id}",
+                        "source": u_id,
+                        "target": p_id,
+                        "label": (
+                            pm.role.value if hasattr(pm.role, "value") else str(pm.role)
+                        ),
+                        "type": "default",
+                    }
+                )
 
     # 2. Users and their skills
     users = db.query(User).limit(limit).all()
@@ -75,31 +90,39 @@ def get_dependency_graph(
             if skill:
                 s_id = f"skill_{skill.id}"
                 add_node(s_id, skill.name, "skill")
-                edges.append({
-                    "id": f"e_{u_id}_{s_id}",
-                    "source": u_id,
-                    "target": s_id,
-                    "label": "knows",
-                    "type": "default"
-                })
+                edges.append(
+                    {
+                        "id": f"e_{u_id}_{s_id}",
+                        "source": u_id,
+                        "target": s_id,
+                        "label": "knows",
+                        "type": "default",
+                    }
+                )
 
     # 3. Organizations and their members
     orgs = db.query(Organization).limit(limit).all()
     for o in orgs:
         o_id = f"org_{o.id}"
         add_node(o_id, o.name, "organization")
-        
-        for om in db.query(OrganizationMember).filter(OrganizationMember.organization_id == o.id).all():
+
+        for om in (
+            db.query(OrganizationMember)
+            .filter(OrganizationMember.organization_id == o.id)
+            .all()
+        ):
             user = db.query(User).filter(User.id == om.user_id).first()
             if user:
                 u_id = f"user_{user.id}"
                 add_node(u_id, user.username, "user")
-                edges.append({
-                    "id": f"e_{u_id}_{o_id}",
-                    "source": u_id,
-                    "target": o_id,
-                    "label": "member",
-                    "type": "default"
-                })
+                edges.append(
+                    {
+                        "id": f"e_{u_id}_{o_id}",
+                        "source": u_id,
+                        "target": o_id,
+                        "label": "member",
+                        "type": "default",
+                    }
+                )
 
     return {"nodes": nodes, "edges": edges}
