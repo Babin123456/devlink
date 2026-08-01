@@ -31,6 +31,7 @@ import { BookmarkToggleButton } from "@/components/shared/BookmarkToggleButton";
 import { addRecentlyViewedProject } from "@/lib/recentlyViewedProjects";
 
 import { usePermissions } from "@/hooks/usePermissions";
+import { ProjectTimeline } from "@/components/project/ProjectTimeline";
 
 export const Route = createFileRoute("/_app/projects/$projectId")({
   head: ({ params }) => ({
@@ -292,6 +293,8 @@ function ProjectDetail() {
               )}
             </div>
           </Card>
+
+          <ProjectTimeline className="mt-6" />
         </div>
       )}
       {tab === "members" && (
