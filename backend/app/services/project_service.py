@@ -145,9 +145,13 @@ class ProjectService:
         )
 
         if language:
-            stmt = stmt.where(Project.language == language)
+            lang_list = [l.strip() for l in language.split(",") if l.strip()]
+            if lang_list:
+                stmt = stmt.where(Project.language.in_(lang_list))
         if experience:
-            stmt = stmt.where(Project.experience == experience)
+            exp_list = [e.strip() for e in experience.split(",") if e.strip()]
+            if exp_list:
+                stmt = stmt.where(Project.experience.in_(exp_list))
         if remote is not None:
             stmt = stmt.where(Project.is_remote == remote)
         if paid is not None:
@@ -155,7 +159,10 @@ class ProjectService:
         if opensource is not None:
             stmt = stmt.where(Project.is_open_source == opensource)
         if tech:
-            stmt = stmt.where(Project.tech_stack.ilike(f"%{tech}%"))
+            tech_list = [t.strip() for t in tech.split(",") if t.strip()]
+            if tech_list:
+                from sqlalchemy import or_
+                stmt = stmt.where(or_(*[Project.tech_stack.ilike(f"%{t}%") for t in tech_list]))
 
         stmt = stmt.offset(skip).limit(limit)
 
