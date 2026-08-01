@@ -153,6 +153,11 @@ PROJECT_INVITE = "project:invite"
 PROJECT_ARCHIVE = "project:archive"
 PROJECT_RESTORE = "project:restore"
 PROJECT_VIEW = "project:view"
+PROJECT_MANAGE_ROLES = "project:manage_roles"
+PROJECT_TRANSFER_OWNERSHIP = "project:transfer_ownership"
+PROJECT_REMOVE_MEMBERS = "project:remove_members"
+PROJECT_EDIT_CONTENT = "project:edit_content"
+PROJECT_REVIEW = "project:review"
 
 PROJECT_ROLE_PERMISSIONS: dict[MemberRole, frozenset[str]] = {
     MemberRole.OWNER: frozenset(
@@ -179,6 +184,65 @@ PROJECT_ROLE_PERMISSIONS: dict[MemberRole, frozenset[str]] = {
     MemberRole.MEMBER: frozenset({PROJECT_VIEW}),
 }
 
+PROJECT_ROLE_PERMISSIONS = {
+    MemberRole.OWNER: {
+        PROJECT_UPDATE,
+        PROJECT_DELETE,
+        PROJECT_INVITE,
+        PROJECT_ARCHIVE,
+        PROJECT_RESTORE,
+        PROJECT_VIEW,
+        PROJECT_MANAGE_ROLES,
+        PROJECT_TRANSFER_OWNERSHIP,
+        PROJECT_REMOVE_MEMBERS,
+        PROJECT_EDIT_CONTENT,
+        PROJECT_REVIEW,
+    },
+    MemberRole.CO_OWNER: {
+        PROJECT_UPDATE,
+        PROJECT_INVITE,
+        PROJECT_ARCHIVE,
+        PROJECT_RESTORE,
+        PROJECT_VIEW,
+        PROJECT_MANAGE_ROLES,
+        PROJECT_REMOVE_MEMBERS,
+        PROJECT_EDIT_CONTENT,
+        PROJECT_REVIEW,
+    },
+    MemberRole.ADMIN: {
+        PROJECT_UPDATE,
+        PROJECT_INVITE,
+        PROJECT_VIEW,
+        PROJECT_MANAGE_ROLES,
+        PROJECT_REMOVE_MEMBERS,
+        PROJECT_EDIT_CONTENT,
+        PROJECT_REVIEW,
+    },
+    MemberRole.MAINTAINER: {
+        PROJECT_UPDATE,
+        PROJECT_INVITE,
+        PROJECT_VIEW,
+        PROJECT_MANAGE_ROLES,
+        PROJECT_REMOVE_MEMBERS,
+        PROJECT_EDIT_CONTENT,
+        PROJECT_REVIEW,
+    },
+    MemberRole.CONTRIBUTOR: {
+        PROJECT_VIEW,
+        PROJECT_EDIT_CONTENT,
+        PROJECT_REVIEW,
+    },
+    MemberRole.REVIEWER: {
+        PROJECT_VIEW,
+        PROJECT_REVIEW,
+    },
+    MemberRole.VIEWER: {
+        PROJECT_VIEW,
+    },
+    MemberRole.MEMBER: {
+        PROJECT_VIEW,
+    },
+}
 
 # ─── Permission Check Functions ─────────────────────────────────────────────
 
