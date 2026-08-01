@@ -2,6 +2,8 @@
 import { toast } from "sonner";
 import { api } from "../api/client";
 
+export default api;
+
 export type ProjectSearchResult = {
   id: string;
   title: string;
