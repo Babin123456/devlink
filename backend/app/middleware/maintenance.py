@@ -7,9 +7,9 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from cachetools import TTLCache
 
-from app.database.session import SessionLocal
 from app.models.maintenance import MaintenanceWindow
 from app.models.user import UserRole
+from app.core.security import decode_token
 from app.core.security import decode_token as verify_token
 
 # Cache the maintenance window state for 30 seconds
@@ -22,6 +22,21 @@ def get_active_maintenance():
     if CACHE_KEY in maintenance_cache:
         return maintenance_cache[CACHE_KEY]
 
+    from app.database.session import SessionLocal
+
+    try:
+        with SessionLocal() as db:
+            now = datetime.now(timezone.utc)
+            from sqlalchemy import select
+            stmt = (
+                select(MaintenanceWindow)
+                .where(
+                    MaintenanceWindow.is_active == True,
+                    MaintenanceWindow.start_time <= now,
+                    MaintenanceWindow.end_time >= now,
+                )
+                .order_by(MaintenanceWindow.start_time.desc())
+                .limit(1)
     with SessionLocal() as db:
         now = datetime.now(timezone.utc)
         from sqlalchemy import select
@@ -33,11 +48,18 @@ def get_active_maintenance():
                 MaintenanceWindow.start_time <= now,
                 MaintenanceWindow.end_time >= now,
             )
-            .order_by(MaintenanceWindow.start_time.desc())
-            .limit(1)
-        )
-        window = db.scalar(stmt)
+            window = db.scalar(stmt)
+            result = None
+            if window:
+                result = {
+                    "message": window.message,
+                    "end_time": window.end_time.isoformat(),
+                }
+    except Exception:
+        # If we cannot query the maintenance window, fail open so a DB blip
+        # never takes the whole API down.
         result = None
+    finally:
         if window:
             result = {
                 "message": window.message,
@@ -71,7 +93,7 @@ class MaintenanceMiddleware(BaseHTTPMiddleware):
             if auth_header.startswith("Bearer "):
                 token = auth_header[7:]
                 try:
-                    payload = verify_token(token)
+                    payload = decode_token(token)
                     if payload and payload.get("role") == UserRole.ADMIN:
                         is_admin = True
                 except Exception:

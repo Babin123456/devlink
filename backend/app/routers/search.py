@@ -12,6 +12,7 @@ from app.schemas.search_index import (
 from app.services.search_service import SearchService
 from app.services.search_index_service import SearchIndexService
 from app.services.search_analytics_service import SearchAnalyticsService
+from app.dependencies import get_current_user, get_optional_current_user
 from app.models.user import User, UserRole
 import time
 import uuid
@@ -28,7 +29,7 @@ def full_search(
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_database),
-    user: Optional[User] = Depends(get_current_user_optional),
+    user: Optional[User] = Depends(get_optional_current_user),
 ):
     """Full-text paginated search across Users, Projects, Organizations, Skills, and Tags."""
     start_time = time.time()
@@ -149,7 +150,7 @@ class TrackClickRequest(BaseModel):
 def track_click(
     request: TrackClickRequest,
     db: Session = Depends(get_database),
-    user: Optional[User] = Depends(get_current_user_optional),
+    user: Optional[User] = Depends(get_optional_current_user),
 ):
     """Track which entity a user clicked from their search results."""
     # Find the most recent search query for this user/session with this query string
@@ -201,6 +202,8 @@ def run_search_benchmark(
 
 
 @router.get(
+    "/analytics/dashboard",
+    response_model=dict,
     "/analytics-dashboard",
     "/analytics/dashboard",
     summary="Get search analytics dashboard metrics",
