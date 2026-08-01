@@ -192,7 +192,12 @@ oauth_redis = redis.from_url(settings.REDIS_URL, decode_responses=True)
 
 
 import httpx  # noqa: E402
-from app.schemas.auth import GitHubLoginRequest, LinkedInLoginRequest, OAuthStateResponse  # noqa: E402
+from app.schemas.auth import (
+    GitHubLoginRequest,
+    LinkedInLoginRequest,
+    OAuthStateResponse,
+)  # noqa: E402
+
 # ==========================================================
 # GitHub OAuth Authorization (CSRF State)
 # ==========================================================

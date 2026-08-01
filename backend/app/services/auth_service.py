@@ -852,14 +852,10 @@ class AuthService:
     def linkedin_login(self, linkedin_user: dict, primary_email: str):
         linkedin_id = str(linkedin_user["sub"])
 
-        user = self.db.scalar(
-            select(User).where(User.linkedin_id == linkedin_id)
-        )
+        user = self.db.scalar(select(User).where(User.linkedin_id == linkedin_id))
 
         if not user:
-            user = self.db.scalar(
-                select(User).where(User.email == primary_email)
-            )
+            user = self.db.scalar(select(User).where(User.email == primary_email))
             if user:
                 user.linkedin_id = linkedin_id
                 if linkedin_user.get("picture"):
@@ -870,9 +866,7 @@ class AuthService:
                 import string
 
                 alphabet = string.ascii_letters + string.digits + string.punctuation
-                random_password = "".join(
-                    secrets.choice(alphabet) for i in range(32)
-                )
+                random_password = "".join(secrets.choice(alphabet) for i in range(32))
 
                 name = linkedin_user.get("name") or "LinkedIn User"
                 name_parts = name.split(" ", 1)

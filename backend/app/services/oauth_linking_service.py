@@ -127,7 +127,9 @@ class OAuthLinkingService:
             ("gitlab", user.gitlab_id),
             ("linkedin", user.linkedin_id),
         ]
-        total_linked_oauth = sum(1 for name, pid in provider_map if pid and str(pid).strip())
+        total_linked_oauth = sum(
+            1 for name, pid in provider_map if pid and str(pid).strip()
+        )
 
         if not has_password and total_linked_oauth <= 1:
             raise HTTPException(

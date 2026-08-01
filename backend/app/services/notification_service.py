@@ -49,7 +49,7 @@ class NotificationService:
                 type = NotificationType(type)
             except ValueError:
                 pass
-        
+
         if not priority:
             priority = NotificationPriority.NORMAL
 

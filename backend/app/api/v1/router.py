@@ -66,7 +66,9 @@ api_v1_router.include_router(
     builder_flares.router, prefix="/flare", tags=["Builder's Flare"]
 )
 api_v1_router.include_router(messages.router, prefix="/messages", tags=["Messages"])
-api_v1_router.include_router(organizations.router, prefix="/organizations", tags=["Organizations"])
+api_v1_router.include_router(
+    organizations.router, prefix="/organizations", tags=["Organizations"]
+)
 api_v1_router.include_router(org_audit_logs.router)
 api_v1_router.include_router(
     notifications.router, prefix="/notifications", tags=["Notifications"]

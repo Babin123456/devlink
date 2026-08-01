@@ -32,7 +32,7 @@ def full_search(
 ):
     """Full-text paginated search across Users, Projects, Organizations, Skills, and Tags."""
     start_time = time.time()
-    
+
     results = SearchService.search(
         db=db,
         q=q,
@@ -40,9 +40,9 @@ def full_search(
         page=page,
         limit=limit,
     )
-    
+
     latency_ms = (time.time() - start_time) * 1000
-    
+
     # Calculate total results returned in this page
     total_results = 0
     if category:
@@ -53,7 +53,7 @@ def full_search(
         for k, v in results.items():
             if isinstance(v, list):
                 total_results += len(v)
-                
+
     if q.strip():
         # Log the search asynchronously ideally, but we do it synchronously here
         SearchAnalyticsService.log_search(
@@ -62,9 +62,9 @@ def full_search(
             results_count=total_results,
             latency_ms=latency_ms,
             user_id=user.id if user else None,
-            filters={"category": category} if category else None
+            filters={"category": category} if category else None,
         )
-        
+
     return results
 
 
@@ -107,7 +107,10 @@ def suggestions(
 )
 def search_indexed(
     q: str = Query("", max_length=200, description="Search query string"),
-    category: Optional[str] = Query(None, description="Resource category: developers, projects, organizations, discussions, skills, technologies"),
+    category: Optional[str] = Query(
+        None,
+        description="Resource category: developers, projects, organizations, discussions, skills, technologies",
+    ),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_database),
@@ -131,10 +134,13 @@ def reindex_search_resources(
 ):
     """Rebuilds the inverted search index across developers, projects, organizations, discussions, skills, and technologies."""
     return SearchIndexService.reindex_all(db)
+
+
 class TrackClickRequest(BaseModel):
     query: str
     clicked_entity_type: str
     clicked_entity_id: uuid.UUID
+
 
 @router.post(
     "/track-click",
@@ -149,17 +155,17 @@ def track_click(
     # Find the most recent search query for this user/session with this query string
     from sqlalchemy import select
     from app.models.search_analytics import SearchQueryLog
-    
+
     stmt = select(SearchQueryLog).where(SearchQueryLog.query == request.query)
     if user:
         stmt = stmt.where(SearchQueryLog.user_id == user.id)
-        
+
     stmt = stmt.order_by(SearchQueryLog.created_at.desc()).limit(1)
-    
+
     log = db.scalar(stmt)
     if not log:
         return {"status": "ignored"}
-        
+
     SearchAnalyticsService.log_click(
         db=db,
         search_query_id=log.id,
@@ -196,6 +202,7 @@ def run_search_benchmark(
 
 @router.get(
     "/analytics-dashboard",
+    "/analytics/dashboard",
     summary="Get search analytics dashboard metrics",
 )
 def get_analytics_dashboard(

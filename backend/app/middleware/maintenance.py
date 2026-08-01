@@ -25,6 +25,7 @@ def get_active_maintenance():
     with SessionLocal() as db:
         now = datetime.now(timezone.utc)
         from sqlalchemy import select
+
         stmt = (
             select(MaintenanceWindow)
             .where(
@@ -42,7 +43,7 @@ def get_active_maintenance():
                 "message": window.message,
                 "end_time": window.end_time.isoformat(),
             }
-        
+
         maintenance_cache[CACHE_KEY] = result
         return result
 
@@ -54,7 +55,11 @@ class MaintenanceMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next) -> typing.Any:
         # Exclude paths that should always be available
-        if request.url.path.startswith("/api/v1/health") or request.url.path.startswith("/docs") or request.url.path.startswith("/openapi"):
+        if (
+            request.url.path.startswith("/api/v1/health")
+            or request.url.path.startswith("/docs")
+            or request.url.path.startswith("/openapi")
+        ):
             return await call_next(request)
 
         maintenance = get_active_maintenance()
@@ -71,7 +76,7 @@ class MaintenanceMiddleware(BaseHTTPMiddleware):
                         is_admin = True
                 except Exception:
                     pass
-            
+
             # If not admin, return 503
             if not is_admin:
                 return JSONResponse(
