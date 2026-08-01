@@ -14,6 +14,7 @@ limiter = Limiter(
     key_func=get_remote_address,
     default_limits=[
         settings.DEFAULT_RATE_LIMIT,
+    ],
     enabled=settings.ENABLE_RATE_LIMIT,
     headers_enabled=True,
 )

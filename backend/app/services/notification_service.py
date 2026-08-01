@@ -75,6 +75,22 @@ class NotificationService:
         )
 
     @staticmethod
+    def create_notification(
+        db: Session,
+        recipient_id: uuid.UUID,
+        sender_id: uuid.UUID | None,
+        notification: NotificationCreate,
+    ) -> Notification:
+        db_notification = Notification(
+            sender_id=sender_id,
+            **notification.model_dump()
+        )
+        db.add(db_notification)
+        db.flush()
+        db.refresh(db_notification)
+        return db_notification
+
+    @staticmethod
     def get_notification(
         db: Session,
         notification_id: uuid.UUID,
