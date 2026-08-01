@@ -20,22 +20,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from enum import Enum
 from app.database.base import Base
 
-
 class UserRole(str, Enum):
-    ADMIN = "admin"
-    USER = "user"
-    DEVELOPER = "developer"
-
     """Application-level user role."""
-
+    USER = "user"
     ADMIN = "admin"
+    DEVELOPER = "developer"
     MEMBER = "member"
     VIEWER = "viewer"
-from enum import Enum
-
-class UserRole(str, Enum):
-    USER = "user"
-    ADMIN = "admin"
     MODERATOR = "moderator"
 
 

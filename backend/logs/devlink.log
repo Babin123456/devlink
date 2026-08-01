@@ -2231,3 +2231,23 @@ Multiple connection attempts failed. All failures were:
 [2m2026-07-31T20:11:02.103169Z[0m [[31m[1merror    [0m] [1mRedis set error for error_key: Write Error[0m [[0m[1m[34mapp.core.cache[0m][0m
 [2m2026-07-31T20:11:02.594349Z[0m [[31m[1merror    [0m] [1mRedis get error for error_key_get: Read Error[0m [[0m[1m[34mapp.core.cache[0m][0m
 [2m2026-07-31T20:11:02.595244Z[0m [[32m[1mdebug    [0m] [1mCache MISS: error_key_get     [0m [[0m[1m[34mapp.core.cache[0m][0m
+[2m2026-08-01T04:51:45.318063Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T04:51:45.320072Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'NativeStringIO': <class '_io.StringIO'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T04:51:45.321089Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'BytesIO': <class '_io.BytesIO'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T04:51:45.443062Z[0m [[32m[1mdebug    [0m] [1mregistered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>[0m [[0m[1m[34mpasslib.registry[0m][0m
+[2m2026-08-01T04:59:43.145496Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T04:59:43.147315Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'NativeStringIO': <class '_io.StringIO'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T04:59:43.149352Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'BytesIO': <class '_io.BytesIO'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T04:59:43.176177Z[0m [[32m[1mdebug    [0m] [1mregistered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>[0m [[0m[1m[34mpasslib.registry[0m][0m
+[2m2026-08-01T05:00:35.603434Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T05:00:35.605922Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'NativeStringIO': <class '_io.StringIO'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T05:00:35.608005Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'BytesIO': <class '_io.BytesIO'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T05:00:35.640263Z[0m [[32m[1mdebug    [0m] [1mregistered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>[0m [[0m[1m[34mpasslib.registry[0m][0m
+[2m2026-08-01T05:01:22.327268Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T05:01:22.328725Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'NativeStringIO': <class '_io.StringIO'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T05:01:22.329795Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'BytesIO': <class '_io.BytesIO'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T05:01:22.346718Z[0m [[32m[1mdebug    [0m] [1mregistered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>[0m [[0m[1m[34mpasslib.registry[0m][0m
+[2m2026-08-01T05:02:31.597911Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T05:02:31.599507Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'NativeStringIO': <class '_io.StringIO'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T05:02:31.600156Z[0m [[32m[1mdebug    [0m] [1mloaded lazy attr 'BytesIO': <class '_io.BytesIO'>[0m [[0m[1m[34mpasslib.utils.compat[0m][0m
+[2m2026-08-01T05:02:31.618130Z[0m [[32m[1mdebug    [0m] [1mregistered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>[0m [[0m[1m[34mpasslib.registry[0m][0m
