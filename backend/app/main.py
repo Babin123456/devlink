@@ -554,6 +554,8 @@ app.include_router(skills.router)
 app.include_router(users.router)
 app.include_router(websockets.router)
 app.include_router(graph.router, prefix="/api")
+from app.routers import webhooks
+app.include_router(webhooks.router, prefix="/api")
 app.include_router(recommendations.router)
 app.include_router(
     repository_quality.router, prefix="/api", tags=["Repository Quality"]
