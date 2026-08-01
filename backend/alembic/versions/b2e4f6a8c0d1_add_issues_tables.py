@@ -52,6 +52,19 @@ def upgrade() -> None:
             server_default="medium",
         ),
         sa.Column("labels", sa.String(500), nullable=True),
+        sa.Column(
+            "difficulty",
+            sa.Enum("beginner", "intermediate", "advanced", "expert", name="issuedifficulty"),
+            nullable=True,
+            index=True,
+        ),
+        sa.Column("difficulty_confidence", sa.Float(), nullable=True),
+        sa.Column(
+            "difficulty_manual_override",
+            sa.Boolean(),
+            nullable=False,
+            server_default="false",
+        ),
         sa.Column("embedding", sa.Text(), nullable=True),
         sa.Column(
             "is_duplicate_checked", sa.Boolean(), nullable=False, server_default="false"
@@ -102,3 +115,4 @@ def downgrade() -> None:
     op.drop_table("issues")
     op.execute("DROP TYPE IF EXISTS issuestatus")
     op.execute("DROP TYPE IF EXISTS issuepriority")
+    op.execute("DROP TYPE IF EXISTS issuedifficulty")

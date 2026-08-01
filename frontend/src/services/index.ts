@@ -20,6 +20,7 @@ import {
   authApi,
   collectionsApi,
   recommendationsApi,
+  fallbackTechStack,
   searchApi,
   issuesApi,
 } from "@/api";
@@ -291,7 +292,7 @@ export const techStackService = {
   recommend: (projectIdea: string) =>
     withFallback(
       () => recommendationsApi.recommendTechStack(projectIdea),
-      null as TechStackResponse | null,
+      fallbackTechStack(projectIdea),
     ),
 };
 

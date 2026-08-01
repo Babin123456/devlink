@@ -4,7 +4,9 @@ from typing import List, Dict, Any, Optional
 
 class SearchIndexedResultItem(BaseModel):
     id: str
-    entity_type: str  # developers, projects, organizations, discussions, skills, technologies
+    entity_type: (
+        str  # developers, projects, organizations, discussions, skills, technologies
+    )
     title: str
     description: Optional[str] = None
     score: float

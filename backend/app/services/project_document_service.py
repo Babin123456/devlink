@@ -47,9 +47,7 @@ class ProjectDocumentService:
         return doc
 
     @staticmethod
-    def list_project_documents(
-        db: Session, project_id: UUID
-    ) -> list[ProjectDocument]:
+    def list_project_documents(db: Session, project_id: UUID) -> list[ProjectDocument]:
         return (
             db.query(ProjectDocument)
             .filter(ProjectDocument.project_id == project_id)
@@ -87,9 +85,7 @@ class ProjectDocumentService:
             if content is not None and content != doc.content:
                 # Merge logic: append new additions if distinct or retain server latest
                 if doc.content and content and not doc.content.endswith(content):
-                    merged_content = (
-                        f"{doc.content}\n\n--- [Collaborator Edit Conflict Resolved] ---\n{content}"
-                    )
+                    merged_content = f"{doc.content}\n\n--- [Collaborator Edit Conflict Resolved] ---\n{content}"
                     doc.content = merged_content
             doc.version += 1
             doc.last_edited_by_id = user_id

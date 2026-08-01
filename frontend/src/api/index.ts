@@ -35,7 +35,7 @@ export type {
 } from "./modules/search";
 export { activitiesApi } from "./modules/activities";
 export { collectionsApi } from "./modules/collections";
-export { recommendationsApi } from "./modules/recommendations";
+export { recommendationsApi, fallbackTechStack } from "./modules/recommendations";
 export type { TechStackRecommendation, TechStackResponse } from "./modules/recommendations";
 export { bookmarksApi } from "./modules/bookmarks";
 export { issuesApi } from "./modules/issues";

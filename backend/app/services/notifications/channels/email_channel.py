@@ -6,6 +6,7 @@ from app.models.user import User
 from app.services.email_service import EmailService
 from app.services.notifications.channels.base import NotificationChannel
 
+
 class EmailChannel(NotificationChannel):
     @property
     def name(self) -> str:
@@ -24,7 +25,7 @@ class EmailChannel(NotificationChannel):
         action_url: str | None = None,
         image_url: str | None = None,
     ) -> Notification | None:
-        
+
         user = db.get(User, recipient_id)
         if not user or not user.email:
             return None

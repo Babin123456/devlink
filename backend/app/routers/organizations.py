@@ -50,6 +50,7 @@ def create_organization(
 
     from app.services.audit_log_service import AuditLogService
     from app.models.audit_log import AuditAction
+
     AuditLogService.create_log(
         db=db,
         actor_id=current_user.id,
@@ -211,6 +212,7 @@ def update_organization(
 
     from app.services.audit_log_service import AuditLogService
     from app.models.audit_log import AuditAction
+
     AuditLogService.create_log(
         db=db,
         actor_id=current_user.id,
@@ -459,6 +461,7 @@ def hard_delete_organization(
 
     from app.services.audit_log_service import AuditLogService
     from app.models.audit_log import AuditAction
+
     AuditLogService.create_log(
         db=db,
         actor_id=current_user.id,

@@ -372,9 +372,11 @@ app.add_middleware(ActivityTrackingMiddleware)
 app.add_middleware(MaintenanceMiddleware)
 
 from app.middleware.audit_context import AuditContextMiddleware
+
 app.add_middleware(AuditContextMiddleware)
 
 from app.middleware.org_audit_logging import OrganizationAuditMiddleware
+
 app.add_middleware(OrganizationAuditMiddleware)
 
 # ------------------------------------------------------------------
@@ -399,7 +401,7 @@ app.add_middleware(
         "Content-Type",
         "X-Requested-With",
         "X-Request-ID",
-        "X-Correlation-ID"
+        "X-Correlation-ID",
     ],
 )
 
@@ -512,6 +514,7 @@ app.include_router(
     notifications.router, prefix="/api/notifications", tags=["Notifications"]
 )
 from app.routers import admin_notifications
+
 app.include_router(admin_notifications.router, prefix="/api")
 
 app.include_router(followers.router, prefix="/api/followers", tags=["Followers"])
@@ -520,8 +523,9 @@ app.include_router(bookmark_collections.router)
 app.include_router(activities.router)
 app.include_router(conversations.router)
 from app.routers import audit
+
 app.include_router(audit.router, prefix="/api", tags=["Audit"])
-app.include_router(issues.router, prefix="/api/issues", tags=["Issues"])
+app.include_router(issues.router, prefix="/api", tags=["Issues"])
 app.include_router(
     profile_summary.router, prefix="/api/profile-summary", tags=["Profile Summary"]
 )
@@ -550,6 +554,8 @@ app.include_router(skills.router)
 app.include_router(users.router)
 app.include_router(websockets.router)
 app.include_router(graph.router, prefix="/api")
+from app.routers import webhooks
+app.include_router(webhooks.router, prefix="/api")
 app.include_router(recommendations.router)
 app.include_router(
     repository_quality.router, prefix="/api", tags=["Repository Quality"]
@@ -559,5 +565,7 @@ app.include_router(maintenance.router, prefix="/api")
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
 app.include_router(saved_searches.router)
 app.include_router(hackathons.router, prefix="/api/hackathons", tags=["Hackathons"])
-app.include_router(notification_templates.router, prefix="/api", tags=["Notification Templates"])
+app.include_router(
+    notification_templates.router, prefix="/api", tags=["Notification Templates"]
+)
 app.include_router(verification.router, prefix="/api", tags=["Verification"])

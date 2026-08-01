@@ -4,9 +4,7 @@ from typing import Optional
 correlation_id_ctx: ContextVar[Optional[str]] = ContextVar(
     "correlation_id_ctx", default=None
 )
-request_id_ctx: ContextVar[Optional[str]] = ContextVar(
-    "request_id_ctx", default=None
-)
+request_id_ctx: ContextVar[Optional[str]] = ContextVar("request_id_ctx", default=None)
 
 
 def get_correlation_id() -> Optional[str]:
