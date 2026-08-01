@@ -12,7 +12,11 @@ export function DashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <div className="flex min-h-screen w-full bg-background overflow-hidden">
+    <div className="grid h-screen w-full bg-background overflow-hidden
+      grid-cols-1 
+      md:grid-cols-[max-content_1fr] 
+      xl:grid-cols-[max-content_1fr_max-content]">
+      
       {/* ─── Desktop & Tablet Sidebar ─────────────────────────────── */}
       <Sidebar />
 
@@ -20,7 +24,7 @@ export function DashboardLayout() {
       <MobileSidebar />
 
       {/* ─── Main content column ──────────────────────────────────── */}
-      <div className="flex min-w-0 flex-1 flex-col relative h-screen">
+      <div className="flex min-w-0 flex-col relative h-screen overflow-hidden">
         <TopNavbar />
 
         <main

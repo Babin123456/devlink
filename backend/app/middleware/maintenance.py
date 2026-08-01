@@ -18,7 +18,6 @@ CACHE_KEY = "active_maintenance"
 
 
 def get_active_maintenance():
-    from app.database.session import SessionLocal
     if CACHE_KEY in maintenance_cache:
         return maintenance_cache[CACHE_KEY]
 
@@ -37,16 +36,6 @@ def get_active_maintenance():
                 )
                 .order_by(MaintenanceWindow.start_time.desc())
                 .limit(1)
-    with SessionLocal() as db:
-        now = datetime.now(timezone.utc)
-        from sqlalchemy import select
-
-        stmt = (
-            select(MaintenanceWindow)
-            .where(
-                MaintenanceWindow.is_active == True,
-                MaintenanceWindow.start_time <= now,
-                MaintenanceWindow.end_time >= now,
             )
             window = db.scalar(stmt)
             result = None
@@ -59,15 +48,9 @@ def get_active_maintenance():
         # If we cannot query the maintenance window, fail open so a DB blip
         # never takes the whole API down.
         result = None
-    finally:
-        if window:
-            result = {
-                "message": window.message,
-                "end_time": window.end_time.isoformat(),
-            }
 
-        maintenance_cache[CACHE_KEY] = result
-        return result
+    maintenance_cache[CACHE_KEY] = result
+    return result
 
 
 class MaintenanceMiddleware(BaseHTTPMiddleware):

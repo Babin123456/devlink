@@ -205,11 +205,6 @@ def run_search_benchmark(
 @router.get(
     "/analytics/dashboard",
     response_model=dict,
-    "/analytics",
-    "/analytics/dashboard",
-    response_model=dict,
-    "/analytics-dashboard",
-    "/analytics/dashboard",
     summary="Get search analytics dashboard metrics",
 )
 def get_analytics_dashboard(
