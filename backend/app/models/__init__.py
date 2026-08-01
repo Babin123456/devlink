@@ -24,6 +24,7 @@ from .notification import Notification  # noqa: F401
 from .organization import Organization  # noqa: F401
 from .organization_member import OrganizationMember, OrgMemberRole  # noqa: F401
 from .project import Project  # noqa: F401
+from .project_document import ProjectDocument  # noqa: F401
 from .project_view import ProjectView  # noqa: F401
 from .project_member import ProjectMember  # noqa: F401
 from .project_skill import ProjectSkill  # noqa: F401
@@ -61,5 +62,14 @@ from .refresh_token import RefreshToken
 from .repository import Repository
 from .skill import Skill
 from .user import User
+from .user_report import UserReport as UserReport
+from .user_skill import UserSkill as UserSkill
+from .workspace_api_token import WorkspaceApiToken as WorkspaceApiToken
+from .milestone import Milestone as Milestone
+from .announcement import Announcement as Announcement
 from .user_report import UserReport
 from .user_skill import UserSkill
+from .verification_request import VerificationRequest  # noqa: F401
+from .maintenance import MaintenanceWindow
+from .search_analytics import SearchQueryLog, SearchClickLog
+from .webhook import WebhookDelivery, WebhookDeadLetterQueue, WebhookDeliveryStatus

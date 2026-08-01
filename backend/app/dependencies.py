@@ -56,6 +56,9 @@ def get_optional_current_user(
         return None
 
 
+get_current_user_optional = get_optional_current_user
+
+
 # ---------------------------------------------------------------------
 # Current User
 # ---------------------------------------------------------------------
@@ -85,7 +88,23 @@ def get_current_user(
 
         user_id = UUID(user_id)
 
-    except ValueError:
+    except Exception:
+        # Try authenticating as a workspace API Token
+        from app.services.workspace_api_token_service import WorkspaceApiTokenService
+
+        token_info = WorkspaceApiTokenService.authenticate_api_token(
+            db, credentials.credentials
+        )
+        if token_info:
+            auth_service = AuthService(db)
+            user = auth_service.get_current_user(token_info.created_by_id)
+            if user:
+                user._authenticated_via_token = True
+                user._token_organization_id = token_info.organization_id
+                user._token_scopes = [
+                    s.strip() for s in token_info.scopes.split(",") if s.strip()
+                ]
+                return user
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials.",
@@ -102,6 +121,15 @@ def get_current_user(
         )
 
     return user
+
+
+def get_current_user_id(
+    current_user: User = Depends(get_current_user),
+) -> UUID:
+    """
+    Returns UUID of the currently authenticated user.
+    """
+    return current_user.id
 
 
 def get_optional_current_user(
@@ -121,7 +149,35 @@ def get_optional_current_user(
         auth_service = AuthService(db)
         return auth_service.get_current_user(UUID(user_id))
     except Exception:
+        # Try authenticating as a workspace API Token
+        from app.services.workspace_api_token_service import WorkspaceApiTokenService
+
+        token_info = WorkspaceApiTokenService.authenticate_api_token(
+            db, credentials.credentials
+        )
+        if token_info:
+            auth_service = AuthService(db)
+            user = auth_service.get_current_user(token_info.created_by_id)
+            if user:
+                user._authenticated_via_token = True
+                user._token_organization_id = token_info.organization_id
+                user._token_scopes = [
+                    s.strip() for s in token_info.scopes.split(",") if s.strip()
+                ]
+                return user
         return None
+
+
+# ---------------------------------------------------------------------
+# Current User ID
+# ---------------------------------------------------------------------
+
+
+def get_current_user_id(current_user: User = Depends(get_current_user)) -> str:
+    """
+    Returns the currently authenticated user's ID as a string.
+    """
+    return str(current_user.id)
 
 
 # ---------------------------------------------------------------------
@@ -213,6 +269,32 @@ def require_org_permission(action: str):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Organization not found.",
             )
+
+        # Check API token constraints
+        if getattr(current_user, "_authenticated_via_token", False):
+            if current_user._token_organization_id != organization_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Token not authorized for this organization.",
+                )
+
+            token_scopes = current_user._token_scopes
+            if "org:admin" not in token_scopes:
+                if action in ("org:update", "org:manage_members", "org:manage_tokens"):
+                    if action == "org:update" and "org:write" in token_scopes:
+                        pass
+                    else:
+                        raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f"Scope required for action: {action}",
+                        )
+                elif "org:read" not in token_scopes:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="Scope 'org:read' required.",
+                    )
+            return current_user
+
         if not has_org_permission(db, current_user.id, organization_id, action):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -242,10 +324,97 @@ def require_project_permission(action: str):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Project not found.",
             )
+
+        # Check API token constraints
+        if getattr(current_user, "_authenticated_via_token", False):
+            if project.organization_id != current_user._token_organization_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Token not authorized for this project's organization.",
+                )
+
+            token_scopes = current_user._token_scopes
+            if "org:admin" not in token_scopes:
+                if action == "project:view":
+                    if not any(
+                        s in token_scopes for s in ("project:read", "project:write")
+                    ):
+                        raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Scope 'project:read' required.",
+                        )
+                else:
+                    if "project:write" not in token_scopes:
+                        raise HTTPException(
+                            status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Scope 'project:write' required.",
+                        )
+            return current_user
+
         if not has_project_permission(db, current_user.id, project_id, action):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Permission denied.",
+            )
+        return current_user
+
+    return dependency
+
+
+# ---------------------------------------------------------------------
+# System-Level RBAC Guards (issue #357)
+# ---------------------------------------------------------------------
+
+from app.core.rbac import (  # noqa: E402
+    SystemRole,
+    has_system_permission,
+    has_system_role,
+)
+
+
+def require_system_permission(action: str):
+    """Dependency factory to check system-level permissions.
+
+    Checks the user's system_role against SYSTEM_ROLE_PERMISSIONS.
+    Superusers always pass.
+    """
+
+    def dependency(
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_database),
+    ) -> User:
+        if not has_system_permission(db, current_user.id, action):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"System permission required: {action}",
+            )
+        return current_user
+
+    return dependency
+
+
+def require_roles(*allowed_roles: SystemRole):
+    """Dependency factory to check that the user has one of the specified system roles.
+
+    Superusers always pass.  Usage::
+
+        @router.post("/admin/users", dependencies=[Depends(require_roles(SystemRole.ADMIN))])
+        def list_all_users(...): ...
+
+    Args:
+        *allowed_roles: One or more :class:`SystemRole` values. The user
+            must hold at least one to pass the check.
+    """
+
+    def dependency(
+        current_user: User = Depends(get_current_active_user),
+        db: Session = Depends(get_database),
+    ) -> User:
+        if not has_system_role(db, current_user.id, *allowed_roles):
+            role_names = ", ".join(r.value for r in allowed_roles)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"One of the following roles required: {role_names}",
             )
         return current_user
 

@@ -4,20 +4,9 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-# pyrefly: ignore [missing-import]
-from pydantic import BaseModel, ConfigDict
-
-from app.models.issue import IssueDifficulty, IssuePriority, IssueStatus
-
-
-class IssueBase(BaseModel):
-    title: str
-    description: str
-
-
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.issue import IssuePriority, IssueStatus
+from app.models.issue import IssueDifficulty, IssuePriority, IssueStatus
 
 # ------------------------------------------------------------------
 # Issue Schemas
@@ -32,12 +21,6 @@ class IssueBase(BaseModel):
 
 
 class IssueCreate(IssueBase):
-    project_id: uuid.UUID
-
-
-class IssueUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
     pass
 
 
@@ -80,9 +63,7 @@ class IssueResponse(IssueBase):
     difficulty_manual_override: bool = False
     created_at: datetime
     updated_at: datetime
-    is_duplicate_checked: bool
-    created_at: datetime
-    updated_at: datetime
+    is_duplicate_checked: bool = False
 
 
 class IssueDetailResponse(IssueResponse):

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import (
     Boolean,
@@ -13,12 +14,20 @@ from sqlalchemy import (
     JSON,
     func,
 )
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from enum import Enum
 from app.database.base import Base
+
+class UserRole(str, Enum):
+    """Application-level user role."""
+    USER = "user"
+    ADMIN = "admin"
+    DEVELOPER = "developer"
+    MEMBER = "member"
+    VIEWER = "viewer"
+    MODERATOR = "moderator"
 
 
 class User(Base):
@@ -68,9 +77,9 @@ class User(Base):
         nullable=False,
     )
 
-    password_hash: Mapped[str] = mapped_column(
+    password_hash: Mapped[str | None] = mapped_column(
         String(255),
-        nullable=False,
+        nullable=True,
     )
 
     # ------------------------------------------------------------------
@@ -231,6 +240,23 @@ class User(Base):
         nullable=False,
     )
 
+    # System-level RBAC role (issue #357).
+    # Controls platform-wide permissions independent of org/project membership.
+    # Values: admin, maintainer, organization_owner, project_owner, contributor, user
+    system_role: Mapped[str] = mapped_column(
+        String(50),
+        default="user",
+        nullable=False,
+        index=True,
+    )
+
+    verification_status: Mapped[str] = mapped_column(
+        String(20), default="unverified", nullable=False
+    )
+    verified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
     email_verified_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
@@ -267,6 +293,18 @@ class User(Base):
         unique=True,
     )
 
+    linkedin_id: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        unique=True,
+    )
+
+    gitlab_id: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        unique=True,
+    )
+
     # ------------------------------------------------------------------
     # Soft Delete
     # ------------------------------------------------------------------
@@ -282,6 +320,7 @@ class User(Base):
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
+        index=True,
     )
 
     deleted_by: Mapped[User | None] = relationship(
