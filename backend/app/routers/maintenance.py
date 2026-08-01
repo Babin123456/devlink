@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.database.session import get_db
 from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_database as get_db
 from app.models.maintenance import MaintenanceWindow
 from app.models.user import User, UserRole
 from app.schemas.maintenance import (
@@ -67,6 +68,7 @@ def get_active_maintenance_window(
 ):
     # Publicly accessible endpoint to check if maintenance is currently scheduled/active
     from datetime import datetime, timezone
+
     now = datetime.now(timezone.utc)
     stmt = (
         select(MaintenanceWindow)
