@@ -1,17 +1,37 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# Dependencies
+node_modules
+node_modules/
+frontend/node_modules/
 
-# Virtual Environment
-backend/venv/
+# Python virtual environments
+.venv/
+backend/.venv/
 venv/
+env/
 
-# Logs
-backend/logs/
-*.log
+# Python cache
+__pycache__/
+*.py[cod]
 
-# OS files
+# Node locks & build artifacts
+dist/
+dist-ssr/
+.output/
+.nitro/
+.tanstack/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
 .DS_Store
-Thumbs.db
+
+# Runtime artifacts
+backend/logs/

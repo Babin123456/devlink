@@ -1,21 +1,51 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import lottie from "lottie-web";
-import { AppShell } from "@/components/layout/AppShell";
-import searchAnimation from "@/assets/404 Error - Doodle animation.json";
+
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { SidebarProvider } from "@/context/SidebarContext";
+import { ProfileCompletionChecklist } from "@/components/profile/ProfileCompletionChecklist";
+import { EmailVerificationBanner } from "@/components/auth/EmailVerificationBanner";
+
+const mockUserProfile = {
+  avatar: "",
+  bio: "Frontend Developer interested in React & Open Source.",
+  skills: ["React", "TypeScript", "Tailwind CSS"],
+  githubUrl: "https://github.com/mridul",
+  portfolioUrl: "",
+  experience: "2 yrs",
+};
+
+function AppLayoutWithProfileChecklist() {
+  return (
+    <div className="space-y-0">
+      <EmailVerificationBanner isVerified={false} userEmail="builder@devlink.io" />
+      <ProfileCompletionChecklist userProfile={mockUserProfile} />
+      <SidebarProvider>
+        <DashboardLayout />
+      </SidebarProvider>
+    </div>
+  );
+}
 
 function AppNotFound() {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!ref.current) return;
-    const anim = lottie.loadAnimation({
-      container: ref.current,
-      animationData: searchAnimation,
-      loop: true,
-      autoplay: true,
-    });
-    return () => anim.destroy();
+    let destroy: (() => void) | undefined;
+    Promise.all([import("lottie-web"), import("@/assets/404 Error - Doodle animation.json")]).then(
+      ([lottieMod, animMod]) => {
+        if (!ref.current) return;
+        const anim = lottieMod.default.loadAnimation({
+          container: ref.current,
+          animationData: animMod.default,
+          loop: true,
+          autoplay: true,
+        });
+        destroy = () => anim.destroy();
+      },
+    );
+    return () => destroy?.();
   }, []);
 
   return (
@@ -51,6 +81,6 @@ function AppNotFound() {
 }
 
 export const Route = createFileRoute("/_app")({
-  component: AppShell,
+  component: AppLayoutWithProfileChecklist,
   notFoundComponent: AppNotFound,
 });

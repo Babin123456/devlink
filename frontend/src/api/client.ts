@@ -22,11 +22,12 @@ export class ApiError extends Error {
     this.payload = payload;
   }
 }
-
 export interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
   auth?: boolean;
   retries?: number;
+  timeout?: number;
+  signal?: AbortSignal;
   query?: Record<string, string | number | boolean | undefined | null>;
   raw?: boolean;
 }
@@ -46,6 +47,15 @@ function buildUrl(path: string, query?: RequestOptions["query"]): string {
 
 // Single-flight refresh: parallel 401s share one refresh call.
 let refreshInFlight: Promise<string | null> | null = null;
+
+// Session Correlation ID for distributed tracing
+let sessionCorrelationId = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('x-correlation-id') : null;
+if (!sessionCorrelationId) {
+  sessionCorrelationId = `corr_${crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '') : Math.random().toString(36).slice(2)}`;
+  if (typeof sessionStorage !== 'undefined') {
+    sessionStorage.setItem('x-correlation-id', sessionCorrelationId);
+  }
+}
 
 async function refreshAccessToken(): Promise<string | null> {
   if (!isBackendConfigured()) return null;
@@ -82,7 +92,17 @@ async function refreshAccessToken(): Promise<string | null> {
 }
 
 async function coreFetch(path: string, opts: RequestOptions, attempt = 0): Promise<Response> {
-  const { body, auth = true, query, retries = 2, raw: _raw, headers, ...rest } = opts;
+  const {
+    body,
+    auth = true,
+    query,
+    retries = 2,
+    timeout = 10000,
+    signal,
+    raw: _raw,
+    headers,
+    ...rest
+  } = opts;
   void _raw;
   const finalHeaders = new Headers(headers);
   if (body !== undefined && !(body instanceof FormData)) {
@@ -94,6 +114,11 @@ async function coreFetch(path: string, opts: RequestOptions, attempt = 0): Promi
     if (token) finalHeaders.set("Authorization", `Bearer ${token}`);
   }
 
+  // Structured Logging Headers
+  finalHeaders.set("X-Correlation-ID", sessionCorrelationId!);
+  finalHeaders.set("X-Request-ID", `req_${crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '') : Math.random().toString(36).slice(2)}`);
+
+
   const init: RequestInit = {
     ...rest,
     headers: finalHeaders,
@@ -101,15 +126,50 @@ async function coreFetch(path: string, opts: RequestOptions, attempt = 0): Promi
   };
 
   let res: Response;
+
+  const controller = new AbortController();
+
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeout);
+
+  if (signal) {
+    signal.addEventListener("abort", () => controller.abort(), { once: true });
+  }
+
   try {
-    res = await fetch(buildUrl(path, query), init);
+    res = await fetch(buildUrl(path, query), {
+      ...init,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
   } catch (err) {
-    // Network error — retry with backoff
+    clearTimeout(timeoutId);
+
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new ApiError("Request cancelled or timed out", 408, null);
+    }
+
     if (attempt < retries) {
       await new Promise((r) => setTimeout(r, 200 * 2 ** attempt));
       return coreFetch(path, opts, attempt + 1);
     }
+
     throw new ApiError(err instanceof Error ? err.message : "Network error", 0, null);
+  }
+
+  if (res.status === 503) {
+    try {
+      const payload = await res.clone().json();
+      if (payload?.detail === "Maintenance Mode") {
+        if (window.location.pathname !== "/maintenance") {
+          window.location.href = "/maintenance";
+        }
+      }
+    } catch (e) {
+      // Not JSON, ignore
+    }
   }
 
   if (res.status === 401 && auth && !path.includes("/auth/")) {

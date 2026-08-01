@@ -9,8 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_database
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_database
 from app.models.activity import ActivityType
 from app.models.user import User
 from app.schemas.activity import (
@@ -19,6 +18,7 @@ from app.schemas.activity import (
     ActivityUpdate,
 )
 from app.services.activity_service import ActivityService
+from app.core.cache import cached
 
 router = APIRouter(
     prefix="/activities",

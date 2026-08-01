@@ -1,11 +1,35 @@
-import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import { projectsService } from "@/services";
-import { Card, TagChip } from "@/components/shared/primitives";
+import { Card, TagChip, SectionHeader } from "@/components/shared/primitives";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Star, GitFork, Users2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
+import { ProjectFilters } from "@/components/projects/ProjectFilters";
+import { useProjectFilters } from "@/hooks/useProjectFilters";
 import { cn } from "@/lib/utils";
 import { getRecentlyViewedProjectIds } from "@/lib/recentlyViewedProjects";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
+
+export const projectSearchSchema = z.object({
+  page: z.number().catch(1).optional(),
+  q: z.string().optional(),
+  language: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  experience: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  tech: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  remote: z.boolean().optional(),
+  paid: z.boolean().optional(),
+  opensource: z.boolean().optional(),
+});
 
 export const Route = createFileRoute("/_app/projects")({
   head: () => ({
@@ -14,111 +38,76 @@ export const Route = createFileRoute("/_app/projects")({
       { name: "description", content: "Browse and manage your DevLink projects." },
     ],
   }),
+  validateSearch: projectSearchSchema,
   component: ProjectsPage,
 });
 
-const LANGUAGES = ["JavaScript", "TypeScript", "Python", "Go", "Rust", "Java", "C++"];
-const DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
-const BOOL_FILTERS = [
-  "remote",
-  "paid",
-  "openSource",
-  "ai",
-  "web",
-  "mobile",
-  "backend",
-  "frontend",
-] as const;
-type BoolFilter = (typeof BOOL_FILTERS)[number];
-
-const BOOL_LABELS: Record<BoolFilter, string> = {
-  remote: "Remote",
-  paid: "Paid",
-  openSource: "Open Source",
-  ai: "AI",
-  web: "Web",
-  mobile: "Mobile",
-  backend: "Backend",
-  frontend: "Frontend",
-};
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "rounded-md border px-2.5 py-1 text-[12px] font-medium transition-colors",
-        active
-          ? "border-primary bg-primary/10 text-primary"
-          : "border-border bg-surface text-muted-foreground hover:border-primary/50 hover:text-foreground",
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
-function toggle<T>(set: T[], val: T): T[] {
-  return set.includes(val) ? set.filter((v) => v !== val) : [...set, val];
-}
-
 function ProjectsPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const [q, setQ] = useState("");
+  const navigate = Route.useNavigate();
+  const { filters, setFilters, clearFilters, hasActiveFilters: hasFilters, chipFilterCount } = useProjectFilters();
+  const page = filters.page || 1;
+  const ITEMS_PER_PAGE = 6;
+  const [createOpen, setCreateOpen] = useState(false);
+  const [q, setQ] = useState(filters.q || "");
+
+  // Status filter state (keep for now as it's separate from ProjectFilters component)
   const [statusFilter, setStatusFilter] = useState<
     "all" | "recruiting" | "in-progress" | "completed" | "archived"
   >("all");
   const [showFilters, setShowFilters] = useState(false);
-  const [langs, setLangs] = useState<string[]>([]);
-  const [difficulties, setDifficulties] = useState<string[]>([]);
-  const [boolFilters, setBoolFilters] = useState<BoolFilter[]>([]);
   const [recentProjectIds, setRecentProjectIds] = useState<string[]>([]);
 
   useEffect(() => {
     setRecentProjectIds(getRecentlyViewedProjectIds());
   }, []);
-  const { data = [], isLoading } = useQuery({
-    queryKey: ["projects"],
-    queryFn: projectsService.list,
-  });
-  const recentlyViewed = recentProjectIds
-    .map((id) => data.find((project) => project.id === id))
-    .filter((project): project is NonNullable<typeof project> => Boolean(project));
 
-  const chipFilterCount = langs.length + difficulties.length + boolFilters.length;
-  const hasActiveFilters = q !== "" || statusFilter !== "all" || chipFilterCount > 0;
+  const { data = [], isLoading } = useQuery({
+    queryKey: ["projects", filters.language, filters.experience, filters.remote, filters.paid, filters.opensource, filters.tech],
+    queryFn: () =>
+      projectsService.list({
+        language: filters.language?.length ? filters.language.join(",") : undefined,
+        experience: filters.experience?.length ? filters.experience.join(",") : undefined,
+        remote: filters.remote,
+        paid: filters.paid,
+        opensource: filters.opensource,
+        tech: filters.tech?.length ? filters.tech.join(",") : undefined,
+      }),
+  });
+
+  const recentlyViewed = useMemo(
+    () =>
+      recentProjectIds
+        .map((id) => data.find((project) => project.id === id))
+        .filter((project): project is NonNullable<typeof project> => Boolean(project)),
+    [recentProjectIds, data],
+  );
+
+  const hasActiveFilters = q !== "" || statusFilter !== "all" || hasFilters;
+
+  const filtered = useMemo(
+    () =>
+      data.filter((p) => {
+        if (statusFilter !== "all" && p.status !== statusFilter) return false;
+        if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false;
+        return true;
+      }),
+    [data, statusFilter, q],
+  );
 
   if (pathname !== "/projects" && pathname !== "/projects/") {
     return <Outlet />;
   }
 
-  function clearFilters() {
+  function handleClearAllFilters() {
     setQ("");
     setStatusFilter("all");
-    setLangs([]);
-    setDifficulties([]);
-    setBoolFilters([]);
+    clearFilters();
   }
 
-  const filtered = data.filter((p) => {
-    if (statusFilter !== "all" && p.status !== statusFilter) return false;
-    if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false;
-    if (langs.length > 0 && (!p.language || !langs.includes(p.language))) return false;
-    if (difficulties.length > 0 && (!p.difficulty || !difficulties.includes(p.difficulty)))
-      return false;
-    for (const f of boolFilters) {
-      if (!p[f]) return false;
-    }
-    return true;
-  });
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-4">
@@ -129,9 +118,13 @@ function ProjectsPage() {
             Everything you're building, in one place.
           </p>
         </div>
-        <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90">
+        <button
+          onClick={() => setCreateOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90"
+        >
           <Plus size={14} /> New project
         </button>
+        <CreateProjectDialog open={createOpen} onOpenChange={setCreateOpen} />
       </div>
       {recentlyViewed.length > 0 && (
         <section className="space-y-2">
@@ -221,7 +214,7 @@ function ProjectsPage() {
           </button>
           {hasActiveFilters && (
             <button
-              onClick={clearFilters}
+              onClick={handleClearAllFilters}
               className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-[7px] text-[12px] font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-destructive/20"
               aria-label="Clear all active filters"
             >
@@ -231,72 +224,28 @@ function ProjectsPage() {
           )}
         </div>
 
-        {showFilters && (
-          <div className="mt-3 space-y-3 border-t border-border pt-3">
-            {/* Language */}
-            <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Language
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {LANGUAGES.map((lang) => (
-                  <FilterChip
-                    key={lang}
-                    active={langs.includes(lang)}
-                    onClick={() => setLangs(toggle(langs, lang))}
-                  >
-                    {lang}
-                  </FilterChip>
-                ))}
-              </div>
-            </div>
-
-            {/* Difficulty */}
-            <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Difficulty
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {DIFFICULTIES.map((d) => (
-                  <FilterChip
-                    key={d}
-                    active={difficulties.includes(d)}
-                    onClick={() => setDifficulties(toggle(difficulties, d))}
-                  >
-                    <span className="capitalize">{d}</span>
-                  </FilterChip>
-                ))}
-              </div>
-            </div>
-
-            {/* Boolean tags */}
-            <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Tags
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {BOOL_FILTERS.map((f) => (
-                  <FilterChip
-                    key={f}
-                    active={boolFilters.includes(f)}
-                    onClick={() => setBoolFilters(toggle(boolFilters, f))}
-                  >
-                    {BOOL_LABELS[f]}
-                  </FilterChip>
-                ))}
-              </div>
-            </div>
-
-            {hasActiveFilters && (
+        <BottomSheet
+          open={showFilters}
+          onOpenChange={setShowFilters}
+          title="Filters"
+          description={
+            chipFilterCount > 0
+              ? `${chipFilterCount} active filter${chipFilterCount !== 1 ? "s" : ""}`
+              : undefined
+          }
+          footer={
+            hasActiveFilters ? (
               <button
-                onClick={clearFilters}
-                className="inline-flex items-center gap-1 text-[12px] font-medium text-muted-foreground hover:text-foreground"
+                onClick={handleClearAllFilters}
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-border px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
               >
-                <X size={12} /> Clear filters
+                <X size={13} /> Clear all filters
               </button>
-            )}
-          </div>
-        )}
+            ) : undefined
+          }
+        >
+          <ProjectFilters />
+        </BottomSheet>
       </Card>
 
       {isLoading ? (
@@ -318,7 +267,7 @@ function ProjectsPage() {
           </p>
           {hasActiveFilters && (
             <button
-              onClick={clearFilters}
+              onClick={handleClearAllFilters}
               className="mt-3 text-[13px] font-medium text-primary hover:underline"
             >
               Clear filters
@@ -326,79 +275,116 @@ function ProjectsPage() {
           )}
         </div>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((p) => (
-            <a key={p.id} href={`/projects/${p.id}`} className="block">
-              <Card interactive className="p-4">
-                <div className="flex items-start gap-3">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-muted text-xl">
-                    {p.icon}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[14px] font-semibold text-foreground">{p.name}</p>
-                    <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
-                      {p.description}
-                    </p>
+        <>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {paginated.map((p) => (
+              <Link
+                key={p.id}
+                to="/projects/$projectId"
+                params={{ projectId: p.id }}
+                className="block"
+              >
+                <Card interactive className="p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-muted text-xl">
+                      {p.icon}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[14px] font-semibold text-foreground">{p.name}</p>
+                      <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
+                        {p.description}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {p.stack.map((s) => (
-                    <TagChip key={s}>{s}</TagChip>
-                  ))}
-                  {p.difficulty && (
-                    <TagChip
-                      className={cn(
-                        p.difficulty === "beginner"
-                          ? "border-success/30 bg-success/10 text-success"
-                          : p.difficulty === "intermediate"
-                            ? "border-warning/30 bg-warning/10 text-warning"
-                            : "border-destructive/30 bg-destructive/10 text-destructive",
-                      )}
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    {p.stack.map((s) => (
+                      <TagChip key={s}>{s}</TagChip>
+                    ))}
+                    {p.difficulty && (
+                      <TagChip
+                        className={cn(
+                          p.difficulty === "Beginner"
+                            ? "border-success/30 bg-success/10 text-success"
+                            : p.difficulty === "Intermediate"
+                              ? "border-warning/30 bg-warning/10 text-warning"
+                              : "border-destructive/30 bg-destructive/10 text-destructive",
+                        )}
+                      >
+                        {p.difficulty}
+                      </TagChip>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span>Progress</span>
+                      <span>{p.progress}%</span>
+                    </div>
+                    <div className="h-1 overflow-hidden rounded-full bg-muted">
+                      <div className="h-full bg-primary" style={{ width: `${p.progress}%` }} />
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span className="inline-flex items-center gap-1">
+                      <Users2 size={12} /> {p.members}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Star size={12} /> {p.stars}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <GitFork size={12} /> {p.forks}
+                    </span>
+                    <span
+                      className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
+                        p.status === "recruiting"
+                          ? "bg-primary/10 text-primary"
+                          : p.status === "in-progress"
+                            ? "bg-warning/10 text-warning"
+                            : p.status === "completed"
+                              ? "bg-success/10 text-success"
+                              : "bg-muted text-muted-foreground"
+                      }`}
                     >
-                      {p.difficulty}
-                    </TagChip>
-                  )}
-                </div>
-                <div className="mt-3">
-                  <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span>Progress</span>
-                    <span>{p.progress}%</span>
+                      {p.status
+                        .split("-")
+                        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(" ")}
+                    </span>
                   </div>
-                  <div className="h-1 overflow-hidden rounded-full bg-muted">
-                    <div className="h-full bg-primary" style={{ width: `${p.progress}%` }} />
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span className="inline-flex items-center gap-1">
-                    <Users2 size={12} /> {p.members}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Star size={12} /> {p.stars}
-                  </span>
-                  <span className="inline-flex items-center gap-1">
-                    <GitFork size={12} /> {p.forks}
-                  </span>
-                  <span
-                    className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
-                      p.status === "recruiting"
-                        ? "bg-primary/10 text-primary"
-                        : p.status === "in-progress"
-                          ? "bg-warning/10 text-warning"
-                          : p.status === "completed"
-                            ? "bg-success/10 text-success"
-                            : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {p.status
-                      .split("-")
-                      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                      .join(" ")}
-                  </span>
-                </div>
-              </Card>
-            </a>
-          ))}
-        </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href={`/projects?page=${Math.max(1, page - 1)}`}
+                      aria-disabled={page === 1}
+                      className={page === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink href={`/projects?page=${i + 1}`} isActive={page === i + 1}>
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      href={`/projects?page=${Math.min(totalPages, page + 1)}`}
+                      aria-disabled={page === totalPages}
+                      className={page === totalPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
