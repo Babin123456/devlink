@@ -531,6 +531,9 @@ app.include_router(issues.router, prefix="/api", tags=["Issues"])
 app.include_router(
     profile_summary.router, prefix="/api/profile-summary", tags=["Profile Summary"]
 )
+from app.routers import profile_views
+app.include_router(profile_views.router, prefix="/api", tags=["Profile Views"])
+
 app.include_router(
     conversation_starters.router,
     prefix="/api/conversation-starters",
