@@ -51,11 +51,13 @@ function SearchPage() {
 
   const trackClick = (entityType: string, entityId: string) => {
     if (query) {
-      api.post('/api/search/track-click', {
-        query,
-        clicked_entity_type: entityType,
-        clicked_entity_id: entityId
-      }).catch(() => {});
+      api
+        .post("/api/search/track-click", {
+          query,
+          clicked_entity_type: entityType,
+          clicked_entity_id: entityId,
+        })
+        .catch(() => {});
     }
   };
 
@@ -172,9 +174,9 @@ function SearchPage() {
             <EmptyState query={q} label="developers" />
           ) : (
             devs.map((b) => (
-              <Link 
-                key={b.id} 
-                to="/profile/$username" 
+              <Link
+                key={b.id}
+                to="/profile/$username"
                 params={{ username: b.username }}
                 onClick={() => trackClick("user", b.id)}
               >
@@ -206,9 +208,9 @@ function SearchPage() {
             <EmptyState query={q} label="projects" />
           ) : (
             projs.map((p) => (
-              <Link 
-                key={p.id} 
-                to="/projects/$projectId" 
+              <Link
+                key={p.id}
+                to="/projects/$projectId"
                 params={{ projectId: p.id }}
                 onClick={() => trackClick("project", p.id)}
               >

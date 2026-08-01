@@ -456,7 +456,6 @@ function ProfilePage() {
 
       {me && <ProfileViewersList className="mt-4" />}
 
-
       <div className="grid gap-4 lg:grid-cols-3 items-start">
         <div className="flex flex-col gap-4">
           {/* <Card className="p-4">
