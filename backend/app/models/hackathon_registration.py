@@ -74,7 +74,8 @@ class HackathonRegistration(Base):
     team_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("hackathon_teams.id", ondelete="SET NULL"),
-     index=True,)
+        index=True,
+    )
 
     # ==========================================================
     # Registration

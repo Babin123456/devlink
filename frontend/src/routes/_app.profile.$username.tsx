@@ -25,6 +25,9 @@ import { copyText } from "@/lib/clipboard";
 import { ReportUserModal } from "@/components/shared/ReportUserModal";
 import SkillsCard from "@/components/profile/SkillsCard";
 import ExperienceCard from "@/components/profile/ExperienceCard";
+import { ProfileViewersList } from "@/components/profile/ProfileViewersList";
+import { FollowButton } from "@/components/shared/FollowButton";
+import { useFollowStatus } from "@/hooks/useFollow";
 
 export const Route = createFileRoute("/_app/profile/$username")({
   head: ({ params }) => ({
@@ -135,6 +138,8 @@ function ProfilePage() {
       }
     : builders.find((x) => x.handle === username);
   if (!b) throw notFound();
+
+  const { data: followStatus } = useFollowStatus(b.id);
 
   // Profile banner & avatar state
   const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
@@ -278,11 +283,15 @@ function ProfilePage() {
               <p className="mt-2 text-[13px] text-foreground">{b.bio}</p>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
                 <div>
-                  <span className="font-semibold">{b.followers ?? 0}</span>
+                  <span className="font-semibold">
+                    {followStatus?.follower_count ?? b.followers ?? 0}
+                  </span>
                   <span className="m-1 text-muted-foreground">Followers</span>
                 </div>
                 <div>
-                  <span className="font-semibold">{b.following ?? 0}</span>
+                  <span className="font-semibold">
+                    {followStatus?.following_count ?? b.following ?? 0}
+                  </span>
                   <span className="m-1 text-muted-foreground">Following</span>
                 </div>
                 <div>
@@ -303,19 +312,22 @@ function ProfilePage() {
               </div>
             </div>
             {!me && (
-              <button
-                type="button"
-                onClick={() =>
-                  navigate({
-                    to: "/messages/$conversationId",
-                    params: { conversationId: b.id },
-                  })
-                }
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-              >
-                <MessageCircle size={16} />
-                Contact Developer
-              </button>
+              <div className="flex items-center gap-2">
+                <FollowButton userId={b.id} />
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate({
+                      to: "/messages/$conversationId",
+                      params: { conversationId: b.id },
+                    })
+                  }
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  <MessageCircle size={16} />
+                  Contact Developer
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -441,6 +453,9 @@ function ProfilePage() {
           </p>
         )}
       </Card>
+
+      {me && <ProfileViewersList className="mt-4" />}
+
 
       <div className="grid gap-4 lg:grid-cols-3 items-start">
         <div className="flex flex-col gap-4">

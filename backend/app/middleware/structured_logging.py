@@ -8,10 +8,11 @@ from starlette.responses import Response
 
 logger = structlog.get_logger("devlink.request")
 
+
 class StructuredLoggingMiddleware(BaseHTTPMiddleware):
     """
     Structured Logging Middleware.
-    
+
     Responsibilities:
     1. Extract or generate X-Request-ID and X-Correlation-ID.
     2. Bind them to structlog contextvars so all logs in the request share them.
@@ -22,7 +23,9 @@ class StructuredLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         # 1. Extract or Generate IDs
         request_id = request.headers.get("X-Request-ID") or f"req_{uuid.uuid4().hex}"
-        correlation_id = request.headers.get("X-Correlation-ID") or f"corr_{uuid.uuid4().hex}"
+        correlation_id = (
+            request.headers.get("X-Correlation-ID") or f"corr_{uuid.uuid4().hex}"
+        )
 
         # 2. Bind to structlog ContextVars
         structlog.contextvars.clear_contextvars()
@@ -38,7 +41,7 @@ class StructuredLoggingMiddleware(BaseHTTPMiddleware):
         forwarded_for = request.headers.get("x-forwarded-for")
         if forwarded_for:
             ip = forwarded_for.split(",")[0].strip()
-            
+
         user_agent = request.headers.get("user-agent")
 
         try:
@@ -54,7 +57,7 @@ class StructuredLoggingMiddleware(BaseHTTPMiddleware):
                 status=response.status_code,
                 duration=round(duration_ms, 2),
                 ip=ip,
-                user_agent=user_agent
+                user_agent=user_agent,
             )
 
             # 4. Attach Headers
@@ -74,6 +77,6 @@ class StructuredLoggingMiddleware(BaseHTTPMiddleware):
                 duration=round(duration_ms, 2),
                 ip=ip,
                 user_agent=user_agent,
-                exc_info=exc
+                exc_info=exc,
             )
             raise
