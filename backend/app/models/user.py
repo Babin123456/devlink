@@ -17,10 +17,15 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from enum import Enum
 from app.database.base import Base
 
 
 class UserRole(str, Enum):
+    ADMIN = "admin"
+    USER = "user"
+    DEVELOPER = "developer"
+
     """Application-level user role."""
 
     ADMIN = "admin"
