@@ -3,7 +3,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func
 
 from app.database.session import get_db
-from app.models.notification import Notification, NotificationStatus, NotificationChannel
+from app.models.notification import (
+    Notification,
+    NotificationStatus,
+    NotificationChannel,
+)
 from app.dependencies import get_current_user
 from app.models.user import User
 
@@ -21,21 +25,41 @@ def get_notification_stats(
     """
     if current_user.role != "admin":
         return {"detail": "Not authorized"}
-        
+
     total = db.scalar(select(func.count(Notification.id))) or 0
-    pending = db.scalar(
-        select(func.count(Notification.id)).where(Notification.status == NotificationStatus.PENDING)
-    ) or 0
-    failed = db.scalar(
-        select(func.count(Notification.id)).where(Notification.status == NotificationStatus.FAILED)
-    ) or 0
-    sent = db.scalar(
-        select(func.count(Notification.id)).where(Notification.status == NotificationStatus.SENT)
-    ) or 0
-    read = db.scalar(
-        select(func.count(Notification.id)).where(Notification.status == NotificationStatus.READ)
-    ) or 0
-    
+    pending = (
+        db.scalar(
+            select(func.count(Notification.id)).where(
+                Notification.status == NotificationStatus.PENDING
+            )
+        )
+        or 0
+    )
+    failed = (
+        db.scalar(
+            select(func.count(Notification.id)).where(
+                Notification.status == NotificationStatus.FAILED
+            )
+        )
+        or 0
+    )
+    sent = (
+        db.scalar(
+            select(func.count(Notification.id)).where(
+                Notification.status == NotificationStatus.SENT
+            )
+        )
+        or 0
+    )
+    read = (
+        db.scalar(
+            select(func.count(Notification.id)).where(
+                Notification.status == NotificationStatus.READ
+            )
+        )
+        or 0
+    )
+
     return {
         "total": total,
         "pending": pending,
@@ -57,7 +81,7 @@ def get_failed_notifications(
     """
     if current_user.role != "admin":
         return {"detail": "Not authorized"}
-        
+
     stmt = (
         select(Notification)
         .where(Notification.status == NotificationStatus.FAILED)
@@ -65,7 +89,7 @@ def get_failed_notifications(
         .offset(skip)
         .limit(limit)
     )
-    
+
     notifications = list(db.scalars(stmt))
     return notifications
 
@@ -81,17 +105,17 @@ def retry_notification(
     """
     if current_user.role != "admin":
         return {"detail": "Not authorized"}
-        
+
     notification = db.get(Notification, notification_id)
     if not notification:
         return {"detail": "Notification not found"}
-        
+
     notification.status = NotificationStatus.PENDING
     db.commit()
-    
+
     # Re-enqueue the task
     from app.services.notification_service import NotificationService
-    
+
     NotificationService.enqueue(
         db,
         recipient_id=notification.recipient_id,
@@ -106,5 +130,5 @@ def retry_notification(
         message_id=notification.message_id,
         application_id=notification.application_id,
     )
-    
+
     return {"status": "retrying"}

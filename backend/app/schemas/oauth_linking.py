@@ -15,9 +15,15 @@ class OAuthProvidersListResponse(BaseModel):
 
 
 class LinkOAuthAccountRequest(BaseModel):
-    provider: str = Field(..., description="OAuth provider: github, google, gitlab, linkedin")
-    provider_user_id: str = Field(..., min_length=1, description="External user ID from provider")
+    provider: str = Field(
+        ..., description="OAuth provider: github, google, gitlab, linkedin"
+    )
+    provider_user_id: str = Field(
+        ..., min_length=1, description="External user ID from provider"
+    )
 
 
 class UnlinkOAuthAccountRequest(BaseModel):
-    provider: str = Field(..., description="OAuth provider: github, google, gitlab, linkedin")
+    provider: str = Field(
+        ..., description="OAuth provider: github, google, gitlab, linkedin"
+    )

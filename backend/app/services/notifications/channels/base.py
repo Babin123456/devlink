@@ -32,7 +32,7 @@ class NotificationChannel(abc.ABC):
     ) -> Notification | None:
         """
         Send a notification through this channel.
-        
+
         Returns:
             The created Notification database object if applicable, or None.
         """

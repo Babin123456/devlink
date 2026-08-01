@@ -25,6 +25,9 @@ class MemberRole(str, Enum):
     CO_OWNER = "co_owner"
     ADMIN = "admin"
     MAINTAINER = "maintainer"
+    CONTRIBUTOR = "contributor"
+    REVIEWER = "reviewer"
+    VIEWER = "viewer"
     MEMBER = "member"
 
 

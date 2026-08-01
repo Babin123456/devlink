@@ -147,7 +147,11 @@ class FollowerService:
         user_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(func.count()).select_from(Follower).where(Follower.following_id == user_id)
+        stmt = (
+            select(func.count())
+            .select_from(Follower)
+            .where(Follower.following_id == user_id)
+        )
 
         return db.scalar(stmt) or 0
 
@@ -157,7 +161,11 @@ class FollowerService:
         user_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(func.count()).select_from(Follower).where(Follower.follower_id == user_id)
+        stmt = (
+            select(func.count())
+            .select_from(Follower)
+            .where(Follower.follower_id == user_id)
+        )
 
         return db.scalar(stmt) or 0
 

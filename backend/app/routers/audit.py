@@ -18,6 +18,7 @@ router = APIRouter(
     tags=["Audit"],
 )
 
+
 class AuditLogResponse(BaseModel):
     id: uuid.UUID
     actor_id: uuid.UUID | None
