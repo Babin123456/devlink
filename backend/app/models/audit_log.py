@@ -89,6 +89,7 @@ class AuditAction(str, Enum):
 
     # Security
     FAILED_LOGIN = "failed_login"
+    SUSPICIOUS_LOGIN_ATTEMPT = "suspicious_login_attempt"
     TOKEN_REVOKED = "token_revoked"
     API_ACCESS = "api_access"
     API_TOKEN_CREATED = "api_token_created"

@@ -10,7 +10,7 @@ from cachetools import TTLCache
 from app.database.session import SessionLocal
 from app.models.maintenance import MaintenanceWindow
 from app.models.user import UserRole
-from app.api.deps import verify_token
+from app.core.security import decode_token as verify_token
 
 # Cache the maintenance window state for 30 seconds
 maintenance_cache = TTLCache(maxsize=1, ttl=30)
@@ -18,6 +18,7 @@ CACHE_KEY = "active_maintenance"
 
 
 def get_active_maintenance():
+    from app.database.session import SessionLocal
     if CACHE_KEY in maintenance_cache:
         return maintenance_cache[CACHE_KEY]
 
