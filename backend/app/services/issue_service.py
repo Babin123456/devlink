@@ -1,15 +1,18 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.issue import DuplicateSuggestion, Issue, IssueStatus
 from app.schemas.issue import (
     DuplicateCheckRequest,
     DuplicateCheckResponse,
+    DuplicateSuggestionResponse,
     IssueCreate,
+    IssueResponse,
     IssueUpdate,
 )
 from app.services.duplicate_detection_service import DuplicateDetectionService
@@ -123,7 +126,11 @@ class IssueService:
         request: DuplicateCheckRequest,
     ) -> DuplicateCheckResponse:
         """
-        Check for duplicate issues in a project using AI embeddings.
+        Check for duplicate issues in a project.
+
+        Uses AI embeddings when available and falls back to keyword
+        similarity otherwise. Results are returned transiently and are
+        never persisted to the database.
 
         Args:
             db: Database session
@@ -133,28 +140,24 @@ class IssueService:
         Returns:
             DuplicateCheckResponse with suggestions and metadata
         """
-        # Generate embedding for the new issue text
         embedding_text = f"{request.title}\n\n{request.description}"
         embedding = DuplicateDetectionService.generate_embedding(embedding_text)
 
-        if not embedding:
-            # If embedding generation fails, return empty results
-            return DuplicateCheckResponse(
-                has_duplicates=False,
-                suggestions=[],
-                checked_count=0,
-                threshold=request.threshold,
-            )
-
-        # Find similar issues
+        # Find similar issues (embedding similarity with keyword fallback)
         similar_issues = DuplicateDetectionService.find_duplicates(
             db=db,
-            project_id=str(project_id),
+            project_id=project_id,
             embedding=embedding,
+            text=embedding_text,
             threshold=request.threshold,
             limit=5,
         )
 
+        checked_count = (
+            db.scalar(
+                select(func.count()).select_from(Issue).where(
+                    Issue.project_id == project_id
+                )
         # Since source_issue_id is a placeholder right now, we just mock the existing check or use a single IN clause if we had a real ID
         # Here we simulate fetching all existing at once for the given duplicates (assuming source_issue_id is fixed per request in a real scenario)
         # For the placeholder logic, we'll keep the loop but avoid the DB query by knowing uuid4() is never in the DB.
@@ -170,19 +173,29 @@ class IssueService:
                 duplicate_issue_id=result["issue_id"],
                 similarity_score=result["similarity_score"],
             )
-            db.add(suggestion)
-            suggestions.append(suggestion)
+            or 0
+        )
 
-        db.flush()
-
-        # Load issue details for suggestions
-        for suggestion in suggestions:
-            db.refresh(suggestion)
+        # Build transient suggestion responses
+        now = datetime.now(timezone.utc)
+        suggestions: list[DuplicateSuggestionResponse] = []
+        for result in similar_issues:
+            issue = result["issue"]
+            suggestions.append(
+                DuplicateSuggestionResponse(
+                    id=uuid.uuid4(),
+                    source_issue_id=uuid.uuid4(),
+                    duplicate_issue_id=issue.id,
+                    similarity_score=result["similarity_score"],
+                    created_at=now,
+                    issue=IssueResponse.model_validate(issue),
+                )
+            )
 
         return DuplicateCheckResponse(
             has_duplicates=len(suggestions) > 0,
             suggestions=suggestions,
-            checked_count=len(similar_issues),
+            checked_count=checked_count,
             threshold=request.threshold,
         )
 
@@ -194,6 +207,7 @@ class IssueService:
         """Get duplicate suggestions for a specific issue."""
         stmt = (
             select(DuplicateSuggestion)
+            .options(selectinload(DuplicateSuggestion.duplicate_issue))
             .where(
                 DuplicateSuggestion.source_issue_id == issue_id,
             )
@@ -213,6 +227,24 @@ class IssueService:
             raise ValueError("Issue not found")
 
         db_issue.status = IssueStatus.DUPLICATE
+        db_issue.is_duplicate_checked = True
+
+        # Persist the relationship so it can be surfaced later
+        existing = db.scalar(
+            select(DuplicateSuggestion).where(
+                DuplicateSuggestion.source_issue_id == issue_id,
+                DuplicateSuggestion.duplicate_issue_id == duplicate_of_id,
+            )
+        )
+        if not existing:
+            db.add(
+                DuplicateSuggestion(
+                    source_issue_id=issue_id,
+                    duplicate_issue_id=duplicate_of_id,
+                    similarity_score=1.0,
+                )
+            )
+
         db.flush()
         db.refresh(db_issue)
 

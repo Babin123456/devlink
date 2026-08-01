@@ -1,4 +1,4 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { projectsService } from "@/services";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
@@ -186,6 +186,13 @@ function ProjectDetail() {
             {t === "dashboard" ? "Team Workspace" : t}
           </button>
         ))}
+        <Link
+          to="/projects/$projectId/issues"
+          params={{ projectId }}
+          className="border-b-2 border-transparent px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Issues
+        </Link>
       </div>
 
       {tab === "overview" && (

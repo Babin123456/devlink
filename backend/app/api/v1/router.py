@@ -15,7 +15,6 @@ from app.routers import (
     followers,
     hackathons,
     health,
-    issues,
     messages,
     notifications,
     oauth_linking,
@@ -78,7 +77,6 @@ api_v1_router.include_router(bookmarks.router)
 api_v1_router.include_router(bookmark_collections.router)
 api_v1_router.include_router(activities.router)
 api_v1_router.include_router(conversations.router)
-api_v1_router.include_router(issues.router, prefix="/issues", tags=["Issues"])
 api_v1_router.include_router(
     profile_summary.router, prefix="/profile-summary", tags=["Profile Summary"]
 )
