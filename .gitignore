@@ -32,3 +32,6 @@ dist-ssr/
 *.swp
 *.swo
 .DS_Store
+
+# Runtime artifacts
+backend/logs/

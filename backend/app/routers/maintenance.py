@@ -66,6 +66,7 @@ def get_active_maintenance_window(
 ):
     # Publicly accessible endpoint to check if maintenance is currently scheduled/active
     from datetime import datetime, timezone
+
     now = datetime.now(timezone.utc)
     stmt = (
         select(MaintenanceWindow)
