@@ -18,7 +18,15 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
+from enum import Enum
 from app.database.base import Base
+
+
+class UserRole(str, Enum):
+    USER = "user"
+    DEVELOPER = "developer"
+    ADMIN = "admin"
+
 
 
 class User(Base):
