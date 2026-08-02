@@ -17,6 +17,7 @@ import { ProjectFilters } from "@/components/projects/ProjectFilters";
 import { cn } from "@/lib/utils";
 import { getRecentlyViewedProjectIds } from "@/lib/recentlyViewedProjects";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { FilterDrawer, FilterSection } from "@/components/ui/filter-drawer";
 
 export const Route = createFileRoute("/_app/projects")({
   head: () => ({
@@ -256,28 +257,86 @@ function ProjectsPage() {
           )}
         </div>
 
-        <BottomSheet
+        <FilterDrawer
           open={showFilters}
           onOpenChange={setShowFilters}
-          title="Filters"
-          description={
-            chipFilterCount > 0
-              ? `${chipFilterCount} active filter${chipFilterCount !== 1 ? "s" : ""}`
-              : undefined
-          }
-          footer={
-            hasActiveFilters ? (
-              <button
-                onClick={clearFilters}
-                className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-border px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
-              >
-                <X size={13} /> Clear all filters
-              </button>
-            ) : undefined
-          }
-        >
-          <ProjectFilters />
-        </BottomSheet>
+          title="Filter Projects"
+          description="Filter projects by programming language, experience, type, and tech stack"
+          activeCount={chipFilterCount}
+          sections={[
+            {
+              id: "language",
+              title: "Language",
+              type: "multi",
+              options: [
+                { label: "JavaScript", value: "JavaScript" },
+                { label: "TypeScript", value: "TypeScript" },
+                { label: "Python", value: "Python" },
+                { label: "Java", value: "Java" },
+                { label: "Go", value: "Go" },
+                { label: "Rust", value: "Rust" },
+              ],
+            },
+            {
+              id: "experience",
+              title: "Experience Level",
+              type: "select",
+              options: [
+                { label: "Beginner", value: "beginner" },
+                { label: "Intermediate", value: "intermediate" },
+                { label: "Advanced", value: "advanced" },
+              ],
+            },
+            {
+              id: "remote",
+              title: "Work Location",
+              type: "single",
+              options: [
+                { label: "Remote", value: "true" },
+                { label: "Onsite", value: "false" },
+              ],
+            },
+            {
+              id: "paid",
+              title: "Compensation",
+              type: "single",
+              options: [
+                { label: "Paid", value: "true" },
+                { label: "Unpaid", value: "false" },
+              ],
+            },
+            {
+              id: "opensource",
+              title: "Open Source",
+              type: "single",
+              options: [
+                { label: "Yes", value: "true" },
+                { label: "No", value: "false" },
+              ],
+            },
+          ]}
+          values={{
+            language: language ? language.split(",") : [],
+            experience: experience,
+            remote: remote,
+            paid: paid,
+            opensource: openSource,
+          }}
+          onApply={(newValues) => {
+            const selectedLangs = Array.isArray(newValues.language)
+              ? newValues.language.join(",")
+              : newValues.language;
+            handleSetFilters({
+              language: selectedLangs || "",
+              experience: newValues.experience || "",
+              remote: newValues.remote || "",
+              paid: newValues.paid || "",
+              openSource: newValues.opensource || "",
+              techStack: techStack || "",
+            });
+          }}
+          onReset={clearFilters}
+        />
       </Card>
 
       {isLoading ? (
