@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { TechStackSuggest } from "./TechStackSuggest";
 
 interface Props {
   open: boolean;
@@ -28,10 +29,24 @@ export function CreateProjectDialog({ open, onOpenChange }: Props) {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<CreateProjectFormData>({
     resolver: zodResolver(createProjectSchema),
   });
+
+  const projectIdea = watch("description") ?? "";
+
+  function applyTechStack(techs: string[]) {
+    if (techs.length === 0) return;
+    const existing = (watch("tech_stack") ?? "")
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const merged = Array.from(new Set([...existing, ...techs]));
+    setValue("tech_stack", merged.join(", "), { shouldValidate: false });
+  }
 
   function handleClose() {
     reset();
@@ -179,6 +194,8 @@ export function CreateProjectDialog({ open, onOpenChange }: Props) {
                 <p className="text-[11px] text-destructive">{errors.description.message}</p>
               )}
             </div>
+
+            <TechStackSuggest projectIdea={projectIdea} onSelect={applyTechStack} />
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">

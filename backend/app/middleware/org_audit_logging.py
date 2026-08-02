@@ -10,7 +10,9 @@ from app.models.audit_log import AuditAction, AuditLog
 from app.services.audit_log_service import AuditLogService
 
 # Organization path regex: /api/v1/organizations/{org_id}/...
-ORG_PATH_REGEX = re.compile(r"^/api/v1/organizations/([a-f0-9\-]+)(/.*)?$", re.IGNORECASE)
+ORG_PATH_REGEX = re.compile(
+    r"^/api/v1/organizations/([a-f0-9\-]+)(/.*)?$", re.IGNORECASE
+)
 
 
 class OrganizationAuditMiddleware(BaseHTTPMiddleware):
@@ -52,6 +54,7 @@ class OrganizationAuditMiddleware(BaseHTTPMiddleware):
 
         # Record immutable audit entry
         try:
+            from app.database.session import SessionLocal
             db = SessionLocal()
             try:
                 AuditLogService.create_log(

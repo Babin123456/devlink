@@ -1,30 +1,36 @@
 import os
 
+
 def keep_upstream(filepath):
-    with open(filepath, 'r') as f:
+    with open(filepath, "r") as f:
         text = f.read()
-    idx_sep = text.find('=======\n')
-    idx_end = text.find('>>>>>>> upstream/main')
-    
+    idx_sep = text.find("=======\n")
+    idx_end = text.find(">>>>>>> upstream/main")
+
     if idx_sep != -1 and idx_end != -1:
-        while '<<<<<<< HEAD\n' in text:
-            start = text.find('<<<<<<< HEAD\n')
-            sep = text.find('=======\n', start)
-            end = text.find('>>>>>>> upstream/main\n', sep)
-            
+        while "<<<<<<< HEAD\n" in text:
+            start = text.find("<<<<<<< HEAD\n")
+            sep = text.find("=======\n", start)
+            end = text.find(">>>>>>> upstream/main\n", sep)
+
             if start != -1 and sep != -1 and end != -1:
-                upstream_content = text[sep + len('=======\n'):end]
-                text = text[:start] + upstream_content + text[end + len('>>>>>>> upstream/main\n'):]
+                upstream_content = text[sep + len("=======\n") : end]
+                text = (
+                    text[:start]
+                    + upstream_content
+                    + text[end + len(">>>>>>> upstream/main\n") :]
+                )
             else:
                 break
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             f.write(text)
 
-keep_upstream('backend/tests/conftest.py')
-keep_upstream('backend/tests/test_auth.py')
-keep_upstream('backend/app/main.py')
-keep_upstream('backend/app/core/security.py')
-with open('backend/app/core/security.py', 'r') as f:
+
+keep_upstream("backend/tests/conftest.py")
+keep_upstream("backend/tests/test_auth.py")
+keep_upstream("backend/app/main.py")
+keep_upstream("backend/app/core/security.py")
+with open("backend/app/core/security.py", "r") as f:
     sec = f.read()
 patched_import = """from jose import JWTError, jwt
 import bcrypt
@@ -35,23 +41,29 @@ def _patched_hashpw(password, salt):
     return _original_hashpw(password, salt)
 bcrypt.hashpw = _patched_hashpw
 from passlib.context import CryptContext"""
-sec = sec.replace("from jose import JWTError, jwt\nfrom passlib.context import CryptContext", patched_import)
-with open('backend/app/core/security.py', 'w') as f:
+sec = sec.replace(
+    "from jose import JWTError, jwt\nfrom passlib.context import CryptContext",
+    patched_import,
+)
+with open("backend/app/core/security.py", "w") as f:
     f.write(sec)
 
-keep_upstream('backend/app/schemas/auth.py')
-with open('backend/app/schemas/auth.py', 'r') as f:
+keep_upstream("backend/app/schemas/auth.py")
+with open("backend/app/schemas/auth.py", "r") as f:
     sch = f.read()
 github_req = """class GitHubLoginRequest(BaseModel):
     code: str
 
 # =========================================================="""
-sch = sch.replace("# ==========================================================\n# JWT Tokens", github_req + "\n# JWT Tokens")
-with open('backend/app/schemas/auth.py', 'w') as f:
+sch = sch.replace(
+    "# ==========================================================\n# JWT Tokens",
+    github_req + "\n# JWT Tokens",
+)
+with open("backend/app/schemas/auth.py", "w") as f:
     f.write(sch)
 
-keep_upstream('backend/app/routers/auth.py')
-with open('backend/app/routers/auth.py', 'r') as f:
+keep_upstream("backend/app/routers/auth.py")
+with open("backend/app/routers/auth.py", "r") as f:
     router = f.read()
 github_login_code = """
 import httpx
@@ -144,13 +156,13 @@ async def github_login(
 """
 router = router.replace(
     "    return auth_service.login(payload)",
-    "    return auth_service.login(payload)\n" + github_login_code
+    "    return auth_service.login(payload)\n" + github_login_code,
 )
-with open('backend/app/routers/auth.py', 'w') as f:
+with open("backend/app/routers/auth.py", "w") as f:
     f.write(router)
 
-keep_upstream('backend/app/services/auth_service.py')
-with open('backend/app/services/auth_service.py', 'r') as f:
+keep_upstream("backend/app/services/auth_service.py")
+with open("backend/app/services/auth_service.py", "r") as f:
     service = f.read()
 github_service_code = """
     def github_login(self, github_user: dict, primary_email: str):
@@ -236,8 +248,8 @@ github_service_code = """
         }
 """
 service = service.replace(
-    "            \"user\": user,\n        }",
-    "            \"user\": user,\n        }\n" + github_service_code
+    '            "user": user,\n        }',
+    '            "user": user,\n        }\n' + github_service_code,
 )
-with open('backend/app/services/auth_service.py', 'w') as f:
+with open("backend/app/services/auth_service.py", "w") as f:
     f.write(service)

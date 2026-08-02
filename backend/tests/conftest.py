@@ -13,7 +13,12 @@ def visit_ARRAY(self, type_, **kw):
     return "JSON"
 
 
+def visit_JSONB(self, type_, **kw):
+    return "JSON"
+
+
 SQLiteTypeCompiler.visit_ARRAY = visit_ARRAY
+SQLiteTypeCompiler.visit_JSONB = visit_JSONB
 
 
 class MockPwdContext:

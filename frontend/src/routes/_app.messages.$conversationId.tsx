@@ -33,11 +33,28 @@ function Thread() {
 
   // Conversation starters state
   const [starters, setStarters] = useState<ConversationStarterResponse | null>(null);
+  const [startersError, setStartersError] = useState<string | null>(null);
+  const conversationIdRef = useRef(conversationId);
 
   const startersMutation = useMutation({
     mutationFn: () => conversationStartersApi.generate(conversationId),
-    onSuccess: (data) => setStarters(data),
+    onSuccess: (data) => {
+      if (conversationIdRef.current !== conversationId) return;
+      setStarters(data);
+      setStartersError(null);
+    },
+    onError: (err) => {
+      if (conversationIdRef.current !== conversationId) return;
+      setStartersError(err instanceof Error ? err.message : "Failed to load suggestions");
+    },
   });
+
+  // Reset starters when switching conversations
+  useEffect(() => {
+    conversationIdRef.current = conversationId;
+    setStarters(null);
+    setStartersError(null);
+  }, [conversationId]);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -176,7 +193,7 @@ function Thread() {
               </p>
 
               {/* Conversation Starters Section */}
-              {!starters && !startersMutation.isPending && (
+              {!starters && !startersMutation.isPending && !startersError && (
                 <button
                   onClick={() => startersMutation.mutate()}
                   className="mx-auto flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-[12px] text-muted-foreground hover:bg-muted/50 hover:text-foreground"
@@ -194,6 +211,22 @@ function Thread() {
                 </div>
               )}
 
+              {startersError && (
+                <div className="space-y-2">
+                  <p className="text-center text-[12px] text-destructive">{startersError}</p>
+                  <button
+                    onClick={() => {
+                      setStartersError(null);
+                      startersMutation.mutate();
+                    }}
+                    className="mx-auto flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-[12px] text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  >
+                    <Sparkles size={14} />
+                    Try again
+                  </button>
+                </div>
+              )}
+
               {starters && (
                 <div className="space-y-2">
                   <p className="text-center text-[11px] text-muted-foreground">
@@ -202,10 +235,13 @@ function Thread() {
                   {starters.suggestions.map((suggestion, i) => (
                     <button
                       key={i}
-                      onClick={() => setText(suggestion)}
-                      className="w-full rounded-md border border-border bg-surface px-3 py-2 text-left text-[13px] text-foreground hover:bg-muted/50"
+                      onClick={() => setText(suggestion.text)}
+                      className="flex w-full items-center justify-between gap-2 rounded-md border border-border bg-surface px-3 py-2 text-left text-[13px] text-foreground hover:bg-muted/50"
                     >
-                      {suggestion}
+                      <span>{suggestion.text}</span>
+                      <span className="shrink-0 rounded-sm bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        {Math.round(suggestion.confidence * 100)}%
+                      </span>
                     </button>
                   ))}
                 </div>

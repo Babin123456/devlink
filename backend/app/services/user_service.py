@@ -23,12 +23,12 @@ class UserService:
     Business logic for User operations.
     """
 
-    @staticmethod
+@staticmethod
+    @cached(ttl=300, key_prefix="user")
     def get_user(
         db: Session,
         user_id: uuid.UUID,
-    ) -> User | None:
-        stmt = select(User).where(
+    ) -> User | None:        stmt = select(User).where(
             User.id == user_id,
             User.deleted_at.is_(None),
         )
