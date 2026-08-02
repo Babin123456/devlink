@@ -531,6 +531,13 @@ app.include_router(issues.router, prefix="/api", tags=["Issues"])
 app.include_router(
     profile_summary.router, prefix="/api/profile-summary", tags=["Profile Summary"]
 )
+from app.routers import profile_suggestions
+app.include_router(
+    profile_suggestions.router, prefix="/api/profile-suggestions", tags=["Profile Suggestions"]
+)
+app.include_router(
+    profile_suggestions.router, prefix="/api/users/me/profile-suggestions", tags=["Profile Suggestions"]
+)
 from app.routers import profile_views
 app.include_router(profile_views.router, prefix="/api", tags=["Profile Views"])
 
