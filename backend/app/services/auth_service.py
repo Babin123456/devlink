@@ -277,6 +277,19 @@ class AuthService:
 
         self.db.flush()
 
+        if user.mfa_enabled:
+            mfa_token = create_access_token(
+                str(user.id),
+                {"type": "mfa_pending"},
+            )
+            self.db.commit()
+            return {
+                "success": True,
+                "mfa_required": True,
+                "mfa_token": mfa_token,
+                "message": "MFA verification required.",
+            }
+
         access_token = create_access_token(
             str(user.id),
             {
@@ -305,6 +318,71 @@ class AuthService:
         return {
             "success": True,
             "message": "Login successful.",
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "user": user,
+        }
+
+    def complete_mfa_login(
+        self,
+        mfa_token: str,
+        code: str,
+        user_agent: Optional[str] = None,
+        ip_address: Optional[str] = None,
+    ):
+        try:
+            payload = decode_token(mfa_token)
+            if payload.get("type") != "mfa_pending":
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid MFA session token.",
+                )
+            user_id_str = payload.get("sub")
+            user_id = UUID(user_id_str)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired MFA session token.",
+            )
+
+        user = self.db.get(User, user_id)
+        if not user or not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User account unavailable.",
+            )
+
+        from app.services.mfa_service import MFAService
+        verified = MFAService.verify_user_mfa(self.db, user, code)
+        if not verified:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid verification code or recovery code.",
+            )
+
+        access_token = create_access_token(
+            str(user.id),
+            {
+                "username": user.username,
+            },
+        )
+        refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=refresh_token,
+            expires_at=expires_at,
+            user_agent=user_agent,
+            ip_address=ip_address,
+        )
+        self.db.commit()
+
+        return {
+            "success": True,
+            "message": "MFA authentication successful.",
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",

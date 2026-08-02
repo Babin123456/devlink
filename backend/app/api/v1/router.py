@@ -16,6 +16,7 @@ from app.routers import (
     hackathons,
     health,
     messages,
+    mfa,
     notifications,
     oauth_linking,
     org_audit_logs,
@@ -56,6 +57,7 @@ async def v1_root():
 
 # Router inclusions under /api/v1
 api_v1_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_v1_router.include_router(mfa.router)
 api_v1_router.include_router(oauth_linking.router)
 api_v1_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_v1_router.include_router(blocks.router, prefix="/blocks", tags=["User Blocks"])

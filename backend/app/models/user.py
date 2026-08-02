@@ -240,6 +240,26 @@ class User(Base):
         nullable=False,
     )
 
+    # ------------------------------------------------------------------
+    # Multi-Factor Authentication (MFA)
+    # ------------------------------------------------------------------
+
+    mfa_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    mfa_secret: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+
+    mfa_backup_codes: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
     # System-level RBAC role (issue #357).
     # Controls platform-wide permissions independent of org/project membership.
     # Values: admin, maintainer, organization_owner, project_owner, contributor, user

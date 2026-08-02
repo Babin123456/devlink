@@ -14,6 +14,7 @@ limiter = Limiter(
     key_func=get_remote_address,
     default_limits=[
         settings.DEFAULT_RATE_LIMIT,
+    ],
     enabled=settings.ENABLE_RATE_LIMIT,
     headers_enabled=True,
 )
@@ -23,6 +24,7 @@ limiter = Limiter(
 # ------------------------------------------------------------------
 
 AUTH_LIMIT = "1000000/minute" if is_testing else settings.AUTH_RATE_LIMIT
+LOGIN_LIMIT = "1000000/minute" if is_testing else settings.AUTH_RATE_LIMIT
 
 MESSAGE_LIMIT = "1000000/minute" if is_testing else settings.MESSAGE_RATE_LIMIT
 
