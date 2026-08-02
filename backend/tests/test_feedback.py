@@ -1,11 +1,7 @@
 import pytest
-from fastapi.testclient import TestClient
-from app.main import app
-
-client = TestClient(app)
 
 
-def test_submit_feedback_success(db, register_and_login):
+def test_submit_feedback_success(db, client, register_and_login):
     auth = register_and_login("fb1@example.com", "fbuser1")
     headers = auth["headers"]
     payload = {
@@ -21,7 +17,7 @@ def test_submit_feedback_success(db, register_and_login):
     assert data["status"] == "open"
 
 
-def test_submit_feedback_invalid_category(db, register_and_login):
+def test_submit_feedback_invalid_category(db, client, register_and_login):
     auth = register_and_login("fb2@example.com", "fbuser2")
     headers = auth["headers"]
     payload = {
@@ -33,7 +29,7 @@ def test_submit_feedback_invalid_category(db, register_and_login):
     assert response.status_code == 400
 
 
-def test_get_my_feedbacks(db, register_and_login):
+def test_get_my_feedbacks(db, client, register_and_login):
     auth = register_and_login("fb3@example.com", "fbuser3")
     headers = auth["headers"]
     client.post(
@@ -49,3 +45,4 @@ def test_get_my_feedbacks(db, register_and_login):
     assert response.status_code == 200
     feedbacks = response.json()
     assert len(feedbacks) >= 1
+
