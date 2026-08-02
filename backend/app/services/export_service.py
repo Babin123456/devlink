@@ -51,21 +51,106 @@ class ExportService:
         notifications = ExportService._get_notifications(db, user.id)
         builder_flares = ExportService._get_builder_flares(db, user.id)
 
-        return UserExportData(
-            exported_at=now,
-            profile=profile,
-            skills=skills,
-            projects=projects,
-            project_memberships=project_memberships,
-            applications=applications,
-            connections=connections,
-            messages=messages,
-            bookmarks=bookmarks,
-            organizations=organizations,
-            activities=activities,
-            notifications=notifications,
-            builder_flares=builder_flares,
         )
+
+    @staticmethod
+    def export_portfolio_markdown(db: Session, user: User) -> str:
+        """
+        Generate a professional Markdown document representing the user's developer portfolio.
+        """
+        data = ExportService.collect_user_data(db, user)
+        p = data.profile
+
+        md = []
+        md.append(f"# {p.get('first_name', '')} {p.get('last_name', '')}")
+        if p.get("headline"):
+            md.append(f"**{p.get('headline')}**\n")
+
+        if p.get("bio"):
+            md.append("## About Me")
+            md.append(p.get("bio") + "\n")
+
+        md.append("## Professional Info")
+        if p.get("role"):
+            md.append(f"- **Role:** {p.get('role')}")
+        if p.get("experience_level"):
+            md.append(f"- **Experience Level:** {p.get('experience_level')}")
+        if p.get("company"):
+            md.append(f"- **Company:** {p.get('company')}")
+        if p.get("location"):
+            md.append(f"- **Location:** {p.get('location')}")
+        md.append("")
+
+        if data.skills:
+            md.append("## Skills & Expertise")
+            for skill in data.skills:
+                level_str = f" ({skill.level})" if skill.level else ""
+                exp_str = f" - {skill.years_of_experience} yrs" if skill.years_of_experience else ""
+                md.append(f"- **{skill.name}**{level_str}{exp_str}")
+            md.append("")
+
+        if data.projects:
+            md.append("## Projects")
+            for proj in data.projects:
+                md.append(f"### {proj.title}")
+                if proj.tagline:
+                    md.append(f"*{proj.tagline}*")
+                if proj.description:
+                    md.append(proj.description)
+                if proj.tech_stack:
+                    md.append(f"**Tech Stack:** {', '.join(proj.tech_stack)}")
+                if proj.repository_url:
+                    md.append(f"[Repository]({proj.repository_url})")
+                md.append("")
+
+        return "\n".join(md)
+
+    @staticmethod
+    def export_portfolio_html(db: Session, user: User) -> str:
+        """
+        Generate a clean, responsive printable HTML/PDF document layout for developer portfolio.
+        """
+        data = ExportService.collect_user_data(db, user)
+        p = data.profile
+
+        skills_html = "".join(
+            f"<span style='background:#eef2ff;color:#4f46e5;padding:4px 10px;border-radius:12px;font-size:12px;margin-right:6px;'>{s.name}</span>"
+            for s in data.skills
+        )
+        projects_html = "".join(
+            f"<div style='margin-bottom:16px;'><h3 style='margin:0;'>{proj.title}</h3><p style='color:#6b7280;margin:4px 0;'>{proj.description or ''}</p><small><b>Tech Stack:</b> {', '.join(proj.tech_stack or [])}</small></div>"
+            for proj in data.projects
+        )
+
+        return f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{p.get('first_name', '')} {p.get('last_name', '')} - Portfolio</title>
+<style>
+  body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1f2937; padding: 40px; max-width: 800px; margin: 0 auto; }}
+  h1 {{ color: #111827; margin-bottom: 4px; }}
+  .headline {{ font-size: 18px; color: #4b5563; margin-bottom: 24px; }}
+  .section {{ margin-top: 32px; border-top: 1px solid #e5e7eb; padding-top: 20px; }}
+  h2 {{ color: #374151; font-size: 20px; border-bottom: 2px solid #6366f1; padding-bottom: 4px; display: inline-block; }}
+</style>
+</head>
+<body>
+  <h1>{p.get('first_name', '')} {p.get('last_name', '')}</h1>
+  <div class="headline">{p.get('headline') or ''}</div>
+  <p>{p.get('bio') or ''}</p>
+
+  <div class="section">
+    <h2>Skills</h2>
+    <div style="margin-top:12px;">{skills_html}</div>
+  </div>
+
+  <div class="section">
+    <h2>Projects</h2>
+    <div style="margin-top:12px;">{projects_html}</div>
+  </div>
+</body>
+</html>"""
 
     # ------------------------------------------------------------------
     # Profile

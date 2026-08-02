@@ -1,0 +1,32 @@
+import pytest
+from fastapi.testclient import TestClient
+from app.main import app
+
+client = TestClient(app)
+
+
+def test_portfolio_export_markdown(db, register_and_login):
+    headers = register_and_login["headers"]
+    response = client.get("/api/users/me/portfolio/export?format=markdown", headers=headers)
+    assert response.status_code == 200
+    assert "text/markdown" in response.headers["content-type"]
+    assert response.text.startswith("# ")
+
+
+def test_portfolio_export_pdf_html(db, register_and_login):
+    headers = register_and_login["headers"]
+    response = client.get("/api/users/me/portfolio/export?format=pdf", headers=headers)
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert "<!DOCTYPE html>" in response.text
+
+
+def test_portfolio_export_json(db, register_and_login):
+    headers = register_and_login["headers"]
+    response = client.get("/api/users/me/portfolio/export?format=json", headers=headers)
+    assert response.status_code == 200
+    assert "application/json" in response.headers["content-type"]
+    data = response.json()
+    assert "profile" in data
+    assert "skills" in data
+    assert "projects" in data
