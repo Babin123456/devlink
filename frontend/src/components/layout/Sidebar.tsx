@@ -73,9 +73,10 @@ export function Sidebar() {
 
   return (
     <aside
+      aria-expanded={!collapsed}
       className={cn(
         // Hidden on mobile; visible from md up
-        "sticky top-0 h-screen hidden md:flex flex-col border-r border-border bg-sidebar transition-all duration-300",
+        "h-screen hidden md:flex flex-col border-r border-border bg-sidebar transition-all duration-300",
         // Tablet: narrow icon rail; Desktop: full or collapsed width
         collapsed ? "w-[72px]" : "w-[280px]",
       )}

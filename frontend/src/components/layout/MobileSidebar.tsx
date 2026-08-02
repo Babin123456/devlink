@@ -5,8 +5,28 @@ import { SidebarSection } from "./SidebarSection";
 import { UserProfile } from "./UserProfile";
 import { Logo } from "./Logo";
 
+import { useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
+
 export function MobileSidebar() {
   const { isMobileOpen, closeMobile } = useSidebar();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // Close on route change
+  useEffect(() => {
+    closeMobile();
+  }, [pathname, closeMobile]);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isMobileOpen) {
+        closeMobile();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isMobileOpen, closeMobile]);
 
   return (
     <AnimatePresence>

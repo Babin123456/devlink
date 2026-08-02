@@ -65,7 +65,9 @@ def auth_headers(test_user):
     return {"Authorization": f"Bearer {token}"}
 
 
-def test_create_and_get_org_audit_logs(client, db, test_org, test_user, target_user, auth_headers):
+def test_create_and_get_org_audit_logs(
+    client, db, test_org, test_user, target_user, auth_headers
+):
     # Create audit log record
     log = AuditLogService.create_log(
         db,
@@ -91,7 +93,9 @@ def test_create_and_get_org_audit_logs(client, db, test_org, test_user, target_u
     assert data["items"][0]["actor_id"] == str(test_user.id)
 
 
-def test_filter_org_audit_logs_by_user(client, db, test_org, test_user, target_user, auth_headers):
+def test_filter_org_audit_logs_by_user(
+    client, db, test_org, test_user, target_user, auth_headers
+):
     AuditLogService.create_log(
         db,
         actor_id=test_user.id,
@@ -114,7 +118,9 @@ def test_filter_org_audit_logs_by_user(client, db, test_org, test_user, target_u
     assert any(item["target_user_id"] == str(target_user.id) for item in data["items"])
 
 
-def test_filter_org_audit_logs_by_event_type(client, db, test_org, test_user, auth_headers):
+def test_filter_org_audit_logs_by_event_type(
+    client, db, test_org, test_user, auth_headers
+):
     AuditLogService.create_log(
         db,
         actor_id=test_user.id,

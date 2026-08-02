@@ -140,11 +140,12 @@ class Settings(BaseSettings):
     # Rate Limiting
     # ==========================================================
 
+    ENABLE_RATE_LIMIT: bool = True
     DEFAULT_RATE_LIMIT: str = "100/minute"
-    LOGIN_RATE_LIMIT: str = "5/minute"
-    REGISTER_RATE_LIMIT: str = "3/hour"
+    AUTH_RATE_LIMIT: str = "5/minute"
+    SEARCH_RATE_LIMIT: str = "30/minute"
+    UPLOAD_RATE_LIMIT: str = "10/minute"
     MESSAGE_RATE_LIMIT: str = "30/minute"
-    SEARCH_RATE_LIMIT: str = "60/minute"
     PROJECT_RATE_LIMIT: str = "100/minute"
     PASSWORD_RESET_RATE_LIMIT: str = "3/15minutes"
     COMMENT_RATE_LIMIT: str = "30/minute"

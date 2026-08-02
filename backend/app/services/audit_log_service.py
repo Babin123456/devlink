@@ -22,6 +22,7 @@ from app.middleware.audit_context import (
 
 logger = structlog.get_logger("devlink.audit")
 
+
 class AuditLogService:
     """
     Business logic for audit logging.
@@ -269,9 +270,7 @@ class AuditLogService:
         # Pagination
         offset = (page - 1) * limit
         paginated_stmt = (
-            stmt.order_by(AuditLog.created_at.desc())
-            .offset(offset)
-            .limit(limit)
+            stmt.order_by(AuditLog.created_at.desc()).offset(offset).limit(limit)
         )
 
         items = list(db.scalars(paginated_stmt))
@@ -323,7 +322,9 @@ class AuditLogService:
         )
 
         for log in logs:
-            action_str = log.action.value if hasattr(log.action, "value") else str(log.action)
+            action_str = (
+                log.action.value if hasattr(log.action, "value") else str(log.action)
+            )
             writer.writerow(
                 [
                     str(log.id),
@@ -339,4 +340,3 @@ class AuditLogService:
             )
 
         return output.getvalue()
-

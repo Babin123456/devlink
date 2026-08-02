@@ -4,11 +4,11 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.models.notification import (
-    Notification, 
-    NotificationType, 
-    NotificationPriority, 
+    Notification,
+    NotificationType,
+    NotificationPriority,
     NotificationStatus,
-    NotificationChannel as DBChannel
+    NotificationChannel as DBChannel,
 )
 from app.services.notifications.channels.base import NotificationChannel
 
@@ -36,11 +36,11 @@ class DatabaseChannel(NotificationChannel):
             Notification.recipient_id == recipient_id,
             Notification.type == notification_type,
             Notification.is_read.is_(False),
-            Notification.channel == DBChannel.DATABASE
+            Notification.channel == DBChannel.DATABASE,
         )
         if sender_id is not None:
             stmt = stmt.where(Notification.sender_id == sender_id)
-        
+
         # We can also check if metadata_info matches, but for simplicity we'll just update existing if same type/sender
         existing = db.scalars(stmt).first()
         if existing:
@@ -67,7 +67,7 @@ class DatabaseChannel(NotificationChannel):
             action_url=action_url,
             image_url=image_url,
             metadata_info=metadata_info,
-            sent_at=datetime.utcnow()
+            sent_at=datetime.utcnow(),
         )
 
         db.add(db_notification)

@@ -137,7 +137,10 @@ def test_update_workspace_document_with_conflict(db, test_project, test_user):
 
     assert conflict_b is True
     assert updated_b.version == 3
-    assert "Conflict Resolved" in updated_b.content or "Third Version by User B" in updated_b.content
+    assert (
+        "Conflict Resolved" in updated_b.content
+        or "Third Version by User B" in updated_b.content
+    )
 
 
 def test_delete_workspace_document(db, test_project, test_user):
@@ -166,7 +169,9 @@ def token_headers():
     return _headers
 
 
-def test_rest_api_workspace_docs_endpoints(client, test_project, test_user, token_headers):
+def test_rest_api_workspace_docs_endpoints(
+    client, test_project, test_user, token_headers
+):
     # Create doc via REST API
     res = client.post(
         f"/api/v1/projects/{test_project.id}/workspace/docs",
@@ -190,7 +195,11 @@ def test_rest_api_workspace_docs_endpoints(client, test_project, test_user, toke
     # Update doc
     res_update = client.put(
         f"/api/v1/projects/{test_project.id}/workspace/docs/{doc_id}",
-        json={"title": "Updated API Doc", "content": "New API Content", "base_version": 1},
+        json={
+            "title": "Updated API Doc",
+            "content": "New API Content",
+            "base_version": 1,
+        },
         headers=token_headers(test_user),
     )
     assert res_update.status_code == 200
