@@ -503,6 +503,8 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
 app.include_router(export.router, prefix="/api/users", tags=["Export"])
+from app.routers import feedback
+app.include_router(feedback.router, prefix="/api/feedback", tags=["Feedback"])
 app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
 app.include_router(project_dashboards.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api", tags=["Analytics"])

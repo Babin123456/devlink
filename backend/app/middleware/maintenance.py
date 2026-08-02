@@ -10,7 +10,7 @@ from cachetools import TTLCache
 from app.database.session import SessionLocal
 from app.models.maintenance import MaintenanceWindow
 from app.models.user import UserRole
-from app.api.deps import verify_token
+from app.core.security import decode_token
 
 # Cache the maintenance window state for 30 seconds
 maintenance_cache = TTLCache(maxsize=1, ttl=30)
@@ -65,7 +65,7 @@ class MaintenanceMiddleware(BaseHTTPMiddleware):
             if auth_header.startswith("Bearer "):
                 token = auth_header[7:]
                 try:
-                    payload = verify_token(token)
+                    payload = decode_token(token)
                     if payload and payload.get("role") == UserRole.ADMIN:
                         is_admin = True
                 except Exception:
