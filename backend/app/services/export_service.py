@@ -49,9 +49,22 @@ class ExportService:
         organizations = ExportService._get_organizations(db, user.id)
         activities = ExportService._get_activities(db, user.id)
         notifications = ExportService._get_notifications(db, user.id)
-        builder_flares = ExportService._get_builder_flares(db, user.id)
-
+        return UserExportData(
+            exported_at=now,
+            profile=profile,
+            skills=skills,
+            projects=projects,
+            project_memberships=project_memberships,
+            applications=applications,
+            connections=connections,
+            messages=messages,
+            bookmarks=bookmarks,
+            organizations=organizations,
+            activities=activities,
+            notifications=notifications,
+            builder_flares=builder_flares,
         )
+
 
     @staticmethod
     def export_portfolio_markdown(db: Session, user: User) -> str:
