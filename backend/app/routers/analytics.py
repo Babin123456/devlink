@@ -6,8 +6,12 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
+from app.dependencies import get_current_admin
+from app.models.user import User
 from app.schemas.analytics import PlatformAnalyticsResponse
+from app.schemas.community_stats import CommunityStatsResponse
 from app.services.analytics_service import AnalyticsService
+from app.services.community_stats_service import CommunityStatsService
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
@@ -67,3 +71,26 @@ def get_analytics_overview(
         "total_projects": analytics.project_growth.total_projects,
         "project_growth_rate_pct": analytics.project_growth.growth_rate_pct,
     }
+
+
+@router.get(
+    "/community/stats",
+    response_model=CommunityStatsResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get Community Statistics Dashboard Data",
+    description="Returns platform-wide community statistics including developer counts, active projects, teams, opportunities, monthly contributions and registrations, plus popular skills and trending technologies. Admin only.",
+)
+@router.get(
+    "/community/stats/",
+    response_model=CommunityStatsResponse,
+    status_code=status.HTTP_200_OK,
+    include_in_schema=False,
+)
+def get_community_stats(
+    db: Annotated[Session, Depends(get_db)],
+    _: Annotated[User, Depends(get_current_admin)],
+    days: int = Query(
+        default=30, ge=1, le=365, description="Timeframe in days for trending technologies"
+    ),
+) -> CommunityStatsResponse:
+    return CommunityStatsService.get_community_stats(db=db, days=days)
