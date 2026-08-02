@@ -20,6 +20,7 @@ import {
   authApi,
   collectionsApi,
   recommendationsApi,
+  fallbackTechStack,
   searchApi,
   issuesApi,
 } from "@/api";
@@ -157,6 +158,20 @@ export const flaresService = {
 export const messagesService = {
   conversations: () => withFallback(() => messagesApi.conversations(), seed.conversations),
   thread: (id: string) => withFallback(() => messagesApi.thread(id), seed.messages[id] ?? []),
+  send: (conversationId: string, text: string) =>
+    withFallback(
+      () =>
+        messagesApi.send({
+          conversation_id: conversationId,
+          message: text,
+        }),
+      {
+        id: `msg-${Date.now()}`,
+        from: "me",
+        text,
+        at: new Date().toLocaleTimeString(),
+      },
+    ),
 };
 
 export const issuesService = {
@@ -291,7 +306,7 @@ export const techStackService = {
   recommend: (projectIdea: string) =>
     withFallback(
       () => recommendationsApi.recommendTechStack(projectIdea),
-      null as TechStackResponse | null,
+      fallbackTechStack(projectIdea),
     ),
 };
 

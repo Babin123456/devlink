@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useRouterState, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import { projectsService } from "@/services";
 import { Card, TagChip, SectionHeader } from "@/components/shared/primitives";
 import {
@@ -14,10 +15,22 @@ import { Star, GitFork, Users2, Plus, Search, SlidersHorizontal, X } from "lucid
 import { useEffect, useMemo, useState } from "react";
 import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
 import { ProjectFilters } from "@/components/projects/ProjectFilters";
+import { useProjectFilters } from "@/hooks/useProjectFilters";
 import { cn } from "@/lib/utils";
 import { getRecentlyViewedProjectIds } from "@/lib/recentlyViewedProjects";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { FilterDrawer, FilterSection } from "@/components/ui/filter-drawer";
+
+export const projectSearchSchema = z.object({
+  page: z.number().catch(1).optional(),
+  q: z.string().optional(),
+  language: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  experience: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  tech: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  remote: z.boolean().optional(),
+  paid: z.boolean().optional(),
+  opensource: z.boolean().optional(),
+});
 
 export const Route = createFileRoute("/_app/projects")({
   head: () => ({
@@ -26,19 +39,18 @@ export const Route = createFileRoute("/_app/projects")({
       { name: "description", content: "Browse and manage your DevLink projects." },
     ],
   }),
+  validateSearch: projectSearchSchema,
   component: ProjectsPage,
 });
 
 function ProjectsPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const search = useRouterState({
-    select: (state) => state.location.search as Record<string, unknown>,
-  });
   const navigate = Route.useNavigate();
-  const page = Number(search?.page) || 1;
+  const { filters, setFilters, clearFilters, hasActiveFilters: hasFilters, chipFilterCount } = useProjectFilters();
+  const page = filters.page || 1;
   const ITEMS_PER_PAGE = 6;
   const [createOpen, setCreateOpen] = useState(false);
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(filters.q || "");
 
   // Status filter state (keep for now as it's separate from ProjectFilters component)
   const [statusFilter, setStatusFilter] = useState<
@@ -47,40 +59,20 @@ function ProjectsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [recentProjectIds, setRecentProjectIds] = useState<string[]>([]);
 
-  // Extracted URL filters
-  const language = (search?.language as string) || "";
-  const experience = (search?.experience as string) || "";
-  const remote = (search?.remote as string) || "";
-  const paid = (search?.paid as string) || "";
-  const openSource = (search?.opensource as string) || "";
-  const techStack = (search?.tech as string) || "";
-
   useEffect(() => {
     setRecentProjectIds(getRecentlyViewedProjectIds());
   }, []);
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ["projects", language, experience, remote, paid, openSource, techStack],
+    queryKey: ["projects", filters.language, filters.experience, filters.remote, filters.paid, filters.opensource, filters.tech],
     queryFn: () =>
       projectsService.list({
-        language: language || undefined,
-        experience: experience || undefined,
-        remote: remote
-          ? remote.toLowerCase() === "yes" || remote.toLowerCase() === "true"
-            ? "true"
-            : "false"
-          : undefined,
-        paid: paid
-          ? paid.toLowerCase() === "paid" || paid.toLowerCase() === "true"
-            ? "true"
-            : "false"
-          : undefined,
-        opensource: openSource
-          ? openSource.toLowerCase() === "yes" || openSource.toLowerCase() === "true"
-            ? "true"
-            : "false"
-          : undefined,
-        tech: techStack || undefined,
+        language: filters.language?.length ? filters.language.join(",") : undefined,
+        experience: filters.experience?.length ? filters.experience.join(",") : undefined,
+        remote: filters.remote,
+        paid: filters.paid,
+        opensource: filters.opensource,
+        tech: filters.tech?.length ? filters.tech.join(",") : undefined,
       }),
   });
 
@@ -92,10 +84,7 @@ function ProjectsPage() {
     [recentProjectIds, data],
   );
 
-  const chipFilterCount = [language, experience, remote, paid, openSource, techStack].filter(
-    (f) => f !== "",
-  ).length;
-  const hasActiveFilters = q !== "" || statusFilter !== "all" || chipFilterCount > 0;
+  const hasActiveFilters = q !== "" || statusFilter !== "all" || hasFilters;
 
   const filtered = useMemo(
     () =>
@@ -111,33 +100,12 @@ function ProjectsPage() {
     return <Outlet />;
   }
 
-  function clearFilters() {
+  function handleClearAllFilters() {
     setQ("");
     setStatusFilter("all");
-    navigate({ search: { page: 1 } });
+    clearFilters();
   }
 
-  const handleSetFilters = (newFilters: {
-    language: string;
-    experience: string;
-    remote: string;
-    paid: string;
-    openSource: string;
-    techStack: string;
-  }) => {
-    navigate({
-      search: (prev: Record<string, unknown>) => ({
-        ...prev,
-        page: 1,
-        language: newFilters.language || undefined,
-        experience: newFilters.experience || undefined,
-        remote: newFilters.remote || undefined,
-        paid: newFilters.paid || undefined,
-        opensource: newFilters.openSource || undefined,
-        tech: newFilters.techStack || undefined,
-      }),
-    });
-  };
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -247,7 +215,7 @@ function ProjectsPage() {
           </button>
           {hasActiveFilters && (
             <button
-              onClick={clearFilters}
+              onClick={handleClearAllFilters}
               className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-[7px] text-[12px] font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-destructive/20"
               aria-label="Clear all active filters"
             >
@@ -358,7 +326,7 @@ function ProjectsPage() {
           </p>
           {hasActiveFilters && (
             <button
-              onClick={clearFilters}
+              onClick={handleClearAllFilters}
               className="mt-3 text-[13px] font-medium text-primary hover:underline"
             >
               Clear filters

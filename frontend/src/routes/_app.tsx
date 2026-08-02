@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { ProfileCompletionChecklist } from "@/components/profile/ProfileCompletionChecklist";
+import { EmailVerificationBanner } from "@/components/auth/EmailVerificationBanner";
 
 const mockUserProfile = {
   avatar: "",
@@ -16,7 +17,8 @@ const mockUserProfile = {
 
 function AppLayoutWithProfileChecklist() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-0">
+      <EmailVerificationBanner isVerified={false} userEmail="builder@devlink.io" />
       <ProfileCompletionChecklist userProfile={mockUserProfile} />
       <SidebarProvider>
         <DashboardLayout />

@@ -5,6 +5,9 @@ from typing import Optional
 from uuid import UUID
 
 from app.services.email_service import EmailService
+from app.services.suspicious_login_service import SuspiciousLoginService
+from app.services.audit_log_service import AuditLogService
+from app.models.audit_log import AuditAction
 from app.core.config import settings
 
 # pyrefly: ignore [missing-import]
@@ -176,7 +179,28 @@ class AuthService:
         user = self.get_user_by_email(payload.email)
 
         if not user:
-            print("USER NOT FOUND:", payload.email)
+            # Log failed login and check suspicious signals
+            AuditLogService.create_log(
+                db=self.db,
+                actor_id=None,
+                action=AuditAction.FAILED_LOGIN,
+                entity_type="user_session",
+                entity_id=payload.email,
+                description=f"Failed login attempt for email {payload.email}",
+                ip_address=ip_address,
+                user_agent=user_agent,
+                metadata_info={"email": payload.email},
+                success=False,
+            )
+            self.db.commit()
+            SuspiciousLoginService.evaluate_login_attempt(
+                db=self.db,
+                email=payload.email,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                user=None,
+                is_success=False,
+            )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password.",
@@ -185,22 +209,86 @@ class AuthService:
             payload.password,
             user.password_hash,
         ):
-            print("PASSWORD MISMATCH:", payload.password, user.password_hash)
+            # Log failed login and check suspicious signals
+            AuditLogService.create_log(
+                db=self.db,
+                actor_id=user.id,
+                action=AuditAction.FAILED_LOGIN,
+                entity_type="user_session",
+                entity_id=str(user.id),
+                target_user_id=user.id,
+                description=f"Failed password authentication for {payload.email}",
+                ip_address=ip_address,
+                user_agent=user_agent,
+                metadata_info={"email": payload.email},
+                success=False,
+            )
+            self.db.commit()
+            SuspiciousLoginService.evaluate_login_attempt(
+                db=self.db,
+                email=payload.email,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                user=user,
+                is_success=False,
+            )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password.",
             )
         if not user.is_active:
-            print("USER INACTIVE")
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Account is disabled.",
             )
+
+        # Check suspicious login signals for successful login
+        suspicious_result = SuspiciousLoginService.evaluate_login_attempt(
+            db=self.db,
+            email=payload.email,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            user=user,
+            is_success=True,
+        )
+
         user.last_login = datetime.now(timezone.utc)
         user.last_seen = datetime.now(timezone.utc)
         user.last_active_at = datetime.now(timezone.utc)
 
+        # Record successful login audit log
+        AuditLogService.create_log(
+            db=self.db,
+            actor_id=user.id,
+            action=AuditAction.LOGIN,
+            entity_type="user_session",
+            entity_id=str(user.id),
+            target_user_id=user.id,
+            description=f"User logged in from {ip_address or 'Unknown IP'}",
+            ip_address=ip_address,
+            user_agent=user_agent,
+            metadata_info={
+                "email": payload.email,
+                "is_suspicious": suspicious_result.is_suspicious,
+                "signals": suspicious_result.signals,
+            },
+            success=True,
+        )
+
         self.db.flush()
+
+        if user.mfa_enabled:
+            mfa_token = create_access_token(
+                str(user.id),
+                {"type": "mfa_pending"},
+            )
+            self.db.commit()
+            return {
+                "success": True,
+                "mfa_required": True,
+                "mfa_token": mfa_token,
+                "message": "MFA verification required.",
+            }
 
         access_token = create_access_token(
             str(user.id),
@@ -230,6 +318,71 @@ class AuthService:
         return {
             "success": True,
             "message": "Login successful.",
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "user": user,
+        }
+
+    def complete_mfa_login(
+        self,
+        mfa_token: str,
+        code: str,
+        user_agent: Optional[str] = None,
+        ip_address: Optional[str] = None,
+    ):
+        try:
+            payload = decode_token(mfa_token)
+            if payload.get("type") != "mfa_pending":
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid MFA session token.",
+                )
+            user_id_str = payload.get("sub")
+            user_id = UUID(user_id_str)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired MFA session token.",
+            )
+
+        user = self.db.get(User, user_id)
+        if not user or not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User account unavailable.",
+            )
+
+        from app.services.mfa_service import MFAService
+        verified = MFAService.verify_user_mfa(self.db, user, code)
+        if not verified:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid verification code or recovery code.",
+            )
+
+        access_token = create_access_token(
+            str(user.id),
+            {
+                "username": user.username,
+            },
+        )
+        refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=refresh_token,
+            expires_at=expires_at,
+            user_agent=user_agent,
+            ip_address=ip_address,
+        )
+        self.db.commit()
+
+        return {
+            "success": True,
+            "message": "MFA authentication successful.",
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
@@ -777,14 +930,10 @@ class AuthService:
     def linkedin_login(self, linkedin_user: dict, primary_email: str):
         linkedin_id = str(linkedin_user["sub"])
 
-        user = self.db.scalar(
-            select(User).where(User.linkedin_id == linkedin_id)
-        )
+        user = self.db.scalar(select(User).where(User.linkedin_id == linkedin_id))
 
         if not user:
-            user = self.db.scalar(
-                select(User).where(User.email == primary_email)
-            )
+            user = self.db.scalar(select(User).where(User.email == primary_email))
             if user:
                 user.linkedin_id = linkedin_id
                 if linkedin_user.get("picture"):
@@ -795,9 +944,7 @@ class AuthService:
                 import string
 
                 alphabet = string.ascii_letters + string.digits + string.punctuation
-                random_password = "".join(
-                    secrets.choice(alphabet) for i in range(32)
-                )
+                random_password = "".join(secrets.choice(alphabet) for i in range(32))
 
                 name = linkedin_user.get("name") or "LinkedIn User"
                 name_parts = name.split(" ", 1)

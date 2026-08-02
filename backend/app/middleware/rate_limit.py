@@ -15,16 +15,16 @@ limiter = Limiter(
     default_limits=[
         settings.DEFAULT_RATE_LIMIT,
     ],
-    enabled=not is_testing,
+    enabled=settings.ENABLE_RATE_LIMIT,
+    headers_enabled=True,
 )
 
 # ------------------------------------------------------------------
 # Common Limits (all configurable via settings)
 # ------------------------------------------------------------------
 
-LOGIN_LIMIT = "1000000/minute" if is_testing else settings.LOGIN_RATE_LIMIT
-
-REGISTER_LIMIT = "1000000/minute" if is_testing else settings.REGISTER_RATE_LIMIT
+AUTH_LIMIT = "1000000/minute" if is_testing else settings.AUTH_RATE_LIMIT
+LOGIN_LIMIT = "1000000/minute" if is_testing else settings.AUTH_RATE_LIMIT
 
 MESSAGE_LIMIT = "1000000/minute" if is_testing else settings.MESSAGE_RATE_LIMIT
 
@@ -32,10 +32,11 @@ SEARCH_LIMIT = "1000000/minute" if is_testing else settings.SEARCH_RATE_LIMIT
 
 PROJECT_LIMIT = "1000000/minute" if is_testing else settings.PROJECT_RATE_LIMIT
 
+UPLOAD_LIMIT = "1000000/minute" if is_testing else settings.UPLOAD_RATE_LIMIT
+
 PASSWORD_RESET_LIMIT = (
     "1000000/minute" if is_testing else settings.PASSWORD_RESET_RATE_LIMIT
 )
-
 COMMENT_LIMIT = "1000000/minute" if is_testing else settings.COMMENT_RATE_LIMIT
 
 # Recommendations are expensive (multiple joins + scoring).
