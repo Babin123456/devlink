@@ -135,6 +135,8 @@ class Settings(BaseSettings):
     ENABLE_RATE_LIMIT: bool = True
     DEFAULT_RATE_LIMIT: str = "100/minute"
     AUTH_RATE_LIMIT: str = "5/minute"
+    LOGIN_RATE_LIMIT: str = "5/minute"
+    REGISTER_RATE_LIMIT: str = "3/hour"
     SEARCH_RATE_LIMIT: str = "30/minute"
     UPLOAD_RATE_LIMIT: str = "10/minute"
     MESSAGE_RATE_LIMIT: str = "30/minute"
