@@ -371,6 +371,9 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(ActivityTrackingMiddleware)
 app.add_middleware(MaintenanceMiddleware)
 
+from app.middleware.request_validation import RequestValidationMiddleware
+app.add_middleware(RequestValidationMiddleware)
+
 from app.middleware.audit_context import AuditContextMiddleware
 
 app.add_middleware(AuditContextMiddleware)
@@ -379,10 +382,13 @@ from app.middleware.org_audit_logging import OrganizationAuditMiddleware
 
 app.add_middleware(OrganizationAuditMiddleware)
 
+from app.middleware.request_logging import RequestLoggingMiddleware
+
+app.add_middleware(RequestLoggingMiddleware)
+
 # ------------------------------------------------------------------
 # CORS
 # ------------------------------------------------------------------
-
 
 app.add_middleware(
     CORSMiddleware,
