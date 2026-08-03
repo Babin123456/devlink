@@ -141,9 +141,7 @@ def _screen_password(
         if contains_personal_information(password, username=username, email=email):
             raise HTTPException(
                 status_code=400,
-                detail=(
-                    "Password must not contain your username or email address."
-                ),
+                detail=("Password must not contain your username or email address."),
             )
 
     if settings.ENABLE_HIBP_CHECK:

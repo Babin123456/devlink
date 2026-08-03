@@ -22,7 +22,6 @@ from app.core.password_blocklist import (
 from app.services.password_breach_service import PasswordBreachService
 from app.utils.validators import validate_password
 
-
 # ----------------------------------------------------------------------
 # Normalisation
 # ----------------------------------------------------------------------
@@ -98,15 +97,11 @@ def test_empty_password_is_not_flagged_as_common():
 
 
 def test_password_containing_username_is_rejected():
-    assert contains_personal_information(
-        "AlexRivera2025!", username="alexrivera"
-    )
+    assert contains_personal_information("AlexRivera2025!", username="alexrivera")
 
 
 def test_password_containing_email_local_part_is_rejected():
-    assert contains_personal_information(
-        "Rivera#2025", email="rivera@devlink.app"
-    )
+    assert contains_personal_information("Rivera#2025", email="rivera@devlink.app")
 
 
 def test_dotted_username_is_split_into_tokens():
@@ -115,9 +110,7 @@ def test_dotted_username_is_split_into_tokens():
 
 def test_email_domain_alone_does_not_trigger():
     # Everyone shares the domain, so matching on it would reject far too much.
-    assert not contains_personal_information(
-        "QuietLoom#8421", email="alex@devlink.app"
-    )
+    assert not contains_personal_information("QuietLoom#8421", email="alex@devlink.app")
 
 
 def test_short_tokens_are_ignored():
@@ -220,9 +213,7 @@ def test_absent_suffix_counts_as_zero(monkeypatch, breach_service):
     _enable_hibp(monkeypatch)
 
     with patch("httpx.get") as mock_get:
-        mock_get.return_value = _response(
-            200, "0000000000000000000000000000000000A:0"
-        )
+        mock_get.return_value = _response(200, "0000000000000000000000000000000000A:0")
         assert breach_service.breach_count("vermilion-kestrel-97") == 0
 
 
@@ -374,7 +365,4 @@ def test_hibp_outage_does_not_block_registration(monkeypatch):
     with patch("app.services.password_breach_service.cache_manager") as cache:
         cache.get.return_value = None
         with patch("httpx.get", side_effect=httpx.ConnectError("no route")):
-            assert (
-                validate_password("vermilion-Kestrel-97!")
-                == "vermilion-Kestrel-97!"
-            )
+            assert validate_password("vermilion-Kestrel-97!") == "vermilion-Kestrel-97!"

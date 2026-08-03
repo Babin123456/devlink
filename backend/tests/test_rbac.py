@@ -377,7 +377,9 @@ class TestUnauthorizedActionsBlocked:
 
     def test_user_cannot_access_admin_endpoint(self, client, register_and_login):
         """A regular USER should get 403 on an admin-only endpoint."""
-        user_id, token = register_and_login("user@test.com", "testuser", "Vermilion-Kestrel97!")
+        user_id, token = register_and_login(
+            "user@test.com", "testuser", "Vermilion-Kestrel97!"
+        )
 
         response = client.get(
             "/api/admin/users",
@@ -387,7 +389,9 @@ class TestUnauthorizedActionsBlocked:
 
     def test_admin_can_access_admin_endpoint(self, client, db, register_and_login):
         """An ADMIN user should be able to access admin endpoints."""
-        user_id, token = register_and_login("admin@test.com", "adminuser", "Vermilion-Kestrel97!")
+        user_id, token = register_and_login(
+            "admin@test.com", "adminuser", "Vermilion-Kestrel97!"
+        )
 
         from app.models.user import User
 

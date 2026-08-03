@@ -238,6 +238,4 @@ def contains_personal_information(
     if not haystack:
         return False
 
-    return any(
-        token in haystack for token in _context_tokens([username, email])
-    )
+    return any(token in haystack for token in _context_tokens([username, email]))
