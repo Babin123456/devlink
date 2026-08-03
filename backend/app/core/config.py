@@ -123,6 +123,14 @@ class Settings(BaseSettings):
     MEDIA_THUMB_DIMENSION: int = 200
     CDN_BASE_URL: str | None = None
 
+    # Cloud Storage (S3 / R2)
+    STORAGE_PROVIDER: str = "local" # local, s3, r2
+    AWS_ACCESS_KEY_ID: str | None = None
+    AWS_SECRET_ACCESS_KEY: str | None = None
+    AWS_REGION: str | None = None
+    AWS_BUCKET_NAME: str | None = None
+    R2_ACCOUNT_ID: str | None = None
+
     # ==========================================================
     # AI
     # ==========================================================
