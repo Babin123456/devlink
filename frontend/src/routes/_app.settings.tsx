@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { ImageCropUploadModal } from "@/components/shared/ImageCropUploadModal";
 import { DeleteAccountModal } from "@/components/settings/DeleteAccountModal";
 import { OAuthAccountsSection } from "@/components/settings/OAuthAccountsSection";
+import { MFASection } from "@/features/settings/components/MFASection";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -479,6 +480,10 @@ function SettingsPage() {
                 <Separator />
 
                 <OAuthAccountsSection />
+
+                <Separator />
+
+                <MFASection />
 
                 <Separator />
 

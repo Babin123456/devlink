@@ -1,0 +1,342 @@
+from __future__ import annotations
+
+import datetime
+from collections.abc import Mapping
+from typing import Any, TypeVar, cast
+from uuid import UUID
+
+from attrs import define as _attrs_define
+from attrs import field as _attrs_field
+
+from ..models.notification_type import NotificationType
+from ..types import UNSET, Unset
+
+T = TypeVar("T", bound="NotificationResponse")
+
+
+@_attrs_define
+class NotificationResponse:
+    """
+    Attributes:
+        recipient_id (UUID):
+        type_ (NotificationType):
+        title (str):
+        message (str):
+        id (UUID):
+        is_read (bool):
+        created_at (datetime.datetime):
+        updated_at (datetime.datetime):
+        action_url (None | str | Unset):
+        image_url (None | str | Unset):
+        project_id (None | Unset | UUID):
+        conversation_id (None | Unset | UUID):
+        message_id (None | Unset | UUID):
+        application_id (None | Unset | UUID):
+        sender_id (None | Unset | UUID):
+        read_at (datetime.datetime | None | Unset):
+    """
+
+    recipient_id: UUID
+    type_: NotificationType
+    title: str
+    message: str
+    id: UUID
+    is_read: bool
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    action_url: None | str | Unset = UNSET
+    image_url: None | str | Unset = UNSET
+    project_id: None | Unset | UUID = UNSET
+    conversation_id: None | Unset | UUID = UNSET
+    message_id: None | Unset | UUID = UNSET
+    application_id: None | Unset | UUID = UNSET
+    sender_id: None | Unset | UUID = UNSET
+    read_at: datetime.datetime | None | Unset = UNSET
+    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        recipient_id = str(self.recipient_id)
+
+        type_ = self.type_.value
+
+        title = self.title
+
+        message = self.message
+
+        id = str(self.id)
+
+        is_read = self.is_read
+
+        created_at = self.created_at.isoformat()
+
+        updated_at = self.updated_at.isoformat()
+
+        action_url: None | str | Unset
+        if isinstance(self.action_url, Unset):
+            action_url = UNSET
+        else:
+            action_url = self.action_url
+
+        image_url: None | str | Unset
+        if isinstance(self.image_url, Unset):
+            image_url = UNSET
+        else:
+            image_url = self.image_url
+
+        project_id: None | str | Unset
+        if isinstance(self.project_id, Unset):
+            project_id = UNSET
+        elif isinstance(self.project_id, UUID):
+            project_id = str(self.project_id)
+        else:
+            project_id = self.project_id
+
+        conversation_id: None | str | Unset
+        if isinstance(self.conversation_id, Unset):
+            conversation_id = UNSET
+        elif isinstance(self.conversation_id, UUID):
+            conversation_id = str(self.conversation_id)
+        else:
+            conversation_id = self.conversation_id
+
+        message_id: None | str | Unset
+        if isinstance(self.message_id, Unset):
+            message_id = UNSET
+        elif isinstance(self.message_id, UUID):
+            message_id = str(self.message_id)
+        else:
+            message_id = self.message_id
+
+        application_id: None | str | Unset
+        if isinstance(self.application_id, Unset):
+            application_id = UNSET
+        elif isinstance(self.application_id, UUID):
+            application_id = str(self.application_id)
+        else:
+            application_id = self.application_id
+
+        sender_id: None | str | Unset
+        if isinstance(self.sender_id, Unset):
+            sender_id = UNSET
+        elif isinstance(self.sender_id, UUID):
+            sender_id = str(self.sender_id)
+        else:
+            sender_id = self.sender_id
+
+        read_at: None | str | Unset
+        if isinstance(self.read_at, Unset):
+            read_at = UNSET
+        elif isinstance(self.read_at, datetime.datetime):
+            read_at = self.read_at.isoformat()
+        else:
+            read_at = self.read_at
+
+        field_dict: dict[str, Any] = {}
+        field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "recipient_id": recipient_id,
+                "type": type_,
+                "title": title,
+                "message": message,
+                "id": id,
+                "is_read": is_read,
+                "created_at": created_at,
+                "updated_at": updated_at,
+            }
+        )
+        if action_url is not UNSET:
+            field_dict["action_url"] = action_url
+        if image_url is not UNSET:
+            field_dict["image_url"] = image_url
+        if project_id is not UNSET:
+            field_dict["project_id"] = project_id
+        if conversation_id is not UNSET:
+            field_dict["conversation_id"] = conversation_id
+        if message_id is not UNSET:
+            field_dict["message_id"] = message_id
+        if application_id is not UNSET:
+            field_dict["application_id"] = application_id
+        if sender_id is not UNSET:
+            field_dict["sender_id"] = sender_id
+        if read_at is not UNSET:
+            field_dict["read_at"] = read_at
+
+        return field_dict
+
+    @classmethod
+    def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        d = dict(src_dict)
+        recipient_id = UUID(d.pop("recipient_id"))
+
+        type_ = NotificationType(d.pop("type"))
+
+        title = d.pop("title")
+
+        message = d.pop("message")
+
+        id = UUID(d.pop("id"))
+
+        is_read = d.pop("is_read")
+
+        created_at = datetime.datetime.fromisoformat(d.pop("created_at"))
+
+        updated_at = datetime.datetime.fromisoformat(d.pop("updated_at"))
+
+        def _parse_action_url(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        action_url = _parse_action_url(d.pop("action_url", UNSET))
+
+        def _parse_image_url(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        image_url = _parse_image_url(d.pop("image_url", UNSET))
+
+        def _parse_project_id(data: object) -> None | Unset | UUID:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                project_id_type_0 = UUID(data)
+
+                return project_id_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | UUID, data)
+
+        project_id = _parse_project_id(d.pop("project_id", UNSET))
+
+        def _parse_conversation_id(data: object) -> None | Unset | UUID:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                conversation_id_type_0 = UUID(data)
+
+                return conversation_id_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | UUID, data)
+
+        conversation_id = _parse_conversation_id(d.pop("conversation_id", UNSET))
+
+        def _parse_message_id(data: object) -> None | Unset | UUID:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                message_id_type_0 = UUID(data)
+
+                return message_id_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | UUID, data)
+
+        message_id = _parse_message_id(d.pop("message_id", UNSET))
+
+        def _parse_application_id(data: object) -> None | Unset | UUID:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                application_id_type_0 = UUID(data)
+
+                return application_id_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | UUID, data)
+
+        application_id = _parse_application_id(d.pop("application_id", UNSET))
+
+        def _parse_sender_id(data: object) -> None | Unset | UUID:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                sender_id_type_0 = UUID(data)
+
+                return sender_id_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | UUID, data)
+
+        sender_id = _parse_sender_id(d.pop("sender_id", UNSET))
+
+        def _parse_read_at(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                read_at_type_0 = datetime.datetime.fromisoformat(data)
+
+                return read_at_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        read_at = _parse_read_at(d.pop("read_at", UNSET))
+
+        notification_response = cls(
+            recipient_id=recipient_id,
+            type_=type_,
+            title=title,
+            message=message,
+            id=id,
+            is_read=is_read,
+            created_at=created_at,
+            updated_at=updated_at,
+            action_url=action_url,
+            image_url=image_url,
+            project_id=project_id,
+            conversation_id=conversation_id,
+            message_id=message_id,
+            application_id=application_id,
+            sender_id=sender_id,
+            read_at=read_at,
+        )
+
+        notification_response.additional_properties = d
+        return notification_response
+
+    @property
+    def additional_keys(self) -> list[str]:
+        return list(self.additional_properties.keys())
+
+    def __getitem__(self, key: str) -> Any:
+        return self.additional_properties[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.additional_properties[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.additional_properties[key]
+
+    def __contains__(self, key: str) -> bool:
+        return key in self.additional_properties

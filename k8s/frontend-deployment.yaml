@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devlink-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: devlink-frontend
+  template:
+    metadata:
+      labels:
+        app: devlink-frontend
+    spec:
+      containers:
+        - name: devlink-frontend
+          image: devlink-frontend:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: VITE_API_URL
+              value: "http://devlink.local/api"
+            - name: NODE_ENV
+              value: "production"

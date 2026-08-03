@@ -112,7 +112,7 @@ const DEFAULT_STACK = [
   },
 ];
 
-function fallbackTechStack(projectIdea: string): TechStackResponse {
+export function fallbackTechStack(projectIdea: string): TechStackResponse {
   const text = projectIdea.toLowerCase();
   const matches = new Map<string, TechStackRecommendation>();
   for (const [kw, stack] of Object.entries(KEYWORD_STACKS)) {
