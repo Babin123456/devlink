@@ -599,6 +599,10 @@ app.include_router(
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
 
+from app.routers import feature_flags
+
+app.include_router(feature_flags.router, prefix="/api", tags=["Feature Flags"])
+
 from fastapi.openapi.utils import get_openapi
 
 def custom_openapi():
