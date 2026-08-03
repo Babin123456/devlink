@@ -49,6 +49,7 @@ from app.schemas.auth import (
 )
 from app.schemas.user import CurrentUser
 from app.services.auth_service import AuthService
+from app.services.email_service import EmailService
 
 router = APIRouter(
     tags=["Authentication"],
@@ -798,12 +799,6 @@ def resend_verification(
     payload: ResendVerificationEmailRequest,
     db: Session = Depends(get_database),
 ):
-    """
-    Placeholder.
-
-    Email sending will be implemented after the
-    SMTP service is added.
-    """
 
     auth_service = AuthService(db)
 
@@ -817,11 +812,32 @@ def resend_verification(
             "message": ("If the account exists, a verification email has been sent."),
         }
 
-    # Generate verification token
-    token = create_verification_token(str(user.id))  # noqa: F841
-    create_verification_token(str(user.id))
-    # TODO:
-    # Send email via SMTP
+    if user.is_verified:
+        return {
+            "success": True,
+            "message": "Your email is already verified.",
+        }
+
+    token = create_verification_token(str(user.id))
+    verify_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+
+    html = f"""
+    <html>
+        <body>
+            <h2>Verify Your Email</h2>
+            <p>Click the link below to verify your email address:</p>
+            <p><a href="{verify_url}">Verify Email</a></p>
+            <p>This link expires in 24 hours.</p>
+            <br/>
+            <p>Thanks,<br/>The DevLink Team</p>
+        </body>
+    </html>
+    """
+    EmailService.send_email(
+        to_email=user.email,
+        subject="Verify Your Email - DevLink",
+        html_content=html,
+    )
 
     return {
         "success": True,
