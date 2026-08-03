@@ -22,6 +22,7 @@ from app.routers import (
     organizations,
     profile_summary,
     project_members,
+    project_milestones,
     project_tags,
     project_documents,
     project_dashboards,
@@ -64,6 +65,7 @@ api_v1_router.include_router(projects.router, prefix="/projects", tags=["Project
 api_v1_router.include_router(project_members.router)
 api_v1_router.include_router(project_documents.router)
 api_v1_router.include_router(project_dashboards.router)
+api_v1_router.include_router(project_milestones.router)
 api_v1_router.include_router(
     builder_flares.router, prefix="/flare", tags=["Builder's Flare"]
 )
