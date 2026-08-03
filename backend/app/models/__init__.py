@@ -73,3 +73,5 @@ from .verification_request import VerificationRequest  # noqa: F401
 from .maintenance import MaintenanceWindow
 from .search_analytics import SearchQueryLog, SearchClickLog
 from .webhook import WebhookDelivery, WebhookDeadLetterQueue, WebhookDeliveryStatus
+from .plugin import Plugin, PluginInstallation, PluginType, PluginStatus
+

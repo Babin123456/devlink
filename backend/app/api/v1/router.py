@@ -20,6 +20,7 @@ from app.routers import (
     oauth_linking,
     org_audit_logs,
     organizations,
+    plugins,
     profile_summary,
     project_members,
     project_tags,
@@ -107,6 +108,7 @@ api_v1_router.include_router(repository_quality.router, tags=["Repository Qualit
 api_v1_router.include_router(health.router)
 api_v1_router.include_router(search.router, prefix="/search", tags=["Search"])
 api_v1_router.include_router(saved_searches.router)
+api_v1_router.include_router(plugins.router)
 api_v1_router.include_router(
     hackathons.router, prefix="/hackathons", tags=["Hackathons"]
 )
