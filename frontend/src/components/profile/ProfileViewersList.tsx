@@ -70,7 +70,9 @@ export function ProfileViewersList({
   };
 
   return (
-    <div className={cn("rounded-xl border border-border bg-card p-6 shadow-sm space-y-6", className)}>
+    <div
+      className={cn("rounded-xl border border-border bg-card p-6 shadow-sm space-y-6", className)}
+    >
       {/* Header & Privacy Opt-Out Control */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
@@ -97,13 +99,13 @@ export function ProfileViewersList({
             onClick={handleToggle}
             className={cn(
               "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ml-auto",
-              privacyOptOut ? "bg-primary" : "bg-muted"
+              privacyOptOut ? "bg-primary" : "bg-muted",
             )}
           >
             <span
               className={cn(
                 "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-background shadow-lg ring-0 transition duration-200 ease-in-out",
-                privacyOptOut ? "translate-x-4" : "translate-x-0"
+                privacyOptOut ? "translate-x-4" : "translate-x-0",
               )}
             />
           </button>
@@ -117,7 +119,11 @@ export function ProfileViewersList({
             <div className="flex items-center gap-3 min-w-0">
               {viewer.is_anonymous || !viewer.viewer_avatar ? (
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground font-semibold text-xs border border-border shrink-0">
-                  {viewer.is_anonymous ? <EyeOff className="h-4 w-4" /> : <User className="h-4 w-4" />}
+                  {viewer.is_anonymous ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <User className="h-4 w-4" />
+                  )}
                 </span>
               ) : (
                 <img
@@ -137,7 +143,9 @@ export function ProfileViewersList({
                   )}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {viewer.is_anonymous ? "Visitor opted out of public identity" : `@${viewer.viewer_username}`}
+                  {viewer.is_anonymous
+                    ? "Visitor opted out of public identity"
+                    : `@${viewer.viewer_username}`}
                 </p>
               </div>
             </div>

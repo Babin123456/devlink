@@ -234,7 +234,7 @@ from app.core.config import settings
     response_model=AuthResponse,
     summary="GitHub OAuth Login",
 )
-@limiter.limit(LOGIN_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 async def github_login(
     request: Request,
     payload: GitHubLoginRequest,
@@ -359,7 +359,7 @@ async def linkedin_authorize():
     response_model=AuthResponse,
     summary="LinkedIn OAuth Login",
 )
-@limiter.limit(LOGIN_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 async def linkedin_login(
     request: Request,
     payload: LinkedInLoginRequest,

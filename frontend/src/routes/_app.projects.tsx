@@ -24,9 +24,18 @@ import { FilterDrawer, FilterSection } from "@/components/ui/filter-drawer";
 export const projectSearchSchema = z.object({
   page: z.number().catch(1).optional(),
   q: z.string().optional(),
-  language: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
-  experience: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
-  tech: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  language: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  experience: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  tech: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
   remote: z.boolean().optional(),
   paid: z.boolean().optional(),
   opensource: z.boolean().optional(),
@@ -46,7 +55,13 @@ export const Route = createFileRoute("/_app/projects")({
 function ProjectsPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const navigate = Route.useNavigate();
-  const { filters, setFilters, clearFilters, hasActiveFilters: hasFilters, chipFilterCount } = useProjectFilters();
+  const {
+    filters,
+    setFilters,
+    clearFilters,
+    hasActiveFilters: hasFilters,
+    chipFilterCount,
+  } = useProjectFilters();
   const page = filters.page || 1;
   const ITEMS_PER_PAGE = 6;
   const [createOpen, setCreateOpen] = useState(false);
@@ -64,7 +79,15 @@ function ProjectsPage() {
   }, []);
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ["projects", filters.language, filters.experience, filters.remote, filters.paid, filters.opensource, filters.tech],
+    queryKey: [
+      "projects",
+      filters.language,
+      filters.experience,
+      filters.remote,
+      filters.paid,
+      filters.opensource,
+      filters.tech,
+    ],
     queryFn: () =>
       projectsService.list({
         language: filters.language?.length ? filters.language.join(",") : undefined,
@@ -105,7 +128,6 @@ function ProjectsPage() {
     setStatusFilter("all");
     clearFilters();
   }
-
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);

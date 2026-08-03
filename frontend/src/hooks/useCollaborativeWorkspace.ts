@@ -29,7 +29,11 @@ export interface ActiveCollaborator {
   online: boolean;
 }
 
-export function useCollaborativeWorkspace(projectId: string, currentUserId: string, username: string) {
+export function useCollaborativeWorkspace(
+  projectId: string,
+  currentUserId: string,
+  username: string,
+) {
   const [documents, setDocuments] = useState<WorkspaceDoc[]>([]);
   const [activeDocId, setActiveDocId] = useState<string | null>(null);
   const [activeDoc, setActiveDoc] = useState<WorkspaceDoc | null>(null);
@@ -60,7 +64,8 @@ export function useCollaborativeWorkspace(projectId: string, currentUserId: stri
         id: "doc-1",
         project_id: projectId,
         title: "Project Notes & Architecture",
-        content: "# Real-Time Collaborative Workspace\n\nWelcome team! Edit project notes together in real time.",
+        content:
+          "# Real-Time Collaborative Workspace\n\nWelcome team! Edit project notes together in real time.",
         version: 1,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

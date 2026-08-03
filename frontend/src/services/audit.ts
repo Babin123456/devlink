@@ -27,7 +27,7 @@ const seedAuditLogs: AuditLog[] = [
     status_code: 201,
     error_message: null,
     created_at: new Date().toISOString(),
-  }
+  },
 ];
 
 async function withFallback<T>(call: () => Promise<T>, fallback: T): Promise<T> {

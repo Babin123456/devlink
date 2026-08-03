@@ -122,10 +122,7 @@ export function CollaborativeWorkspace({ projectId }: CollaborativeWorkspaceProp
           <span className="flex items-center gap-1.5">
             <Radio
               size={12}
-              className={cn(
-                "animate-pulse",
-                isConnected ? "text-emerald-500" : "text-amber-500",
-              )}
+              className={cn("animate-pulse", isConnected ? "text-emerald-500" : "text-amber-500")}
             />
             {isConnected ? "Live Sync Active" : "Local Draft Mode"}
           </span>
@@ -182,7 +179,8 @@ export function CollaborativeWorkspace({ projectId }: CollaborativeWorkspaceProp
                     </>
                   ) : (
                     <>
-                      <CloudCheck size={12} className="text-emerald-500" /> Synced v{activeDoc.version}
+                      <CloudCheck size={12} className="text-emerald-500" /> Synced v
+                      {activeDoc.version}
                     </>
                   )}
                 </span>
@@ -194,7 +192,10 @@ export function CollaborativeWorkspace({ projectId }: CollaborativeWorkspaceProp
               <div className="flex items-center justify-between rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-600 dark:text-amber-400">
                 <div className="flex items-center gap-2">
                   <AlertTriangle size={16} className="shrink-0 text-amber-500" />
-                  <span>{conflictMessage || "Version conflict detected. Server changes merged automatically."}</span>
+                  <span>
+                    {conflictMessage ||
+                      "Version conflict detected. Server changes merged automatically."}
+                  </span>
                 </div>
                 <button
                   onClick={dismissConflict}
