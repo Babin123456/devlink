@@ -14,6 +14,7 @@ from pydantic import (
     HttpUrl,
     model_validator,
 )
+from app.core.validation import NameStr, UsernameStr, ValidEmail, HeadlineStr, BioStr, ValidURL, SanitizedStr
 
 
 class AvailabilitySlot(BaseModel):
@@ -57,39 +58,29 @@ class PrivacySettingsUpdate(BaseModel):
 
 
 class UserBase(BaseModel):
-    first_name: str = Field(..., min_length=2, max_length=100)
-    last_name: str = Field(..., min_length=2, max_length=100)
+    first_name: NameStr
+    last_name: NameStr
 
-    username: str = Field(
-        ...,
-        min_length=3,
-        max_length=50,
-    )
+    username: UsernameStr
 
-    public_email: Optional[EmailStr] = None
+    public_email: Optional[ValidEmail] = None
 
-    headline: Optional[str] = Field(
-        default=None,
-        max_length=150,
-    )
+    headline: Optional[HeadlineStr] = None
 
-    bio: Optional[str] = Field(
-        default=None,
-        max_length=1000,
-    )
+    bio: Optional[BioStr] = None
 
-    location: Optional[str] = None
-    timezone: Optional[str] = None
+    location: Optional[SanitizedStr] = None
+    timezone: Optional[SanitizedStr] = None
 
-    website: Optional[HttpUrl] = None
-    resume_url: Optional[str] = None
-    portfolio_url: Optional[HttpUrl] = None
-    github_url: Optional[HttpUrl] = None
-    linkedin_url: Optional[HttpUrl] = None
+    website: Optional[ValidURL] = None
+    resume_url: Optional[ValidURL] = None
+    portfolio_url: Optional[ValidURL] = None
+    github_url: Optional[ValidURL] = None
+    linkedin_url: Optional[ValidURL] = None
 
-    role: Optional[str] = None
-    experience_level: Optional[str] = None
-    company: Optional[str] = None
+    role: Optional[SanitizedStr] = None
+    experience_level: Optional[SanitizedStr] = None
+    company: Optional[SanitizedStr] = None
 
     open_to_work: bool = True
     is_private: bool = False
@@ -103,7 +94,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    email: EmailStr
+    email: ValidEmail
     password: str = Field(
         ...,
         min_length=8,
@@ -117,25 +108,25 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    first_name: Optional[NameStr] = None
+    last_name: Optional[NameStr] = None
 
-    headline: Optional[str] = Field(default=None, max_length=150)
-    bio: Optional[str] = Field(default=None, max_length=1000)
+    headline: Optional[HeadlineStr] = None
+    bio: Optional[BioStr] = None
 
-    location: Optional[str] = None
-    timezone: Optional[str] = None
-    public_email: Optional[EmailStr] = None
+    location: Optional[SanitizedStr] = None
+    timezone: Optional[SanitizedStr] = None
+    public_email: Optional[ValidEmail] = None
 
-    website: Optional[HttpUrl] = None
-    resume_url: Optional[str] = None
-    portfolio_url: Optional[HttpUrl] = None
-    github_url: Optional[HttpUrl] = None
-    linkedin_url: Optional[HttpUrl] = None
+    website: Optional[ValidURL] = None
+    resume_url: Optional[ValidURL] = None
+    portfolio_url: Optional[ValidURL] = None
+    github_url: Optional[ValidURL] = None
+    linkedin_url: Optional[ValidURL] = None
 
-    role: Optional[str] = None
-    experience_level: Optional[str] = None
-    company: Optional[str] = None
+    role: Optional[SanitizedStr] = None
+    experience_level: Optional[SanitizedStr] = None
+    company: Optional[SanitizedStr] = None
 
     open_to_work: Optional[bool] = None
     is_private: Optional[bool] = None
@@ -184,7 +175,7 @@ class UserResponse(UserBase):
 
 
 class CurrentUser(UserResponse):
-    email: EmailStr
+    email: ValidEmail
     email_verified_at: Optional[datetime] = None
     last_login: Optional[datetime] = None
 

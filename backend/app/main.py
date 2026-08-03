@@ -348,17 +348,20 @@ app.state.limiter = limiter
 
 from fastapi.exceptions import HTTPException, RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from sqlalchemy.exc import IntegrityError
 from app.core.error_handlers import (
     http_exception_handler,
     validation_exception_handler,
     rate_limit_exception_handler,
     global_exception_handler,
+    integrity_error_handler,
 )
 
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(RateLimitExceeded, rate_limit_exception_handler)
+app.add_exception_handler(IntegrityError, integrity_error_handler)
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_middleware(SlowAPIMiddleware)
 
