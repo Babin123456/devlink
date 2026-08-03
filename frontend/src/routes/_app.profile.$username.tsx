@@ -311,9 +311,9 @@ function ProfilePage() {
                 </span>
               </div>
             </div>
-            {!me && (
-              <div className="flex items-center gap-2">
-                <FollowButton userId={b.id} />
+            <div className="flex items-center gap-2">
+              {!me && <FollowButton userId={b.id} />}
+              {!me && (
                 <button
                   type="button"
                   onClick={() =>
@@ -327,8 +327,20 @@ function ProfilePage() {
                   <MessageCircle size={16} />
                   Contact Developer
                 </button>
-              </div>
-            )}
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  const url = `${window.location.origin}/profile/${b.handle}`;
+                  navigator.clipboard.writeText(url);
+                  toast.success("Profile link copied to clipboard!");
+                }}
+                className="inline-flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-2 text-[13px] font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                <LinkIcon size={16} />
+                Copy Link
+              </button>
+            </div>
           </div>
         </div>
       </Card>

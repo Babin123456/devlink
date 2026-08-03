@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_app/admin/maintenance")({
 });
 
 function AdminMaintenance() {
-  const [windows, setWindows] = useState([]);
+  const [windows, setWindows] = useState<any[]>([]);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [message, setMessage] = useState("The system is undergoing scheduled maintenance.");
@@ -27,7 +27,7 @@ function AdminMaintenance() {
     }
   };
 
-  const handleCreate = async (e) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -48,7 +48,7 @@ function AdminMaintenance() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string | number) => {
     if (!confirm("Are you sure you want to delete this maintenance window?")) return;
     try {
       await api.delete(`/api/maintenance/${id}`);

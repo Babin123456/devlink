@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_app/admin/search-analytics")({
 });
 
 function SearchAnalyticsDashboard() {
-  const [data, setData] = useState<unknown>(null);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
