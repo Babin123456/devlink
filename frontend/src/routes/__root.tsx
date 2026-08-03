@@ -12,6 +12,7 @@ import { AnimatePresence } from "framer-motion";
 import { useEffect, useRef, type ReactNode } from "react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { I18nProvider } from "@/context/I18nContext";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -76,6 +77,17 @@ function NotFoundComponent() {
   );
 }
 
+/**
+ * The root route's errorComponent and notFoundComponent replace RootComponent
+ * rather than rendering inside it, so anything they show sits outside the
+ * providers. The error pages call useTranslation(), so they need their own
+ * I18nProvider — without it an API 401 would surface as a provider error
+ * instead of the sign-in page.
+ */
+function OutsideRootProviders({ children }: { children: ReactNode }) {
+  return <I18nProvider>{children}</I18nProvider>;
+}
+
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
@@ -85,15 +97,27 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
   if (error instanceof ApiError) {
     if (error.status === 401) {
-      return <UnauthorizedPage />;
+      return (
+        <OutsideRootProviders>
+          <UnauthorizedPage />
+        </OutsideRootProviders>
+      );
     }
 
     if (error.status === 403) {
-      return <ForbiddenPage />;
+      return (
+        <OutsideRootProviders>
+          <ForbiddenPage />
+        </OutsideRootProviders>
+      );
     }
 
     if (error.status >= 500) {
-      return <ServerErrorPage />;
+      return (
+        <OutsideRootProviders>
+          <ServerErrorPage />
+        </OutsideRootProviders>
+      );
     }
 
     // status 0  -> fetch/network failure (coreFetch's catch block)
@@ -103,7 +127,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
       // navigator is undefined during SSR; assume online in that case so we
       // don't render OfflinePage on the server for a purely client-side signal.
       const isOnline = typeof navigator === "undefined" ? true : navigator.onLine;
-      return isOnline ? <NetworkErrorPage /> : <OfflinePage />;
+      return (
+        <OutsideRootProviders>
+          {isOnline ? <NetworkErrorPage /> : <OfflinePage />}
+        </OutsideRootProviders>
+      );
     }
   }
 
@@ -188,14 +216,16 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system">
-        <Outlet />
+      <I18nProvider>
+        <ThemeProvider defaultTheme="system">
+          <Outlet />
+          <Toaster position="top-right" richColors />
+        </ThemeProvider>
+        <AnimatePresence mode="wait" initial={false}>
+          <Outlet key={location.pathname} />
+        </AnimatePresence>
         <Toaster position="top-right" richColors />
-      </ThemeProvider>
-      <AnimatePresence mode="wait" initial={false}>
-        <Outlet key={location.pathname} />
-      </AnimatePresence>
-      <Toaster position="top-right" richColors />
+      </I18nProvider>
     </QueryClientProvider>
   );
 }

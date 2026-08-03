@@ -1,14 +1,18 @@
 import { Lock } from "lucide-react";
 
+import { useTranslation } from "@/context/I18nContext";
+
 import { ErrorLayout } from "./ErrorLayout";
 
 export function UnauthorizedPage() {
+  const { t } = useTranslation();
+
   return (
     <ErrorLayout
       icon={<Lock className="h-16 w-16 text-warning" />}
-      title="401 • Unauthorized"
-      description="You need to sign in to access this page."
-      primaryLabel="Go to Login"
+      title={t("errors.unauthorized.title")}
+      description={t("errors.unauthorized.description")}
+      primaryLabel={t("common.goToLogin")}
       primaryTo="/auth"
     />
   );
