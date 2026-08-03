@@ -21,7 +21,6 @@ from app.core.feature_flags import (
 )
 from app.services.feature_flag_service import FeatureFlagService
 
-
 # ----------------------------------------------------------------------
 # Definitions
 # ----------------------------------------------------------------------
@@ -101,9 +100,7 @@ def test_off_strategy_is_off_for_everyone():
 
 
 def test_allowlist_admits_only_listed_users():
-    definition = _flag(
-        strategy=FlagStrategy.ALLOWLIST, allowlist=["user-1", "user-2"]
-    )
+    definition = _flag(strategy=FlagStrategy.ALLOWLIST, allowlist=["user-1", "user-2"])
 
     assert evaluate(definition, user_id="user-1")
     assert evaluate(definition, user_id="user-2")
@@ -133,9 +130,7 @@ def test_zero_percent_is_off_for_everyone():
 def test_hundred_percent_is_on_for_every_identified_user():
     definition = _flag(strategy=FlagStrategy.PERCENTAGE, percentage=100)
 
-    assert all(
-        evaluate(definition, user_id=f"user-{index}") for index in range(100)
-    )
+    assert all(evaluate(definition, user_id=f"user-{index}") for index in range(100))
 
 
 def test_percentage_rollout_is_stable_across_calls():

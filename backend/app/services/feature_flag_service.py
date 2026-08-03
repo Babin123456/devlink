@@ -67,9 +67,7 @@ class FeatureFlagService:
         its UI from a single request instead of one per flag.
         """
         return {
-            key: evaluate(
-                definition, user_id=user_id, override=self._get_override(key)
-            )
+            key: evaluate(definition, user_id=user_id, override=self._get_override(key))
             for key, definition in FLAG_DEFINITIONS.items()
         }
 
