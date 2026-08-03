@@ -76,6 +76,11 @@ class LinkedInLoginRequest(BaseModel):
     state: str = ""
 
 
+class MicrosoftLoginRequest(BaseModel):
+    code: str
+    state: str = ""
+
+
 class OAuthStateResponse(BaseModel):
     state: str
 
