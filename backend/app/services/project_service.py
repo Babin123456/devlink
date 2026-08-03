@@ -32,6 +32,29 @@ class ProjectService:
         owner_id: uuid.UUID,
         project: ProjectCreate,
     ) -> Project:
+        # AI-based duplicate project detection check (#608)
+        allow_dup = getattr(project, "allow_duplicate", False)
+        if not allow_dup:
+            from app.services.duplicate_detection_service import DuplicateDetectionService
+            dup_res = DuplicateDetectionService.find_duplicate_projects(
+                db,
+                title=project.title,
+                description=project.description,
+                threshold=0.80,
+                limit=3,
+            )
+            if dup_res.has_duplicates:
+                top_match = dup_res.suggested_projects[0]
+                from fastapi import HTTPException, status
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "message": f"Potential duplicate project detected: '{top_match.title}' ({top_match.confidence_score}% match).",
+                        "max_similarity_score": dup_res.max_similarity_score,
+                        "suggested_projects": [p.model_dump() for p in dup_res.suggested_projects],
+                        "manual_override_instruction": "Pass 'allow_duplicate': true in request payload to bypass this check.",
+                    },
+                )
 
         db_project = Project(
             owner_id=owner_id,

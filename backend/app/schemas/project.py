@@ -67,7 +67,10 @@ class ProjectBase(BaseModel):
 
 
 class ProjectCreate(ProjectBase):
-    pass
+    allow_duplicate: bool = Field(
+        default=False,
+        description="Manual override flag to allow project creation even if a potential duplicate is detected",
+    )
 
 
 # ==========================================================

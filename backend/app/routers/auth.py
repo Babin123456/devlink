@@ -26,6 +26,7 @@ from sqlalchemy.orm import Session
 from app.middleware.rate_limit import (
     limiter,
     AUTH_LIMIT,
+    LOGIN_LIMIT,
 )
 from app.dependencies import get_database
 from app.schemas.auth import (
