@@ -1,3 +1,5 @@
+import os
+import sys
 from functools import lru_cache
 
 # pyrefly: ignore [missing-import]
@@ -56,7 +58,13 @@ class Settings(BaseSettings):
     # Database
     # ==========================================================
 
-    DATABASE_URL: str = "postgresql+psycopg://postgres:password@localhost:5432/devlink"
+    DATABASE_URL: str = Field(
+        default_factory=lambda: (
+            "sqlite:///:memory:"
+            if os.getenv("TESTING") == "true" or "pytest" in sys.modules
+            else "postgresql+psycopg://postgres:password@localhost:5432/devlink"
+        )
+    )
 
     # ==========================================================
     # Redis
@@ -115,6 +123,14 @@ class Settings(BaseSettings):
     MEDIA_THUMB_DIMENSION: int = 200
     CDN_BASE_URL: str | None = None
 
+    # Cloud Storage (S3 / R2)
+    STORAGE_PROVIDER: str = "local" # local, s3, r2
+    AWS_ACCESS_KEY_ID: str | None = None
+    AWS_SECRET_ACCESS_KEY: str | None = None
+    AWS_REGION: str | None = None
+    AWS_BUCKET_NAME: str | None = None
+    R2_ACCOUNT_ID: str | None = None
+
     # ==========================================================
     # AI
     # ==========================================================
@@ -135,6 +151,8 @@ class Settings(BaseSettings):
     ENABLE_RATE_LIMIT: bool = True
     DEFAULT_RATE_LIMIT: str = "100/minute"
     AUTH_RATE_LIMIT: str = "5/minute"
+    LOGIN_RATE_LIMIT: str = "5/minute"
+    REGISTER_RATE_LIMIT: str = "3/hour"
     SEARCH_RATE_LIMIT: str = "30/minute"
     UPLOAD_RATE_LIMIT: str = "10/minute"
     MESSAGE_RATE_LIMIT: str = "30/minute"
@@ -196,6 +214,21 @@ class Settings(BaseSettings):
 
     ENABLE_COEP: bool = True
     CROSS_ORIGIN_EMBEDDER_POLICY: str = "require-corp"
+
+    # ==========================================================
+    # HTTP Caching (ETag / conditional requests)
+    # ==========================================================
+
+    ENABLE_ETAG: bool = True
+
+    # Responses larger than this are streamed through without a validator
+    # rather than buffered in memory to be hashed. 1 MiB comfortably covers
+    # every JSON payload the API produces today.
+    ETAG_MAX_BODY_SIZE: int = 1024 * 1024
+
+    # "no-cache" means "revalidate before reuse", not "do not store", so the
+    # client keeps the body and we get to answer with a 304.
+    ETAG_CACHE_CONTROL: str = "private, no-cache"
 
     # ==========================================================
     # Celery

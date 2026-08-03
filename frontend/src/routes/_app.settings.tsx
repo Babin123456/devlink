@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { ImageCropUploadModal } from "@/components/shared/ImageCropUploadModal";
 import { DeleteAccountModal } from "@/components/settings/DeleteAccountModal";
 import { OAuthAccountsSection } from "@/components/settings/OAuthAccountsSection";
+import { MFASection } from "@/features/settings/components/MFASection";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -83,9 +84,11 @@ function SettingsPage() {
     window.location.href = "/";
   };
 
-  const inp = "w-full rounded-md border border-border bg-surface px-3 py-[9px] text-[14px] text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground transition-all";
+  const inp =
+    "w-full rounded-md border border-border bg-surface px-3 py-[9px] text-[14px] text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground transition-all";
   const lbl = "mb-1.5 block text-[13px] font-medium text-foreground";
-  const sectionTitle = "text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-4";
+  const sectionTitle =
+    "text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-4";
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 py-6">
@@ -213,16 +216,29 @@ function SettingsPage() {
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div>
                       <label className={lbl}>Full name</label>
-                      <input className={inp} defaultValue={currentUser.name} placeholder="Your full name" />
+                      <input
+                        className={inp}
+                        defaultValue={currentUser.name}
+                        placeholder="Your full name"
+                      />
                     </div>
                     <div>
                       <label className={lbl}>Username</label>
-                      <input className={inp} defaultValue={currentUser.handle} placeholder="username" />
+                      <input
+                        className={inp}
+                        defaultValue={currentUser.handle}
+                        placeholder="username"
+                      />
                     </div>
                   </div>
                   <div>
                     <label className={lbl}>Email</label>
-                    <input className={inp} defaultValue="nancy@devlink.io" type="email" placeholder="email@example.com" />
+                    <input
+                      className={inp}
+                      defaultValue="nancy@devlink.io"
+                      type="email"
+                      placeholder="email@example.com"
+                    />
                   </div>
                   <div>
                     <label className={lbl}>Bio</label>
@@ -232,14 +248,20 @@ function SettingsPage() {
                       defaultValue="Product engineer. React / Postgres / Rust."
                       placeholder="Tell us about yourself"
                     />
-                    <p className="mt-1 text-xs text-muted-foreground">Brief description for your profile</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Brief description for your profile
+                    </p>
                   </div>
                   <div className="flex items-center gap-3 pt-2">
                     <Button type="submit" className="gap-2" disabled={savingAccount}>
                       <Save size={15} />
                       {savingAccount ? "Saving..." : "Save changes"}
                     </Button>
-                    <Button type="button" variant="ghost" onClick={() => toast.success("Changes discarded")}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => toast.success("Changes discarded")}
+                    >
                       Cancel
                     </Button>
                   </div>
@@ -254,7 +276,8 @@ function SettingsPage() {
                         <Trash2 size={15} /> Delete account
                       </h3>
                       <p className="text-xs text-muted-foreground">
-                        Permanently delete your account and all associated data. This action cannot be undone.
+                        Permanently delete your account and all associated data. This action cannot
+                        be undone.
                       </p>
                     </div>
                     <Button
@@ -298,16 +321,18 @@ function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-foreground">Theme</p>
-                      <p className="text-xs text-muted-foreground">Select your preferred color scheme</p>
+                      <p className="text-xs text-muted-foreground">
+                        Select your preferred color scheme
+                      </p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant={true ? "default" : "outline"} size="sm" className="gap-2">
+                      <Button variant="default" size="sm" className="gap-2">
                         <Palette size={14} /> Light
                       </Button>
-                      <Button variant={false ? "default" : "outline"} size="sm" className="gap-2">
+                      <Button variant="outline" size="sm" className="gap-2">
                         <Palette size={14} /> Dark
                       </Button>
-                      <Button variant={false ? "default" : "outline"} size="sm" className="gap-2">
+                      <Button variant="outline" size="sm" className="gap-2">
                         <Palette size={14} /> System
                       </Button>
                     </div>
@@ -318,7 +343,9 @@ function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-foreground">Reduced motion</p>
-                      <p className="text-xs text-muted-foreground">Minimize animations across the interface</p>
+                      <p className="text-xs text-muted-foreground">
+                        Minimize animations across the interface
+                      </p>
                     </div>
                     <Switch />
                   </div>
@@ -326,7 +353,9 @@ function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-foreground">Compact mode</p>
-                      <p className="text-xs text-muted-foreground">Reduce spacing for a denser layout</p>
+                      <p className="text-xs text-muted-foreground">
+                        Reduce spacing for a denser layout
+                      </p>
                     </div>
                     <Switch />
                   </div>
@@ -350,19 +379,42 @@ function SettingsPage() {
                     </h3>
                     <div className="space-y-4">
                       {[
-                        { key: "directMessages", label: "Direct messages", desc: "Someone sends you a direct message" },
-                        { key: "builderRequests", label: "Builder requests", desc: "Someone invites you to collaborate" },
-                        { key: "projectMentions", label: "Project mentions", desc: "You're mentioned in a project" },
-                        { key: "hackathonDeadlines", label: "Hackathon deadlines", desc: "Upcoming hackathon deadlines" },
+                        {
+                          key: "directMessages",
+                          label: "Direct messages",
+                          desc: "Someone sends you a direct message",
+                        },
+                        {
+                          key: "builderRequests",
+                          label: "Builder requests",
+                          desc: "Someone invites you to collaborate",
+                        },
+                        {
+                          key: "projectMentions",
+                          label: "Project mentions",
+                          desc: "You're mentioned in a project",
+                        },
+                        {
+                          key: "hackathonDeadlines",
+                          label: "Hackathon deadlines",
+                          desc: "Upcoming hackathon deadlines",
+                        },
                       ].map((item) => (
                         <div key={item.key} className="flex items-center justify-between">
                           <div>
-                            <Label htmlFor={item.key} className="text-sm font-medium text-foreground">{item.label}</Label>
+                            <Label
+                              htmlFor={item.key}
+                              className="text-sm font-medium text-foreground"
+                            >
+                              {item.label}
+                            </Label>
                             <p className="text-xs text-muted-foreground">{item.desc}</p>
                           </div>
                           <Switch
                             id={item.key}
-                            checked={notificationSettings[item.key as keyof typeof notificationSettings]}
+                            checked={
+                              notificationSettings[item.key as keyof typeof notificationSettings]
+                            }
                             onCheckedChange={(checked) =>
                               setNotificationSettings((prev) => ({ ...prev, [item.key]: checked }))
                             }
@@ -380,17 +432,32 @@ function SettingsPage() {
                     </h3>
                     <div className="space-y-4">
                       {[
-                        { key: "weeklyDigest", label: "Weekly digest", desc: "Weekly summary of your activity" },
-                        { key: "marketingEmails", label: "Marketing emails", desc: "Product updates and tips" },
+                        {
+                          key: "weeklyDigest",
+                          label: "Weekly digest",
+                          desc: "Weekly summary of your activity",
+                        },
+                        {
+                          key: "marketingEmails",
+                          label: "Marketing emails",
+                          desc: "Product updates and tips",
+                        },
                       ].map((item) => (
                         <div key={item.key} className="flex items-center justify-between">
                           <div>
-                            <Label htmlFor={item.key} className="text-sm font-medium text-foreground">{item.label}</Label>
+                            <Label
+                              htmlFor={item.key}
+                              className="text-sm font-medium text-foreground"
+                            >
+                              {item.label}
+                            </Label>
                             <p className="text-xs text-muted-foreground">{item.desc}</p>
                           </div>
                           <Switch
                             id={item.key}
-                            checked={notificationSettings[item.key as keyof typeof notificationSettings]}
+                            checked={
+                              notificationSettings[item.key as keyof typeof notificationSettings]
+                            }
                             onCheckedChange={(checked) =>
                               setNotificationSettings((prev) => ({ ...prev, [item.key]: checked }))
                             }
@@ -400,7 +467,10 @@ function SettingsPage() {
                     </div>
                   </div>
 
-                  <Button className="gap-2" onClick={() => toast.success("Notification preferences saved")}>
+                  <Button
+                    className="gap-2"
+                    onClick={() => toast.success("Notification preferences saved")}
+                  >
                     <Save size={15} /> Save preferences
                   </Button>
                 </div>
@@ -482,6 +552,10 @@ function SettingsPage() {
 
                 <Separator />
 
+                <MFASection />
+
+                <Separator />
+
                 <div className="space-y-4">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Active sessions
@@ -494,10 +568,14 @@ function SettingsPage() {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-foreground">Current session</p>
-                          <p className="text-xs text-muted-foreground">Chrome on Windows - Active now</p>
+                          <p className="text-xs text-muted-foreground">
+                            Chrome on Windows - Active now
+                          </p>
                         </div>
                       </div>
-                      <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded">Active</span>
+                      <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded">
+                        Active
+                      </span>
                     </div>
                     <Separator />
                     <div className="flex items-center justify-between">
@@ -507,7 +585,9 @@ function SettingsPage() {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-foreground">Mobile session</p>
-                          <p className="text-xs text-muted-foreground">DevLink App on iOS - 2 days ago</p>
+                          <p className="text-xs text-muted-foreground">
+                            DevLink App on iOS - 2 days ago
+                          </p>
                         </div>
                       </div>
                       <Button variant="ghost" size="sm" className="text-xs text-muted-foreground">
@@ -515,7 +595,9 @@ function SettingsPage() {
                       </Button>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm">Revoke all sessions</Button>
+                  <Button variant="outline" size="sm">
+                    Revoke all sessions
+                  </Button>
                 </div>
               </div>
             )}
@@ -535,7 +617,9 @@ function SettingsPage() {
                       <p className="text-sm font-medium text-foreground">Current plan</p>
                       <p className="text-xs text-muted-foreground">You are on the Pro plan</p>
                     </div>
-                    <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">Pro</span>
+                    <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
+                      Pro
+                    </span>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between text-sm">
@@ -555,7 +639,9 @@ function SettingsPage() {
                 <div className="rounded-lg border border-border p-5 space-y-3">
                   <h3 className="text-sm font-semibold text-foreground">Payment method</h3>
                   <p className="text-xs text-muted-foreground">No payment method on file</p>
-                  <Button variant="outline" size="sm">Add payment method</Button>
+                  <Button variant="outline" size="sm">
+                    Add payment method
+                  </Button>
                 </div>
               </div>
             )}

@@ -35,10 +35,30 @@ const fetchGraph = async () => {
 
 const MOCK_DATA = {
   nodes: [
-    { id: "proj_1", data: { label: "Project Alpha", type: "project" }, position: { x: 250, y: 50 }, type: "default" },
-    { id: "skill_1", data: { label: "React", type: "skill" }, position: { x: 100, y: 150 }, type: "default" },
-    { id: "skill_2", data: { label: "Python", type: "skill" }, position: { x: 400, y: 150 }, type: "default" },
-    { id: "user_1", data: { label: "Alice", type: "user" }, position: { x: 250, y: 250 }, type: "default" },
+    {
+      id: "proj_1",
+      data: { label: "Project Alpha", type: "project" },
+      position: { x: 250, y: 50 },
+      type: "default",
+    },
+    {
+      id: "skill_1",
+      data: { label: "React", type: "skill" },
+      position: { x: 100, y: 150 },
+      type: "default",
+    },
+    {
+      id: "skill_2",
+      data: { label: "Python", type: "skill" },
+      position: { x: 400, y: 150 },
+      type: "default",
+    },
+    {
+      id: "user_1",
+      data: { label: "Alice", type: "user" },
+      position: { x: 250, y: 250 },
+      type: "default",
+    },
   ],
   edges: [
     { id: "e1", source: "proj_1", target: "skill_1", label: "requires" },
@@ -62,7 +82,7 @@ function GraphView() {
   // Calculate layout simple circular or grid if no position
   const initialNodes = useMemo(() => {
     if (!data?.nodes) return [];
-    return data.nodes.map((n: any, i: number) => {
+    return data.nodes.map((n: unknown, i: number) => {
       if (n.position) return n;
       // Simple layout if no position provided by backend
       const radius = 300;
@@ -71,13 +91,20 @@ function GraphView() {
         ...n,
         position: { x: 400 + radius * Math.cos(angle), y: 300 + radius * Math.sin(angle) },
         style: {
-          background: n.data?.type === "project" ? "#3b82f6" : n.data?.type === "user" ? "#10b981" : n.data?.type === "skill" ? "#f59e0b" : "#6366f1",
+          background:
+            n.data?.type === "project"
+              ? "#3b82f6"
+              : n.data?.type === "user"
+                ? "#10b981"
+                : n.data?.type === "skill"
+                  ? "#f59e0b"
+                  : "#6366f1",
           color: "#fff",
           border: "none",
           borderRadius: "8px",
           padding: "10px",
           fontWeight: "bold",
-        }
+        },
       };
     });
   }, [data]);
@@ -135,14 +162,25 @@ function GraphView() {
         />
         <Controls />
         <Background color="#aaa" gap={16} />
-        
-        <Panel position="top-left" className="bg-surface/80 p-4 rounded-md border border-border backdrop-blur-sm">
+
+        <Panel
+          position="top-left"
+          className="bg-surface/80 p-4 rounded-md border border-border backdrop-blur-sm"
+        >
           <h3 className="font-semibold text-[14px] mb-2">Legend</h3>
           <div className="flex flex-col gap-2 text-[12px]">
-            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-sm"></div> Project</div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-emerald-500 rounded-sm"></div> User</div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-500 rounded-sm"></div> Skill</div>
-            <div className="flex items-center gap-2"><div className="w-3 h-3 bg-indigo-500 rounded-sm"></div> Organization</div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-blue-500 rounded-sm"></div> Project
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-emerald-500 rounded-sm"></div> User
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-amber-500 rounded-sm"></div> Skill
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-indigo-500 rounded-sm"></div> Organization
+            </div>
           </div>
         </Panel>
       </ReactFlow>
