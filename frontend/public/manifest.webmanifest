@@ -1,0 +1,44 @@
+{
+  "name": "DevLink — Where builders connect, collaborate and ship",
+  "short_name": "DevLink",
+  "description": "Find teammates with AI matching, run projects, chat in real time, and enter hackathons together.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d1117",
+  "theme_color": "#05b7d7",
+  "categories": ["productivity", "developer", "social"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "Your projects and activity at a glance"
+    },
+    {
+      "name": "Messages",
+      "url": "/messages",
+      "description": "Open your conversations"
+    },
+    {
+      "name": "Projects",
+      "url": "/projects",
+      "description": "Browse and manage projects"
+    }
+  ]
+}
