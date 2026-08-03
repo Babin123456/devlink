@@ -41,6 +41,48 @@ Authorization: Bearer <your_jwt_access_token>
 | `Content-Type`  | `string` | Must be `application/json` for POST, PUT, and PATCH endpoints |
 | `Authorization` | `string` | `Bearer <access_token>` for authenticated endpoints           |
 | `X-Request-ID`  | `string` | Optional unique correlation ID for tracking requests          |
+| `If-None-Match` | `string` | Optional entity tag from a previous response; see below       |
+
+---
+
+## Conditional Requests (ETag)
+
+Successful `GET` responses that return JSON or plain text carry an `ETag`
+header — a fingerprint of the response body:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+ETag: "0f1c2d3e4a5b6c7d8e9f0a1b2c3d4e5f"
+Cache-Control: private, no-cache
+Vary: Authorization
+```
+
+Send that value back on the next request for the same resource to ask the
+server whether anything changed:
+
+```http
+GET /api/projects HTTP/1.1
+Authorization: Bearer <access_token>
+If-None-Match: "0f1c2d3e4a5b6c7d8e9f0a1b2c3d4e5f"
+```
+
+If the representation is unchanged the API answers `304 Not Modified` with an
+empty body and the client should reuse the copy it already has. If it has
+changed, the full `200` payload is returned along with a new `ETag`.
+
+Notes:
+
+- `If-None-Match` accepts a comma-separated list of tags, weak validators
+  (`W/"..."`), and the `*` wildcard, per RFC 9110.
+- Only `GET` and `HEAD` are eligible. Writes are never given a validator.
+- Non-`200` responses, binary downloads, streaming responses, and endpoints
+  that set `Cache-Control: no-store` are excluded.
+- Responses larger than `ETAG_MAX_BODY_SIZE` (1 MiB by default) are sent
+  without a validator rather than buffered for hashing.
+- `Cache-Control: private` means only the end client may store the response —
+  shared proxies must not, since payloads are scoped to the authenticated user.
+- The whole feature can be turned off with `ENABLE_ETAG=false`.
 
 ---
 
