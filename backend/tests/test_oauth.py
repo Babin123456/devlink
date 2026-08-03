@@ -75,7 +75,7 @@ def test_github_login_link_existing_account(
         last_name="User",
         username="existing_user",
         email="existing@example.com",
-        password_hash=hash_password("Password123!"),
+        password_hash=hash_password("Vermilion-Kestrel97!"),
         is_active=True,
     )
     db.add(existing_user)
