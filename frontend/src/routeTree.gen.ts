@@ -45,7 +45,9 @@ import { Route as AppBuildersBuilderIdRouteImport } from './routes/_app.builders
 import { Route as AppAdminSearchAnalyticsRouteImport } from './routes/_app.admin.search-analytics'
 import { Route as AppAdminNotificationsRouteImport } from './routes/_app.admin.notifications'
 import { Route as AppAdminMaintenanceRouteImport } from './routes/_app.admin.maintenance'
+import { Route as AppAdminCommunityStatsRouteImport } from './routes/_app.admin.community-stats'
 import { Route as AppAdminAuditLogsRouteImport } from './routes/_app.admin.audit-logs'
+import { Route as AppAdminApiRequestAnalyticsRouteImport } from './routes/_app.admin.api-request-analytics'
 import { Route as AppProjectsProjectIdIssuesRouteImport } from './routes/_app.projects.$projectId.issues'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -230,11 +232,22 @@ const AppAdminMaintenanceRoute = AppAdminMaintenanceRouteImport.update({
   path: '/maintenance',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminCommunityStatsRoute = AppAdminCommunityStatsRouteImport.update({
+  id: '/community-stats',
+  path: '/community-stats',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminAuditLogsRoute = AppAdminAuditLogsRouteImport.update({
   id: '/audit-logs',
   path: '/audit-logs',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminApiRequestAnalyticsRoute =
+  AppAdminApiRequestAnalyticsRouteImport.update({
+    id: '/api-request-analytics',
+    path: '/api-request-analytics',
+    getParentRoute: () => AppAdminRoute,
+  } as any)
 const AppProjectsProjectIdIssuesRoute =
   AppProjectsProjectIdIssuesRouteImport.update({
     id: '/issues',
@@ -267,7 +280,9 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRouteWithChildren
   '/portfolio/$username': typeof PortfolioUsernameRoute
+  '/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/admin/community-stats': typeof AppAdminCommunityStatsRoute
   '/admin/maintenance': typeof AppAdminMaintenanceRoute
   '/admin/notifications': typeof AppAdminNotificationsRoute
   '/admin/search-analytics': typeof AppAdminSearchAnalyticsRoute
@@ -305,7 +320,9 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRouteWithChildren
   '/portfolio/$username': typeof PortfolioUsernameRoute
+  '/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/admin/community-stats': typeof AppAdminCommunityStatsRoute
   '/admin/maintenance': typeof AppAdminMaintenanceRoute
   '/admin/notifications': typeof AppAdminNotificationsRoute
   '/admin/search-analytics': typeof AppAdminSearchAnalyticsRoute
@@ -346,7 +363,9 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/settings': typeof AppSettingsRouteWithChildren
   '/portfolio/$username': typeof PortfolioUsernameRoute
+  '/_app/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/_app/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/_app/admin/community-stats': typeof AppAdminCommunityStatsRoute
   '/_app/admin/maintenance': typeof AppAdminMaintenanceRoute
   '/_app/admin/notifications': typeof AppAdminNotificationsRoute
   '/_app/admin/search-analytics': typeof AppAdminSearchAnalyticsRoute
@@ -387,7 +406,9 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/portfolio/$username'
+    | '/admin/api-request-analytics'
     | '/admin/audit-logs'
+    | '/admin/community-stats'
     | '/admin/maintenance'
     | '/admin/notifications'
     | '/admin/search-analytics'
@@ -425,7 +446,9 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/portfolio/$username'
+    | '/admin/api-request-analytics'
     | '/admin/audit-logs'
+    | '/admin/community-stats'
     | '/admin/maintenance'
     | '/admin/notifications'
     | '/admin/search-analytics'
@@ -465,7 +488,9 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/settings'
     | '/portfolio/$username'
+    | '/_app/admin/api-request-analytics'
     | '/_app/admin/audit-logs'
+    | '/_app/admin/community-stats'
     | '/_app/admin/maintenance'
     | '/_app/admin/notifications'
     | '/_app/admin/search-analytics'
@@ -745,11 +770,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminMaintenanceRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/community-stats': {
+      id: '/_app/admin/community-stats'
+      path: '/community-stats'
+      fullPath: '/admin/community-stats'
+      preLoaderRoute: typeof AppAdminCommunityStatsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/admin/audit-logs': {
       id: '/_app/admin/audit-logs'
       path: '/audit-logs'
       fullPath: '/admin/audit-logs'
       preLoaderRoute: typeof AppAdminAuditLogsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/api-request-analytics': {
+      id: '/_app/admin/api-request-analytics'
+      path: '/api-request-analytics'
+      fullPath: '/admin/api-request-analytics'
+      preLoaderRoute: typeof AppAdminApiRequestAnalyticsRouteImport
       parentRoute: typeof AppAdminRoute
     }
     '/_app/projects/$projectId/issues': {
@@ -763,14 +802,18 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppAdminRouteChildren {
+  AppAdminApiRequestAnalyticsRoute: typeof AppAdminApiRequestAnalyticsRoute
   AppAdminAuditLogsRoute: typeof AppAdminAuditLogsRoute
+  AppAdminCommunityStatsRoute: typeof AppAdminCommunityStatsRoute
   AppAdminMaintenanceRoute: typeof AppAdminMaintenanceRoute
   AppAdminNotificationsRoute: typeof AppAdminNotificationsRoute
   AppAdminSearchAnalyticsRoute: typeof AppAdminSearchAnalyticsRoute
 }
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminApiRequestAnalyticsRoute: AppAdminApiRequestAnalyticsRoute,
   AppAdminAuditLogsRoute: AppAdminAuditLogsRoute,
+  AppAdminCommunityStatsRoute: AppAdminCommunityStatsRoute,
   AppAdminMaintenanceRoute: AppAdminMaintenanceRoute,
   AppAdminNotificationsRoute: AppAdminNotificationsRoute,
   AppAdminSearchAnalyticsRoute: AppAdminSearchAnalyticsRoute,

@@ -9,6 +9,7 @@ from fastapi.exceptions import HTTPException, RequestValidationError
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger("devlink")
 
@@ -163,5 +164,42 @@ async def global_exception_handler(
     )
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content=payload,
+    )
+
+
+async def integrity_error_handler(
+    request: Request,
+    exc: IntegrityError,
+) -> JSONResponse:
+    """
+    Handle SQLAlchemy IntegrityError (e.g. Unique Constraint Violations) -> 409 Conflict.
+    """
+    # Extract the error detail from the exception
+    detail = str(exc.orig) if exc.orig else str(exc)
+    
+    # Generic message, but try to find the specific field if possible
+    message = "A record with this information already exists."
+    
+    # PostgreSQL duplicate key error usually looks like:
+    # duplicate key value violates unique constraint "ix_users_email"
+    # DETAIL:  Key (email)=(test@example.com) already exists.
+    if "already exists" in detail.lower() or "unique constraint" in detail.lower():
+        message = "This record already exists. Please use a unique value."
+        
+        # Try to extract the field name from the detail
+        # e.g., Key (username)=(admin) already exists.
+        match = re.search(r"Key \((.*?)\)=", detail)
+        if match:
+            field = match.group(1)
+            message = f"The {field} provided is already in use."
+
+    payload = format_error_response(
+        code="CONFLICT",
+        message=message,
+        details=detail,
+    )
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
         content=payload,
     )
