@@ -36,6 +36,8 @@ LOGIN_LIMIT = "1000000/minute" if is_testing else settings.AUTH_RATE_LIMIT
 
 LOGIN_LIMIT = "1000000/minute" if is_testing else settings.AUTH_RATE_LIMIT
 
+LOGIN_LIMIT = "1000000/minute" if is_testing else settings.AUTH_RATE_LIMIT
+
 MESSAGE_LIMIT = "1000000/minute" if is_testing else settings.MESSAGE_RATE_LIMIT
 
 SEARCH_LIMIT = "1000000/minute" if is_testing else settings.SEARCH_RATE_LIMIT
