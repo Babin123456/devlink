@@ -24,6 +24,7 @@ class UserService:
     """
 
     @staticmethod
+    @cached(ttl=300, key_prefix="user")
     def get_user(
         db: Session,
         user_id: uuid.UUID,
