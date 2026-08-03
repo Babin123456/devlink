@@ -71,6 +71,11 @@ class GitHubLoginRequest(BaseModel):
     state: str = ""
 
 
+class GoogleLoginRequest(BaseModel):
+    code: str
+    state: str = ""
+
+
 class LinkedInLoginRequest(BaseModel):
     code: str
     state: str = ""

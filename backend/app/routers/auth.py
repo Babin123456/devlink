@@ -225,7 +225,7 @@ async def github_authorize():
 import httpx  # noqa: E402
 import redis
 import secrets
-from app.schemas.auth import GitHubLoginRequest, OAuthStateResponse, MicrosoftLoginRequest  # noqa: E402
+from app.schemas.auth import GitHubLoginRequest, OAuthStateResponse, MicrosoftLoginRequest, GoogleLoginRequest  # noqa: E402
 from app.core.config import settings
 
 
@@ -940,3 +940,114 @@ async def microsoft_login(
     # 3. Call AuthService to handle the login/linking
     auth_service = AuthService(db)
     return auth_service.microsoft_login(ms_user, primary_email)
+
+
+# ==========================================================
+# Google OAuth
+# ==========================================================
+
+@router.get(
+    "/google/authorize",
+    response_model=OAuthStateResponse,
+    summary="Get Google OAuth State",
+)
+async def google_authorize():
+    """
+    Generate a CSRF state parameter for Google OAuth flow.
+    The state is stored in Redis with a 10-minute TTL.
+    """
+    state = secrets.token_urlsafe(32)
+    await oauth_redis.setex(f"oauth:state:{state}", 600, "1")
+    return OAuthStateResponse(state=state)
+
+
+@router.post(
+    "/google",
+    response_model=AuthResponse,
+    summary="Google OAuth Login",
+)
+@limiter.limit(LOGIN_LIMIT)
+async def google_login(
+    request: Request,
+    payload: GoogleLoginRequest,
+    db: Session = Depends(get_database),
+):
+    """
+    Authenticate a user via Google OAuth.
+    """
+    if not settings.GOOGLE_CLIENT_ID or not settings.GOOGLE_CLIENT_SECRET or not settings.GOOGLE_REDIRECT_URI:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Google OAuth is not configured.",
+        )
+
+    # Validate CSRF state
+    state = payload.state
+    if not state:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing OAuth state parameter.",
+        )
+
+    state_key = f"oauth:state:{state}"
+    state_valid = await oauth_redis.get(state_key)
+    if not state_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired OAuth state.",
+        )
+    await oauth_redis.delete(state_key)
+
+    # 1. Exchange code for access token
+    token_url = "https://oauth2.googleapis.com/token"
+    
+    data = {
+        "client_id": settings.GOOGLE_CLIENT_ID,
+        "client_secret": settings.GOOGLE_CLIENT_SECRET,
+        "code": payload.code,
+        "grant_type": "authorization_code",
+        "redirect_uri": settings.GOOGLE_REDIRECT_URI,
+    }
+
+    async with httpx.AsyncClient() as client:
+        token_res = await client.post(token_url, data=data)
+        if token_res.status_code != 200:
+            token_error = token_res.json() if token_res.text else {}
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=token_error.get("error_description", "Failed to exchange code for Google token."),
+            )
+
+        token_data = token_res.json()
+        access_token = token_data.get("access_token")
+        if not access_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Google token response did not contain an access token.",
+            )
+
+        # 2. Fetch user profile from Google API
+        user_res = await client.get(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        if user_res.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Failed to fetch Google profile.",
+            )
+
+        google_user = user_res.json()
+
+        primary_email = google_user.get("email")
+
+        if not primary_email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Google profile does not have an email.",
+            )
+
+    # 3. Call AuthService to handle the login/linking
+    auth_service = AuthService(db)
+    return auth_service.google_login(google_user, primary_email)
+
