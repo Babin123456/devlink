@@ -63,72 +63,25 @@ class EmailService:
         except Exception as e:
             logger.error(f"Failed to send email to {email_to}: {e}")
 
-    async def send_verification_email(self, email_to: str, username: str, verification_url: str, expire_hours: int, background_tasks: BackgroundTasks | None = None):
-        await self._send_email_async(
-            subject="Verify your DevLink email address",
-            email_to=email_to,
-            template_name="verification.html",
-            body_data={
-                "username": username,
-                "verification_url": verification_url,
-                "expire_hours": expire_hours
-            },
-            background_tasks=background_tasks
-        )
+    def send_verification_email(self, email_to: str, username: str, verification_url: str, expire_hours: int, background_tasks: BackgroundTasks | None = None):
+        from app.celery_app.tasks.email_tasks import send_verification_email_task
+        send_verification_email_task.delay(email_to, username, verification_url, expire_hours)
 
-    async def send_password_reset_email(self, email_to: str, username: str, reset_url: str, expire_hours: int, background_tasks: BackgroundTasks | None = None):
-        await self._send_email_async(
-            subject="Reset your DevLink password",
-            email_to=email_to,
-            template_name="password_reset.html",
-            body_data={
-                "username": username,
-                "reset_url": reset_url,
-                "expire_hours": expire_hours
-            },
-            background_tasks=background_tasks
-        )
+    def send_password_reset_email(self, email_to: str, username: str, reset_url: str, expire_hours: int, background_tasks: BackgroundTasks | None = None):
+        from app.celery_app.tasks.email_tasks import send_password_reset_email_task
+        send_password_reset_email_task.delay(email_to, username, reset_url, expire_hours)
 
-    async def send_invitation_email(self, email_to: str, inviter_name: str, project_name: str, invitation_url: str, background_tasks: BackgroundTasks | None = None):
-        await self._send_email_async(
-            subject=f"You've been invited to join {project_name} on DevLink",
-            email_to=email_to,
-            template_name="invitation.html",
-            body_data={
-                "inviter_name": inviter_name,
-                "project_name": project_name,
-                "invitation_url": invitation_url
-            },
-            background_tasks=background_tasks
-        )
+    def send_invitation_email(self, email_to: str, inviter_name: str, project_name: str, invitation_url: str, background_tasks: BackgroundTasks | None = None):
+        from app.celery_app.tasks.email_tasks import send_invitation_email_task
+        send_invitation_email_task.delay(email_to, inviter_name, project_name, invitation_url)
 
-    async def send_mention_email(self, email_to: str, username: str, mentioner_name: str, context_name: str, mention_text: str, context_url: str, background_tasks: BackgroundTasks | None = None):
-        await self._send_email_async(
-            subject=f"{mentioner_name} mentioned you on DevLink",
-            email_to=email_to,
-            template_name="mention.html",
-            body_data={
-                "username": username,
-                "mentioner_name": mentioner_name,
-                "context_name": context_name,
-                "mention_text": mention_text,
-                "context_url": context_url
-            },
-            background_tasks=background_tasks
-        )
+    def send_mention_email(self, email_to: str, username: str, mentioner_name: str, context_name: str, mention_text: str, context_url: str, background_tasks: BackgroundTasks | None = None):
+        from app.celery_app.tasks.email_tasks import send_mention_email_task
+        send_mention_email_task.delay(email_to, username, mentioner_name, context_name, mention_text, context_url)
 
-    async def send_app_update_email(self, email_to: str, username: str, update_title: str, update_content: str, action_url: str, background_tasks: BackgroundTasks | None = None):
-        await self._send_email_async(
-            subject=f"DevLink Update: {update_title}",
-            email_to=email_to,
-            template_name="app_update.html",
-            body_data={
-                "username": username,
-                "update_title": update_title,
-                "update_content": update_content,
-                "action_url": action_url
-            },
-            background_tasks=background_tasks
-        )
+    def send_app_update_email(self, email_to: str, username: str, update_title: str, update_content: str, action_url: str, background_tasks: BackgroundTasks | None = None):
+        from app.celery_app.tasks.email_tasks import send_app_update_email_task
+        send_app_update_email_task.delay(email_to, username, update_title, update_content, action_url)
+
 
 email_service = EmailService()
