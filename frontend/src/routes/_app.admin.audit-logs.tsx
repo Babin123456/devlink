@@ -12,7 +12,13 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, Download } from "lucide-react";
 import { format } from "date-fns";
@@ -46,16 +52,17 @@ function AuditLogsPage() {
   const handleExportCSV = () => {
     if (logs.length === 0) return;
     const header = ["ID", "Actor ID", "Action", "Entity Type", "Entity ID", "IP Address", "Date"];
-    const rows = logs.map(log => [
+    const rows = logs.map((log) => [
       log.id,
       log.actor_id || "",
       log.action,
       log.entity_type,
       log.entity_id || "",
       log.ip_address || "",
-      new Date(log.created_at).toLocaleString()
+      new Date(log.created_at).toLocaleString(),
     ]);
-    const csvContent = "data:text/csv;charset=utf-8," + [header, ...rows].map(e => e.join(",")).join("\n");
+    const csvContent =
+      "data:text/csv;charset=utf-8," + [header, ...rows].map((e) => e.join(",")).join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -67,7 +74,8 @@ function AuditLogsPage() {
 
   const handleExportJSON = () => {
     if (logs.length === 0) return;
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs, null, 2));
+    const dataStr =
+      "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs, null, 2));
     const link = document.createElement("a");
     link.setAttribute("href", dataStr);
     link.setAttribute("download", "audit_logs.json");
@@ -76,7 +84,7 @@ function AuditLogsPage() {
     link.remove();
   };
 
-  const filteredLogs = logs.filter(log => {
+  const filteredLogs = logs.filter((log) => {
     const matchesAction = filterAction === "all" || log.action === filterAction;
     const matchesSearch =
       search === "" ||
@@ -156,7 +164,10 @@ function AuditLogsPage() {
                     <TableCell className="whitespace-nowrap">
                       {format(new Date(log.created_at), "MMM d, HH:mm:ss")}
                     </TableCell>
-                    <TableCell className="font-medium truncate max-w-[120px]" title={log.actor_id ?? ""}>
+                    <TableCell
+                      className="font-medium truncate max-w-[120px]"
+                      title={log.actor_id ?? ""}
+                    >
                       {log.actor_id || "System"}
                     </TableCell>
                     <TableCell>

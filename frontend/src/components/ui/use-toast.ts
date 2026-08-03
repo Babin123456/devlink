@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { toast as sonnerToast, ExternalToast } from "sonner";
 
@@ -53,7 +52,7 @@ function dispatch(action: ActionType) {
       break;
     case "UPDATE_TOAST":
       memoryState.toasts = memoryState.toasts.map((t) =>
-        t.id === action.toast.id ? { ...t, ...action.toast } : t
+        t.id === action.toast.id ? { ...t, ...action.toast } : t,
       );
       break;
     case "DISMISS_TOAST": {
@@ -72,7 +71,7 @@ function dispatch(action: ActionType) {
           ? {
               ...t,
             }
-          : t
+          : t,
       );
       break;
     }

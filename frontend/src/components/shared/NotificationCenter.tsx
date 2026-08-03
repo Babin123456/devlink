@@ -103,7 +103,7 @@ export function NotificationCenter() {
     const token = localStorage.getItem("token") || "";
     // Connect to collab ws as that handles personal messages too? Actually there's websocket_collab and websocket_chat.
     // For now we'll just periodically refetch or use simple polling if ws is not fully configured for notifications globally.
-    // Assuming backend emits to /ws/chat?token= or similar. 
+    // Assuming backend emits to /ws/chat?token= or similar.
     // We'll rely on react-query polling or simple invalidation.
     const interval = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });

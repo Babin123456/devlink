@@ -371,6 +371,12 @@ app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(StructuredLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
+
+from app.middleware.etag import ETagMiddleware
+
+# Sits outside the security headers middleware so a 304 still carries them.
+app.add_middleware(ETagMiddleware)
+
 app.add_middleware(ActivityTrackingMiddleware)
 app.add_middleware(MaintenanceMiddleware)
 
