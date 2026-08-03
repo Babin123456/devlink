@@ -101,6 +101,19 @@ class UserCreate(UserBase):
         max_length=128,
     )
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "username": "janedoe",
+                "email": "jane.doe@example.com",
+                "password": "StrongPassword123!",
+                "open_to_work": True
+            }
+        }
+    )
+
 
 # ==========================================================
 # Update User
@@ -132,6 +145,19 @@ class UserUpdate(BaseModel):
     is_private: Optional[bool] = None
     privacy_settings: Optional[PrivacySettingsUpdate] = None
     availability: Optional[list[AvailabilitySlot]] = None
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "first_name": "Jane",
+                "last_name": "Smith",
+                "headline": "Senior Full-Stack Developer",
+                "bio": "I love building scalable web applications.",
+                "location": "San Francisco, CA",
+                "github_url": "https://github.com/janesmith"
+            }
+        }
+    )
 
 
 # ==========================================================
