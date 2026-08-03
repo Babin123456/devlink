@@ -371,6 +371,9 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(ActivityTrackingMiddleware)
 app.add_middleware(MaintenanceMiddleware)
 
+from app.middleware.request_validation import RequestValidationMiddleware
+app.add_middleware(RequestValidationMiddleware)
+
 from app.middleware.audit_context import AuditContextMiddleware
 
 app.add_middleware(AuditContextMiddleware)
