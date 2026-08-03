@@ -374,7 +374,10 @@ class ProjectService:
             db.scalar(
                 select(func.count())
                 .select_from(Bookmark)
-                .where(Bookmark.project_id == project_id)
+                .where(
+                    Bookmark.target_type == "project",
+                    Bookmark.target_id == project_id,
+                )
             )
             or 0
         )

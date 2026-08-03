@@ -8,7 +8,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
 
-
 class MaintenanceWindow(Base):
     __tablename__ = "maintenance_windows"
 

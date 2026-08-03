@@ -1,0 +1,61 @@
+name: sdk-generation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ["v*"]
+
+jobs:
+  generate-sdks:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install backend dependencies
+        run: pip install -r requirements.txt
+
+      - name: Export OpenAPI schema
+        run: python scripts/export_openapi.py
+
+      - name: Generate SDKs
+        run: python scripts/generate_sdks.py
+
+      - name: Verify generated SDKs
+        run: |
+          test -f ../clients/openapi.json
+          test -f ../clients/typescript/src/api/generated.ts
+          test -d ../clients/python/devlink_api_client
+
+      - name: Commit generated SDKs
+        if: github.event_name == 'push'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(sdk): regenerate OpenAPI SDKs [skip ci]"
+          file_pattern: "clients/*"
+          commit_user_name: "devlink-bot"
+          commit_user_email: "devlink-bot@users.noreply.github.com"
+
+      - name: Create release artifacts
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: devlink-sdks-${{ github.ref_name }}
+          path: |
+            clients/typescript
+            clients/python

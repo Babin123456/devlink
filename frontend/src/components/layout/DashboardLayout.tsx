@@ -12,11 +12,12 @@ export function DashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <div className="grid h-screen w-full bg-background overflow-hidden
+    <div
+      className="grid h-screen w-full bg-background overflow-hidden
       grid-cols-1 
       md:grid-cols-[max-content_1fr] 
-      xl:grid-cols-[max-content_1fr_max-content]">
-      
+      xl:grid-cols-[max-content_1fr_max-content]"
+    >
       {/* ─── Desktop & Tablet Sidebar ─────────────────────────────── */}
       <Sidebar />
 

@@ -49,9 +49,9 @@ function ProjectDetail() {
     queryKey: ["project", projectId],
     queryFn: () => projectsService.get(projectId),
   });
-  const [tab, setTab] = useState<"overview" | "workspace" | "members" | "activity" | "repos" | "dashboard">(
-    "overview",
-  );
+  const [tab, setTab] = useState<
+    "overview" | "workspace" | "members" | "activity" | "repos" | "dashboard"
+  >("overview");
   const [copied, setCopied] = useState(false);
   const isOwner = p?.owner === currentUser.name;
 
@@ -299,7 +299,11 @@ function ProjectDetail() {
       )}
       {tab === "members" && (
         <Card className="p-6">
-          <ProjectMembersList projectId={projectId} currentUserId={currentUser.id} isOwner={isOwner} />
+          <ProjectMembersList
+            projectId={projectId}
+            currentUserId={currentUser.id}
+            isOwner={isOwner}
+          />
         </Card>
       )}
       {tab === "activity" && (
@@ -327,9 +331,7 @@ function ProjectDetail() {
           </div>
         </Card>
       )}
-      {tab === "workspace" && (
-        <CollaborativeWorkspace projectId={projectId} />
-      )}
+      {tab === "workspace" && <CollaborativeWorkspace projectId={projectId} />}
       {tab === "dashboard" && (
         <ProjectDashboard projectId={projectId} currentUserRole={currentUserRole} />
       )}

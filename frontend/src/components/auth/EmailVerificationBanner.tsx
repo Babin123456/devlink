@@ -71,7 +71,7 @@ export function EmailVerificationBanner({
       aria-label="Email verification reminder"
       className={cn(
         "relative w-full bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border-b border-amber-500/30 px-4 py-3 text-amber-950 dark:text-amber-100 backdrop-blur-sm transition-all",
-        className
+        className,
       )}
     >
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
@@ -80,7 +80,8 @@ export function EmailVerificationBanner({
             <Mail className="h-4 w-4" aria-hidden="true" />
           </span>
           <p className="font-medium leading-tight">
-            <strong className="font-semibold">Verify your email address:</strong> Please check your inbox
+            <strong className="font-semibold">Verify your email address:</strong> Please check your
+            inbox
             {userEmail ? ` (${userEmail})` : ""} to activate all account capabilities.
           </p>
         </div>
