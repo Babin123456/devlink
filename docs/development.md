@@ -47,16 +47,18 @@ devlink/
 ## 2. Coding Style
 
 ### Frontend Guidelines
-* **TypeScript First**: Strict mode enabled. Explicitly type component props, hook return values, and API responses. Avoid using `any`.
-* **Functional Components**: Write functional React components using hooks.
-* **Component Modularity**: Keep components small, focused, and organized by feature directory.
-* **Styling**: Use utility classes (Tailwind CSS v4) adhering to existing spacing, color palette, and typography design tokens.
+
+- **TypeScript First**: Strict mode enabled. Explicitly type component props, hook return values, and API responses. Avoid using `any`.
+- **Functional Components**: Write functional React components using hooks.
+- **Component Modularity**: Keep components small, focused, and organized by feature directory.
+- **Styling**: Use utility classes (Tailwind CSS v4) adhering to existing spacing, color palette, and typography design tokens.
 
 ### Backend Guidelines
-* **PEP 8 Compliance**: Follow standard Python code formatting.
-* **Type Hints**: Annotate all function signatures and parameters using type annotations.
-* **Pydantic Validation**: Pass incoming JSON payloads through Pydantic schemas before processing in service layers.
-* **Explicit Exceptions**: Raise appropriate HTTPExceptions (e.g. `400 Bad Request`, `401 Unauthorized`, `404 Not Found`) with descriptive details.
+
+- **PEP 8 Compliance**: Follow standard Python code formatting.
+- **Type Hints**: Annotate all function signatures and parameters using type annotations.
+- **Pydantic Validation**: Pass incoming JSON payloads through Pydantic schemas before processing in service layers.
+- **Explicit Exceptions**: Raise appropriate HTTPExceptions (e.g. `400 Bad Request`, `401 Unauthorized`, `404 Not Found`) with descriptive details.
 
 ---
 
@@ -135,14 +137,16 @@ pytest --cov=app tests/
 ## 5. Debugging
 
 ### Debugging the Frontend
-* **React Developer Tools**: Inspect component hierarchy, props, state, and context values.
-* **Browser Console & Network Tab**: Monitor outgoing API requests, HTTP status responses, payload formatting, and console output.
-* **VS Code Debugger**: Add launch configuration for Chrome/Edge debugging in `.vscode/launch.json`.
+
+- **React Developer Tools**: Inspect component hierarchy, props, state, and context values.
+- **Browser Console & Network Tab**: Monitor outgoing API requests, HTTP status responses, payload formatting, and console output.
+- **VS Code Debugger**: Add launch configuration for Chrome/Edge debugging in `.vscode/launch.json`.
 
 ### Debugging the Backend
-* **FastAPI Auto-Reload & Logs**: View server logs directly in the terminal where `uvicorn app.main:app --reload` is running.
-* **Python Debugger (`breakpoint()`)**: Insert standard `breakpoint()` calls in Python service or router files to pause execution and inspect variables in the terminal shell.
-* **VS Code FastAPI Debugger**: Configure `.vscode/launch.json`:
+
+- **FastAPI Auto-Reload & Logs**: View server logs directly in the terminal where `uvicorn app.main:app --reload` is running.
+- **Python Debugger (`breakpoint()`)**: Insert standard `breakpoint()` calls in Python service or router files to pause execution and inspect variables in the terminal shell.
+- **VS Code FastAPI Debugger**: Configure `.vscode/launch.json`:
 
 ```json
 {
@@ -164,6 +168,7 @@ pytest --cov=app tests/
 ---
 
 ## Related Documents
-* [Architecture Documentation](architecture.md)
-* [Deployment Guide](deployment.md)
-* [Coding Standards](coding-standards.md)
+
+- [Architecture Documentation](architecture.md)
+- [Deployment Guide](deployment.md)
+- [Coding Standards](coding-standards.md)

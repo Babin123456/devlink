@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { TechStackSuggest } from "./TechStackSuggest";
 
 interface Props {
   open: boolean;
@@ -28,10 +29,24 @@ export function CreateProjectDialog({ open, onOpenChange }: Props) {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<CreateProjectFormData>({
     resolver: zodResolver(createProjectSchema),
   });
+
+  const projectIdea = watch("description") ?? "";
+
+  function applyTechStack(techs: string[]) {
+    if (techs.length === 0) return;
+    const existing = (watch("tech_stack") ?? "")
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const merged = Array.from(new Set([...existing, ...techs]));
+    setValue("tech_stack", merged.join(", "), { shouldValidate: false });
+  }
 
   function handleClose() {
     reset();
@@ -142,7 +157,10 @@ export function CreateProjectDialog({ open, onOpenChange }: Props) {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5 sm:space-y-4 overflow-y-auto pr-1">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-3.5 sm:space-y-4 overflow-y-auto pr-1"
+          >
             <div className="space-y-1.5">
               <Label className="text-[12px] text-muted-foreground">Title</Label>
               <Input
@@ -176,6 +194,8 @@ export function CreateProjectDialog({ open, onOpenChange }: Props) {
                 <p className="text-[11px] text-destructive">{errors.description.message}</p>
               )}
             </div>
+
+            <TechStackSuggest projectIdea={projectIdea} onSelect={applyTechStack} />
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
@@ -245,7 +265,12 @@ export function CreateProjectDialog({ open, onOpenChange }: Props) {
             </div>
 
             <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2 border-t border-border sm:border-0">
-              <Button type="button" variant="outline" onClick={handleClose} className="w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                className="w-full sm:w-auto"
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={submitting} className="w-full sm:w-auto">

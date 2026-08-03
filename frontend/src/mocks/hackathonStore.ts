@@ -21,7 +21,7 @@ import {
 let hackathons: Hackathon[] = seedHackathons.map((h) => ({ ...h }));
 let teams: HackathonTeam[] = seedTeams.map((t) => ({ ...t }));
 let submissions: HackathonSubmission[] = seedSubmissions.map((s) => ({ ...s }));
-let leaderboard: HackathonLeaderboardEntry[] = seedLeaderboard.map((e) => ({ ...e }));
+const leaderboard: HackathonLeaderboardEntry[] = seedLeaderboard.map((e) => ({ ...e }));
 const registrations = new Set<string>(); // "hackathonId:userId"
 
 function uuid(): string {
@@ -91,9 +91,7 @@ export const hackathonStore = {
 
   async joinTeam(teamId: string): Promise<void> {
     await delay();
-    teams = teams.map((t) =>
-      t.id === teamId ? { ...t, member_count: t.member_count + 1 } : t,
-    );
+    teams = teams.map((t) => (t.id === teamId ? { ...t, member_count: t.member_count + 1 } : t));
   },
 
   async leaveTeam(teamId: string): Promise<void> {
@@ -153,9 +151,7 @@ export const hackathonStore = {
 
   // ── Leaderboard ───────────────────────────────────────────────────────────
   getLeaderboard(hackathonId: string): HackathonLeaderboardEntry[] {
-    const hackathonTeamIds = teams
-      .filter((t) => t.hackathon_id === hackathonId)
-      .map((t) => t.id);
+    const hackathonTeamIds = teams.filter((t) => t.hackathon_id === hackathonId).map((t) => t.id);
     return leaderboard.filter((e) => hackathonTeamIds.includes(e.team_id));
   },
 };

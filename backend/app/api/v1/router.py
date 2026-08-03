@@ -4,6 +4,7 @@ from app.routers import (
     activities,
     applications,
     auth,
+    backup,
     blocks,
     bookmark_collections,
     bookmarks,
@@ -15,20 +16,28 @@ from app.routers import (
     followers,
     hackathons,
     health,
-    issues,
     messages,
+    mfa,
     notifications,
+    oauth_linking,
+    org_audit_logs,
     organizations,
     profile_summary,
+    profile_suggestions,
+    project_members,
     project_tags,
+    project_documents,
+    project_dashboards,
     projects,
     recommendations,
     repositories,
     repository_quality,
     saved_searches,
     search,
+    security_dashboard,
     skills,
     users,
+    webhooks,
     websockets,
 )
 
@@ -51,14 +60,25 @@ async def v1_root():
 
 # Router inclusions under /api/v1
 api_v1_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_v1_router.include_router(mfa.router)
+api_v1_router.include_router(oauth_linking.router)
 api_v1_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_v1_router.include_router(blocks.router, prefix="/blocks", tags=["User Blocks"])
 api_v1_router.include_router(export.router, prefix="/users", tags=["Export"])
+api_v1_router.include_router(backup.router)
 api_v1_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
+api_v1_router.include_router(project_members.router)
+api_v1_router.include_router(project_documents.router)
+api_v1_router.include_router(project_dashboards.router)
 api_v1_router.include_router(
     builder_flares.router, prefix="/flare", tags=["Builder's Flare"]
 )
 api_v1_router.include_router(messages.router, prefix="/messages", tags=["Messages"])
+api_v1_router.include_router(
+    organizations.router, prefix="/organizations", tags=["Organizations"]
+)
+api_v1_router.include_router(org_audit_logs.router)
+api_v1_router.include_router(webhooks.router)
 api_v1_router.include_router(
     notifications.router, prefix="/notifications", tags=["Notifications"]
 )
@@ -67,9 +87,14 @@ api_v1_router.include_router(bookmarks.router)
 api_v1_router.include_router(bookmark_collections.router)
 api_v1_router.include_router(activities.router)
 api_v1_router.include_router(conversations.router)
-api_v1_router.include_router(issues.router, prefix="/issues", tags=["Issues"])
 api_v1_router.include_router(
     profile_summary.router, prefix="/profile-summary", tags=["Profile Summary"]
+)
+api_v1_router.include_router(
+    profile_suggestions.router, prefix="/profile-suggestions", tags=["Profile Suggestions"]
+)
+api_v1_router.include_router(
+    profile_suggestions.router, prefix="/users/me/profile-suggestions", tags=["Profile Suggestions"]
 )
 api_v1_router.include_router(
     conversation_starters.router,
@@ -94,6 +119,7 @@ api_v1_router.include_router(repository_quality.router, tags=["Repository Qualit
 api_v1_router.include_router(health.router)
 api_v1_router.include_router(search.router, prefix="/search", tags=["Search"])
 api_v1_router.include_router(saved_searches.router)
+api_v1_router.include_router(security_dashboard.router)
 api_v1_router.include_router(
     hackathons.router, prefix="/hackathons", tags=["Hackathons"]
 )

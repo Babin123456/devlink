@@ -34,8 +34,14 @@ export function CreateTeamDialog({ hackathonId, open, onOpenChange, onCreated }:
 
   async function handleCreate() {
     const trimmed = name.trim();
-    if (!trimmed) { setNameError("Team name is required."); return; }
-    if (trimmed.length < 2) { setNameError("Must be at least 2 characters."); return; }
+    if (!trimmed) {
+      setNameError("Team name is required.");
+      return;
+    }
+    if (trimmed.length < 2) {
+      setNameError("Must be at least 2 characters.");
+      return;
+    }
 
     setNameError("");
     setLoading(true);
@@ -67,18 +73,26 @@ export function CreateTeamDialog({ hackathonId, open, onOpenChange, onCreated }:
 
         <div className="space-y-3">
           <div>
-            <label htmlFor="team-name" className="mb-1.5 block text-[13px] font-medium text-foreground">
+            <label
+              htmlFor="team-name"
+              className="mb-1.5 block text-[13px] font-medium text-foreground"
+            >
               Team name <span className="text-destructive">*</span>
             </label>
             <input
               id="team-name"
               value={name}
-              onChange={(e) => { setName(e.target.value); setNameError(""); }}
+              onChange={(e) => {
+                setName(e.target.value);
+                setNameError("");
+              }}
               onKeyDown={(e) => e.key === "Enter" && handleCreate()}
               placeholder="e.g. Neural Nexus"
               maxLength={100}
               className={`w-full rounded-md border bg-surface px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/20 ${
-                nameError ? "border-destructive focus:border-destructive" : "border-border focus:border-primary"
+                nameError
+                  ? "border-destructive focus:border-destructive"
+                  : "border-border focus:border-primary"
               }`}
               autoFocus
             />
@@ -86,7 +100,10 @@ export function CreateTeamDialog({ hackathonId, open, onOpenChange, onCreated }:
           </div>
 
           <div>
-            <label htmlFor="team-desc" className="mb-1.5 block text-[13px] font-medium text-foreground">
+            <label
+              htmlFor="team-desc"
+              className="mb-1.5 block text-[13px] font-medium text-foreground"
+            >
               Description <span className="font-normal text-muted-foreground">(optional)</span>
             </label>
             <textarea

@@ -24,16 +24,28 @@ export const authApi = {
     tokenStore.set(res.access_token, res.refresh_token);
     return res;
   },
-async login(input: { email: string; password: string }) {
+  async login(input: { email: string; password: string }) {
     const res = await api.post<AuthResponse>("/api/auth/login", input, { auth: false });
     tokenStore.set(res.access_token, res.refresh_token);
     return res;
   },
-  async githubLogin(code: string) {
-    const res = await api.post<AuthResponse>("/api/auth/github", { code }, { auth: false });
+  async githubLogin(code: string, state: string) {
+    const res = await api.post<AuthResponse>("/api/auth/github", { code, state }, { auth: false });
     tokenStore.set(res.access_token, res.refresh_token);
     return res;
-  },  async logout() {
+  },
+  async linkedinLogin(code: string, state: string) {
+    const res = await api.post<AuthResponse>(
+      "/api/auth/linkedin",
+      { code, state },
+      { auth: false },
+    );
+    tokenStore.set(res.access_token, res.refresh_token);
+    return res;
+  },
+  oauthAuthorize: (provider: "github" | "linkedin") =>
+    api.get<{ state: string }>(`/api/auth/${provider}/authorize`, { auth: false }),
+  async logout() {
     try {
       await api.post<void>("/api/auth/logout", { refresh_token: tokenStore.getRefresh() });
     } finally {

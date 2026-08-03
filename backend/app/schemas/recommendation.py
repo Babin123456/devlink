@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import uuid
+from typing import Optional
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 # ==========================================================
 # Lightweight Project Response for Recommendations
@@ -70,15 +71,6 @@ class RecommendationList(BaseModel):
     recommendations: list[ProjectRecommendation]
     total: int
 
-
-"""
-Pydantic schemas for the AI-Powered Builder Recommendation System.
-"""
-import uuid
-from typing import Optional
-
-# pyrefly: ignore [missing-import]
-from pydantic import BaseModel, ConfigDict, Field
 
 # ==========================================================
 # Score Breakdown

@@ -2,6 +2,7 @@ from uuid import UUID
 
 # pyrefly: ignore [missing-import]
 import uuid
+import redis
 from fastapi import (
     APIRouter,
     Depends,
@@ -24,9 +25,8 @@ from sqlalchemy.orm import Session
 
 from app.middleware.rate_limit import (
     limiter,
+    AUTH_LIMIT,
     LOGIN_LIMIT,
-    PASSWORD_RESET_LIMIT,
-    REGISTER_LIMIT,
 )
 from app.dependencies import get_database
 from app.schemas.auth import (
@@ -49,6 +49,7 @@ from app.schemas.auth import (
 )
 from app.schemas.user import CurrentUser
 from app.services.auth_service import AuthService
+from app.services.email_service import EmailService
 
 router = APIRouter(
     tags=["Authentication"],
@@ -65,7 +66,7 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
 )
-@limiter.limit(REGISTER_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 def register(
     request: Request,
     payload: RegisterRequest,
@@ -92,7 +93,7 @@ def register(
     response_model=AuthResponse,
     summary="Login",
 )
-@limiter.limit(LOGIN_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 def login(
     request: Request,
     payload: LoginRequest,
@@ -187,8 +188,45 @@ def logout(
     return auth_service.logout(user_id, refresh_token_str=refresh_token_str)
 
 
+oauth_redis = redis.from_url(settings.REDIS_URL, decode_responses=True)
+
+
 import httpx  # noqa: E402
-from app.schemas.auth import GitHubLoginRequest  # noqa: E402
+from app.schemas.auth import (
+    GitHubLoginRequest,
+    LinkedInLoginRequest,
+    OAuthStateResponse,
+)  # noqa: E402
+
+# ==========================================================
+# GitHub OAuth Authorization (CSRF State)
+# ==========================================================
+
+# Redis client for OAuth state storage
+oauth_redis = redis.from_url(settings.REDIS_URL, decode_responses=True)
+
+
+@router.get(
+    "/github/authorize",
+    response_model=OAuthStateResponse,
+    summary="Get GitHub OAuth State",
+)
+async def github_authorize():
+    """
+    Generate a CSRF state parameter for GitHub OAuth flow.
+    The state is stored in Redis with a 10-minute TTL.
+    Frontend should include this state when redirecting to GitHub's authorize URL.
+    """
+    state = secrets.token_urlsafe(32)
+    await oauth_redis.setex(f"oauth:state:{state}", 600, "1")
+    return OAuthStateResponse(state=state)
+
+
+import httpx  # noqa: E402
+import redis
+import secrets
+from app.schemas.auth import GitHubLoginRequest, OAuthStateResponse  # noqa: E402
+from app.core.config import settings
 
 
 @router.post(
@@ -210,6 +248,23 @@ async def github_login(
             status_code=status.HTTP_501_NOT_IMPLEMENTED,
             detail="GitHub OAuth is not configured.",
         )
+
+    # Validate CSRF state
+    state = payload.state
+    if not state:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing OAuth state parameter.",
+        )
+
+    state_key = f"oauth:state:{state}"
+    state_valid = await oauth_redis.get(state_key)
+    if not state_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired OAuth state.",
+        )
+    await oauth_redis.delete(state_key)
 
     # 1. Exchange code for access token
     token_url = "https://github.com/login/oauth/access_token"
@@ -279,6 +334,107 @@ async def github_login(
 
 
 # ==========================================================
+# LinkedIn OAuth Authorization (CSRF State)
+# ==========================================================
+
+
+@router.get(
+    "/linkedin/authorize",
+    response_model=OAuthStateResponse,
+    summary="Get LinkedIn OAuth State",
+)
+async def linkedin_authorize():
+    state = secrets.token_urlsafe(32)
+    await oauth_redis.setex(f"oauth:state:{state}", 600, "1")
+    return OAuthStateResponse(state=state)
+
+
+# ==========================================================
+# LinkedIn OAuth Login
+# ==========================================================
+
+
+@router.post(
+    "/linkedin",
+    response_model=AuthResponse,
+    summary="LinkedIn OAuth Login",
+)
+@limiter.limit(LOGIN_LIMIT)
+async def linkedin_login(
+    request: Request,
+    payload: LinkedInLoginRequest,
+    db: Session = Depends(get_database),
+):
+    if not settings.LINKEDIN_CLIENT_ID or not settings.LINKEDIN_CLIENT_SECRET:
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="LinkedIn OAuth is not configured.",
+        )
+
+    state = payload.state
+    if not state:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing OAuth state parameter.",
+        )
+    state_key = f"oauth:state:{state}"
+    state_valid = await oauth_redis.get(state_key)
+    if not state_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired OAuth state.",
+        )
+    await oauth_redis.delete(state_key)
+
+    token_url = "https://www.linkedin.com/oauth/v2/accessToken"
+    headers = {"Accept": "application/json"}
+    data = {
+        "client_id": settings.LINKEDIN_CLIENT_ID,
+        "client_secret": settings.LINKEDIN_CLIENT_SECRET,
+        "code": payload.code,
+        "grant_type": "authorization_code",
+        "redirect_uri": "",
+    }
+
+    async with httpx.AsyncClient() as client:
+        token_res = await client.post(token_url, data=data, headers=headers)
+        if token_res.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Failed to exchange code for LinkedIn token.",
+            )
+        token_data = token_res.json()
+        if "error" in token_data:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=token_data.get("error_description", "Invalid LinkedIn code."),
+            )
+
+        access_token = token_data["access_token"]
+
+        user_res = await client.get(
+            "https://api.linkedin.com/v2/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        if user_res.status_code != 200:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Failed to fetch LinkedIn profile.",
+            )
+        linkedin_user = user_res.json()
+
+        primary_email = linkedin_user.get("email")
+        if not primary_email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A verified email is required for LinkedIn login.",
+            )
+
+    auth_service = AuthService(db)
+    return auth_service.linkedin_login(linkedin_user, primary_email)
+
+
+# ==========================================================
 # Current User
 # ==========================================================
 
@@ -288,7 +444,7 @@ async def github_login(
     response_model=CurrentUserResponse,
     summary="Current authenticated user",
 )
-@limiter.limit("30/minute")
+@limiter.limit(AUTH_LIMIT)
 def me(
     request: Request,
     user_id: str = Depends(get_current_user_id),
@@ -310,7 +466,7 @@ def me(
     response_model=AuthResponse,
     summary="Refresh JWT",
 )
-@limiter.limit("10/minute")
+@limiter.limit(AUTH_LIMIT)
 def refresh(
     request: Request,
     payload: RefreshTokenRequest,
@@ -347,7 +503,7 @@ def refresh(
     response_model=LogoutResponse,
     summary="Logout",
 )
-@limiter.limit("10/minute")
+@limiter.limit(AUTH_LIMIT)
 def logout(
     request: Request,
     payload: LogoutRequest,
@@ -528,7 +684,7 @@ from app.schemas.auth import (  # noqa: E402
     response_model=SuccessResponse,
     summary="Change Password",
 )
-@limiter.limit("5/minute")
+@limiter.limit(AUTH_LIMIT)
 def change_password(
     request: Request,
     payload: ChangePasswordRequest,
@@ -555,7 +711,7 @@ def change_password(
     response_model=ForgotPasswordResponse,
     summary="Forgot Password",
 )
-@limiter.limit(PASSWORD_RESET_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 def forgot_password(
     request: Request,
     payload: ForgotPasswordRequest,
@@ -579,7 +735,7 @@ def forgot_password(
     response_model=SuccessResponse,
     summary="Reset Password",
 )
-@limiter.limit(PASSWORD_RESET_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 def reset_password(
     request: Request,
     payload: ResetPasswordRequest,
@@ -602,7 +758,7 @@ def reset_password(
     response_model=VerifyEmailResponse,
     summary="Verify Email",
 )
-@limiter.limit("5/minute")
+@limiter.limit(AUTH_LIMIT)
 def verify_email(
     request: Request,
     payload: VerifyEmailRequest,
@@ -637,18 +793,12 @@ def verify_email(
     response_model=SuccessResponse,
     summary="Resend Verification Email",
 )
-@limiter.limit("3/hour")
+@limiter.limit(AUTH_LIMIT)
 def resend_verification(
     request: Request,
     payload: ResendVerificationEmailRequest,
     db: Session = Depends(get_database),
 ):
-    """
-    Placeholder.
-
-    Email sending will be implemented after the
-    SMTP service is added.
-    """
 
     auth_service = AuthService(db)
 
@@ -662,11 +812,32 @@ def resend_verification(
             "message": ("If the account exists, a verification email has been sent."),
         }
 
-    # Generate verification token
-    token = create_verification_token(str(user.id))  # noqa: F841
-    create_verification_token(str(user.id))
-    # TODO:
-    # Send email via SMTP
+    if user.is_verified:
+        return {
+            "success": True,
+            "message": "Your email is already verified.",
+        }
+
+    token = create_verification_token(str(user.id))
+    verify_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+
+    html = f"""
+    <html>
+        <body>
+            <h2>Verify Your Email</h2>
+            <p>Click the link below to verify your email address:</p>
+            <p><a href="{verify_url}">Verify Email</a></p>
+            <p>This link expires in 24 hours.</p>
+            <br/>
+            <p>Thanks,<br/>The DevLink Team</p>
+        </body>
+    </html>
+    """
+    EmailService.send_email(
+        to_email=user.email,
+        subject="Verify Your Email - DevLink",
+        html_content=html,
+    )
 
     return {
         "success": True,

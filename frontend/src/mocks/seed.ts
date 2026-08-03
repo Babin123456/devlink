@@ -232,7 +232,6 @@ export const builders: Builder[] = [
         role: "React Developer",
         duration: "2021-2023",
       },
-
     ],
     education: [
       {
@@ -243,19 +242,18 @@ export const builders: Builder[] = [
     ],
     activityTimeline: [
       {
-        title:"Joined DevLink",
+        title: "Joined DevLink",
         date: "Jan 2024",
       },
       {
-        title:"Created AI Chatbot",
+        title: "Created AI Chatbot",
         date: "Mar 2024",
       },
       {
-        title:"Reached 200 Followers",
+        title: "Reached 200 Followers",
         date: "Jul 2024",
       },
-
-    ]
+    ],
   },
   {
     id: "b2",

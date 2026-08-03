@@ -1,3 +1,5 @@
+import os
+import sys
 from functools import lru_cache
 
 # pyrefly: ignore [missing-import]
@@ -56,7 +58,13 @@ class Settings(BaseSettings):
     # Database
     # ==========================================================
 
-    DATABASE_URL: str = "postgresql+psycopg://postgres:password@localhost:5432/devlink"
+    DATABASE_URL: str = Field(
+        default_factory=lambda: (
+            "sqlite:///:memory:"
+            if os.getenv("TESTING") == "true" or "pytest" in sys.modules
+            else "postgresql+psycopg://postgres:password@localhost:5432/devlink"
+        )
+    )
 
     # ==========================================================
     # Redis
@@ -96,6 +104,9 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
 
+    LINKEDIN_CLIENT_ID: str = ""
+    LINKEDIN_CLIENT_SECRET: str = ""
+
     # ==========================================================
     # Uploads
     # ==========================================================
@@ -111,6 +122,14 @@ class Settings(BaseSettings):
     MEDIA_MAX_DIMENSION: int = 1200
     MEDIA_THUMB_DIMENSION: int = 200
     CDN_BASE_URL: str | None = None
+
+    # Cloud Storage (S3 / R2)
+    STORAGE_PROVIDER: str = "local" # local, s3, r2
+    AWS_ACCESS_KEY_ID: str | None = None
+    AWS_SECRET_ACCESS_KEY: str | None = None
+    AWS_REGION: str | None = None
+    AWS_BUCKET_NAME: str | None = None
+    R2_ACCOUNT_ID: str | None = None
 
     # ==========================================================
     # AI
@@ -129,26 +148,72 @@ class Settings(BaseSettings):
     # Rate Limiting
     # ==========================================================
 
+    ENABLE_RATE_LIMIT: bool = True
     DEFAULT_RATE_LIMIT: str = "100/minute"
+    AUTH_RATE_LIMIT: str = "5/minute"
     LOGIN_RATE_LIMIT: str = "5/minute"
     REGISTER_RATE_LIMIT: str = "3/hour"
+    SEARCH_RATE_LIMIT: str = "30/minute"
+    UPLOAD_RATE_LIMIT: str = "10/minute"
     MESSAGE_RATE_LIMIT: str = "30/minute"
-    SEARCH_RATE_LIMIT: str = "60/minute"
     PROJECT_RATE_LIMIT: str = "100/minute"
     PASSWORD_RESET_RATE_LIMIT: str = "3/15minutes"
     COMMENT_RATE_LIMIT: str = "30/minute"
     RECOMMENDATION_RATE_LIMIT: str = "20/minute"
 
     # ==========================================================
+    # Request Tracing / Correlation IDs
+    # ==========================================================
+
+    CORRELATION_ID_HEADER: str = "X-Correlation-ID"
+    REQUEST_ID_HEADER: str = "X-Request-ID"
+    ENABLE_REQUEST_TRACING: bool = True
+
+    # ==========================================================
     # Security Headers
     # ==========================================================
 
     ENABLE_HSTS: bool = True
+    HSTS_HEADER_VALUE: str = "max-age=63072000; includeSubDomains; preload"
+
     ENABLE_CSP: bool = True
+    CSP_HEADER_VALUE: str = (
+        "default-src 'self'; "
+        "script-src 'self'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' https: data:; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none'; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self';"
+    )
+
     ENABLE_X_FRAME_OPTIONS: bool = True
+    X_FRAME_OPTIONS_VALUE: str = "DENY"
+
     ENABLE_X_CONTENT_TYPE_OPTIONS: bool = True
+
+    ENABLE_REFERRER_POLICY: bool = True
+    REFERRER_POLICY_VALUE: str = "strict-origin-when-cross-origin"
+
+    ENABLE_PERMISSIONS_POLICY: bool = True
+    PERMISSIONS_POLICY_VALUE: str = (
+        "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+    )
+
     ENABLE_DNS_PREFETCH_CONTROL: bool = True
     ENABLE_CROSS_DOMAIN_POLICIES: bool = True
+
+    ENABLE_COOP: bool = True
+    CROSS_ORIGIN_OPENER_POLICY: str = "same-origin"
+
+    ENABLE_CORP: bool = True
+    CROSS_ORIGIN_RESOURCE_POLICY: str = "same-origin"
+
+    ENABLE_COEP: bool = True
+    CROSS_ORIGIN_EMBEDDER_POLICY: str = "require-corp"
 
     # ==========================================================
     # Celery

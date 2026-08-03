@@ -6,6 +6,9 @@ from typing import Optional
 from uuid import UUID
 
 from app.services.email_service import EmailService
+from app.services.suspicious_login_service import SuspiciousLoginService
+from app.services.audit_log_service import AuditLogService
+from app.models.audit_log import AuditAction
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -85,6 +88,7 @@ class AuthService:
         user: User,
         new_password: str,
     ) -> bool:
+
         if verify_password(new_password, user.password_hash):
             return True
         histories = (
@@ -179,6 +183,28 @@ class AuthService:
 
         if not user:
             logger.warning("Login failed: user not found for email")
+            # Log failed login and check suspicious signals
+            AuditLogService.create_log(
+                db=self.db,
+                actor_id=None,
+                action=AuditAction.FAILED_LOGIN,
+                entity_type="user_session",
+                entity_id=payload.email,
+                description=f"Failed login attempt for email {payload.email}",
+                ip_address=ip_address,
+                user_agent=user_agent,
+                metadata_info={"email": payload.email},
+                success=False,
+            )
+            self.db.commit()
+            SuspiciousLoginService.evaluate_login_attempt(
+                db=self.db,
+                email=payload.email,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                user=None,
+                is_success=False,
+            )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password.",
@@ -188,6 +214,29 @@ class AuthService:
             user.password_hash,
         ):
             logger.warning("Login failed: password mismatch for user %s", user.id)
+            # Log failed login and check suspicious signals
+            AuditLogService.create_log(
+                db=self.db,
+                actor_id=user.id,
+                action=AuditAction.FAILED_LOGIN,
+                entity_type="user_session",
+                entity_id=str(user.id),
+                target_user_id=user.id,
+                description=f"Failed password authentication for {payload.email}",
+                ip_address=ip_address,
+                user_agent=user_agent,
+                metadata_info={"email": payload.email},
+                success=False,
+            )
+            self.db.commit()
+            SuspiciousLoginService.evaluate_login_attempt(
+                db=self.db,
+                email=payload.email,
+                ip_address=ip_address,
+                user_agent=user_agent,
+                user=user,
+                is_success=False,
+            )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password.",
@@ -198,11 +247,54 @@ class AuthService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Account is disabled.",
             )
+
+        # Check suspicious login signals for successful login
+        suspicious_result = SuspiciousLoginService.evaluate_login_attempt(
+            db=self.db,
+            email=payload.email,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            user=user,
+            is_success=True,
+        )
+
         user.last_login = datetime.now(timezone.utc)
         user.last_seen = datetime.now(timezone.utc)
         user.last_active_at = datetime.now(timezone.utc)
 
+        # Record successful login audit log
+        AuditLogService.create_log(
+            db=self.db,
+            actor_id=user.id,
+            action=AuditAction.LOGIN,
+            entity_type="user_session",
+            entity_id=str(user.id),
+            target_user_id=user.id,
+            description=f"User logged in from {ip_address or 'Unknown IP'}",
+            ip_address=ip_address,
+            user_agent=user_agent,
+            metadata_info={
+                "email": payload.email,
+                "is_suspicious": suspicious_result.is_suspicious,
+                "signals": suspicious_result.signals,
+            },
+            success=True,
+        )
+
         self.db.flush()
+
+        if user.mfa_enabled:
+            mfa_token = create_access_token(
+                str(user.id),
+                {"type": "mfa_pending"},
+            )
+            self.db.commit()
+            return {
+                "success": True,
+                "mfa_required": True,
+                "mfa_token": mfa_token,
+                "message": "MFA verification required.",
+            }
 
         access_token = create_access_token(
             str(user.id),
@@ -232,6 +324,155 @@ class AuthService:
         return {
             "success": True,
             "message": "Login successful.",
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "user": user,
+        }
+
+    def complete_mfa_login(
+        self,
+        mfa_token: str,
+        code: str,
+        user_agent: Optional[str] = None,
+        ip_address: Optional[str] = None,
+    ):
+        try:
+            payload = decode_token(mfa_token)
+            if payload.get("type") != "mfa_pending":
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid MFA session token.",
+                )
+            user_id_str = payload.get("sub")
+            user_id = UUID(user_id_str)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired MFA session token.",
+            )
+
+        user = self.db.get(User, user_id)
+        if not user or not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User account unavailable.",
+            )
+
+        from app.services.mfa_service import MFAService
+        verified = MFAService.verify_user_mfa(self.db, user, code)
+        if not verified:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid verification code or recovery code.",
+            )
+
+        access_token = create_access_token(
+            str(user.id),
+            {
+                "username": user.username,
+            },
+        )
+        refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=refresh_token,
+            expires_at=expires_at,
+            user_agent=user_agent,
+            ip_address=ip_address,
+        )
+        self.db.commit()
+
+        return {
+            "success": True,
+            "message": "MFA authentication successful.",
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "user": user,
+        }
+
+    def github_login(self, github_user: dict, primary_email: str):
+        from app.models.user import User
+        from app.core.security import (
+            hash_password,
+            create_access_token,
+            create_refresh_token,
+        )
+        from fastapi import HTTPException, status
+        import secrets
+        import string
+        from datetime import datetime, timezone
+
+        github_id = str(github_user.get("id"))
+
+        user = self.db.query(User).filter(User.github_id == github_id).first()
+
+        if not user:
+            user = self.db.query(User).filter(User.email == primary_email).first()
+            if user:
+                user.github_id = github_id
+                if not user.github_url:
+                    user.github_url = github_user.get("html_url")
+                if not user.profile_image:
+                    user.profile_image = github_user.get("avatar_url")
+                self.db.commit()
+                self.db.refresh(user)
+            else:
+                alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+                random_password = "".join(secrets.choice(alphabet) for i in range(16))
+                name_parts = (github_user.get("name") or "").split(" ")
+                first_name = (
+                    name_parts[0] if len(name_parts) > 0 and name_parts[0] else "GitHub"
+                )
+                last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else "User"
+
+                base_username = (github_user.get("login") or "github_user").lower()[:50]
+                username = base_username
+                counter = 1
+                while self.get_user_by_username(username):
+                    suffix = str(counter)
+                    username = f"{base_username[: 50 - len(suffix)]}{suffix}"
+                    counter += 1
+                user = User(
+                    first_name=first_name,
+                    last_name=last_name,
+                    username=username,
+                    email=primary_email,
+                    password_hash=hash_password(random_password),
+                    github_id=github_id,
+                    github_url=github_user.get("html_url"),
+                    profile_image=github_user.get("avatar_url"),
+                    is_active=True,
+                    is_verified=True,
+                    created_at=datetime.now(timezone.utc),
+                    email_verified_at=datetime.now(timezone.utc),
+                )
+                self.db.add(user)
+                self.db.commit()
+                self.db.refresh(user)
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account is disabled.",
+            )
+        user.last_login = datetime.now(timezone.utc)
+        self.db.commit()
+
+        access_token = create_access_token(
+            str(user.id),
+            {
+                "username": user.username,
+                "email": user.email,
+            },
+        )
+        refresh_token = create_refresh_token(str(user.id))
+
+        return {
+            "success": True,
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
@@ -682,4 +923,108 @@ class AuthService:
         return {
             "success": True,
             "message": ("Password has been reset."),
+        }
+
+    # =====================================================
+    # LinkedIn OAuth Login
+    # =====================================================
+
+    def linkedin_login(self, linkedin_user: dict, primary_email: str):
+        linkedin_id = str(linkedin_user["sub"])
+
+        user = self.db.scalar(select(User).where(User.linkedin_id == linkedin_id))
+
+        if not user:
+            user = self.db.scalar(select(User).where(User.email == primary_email))
+            if user:
+                user.linkedin_id = linkedin_id
+                if linkedin_user.get("picture"):
+                    user.profile_image = linkedin_user["picture"]
+                self.db.commit()
+            else:
+                import secrets
+                import string
+
+                alphabet = string.ascii_letters + string.digits + string.punctuation
+                random_password = "".join(secrets.choice(alphabet) for i in range(32))
+
+                name = linkedin_user.get("name") or "LinkedIn User"
+                name_parts = name.split(" ", 1)
+                first_name = name_parts[0][:100]
+                last_name = name_parts[1][:100] if len(name_parts) > 1 else ""
+
+                linkedin_username = (
+                    linkedin_user.get("preferred_username") or "linkedin_user"
+                ).lower()[:50]
+                base_username = linkedin_username
+                username = base_username
+                counter = 1
+                while self.get_user_by_username(username):
+                    suffix = str(counter)
+                    username = f"{base_username[:50 - len(suffix)]}{suffix}"
+                    counter += 1
+
+                user = User(
+                    first_name=first_name,
+                    last_name=last_name,
+                    username=username,
+                    email=primary_email,
+                    password_hash=hash_password(random_password),
+                    linkedin_id=linkedin_id,
+                    profile_image=linkedin_user.get("picture"),
+                    is_active=True,
+                    is_verified=True,
+                    created_at=datetime.now(timezone.utc),
+                    email_verified_at=datetime.now(timezone.utc),
+                )
+                self.db.add(user)
+                self.db.commit()
+                self.db.refresh(user)
+                event_bus.publish(
+                    "USER_REGISTERED",
+                    email=user.email,
+                    user_id=str(user.id),
+                )
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account is disabled.",
+            )
+        user.last_login = datetime.now(timezone.utc)
+        self.db.commit()
+
+        access_token = create_access_token(
+            str(user.id),
+            {
+                "username": user.username,
+                "email": user.email,
+            },
+        )
+
+        refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(
+            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+        )
+
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=refresh_token,
+            expires_at=expires_at,
+        )
+        self.db.commit()
+
+        event_bus.publish(
+            "USER_LOGIN",
+            email=user.email,
+            user_id=str(user.id),
+        )
+
+        return {
+            "success": True,
+            "message": "LinkedIn login successful.",
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "user": user,
         }

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { OrganizationHeader } from "./OrganizationHeader";
+import { OrganizationApiTokens } from "./OrganizationApiTokens";
+import { OrganizationAuditLogs } from "./OrganizationAuditLogs";
 
 interface OrganizationProfileProps {
   organizationData: {
@@ -11,10 +13,16 @@ interface OrganizationProfileProps {
     description?: string;
     hiring: boolean;
   };
+  orgId: string;
 }
 
-export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({ organizationData }) => {
-  const [activeTab, setActiveTab] = useState<"about" | "team" | "projects" | "hiring">("about");
+export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({
+  organizationData,
+  orgId,
+}) => {
+  const [activeTab, setActiveTab] = useState<"about" | "team" | "projects" | "hiring" | "tokens" | "audit">(
+    "about",
+  );
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -29,18 +37,18 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({ organi
       />
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-800 mb-6 gap-6">
-        {(["about", "team", "projects", "hiring"] as const).map((tab) => (
+      <div className="flex border-b border-gray-800 mb-6 gap-6 overflow-x-auto">
+        {(["about", "team", "projects", "hiring", "tokens", "audit"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`pb-3 text-sm font-medium capitalize border-b-2 transition-colors ${
+            className={`pb-3 text-sm font-medium capitalize border-b-2 transition-colors shrink-0 ${
               activeTab === tab
                 ? "border-indigo-500 text-indigo-400"
                 : "border-transparent text-gray-400 hover:text-gray-200"
             }`}
           >
-            {tab}
+            {tab === "tokens" ? "API Tokens" : tab === "audit" ? "Audit Logs" : tab}
           </button>
         ))}
       </div>
@@ -86,6 +94,10 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({ organi
             )}
           </div>
         )}
+
+        {activeTab === "tokens" && <OrganizationApiTokens orgId={orgId} />}
+
+        {activeTab === "audit" && <OrganizationAuditLogs orgId={orgId} />}
       </div>
     </div>
   );

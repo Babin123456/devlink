@@ -25,6 +25,9 @@ import { copyText } from "@/lib/clipboard";
 import { ReportUserModal } from "@/components/shared/ReportUserModal";
 import SkillsCard from "@/components/profile/SkillsCard";
 import ExperienceCard from "@/components/profile/ExperienceCard";
+import { ProfileViewersList } from "@/components/profile/ProfileViewersList";
+import { FollowButton } from "@/components/shared/FollowButton";
+import { useFollowStatus } from "@/hooks/useFollow";
 
 export const Route = createFileRoute("/_app/profile/$username")({
   head: ({ params }) => ({
@@ -135,6 +138,8 @@ function ProfilePage() {
       }
     : builders.find((x) => x.handle === username);
   if (!b) throw notFound();
+
+  const { data: followStatus } = useFollowStatus(b.id);
 
   // Profile banner & avatar state
   const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
@@ -266,63 +271,67 @@ function ProfilePage() {
               className="ring-4 ring-card shadow-lg"
             />
             <div className="min-w-0 flex-1 pt-12 sm:pt-4">
-            <h1 className="text-[22px] font-bold text-foreground flex items-center gap-2">
-              {b.name}
-              {b.verified && (
-                <BadgeCheck className="text-primary h-6 w-6" aria-label="Verified User" />
-              )}
-            </h1>
-            <p className="text-[13px] text-muted-foreground">
-              @{b.handle} · {b.role}
-            </p>
-            <p className="mt-2 text-[13px] text-foreground">{b.bio}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
-              <div>
-                <span className="font-semibold">{b.followers ?? 0}</span>
-                <span className="m-1 text-muted-foreground">Followers</span>
-
-              </div>
-              <div>
-                <span className="font-semibold">{b.following ?? 0}</span>
-                <span className="m-1 text-muted-foreground">Following</span>
-
-              </div>
-              <div>
-                <span className="font-semibold">{b.contributions?? 0}</span>
-                <span className="ml-1 text-muted-foreground">Contributions</span>
-
-              </div>
+              <h1 className="text-[22px] font-bold text-foreground flex items-center gap-2">
+                {b.name}
+                {b.verified && (
+                  <BadgeCheck className="text-primary h-6 w-6" aria-label="Verified User" />
+                )}
+              </h1>
+              <p className="text-[13px] text-muted-foreground">
+                @{b.handle} · {b.role}
+              </p>
+              <p className="mt-2 text-[13px] text-foreground">{b.bio}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
+                <div>
+                  <span className="font-semibold">
+                    {followStatus?.follower_count ?? b.followers ?? 0}
+                  </span>
+                  <span className="m-1 text-muted-foreground">Followers</span>
+                </div>
+                <div>
+                  <span className="font-semibold">
+                    {followStatus?.following_count ?? b.following ?? 0}
+                  </span>
+                  <span className="m-1 text-muted-foreground">Following</span>
+                </div>
+                <div>
+                  <span className="font-semibold">{b.contributions ?? 0}</span>
+                  <span className="ml-1 text-muted-foreground">Contributions</span>
+                </div>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <MapPin size={12} /> {b.country}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Calendar size={12} /> Joined 2024
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <LinkIcon size={12} /> devlink.io/{b.handle}
-              </span>
+                <span className="inline-flex items-center gap-1">
+                  <MapPin size={12} /> {b.country}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Calendar size={12} /> Joined 2024
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <LinkIcon size={12} /> devlink.io/{b.handle}
+                </span>
+              </div>
             </div>
+            {!me && (
+              <div className="flex items-center gap-2">
+                <FollowButton userId={b.id} />
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate({
+                      to: "/messages/$conversationId",
+                      params: { conversationId: b.id },
+                    })
+                  }
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  <MessageCircle size={16} />
+                  Contact Developer
+                </button>
+              </div>
+            )}
           </div>
-          {!me && (
-            <button
-              type="button"
-              onClick={() =>
-                navigate({
-                  to: "/messages/$conversationId",
-                  params: { conversationId: b.id },
-                })
-              }
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-            >
-              <MessageCircle size={16} />
-              Contact Developer
-            </button>
-          )}
         </div>
-      </div>
-    </Card>
+      </Card>
 
       {/* AI Profile Summary Section */}
       <Card className="p-4">
@@ -445,6 +454,9 @@ function ProfilePage() {
         )}
       </Card>
 
+      {me && <ProfileViewersList className="mt-4" />}
+
+
       <div className="grid gap-4 lg:grid-cols-3 items-start">
         <div className="flex flex-col gap-4">
           {/* <Card className="p-4">
@@ -467,7 +479,7 @@ function ProfilePage() {
                 ))}
               </div>
             </Card>
-          ):null }
+          ) : null}
 
           {b.badges && b.badges.length > 0 && (
             <Card className="p-4">

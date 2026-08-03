@@ -5,9 +5,21 @@ export interface SpamCheckResult {
 }
 
 const SPAM_KEYWORDS = [
-  "buy now", "free money", "earn fast", "crypto giveaway", "telegram group",
-  "whatsapp group", "click here", "cheap price", "guaranteed profit", "discount code",
-  "casino", "betting", "unlimited followers", "dm for info", "work from home $",
+  "buy now",
+  "free money",
+  "earn fast",
+  "crypto giveaway",
+  "telegram group",
+  "whatsapp group",
+  "click here",
+  "cheap price",
+  "guaranteed profit",
+  "discount code",
+  "casino",
+  "betting",
+  "unlimited followers",
+  "dm for info",
+  "work from home $",
 ];
 
 const PHISHING_PATTERNS = [

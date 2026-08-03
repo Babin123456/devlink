@@ -19,14 +19,37 @@ interface Props {
 }
 
 interface F {
-  name: string; description: string; theme: string; prize: string;
-  starts_at: string; ends_at: string; min_team_size: string; max_team_size: string;
+  name: string;
+  description: string;
+  theme: string;
+  prize: string;
+  starts_at: string;
+  ends_at: string;
+  min_team_size: string;
+  max_team_size: string;
   website_url: string;
 }
 
-interface E { name?: string; description?: string; starts_at?: string; ends_at?: string; min_team_size?: string; max_team_size?: string; }
+interface E {
+  name?: string;
+  description?: string;
+  starts_at?: string;
+  ends_at?: string;
+  min_team_size?: string;
+  max_team_size?: string;
+}
 
-const EMPTY: F = { name: "", description: "", theme: "", prize: "", starts_at: "", ends_at: "", min_team_size: "2", max_team_size: "4", website_url: "" };
+const EMPTY: F = {
+  name: "",
+  description: "",
+  theme: "",
+  prize: "",
+  starts_at: "",
+  ends_at: "",
+  min_team_size: "2",
+  max_team_size: "4",
+  website_url: "",
+};
 
 function fi(err?: string) {
   return `w-full rounded-md border bg-surface px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/20 ${err ? "border-destructive" : "border-border focus:border-primary"}`;
@@ -114,9 +137,14 @@ export function CreateHackathonDialog({ open, onOpenChange }: Props) {
             <label className="mb-1.5 block text-[13px] font-medium text-foreground">
               Name <span className="text-destructive">*</span>
             </label>
-            <input value={form.name} onChange={(e) => set("name", e.target.value)}
-              placeholder="e.g. AI for Good 2025" maxLength={200} className={fi(errors.name)}
-              autoFocus />
+            <input
+              value={form.name}
+              onChange={(e) => set("name", e.target.value)}
+              placeholder="e.g. AI for Good 2025"
+              maxLength={200}
+              className={fi(errors.name)}
+              autoFocus
+            />
             {errors.name && <p className="mt-1 text-[12px] text-destructive">{errors.name}</p>}
           </div>
 
@@ -125,9 +153,16 @@ export function CreateHackathonDialog({ open, onOpenChange }: Props) {
             <label className="mb-1.5 block text-[13px] font-medium text-foreground">
               Description <span className="text-destructive">*</span>
             </label>
-            <textarea value={form.description} onChange={(e) => set("description", e.target.value)}
-              rows={3} placeholder="What is this hackathon about?" className={`${fi(errors.description)} resize-none`} />
-            {errors.description && <p className="mt-1 text-[12px] text-destructive">{errors.description}</p>}
+            <textarea
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+              rows={3}
+              placeholder="What is this hackathon about?"
+              className={`${fi(errors.description)} resize-none`}
+            />
+            {errors.description && (
+              <p className="mt-1 text-[12px] text-destructive">{errors.description}</p>
+            )}
           </div>
 
           {/* Theme + Prize */}
@@ -136,15 +171,25 @@ export function CreateHackathonDialog({ open, onOpenChange }: Props) {
               <label className="mb-1.5 block text-[13px] font-medium text-foreground">
                 Theme <span className="font-normal text-muted-foreground">(optional)</span>
               </label>
-              <input value={form.theme} onChange={(e) => set("theme", e.target.value)}
-                placeholder="e.g. Social Impact" maxLength={200} className={fi()} />
+              <input
+                value={form.theme}
+                onChange={(e) => set("theme", e.target.value)}
+                placeholder="e.g. Social Impact"
+                maxLength={200}
+                className={fi()}
+              />
             </div>
             <div>
               <label className="mb-1.5 block text-[13px] font-medium text-foreground">
                 Prize <span className="font-normal text-muted-foreground">(optional)</span>
               </label>
-              <input value={form.prize} onChange={(e) => set("prize", e.target.value)}
-                placeholder="e.g. $10k" maxLength={100} className={fi()} />
+              <input
+                value={form.prize}
+                onChange={(e) => set("prize", e.target.value)}
+                placeholder="e.g. $10k"
+                maxLength={100}
+                className={fi()}
+              />
             </div>
           </div>
 
@@ -154,17 +199,29 @@ export function CreateHackathonDialog({ open, onOpenChange }: Props) {
               <label className="mb-1.5 block text-[13px] font-medium text-foreground">
                 Starts <span className="text-destructive">*</span>
               </label>
-              <input type="datetime-local" value={form.starts_at}
-                onChange={(e) => set("starts_at", e.target.value)} className={fi(errors.starts_at)} />
-              {errors.starts_at && <p className="mt-1 text-[12px] text-destructive">{errors.starts_at}</p>}
+              <input
+                type="datetime-local"
+                value={form.starts_at}
+                onChange={(e) => set("starts_at", e.target.value)}
+                className={fi(errors.starts_at)}
+              />
+              {errors.starts_at && (
+                <p className="mt-1 text-[12px] text-destructive">{errors.starts_at}</p>
+              )}
             </div>
             <div>
               <label className="mb-1.5 block text-[13px] font-medium text-foreground">
                 Ends <span className="text-destructive">*</span>
               </label>
-              <input type="datetime-local" value={form.ends_at}
-                onChange={(e) => set("ends_at", e.target.value)} className={fi(errors.ends_at)} />
-              {errors.ends_at && <p className="mt-1 text-[12px] text-destructive">{errors.ends_at}</p>}
+              <input
+                type="datetime-local"
+                value={form.ends_at}
+                onChange={(e) => set("ends_at", e.target.value)}
+                className={fi(errors.ends_at)}
+              />
+              {errors.ends_at && (
+                <p className="mt-1 text-[12px] text-destructive">{errors.ends_at}</p>
+              )}
             </div>
           </div>
 
@@ -174,17 +231,33 @@ export function CreateHackathonDialog({ open, onOpenChange }: Props) {
               <label className="mb-1.5 block text-[13px] font-medium text-foreground">
                 Min team size <span className="text-destructive">*</span>
               </label>
-              <input type="number" min={1} max={20} value={form.min_team_size}
-                onChange={(e) => set("min_team_size", e.target.value)} className={fi(errors.min_team_size)} />
-              {errors.min_team_size && <p className="mt-1 text-[12px] text-destructive">{errors.min_team_size}</p>}
+              <input
+                type="number"
+                min={1}
+                max={20}
+                value={form.min_team_size}
+                onChange={(e) => set("min_team_size", e.target.value)}
+                className={fi(errors.min_team_size)}
+              />
+              {errors.min_team_size && (
+                <p className="mt-1 text-[12px] text-destructive">{errors.min_team_size}</p>
+              )}
             </div>
             <div>
               <label className="mb-1.5 block text-[13px] font-medium text-foreground">
                 Max team size <span className="text-destructive">*</span>
               </label>
-              <input type="number" min={1} max={20} value={form.max_team_size}
-                onChange={(e) => set("max_team_size", e.target.value)} className={fi(errors.max_team_size)} />
-              {errors.max_team_size && <p className="mt-1 text-[12px] text-destructive">{errors.max_team_size}</p>}
+              <input
+                type="number"
+                min={1}
+                max={20}
+                value={form.max_team_size}
+                onChange={(e) => set("max_team_size", e.target.value)}
+                className={fi(errors.max_team_size)}
+              />
+              {errors.max_team_size && (
+                <p className="mt-1 text-[12px] text-destructive">{errors.max_team_size}</p>
+              )}
             </div>
           </div>
 
@@ -193,18 +266,30 @@ export function CreateHackathonDialog({ open, onOpenChange }: Props) {
             <label className="mb-1.5 block text-[13px] font-medium text-foreground">
               Website URL <span className="font-normal text-muted-foreground">(optional)</span>
             </label>
-            <input value={form.website_url} onChange={(e) => set("website_url", e.target.value)}
-              placeholder="https://…" className={fi()} />
+            <input
+              value={form.website_url}
+              onChange={(e) => set("website_url", e.target.value)}
+              placeholder="https://…"
+              className={fi()}
+            />
           </div>
         </div>
 
         <DialogFooter>
-          <button type="button" onClick={handleClose} disabled={loading}
-            className="rounded-md border border-border px-4 py-2 text-[13px] font-medium text-foreground hover:bg-muted disabled:opacity-50">
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={loading}
+            className="rounded-md border border-border px-4 py-2 text-[13px] font-medium text-foreground hover:bg-muted disabled:opacity-50"
+          >
             Cancel
           </button>
-          <button type="button" onClick={handleCreate} disabled={loading}
-            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60">
+          <button
+            type="button"
+            onClick={handleCreate}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
+          >
             {loading && <Loader2 size={13} className="animate-spin" />}
             Create hackathon
           </button>
