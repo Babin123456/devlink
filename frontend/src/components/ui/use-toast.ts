@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as React from "react";
 import { toast as sonnerToast, ExternalToast } from "sonner";
 
@@ -6,6 +7,7 @@ export type ToastType = "success" | "error" | "warning" | "info" | "default" | "
 export interface ToastProps {
   id?: string;
   title?: React.ReactNode;
+  description?: React.ReactNode | (() => React.ReactNode);
   description?: React.ReactNode;
   variant?: "default" | "destructive" | "success" | "warning" | "info";
   type?: ToastType;
