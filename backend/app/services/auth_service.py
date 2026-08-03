@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
@@ -9,6 +10,8 @@ from app.services.suspicious_login_service import SuspiciousLoginService
 from app.services.audit_log_service import AuditLogService
 from app.models.audit_log import AuditAction
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 # pyrefly: ignore [missing-import]
 
@@ -179,6 +182,7 @@ class AuthService:
         user = self.get_user_by_email(payload.email)
 
         if not user:
+            logger.warning("Login failed: user not found for email")
             # Log failed login and check suspicious signals
             AuditLogService.create_log(
                 db=self.db,
@@ -209,6 +213,7 @@ class AuthService:
             payload.password,
             user.password_hash,
         ):
+            logger.warning("Login failed: password mismatch for user %s", user.id)
             # Log failed login and check suspicious signals
             AuditLogService.create_log(
                 db=self.db,
@@ -237,6 +242,7 @@ class AuthService:
                 detail="Invalid email or password.",
             )
         if not user.is_active:
+            logger.warning("Login blocked: inactive account %s", user.id)
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Account is disabled.",
@@ -565,10 +571,6 @@ class AuthService:
         )
 
         refresh_token = create_refresh_token(str(user.id))
-        expires_at = datetime.now(timezone.utc) + timedelta(
-            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
-        )
-        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
         expires_at = datetime.now(timezone.utc) + timedelta(
             days=settings.REFRESH_TOKEN_EXPIRE_DAYS
         )

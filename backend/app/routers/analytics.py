@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
+from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
@@ -12,6 +13,10 @@ from app.schemas.analytics import PlatformAnalyticsResponse
 from app.schemas.community_stats import CommunityStatsResponse
 from app.services.analytics_service import AnalyticsService
 from app.services.community_stats_service import CommunityStatsService
+from app.schemas.analytics import PlatformAnalyticsResponse
+from app.schemas.request_analytics import RequestAnalyticsResponse
+from app.services.analytics_service import AnalyticsService
+from app.services.request_analytics_service import RequestAnalyticsService
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
@@ -94,3 +99,51 @@ def get_community_stats(
     ),
 ) -> CommunityStatsResponse:
     return CommunityStatsService.get_community_stats(db=db, days=days)
+# ==========================================================
+# API Request Analytics
+# ==========================================================
+
+
+@router.get(
+    "/requests",
+    response_model=RequestAnalyticsResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get API Request Analytics",
+    description=(
+        "Admin endpoint returning API request metrics: total volume, average "
+        "response time, error rate, active users, rate-limited requests, "
+        "per-endpoint breakdown, and a daily trend."
+    ),
+)
+def get_request_analytics(
+    db: Annotated[Session, Depends(get_db)],
+    _: Annotated[object, Depends(get_current_admin)],
+    days: int = Query(
+        default=30, ge=1, le=365, description="Timeframe in days for the report"
+    ),
+) -> RequestAnalyticsResponse:
+    return RequestAnalyticsService.get_request_analytics(db=db, days=days)
+
+
+@router.get(
+    "/requests/export",
+    response_class=PlainTextResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Export API Request Analytics as CSV",
+    description="Admin endpoint returning raw request logs as a CSV file.",
+)
+def export_request_analytics(
+    db: Annotated[Session, Depends(get_db)],
+    _: Annotated[object, Depends(get_current_admin)],
+    days: int = Query(
+        default=30, ge=1, le=365, description="Timeframe in days for the export"
+    ),
+) -> PlainTextResponse:
+    csv_data = RequestAnalyticsService.export_csv(db=db, days=days)
+    return PlainTextResponse(
+        content=csv_data,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f'attachment; filename="request-analytics-{days}d.csv"'
+        },
+    )

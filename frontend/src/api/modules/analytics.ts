@@ -46,4 +46,24 @@ export const analyticsApi = {
     api.get<CommunityStatsResponse>(
       `/api/analytics/community/stats${days ? `?days=${days}` : ""}`
     ),
+  requestAnalytics: (days: number) =>
+    api.get<RequestAnalytics>(`/api/analytics/requests?days=${days}`),
 };
+
+export interface RequestAnalytics {
+  timeframe_days: number;
+  total_requests: number;
+  avg_response_time_ms: number;
+  error_rate_pct: number;
+  active_users: number;
+  rate_limited_requests: number;
+  requests_by_endpoint: {
+    endpoint: string;
+    method: string;
+    requests: number;
+    avg_response_time_ms: number;
+    error_count: number;
+    error_rate_pct: number;
+  }[];
+  daily_trend: { date: string; requests: number; errors: number }[];
+}

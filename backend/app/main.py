@@ -348,17 +348,20 @@ app.state.limiter = limiter
 
 from fastapi.exceptions import HTTPException, RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from sqlalchemy.exc import IntegrityError
 from app.core.error_handlers import (
     http_exception_handler,
     validation_exception_handler,
     rate_limit_exception_handler,
     global_exception_handler,
+    integrity_error_handler,
 )
 
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(RateLimitExceeded, rate_limit_exception_handler)
+app.add_exception_handler(IntegrityError, integrity_error_handler)
 app.add_exception_handler(Exception, global_exception_handler)
 app.add_middleware(SlowAPIMiddleware)
 
@@ -371,6 +374,9 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(ActivityTrackingMiddleware)
 app.add_middleware(MaintenanceMiddleware)
 
+from app.middleware.request_validation import RequestValidationMiddleware
+app.add_middleware(RequestValidationMiddleware)
+
 from app.middleware.audit_context import AuditContextMiddleware
 
 app.add_middleware(AuditContextMiddleware)
@@ -379,10 +385,13 @@ from app.middleware.org_audit_logging import OrganizationAuditMiddleware
 
 app.add_middleware(OrganizationAuditMiddleware)
 
+from app.middleware.request_logging import RequestLoggingMiddleware
+
+app.add_middleware(RequestLoggingMiddleware)
+
 # ------------------------------------------------------------------
 # CORS
 # ------------------------------------------------------------------
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -500,17 +509,19 @@ from app.routers import (
 # Router inclusions
 
 
-app.include_router(media.router, prefix="/api")
+app.include_router(media.router, prefix="/api", tags=["Media"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 from app.routers import mfa
 app.include_router(mfa.router, prefix="/api")
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
 app.include_router(export.router, prefix="/api/users", tags=["Export"])
+from app.routers import feedback
+app.include_router(feedback.router, prefix="/api/feedback", tags=["Feedback"])
 app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
 from app.routers import project_members
-app.include_router(project_members.router, prefix="/api")
-app.include_router(project_dashboards.router, prefix="/api")
+app.include_router(project_members.router, prefix="/api", tags=["Project Members"])
+app.include_router(project_dashboards.router, prefix="/api", tags=["Project Dashboards"])
 app.include_router(analytics.router, prefix="/api", tags=["Analytics"])
 app.include_router(builder_flares.router, prefix="/api/flare", tags=["Builder's Flare"])
 app.include_router(messages.router, prefix="/api/messages", tags=["Messages"])
@@ -519,19 +530,26 @@ app.include_router(
 )
 from app.routers import admin_notifications
 
-app.include_router(admin_notifications.router, prefix="/api")
+app.include_router(admin_notifications.router, prefix="/api", tags=["Admin Notifications"])
 
 app.include_router(followers.router, prefix="/api/followers", tags=["Followers"])
-app.include_router(bookmarks.router)
-app.include_router(bookmark_collections.router)
-app.include_router(activities.router)
-app.include_router(conversations.router)
+app.include_router(bookmarks.router, prefix="/api/bookmarks", tags=["Bookmarks"])
+app.include_router(bookmark_collections.router, prefix="/api/bookmark-collections", tags=["Bookmark Collections"])
+app.include_router(activities.router, prefix="/api/activities", tags=["Activities"])
+app.include_router(conversations.router, prefix="/api/conversations", tags=["Conversations"])
 from app.routers import audit
 
 app.include_router(audit.router, prefix="/api", tags=["Audit"])
 app.include_router(issues.router, prefix="/api", tags=["Issues"])
 app.include_router(
     profile_summary.router, prefix="/api/profile-summary", tags=["Profile Summary"]
+)
+from app.routers import profile_suggestions
+app.include_router(
+    profile_suggestions.router, prefix="/api/profile-suggestions", tags=["Profile Suggestions"]
+)
+app.include_router(
+    profile_suggestions.router, prefix="/api/users/me/profile-suggestions", tags=["Profile Suggestions"]
 )
 from app.routers import profile_views
 app.include_router(profile_views.router, prefix="/api", tags=["Profile Views"])
@@ -549,30 +567,65 @@ app.include_router(
     prefix="/api/contributor-matching",
     tags=["Contributor Matching"],
 )
-app.include_router(repositories.router)
-app.include_router(organizations.router)
+app.include_router(repositories.router, prefix="/api/repositories", tags=["Repositories"])
+app.include_router(organizations.router, prefix="/api/organizations", tags=["Organizations"])
 
 from app.routers import workspace_api_tokens
 
-app.include_router(workspace_api_tokens.router, prefix="/api")
+app.include_router(workspace_api_tokens.router, prefix="/api", tags=["Workspace API Tokens"])
 
-app.include_router(applications.router)
-app.include_router(skills.router)
-app.include_router(users.router)
-app.include_router(websockets.router)
-app.include_router(graph.router, prefix="/api")
+app.include_router(applications.router, prefix="/api/applications", tags=["Applications"])
+app.include_router(skills.router, prefix="/api/skills", tags=["Skills"])
+# users.router already included above
+app.include_router(websockets.router, prefix="/api/ws", tags=["WebSockets"])
+app.include_router(graph.router, prefix="/api", tags=["Graph"])
 from app.routers import webhooks
-app.include_router(webhooks.router, prefix="/api")
-app.include_router(recommendations.router)
+app.include_router(webhooks.router, prefix="/api", tags=["Webhooks"])
+app.include_router(recommendations.router, prefix="/api/recommendations", tags=["Recommendations"])
 app.include_router(
     repository_quality.router, prefix="/api", tags=["Repository Quality"]
 )
-app.include_router(health.router)
-app.include_router(maintenance.router, prefix="/api")
+app.include_router(health.router, prefix="/api/health", tags=["Health"])
+app.include_router(maintenance.router, prefix="/api", tags=["Maintenance"])
 app.include_router(search.router, prefix="/api/search", tags=["Search"])
-app.include_router(saved_searches.router)
+app.include_router(saved_searches.router, prefix="/api/saved-searches", tags=["Saved Searches"])
 app.include_router(hackathons.router, prefix="/api/hackathons", tags=["Hackathons"])
 app.include_router(
     notification_templates.router, prefix="/api", tags=["Notification Templates"]
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
+
+from fastapi.openapi.utils import get_openapi
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    
+    openapi_schema = get_openapi(
+        title="DevLink API",
+        version="1.0.0",
+        description="Backend API for the DevLink Developer Collaboration Platform",
+        routes=app.routes,
+    )
+    
+    error_400 = {"description": "Bad Request"}
+    error_401 = {"description": "Unauthorized"}
+    error_403 = {"description": "Forbidden"}
+    error_404 = {"description": "Not Found"}
+    error_409 = {"description": "Conflict"}
+    error_500 = {"description": "Internal Server Error"}
+    
+    for path in openapi_schema.get("paths", {}).values():
+        for method in path.values():
+            responses = method.setdefault("responses", {})
+            if "400" not in responses: responses["400"] = error_400
+            if "401" not in responses: responses["401"] = error_401
+            if "403" not in responses: responses["403"] = error_403
+            if "404" not in responses: responses["404"] = error_404
+            if "409" not in responses: responses["409"] = error_409
+            if "500" not in responses: responses["500"] = error_500
+            
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi

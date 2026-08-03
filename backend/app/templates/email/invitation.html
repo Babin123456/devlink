@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<p>Hello,</p>
+<p>You have been invited by <strong>{{ inviter_name }}</strong> to join the <strong>{{ project_name }}</strong> project on DevLink!</p>
+<p style="text-align: center;">
+    <a href="{{ invitation_url }}" class="btn">View Invitation</a>
+</p>
+<p>If you don't have an account yet, you will be prompted to create one.</p>
+<p>Best regards,<br>The DevLink Team</p>
+{% endblock %}

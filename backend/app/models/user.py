@@ -30,6 +30,13 @@ class UserRole(str, Enum):
     MODERATOR = "moderator"
 
 
+class UserRole(str, Enum):
+    USER = "user"
+    DEVELOPER = "developer"
+    ADMIN = "admin"
+
+
+
 class User(Base):
     """
     DevLink User Model

@@ -4,6 +4,7 @@ from app.routers import (
     activities,
     applications,
     auth,
+    backup,
     blocks,
     bookmark_collections,
     bookmarks,
@@ -22,6 +23,7 @@ from app.routers import (
     org_audit_logs,
     organizations,
     profile_summary,
+    profile_suggestions,
     project_members,
     project_tags,
     project_documents,
@@ -32,6 +34,7 @@ from app.routers import (
     repository_quality,
     saved_searches,
     search,
+    security_dashboard,
     skills,
     users,
     webhooks,
@@ -62,6 +65,7 @@ api_v1_router.include_router(oauth_linking.router)
 api_v1_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_v1_router.include_router(blocks.router, prefix="/blocks", tags=["User Blocks"])
 api_v1_router.include_router(export.router, prefix="/users", tags=["Export"])
+api_v1_router.include_router(backup.router)
 api_v1_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
 api_v1_router.include_router(project_members.router)
 api_v1_router.include_router(project_documents.router)
@@ -87,6 +91,12 @@ api_v1_router.include_router(
     profile_summary.router, prefix="/profile-summary", tags=["Profile Summary"]
 )
 api_v1_router.include_router(
+    profile_suggestions.router, prefix="/profile-suggestions", tags=["Profile Suggestions"]
+)
+api_v1_router.include_router(
+    profile_suggestions.router, prefix="/users/me/profile-suggestions", tags=["Profile Suggestions"]
+)
+api_v1_router.include_router(
     conversation_starters.router,
     prefix="/conversation-starters",
     tags=["Conversation Starters"],
@@ -109,6 +119,7 @@ api_v1_router.include_router(repository_quality.router, tags=["Repository Qualit
 api_v1_router.include_router(health.router)
 api_v1_router.include_router(search.router, prefix="/search", tags=["Search"])
 api_v1_router.include_router(saved_searches.router)
+api_v1_router.include_router(security_dashboard.router)
 api_v1_router.include_router(
     hackathons.router, prefix="/hackathons", tags=["Hackathons"]
 )

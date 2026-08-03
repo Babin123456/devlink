@@ -22,6 +22,7 @@ export const Route = createFileRoute("/_app/admin")({
           <a href="/admin/maintenance" className="text-blue-600 hover:underline">Maintenance Mode</a>
           <a href="/admin/search-analytics" className="text-blue-600 hover:underline">Search Analytics</a>
           <a href="/admin/community-stats" className="text-blue-600 hover:underline">Community Stats</a>
+          <a href="/admin/api-request-analytics" className="text-blue-600 hover:underline">API Request Analytics</a>
         </div>
       </div>
       <Outlet />
