@@ -315,10 +315,15 @@ function ProjectsPage() {
           }}
           onApply={(newValues) => {
             // const selectedLangs = Array.isArray(newValues.language)
-              // ? newValues.language.join(",")
-              // : newValues.language;
-            setFilters({ ...filters,
-              language: Array.isArray(newValues.language) ? newValues.language : newValues.language ? [newValues.language] : undefined,
+            // ? newValues.language.join(",")
+            // : newValues.language;
+            setFilters({
+              ...filters,
+              language: Array.isArray(newValues.language)
+                ? newValues.language
+                : newValues.language
+                  ? [newValues.language]
+                  : undefined,
               experience: newValues.experience || "",
               remote: newValues.remote || "",
               paid: newValues.paid || "",

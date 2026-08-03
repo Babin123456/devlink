@@ -30,7 +30,7 @@ function Landing() {
   const { isDark, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [billingCycle, setBillingCycle] = React.useState<"monthly" | "yearly">("yearly");
-  
+
   React.useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -239,7 +239,9 @@ function Landing() {
                 type="button"
                 onClick={() => setBillingCycle("monthly")}
                 className={`relative w-32 rounded-full py-2 text-sm font-semibold transition-colors duration-200 ease-in-out ${
-                  billingCycle === "monthly" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  billingCycle === "monthly"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {billingCycle === "monthly" && (
@@ -256,7 +258,9 @@ function Landing() {
                 type="button"
                 onClick={() => setBillingCycle("yearly")}
                 className={`relative w-32 rounded-full py-2 text-sm font-semibold transition-colors duration-200 ease-in-out ${
-                  billingCycle === "yearly" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  billingCycle === "yearly"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {billingCycle === "yearly" && (
@@ -324,9 +328,11 @@ function Landing() {
                   <h3 className="text-xl font-bold text-foreground">{p.name}</h3>
                   <p className="mt-2 text-sm text-muted-foreground">{p.desc}</p>
                 </div>
-                
+
                 <div className="mb-6 flex items-baseline gap-2">
-                  <span className="text-4xl font-bold tracking-tight text-foreground">{p.price}</span>
+                  <span className="text-4xl font-bold tracking-tight text-foreground">
+                    {p.price}
+                  </span>
                   <span className="text-sm font-medium text-muted-foreground">{p.period}</span>
                 </div>
 
@@ -346,7 +352,7 @@ function Landing() {
                   <ul className="space-y-3 text-sm text-muted-foreground">
                     {p.perks.map((perk) => (
                       <li key={perk} className="flex items-start gap-3">
-                        <Check className="h-5 w-5 shrink-0 text-success" /> 
+                        <Check className="h-5 w-5 shrink-0 text-success" />
                         <span>{perk}</span>
                       </li>
                     ))}
