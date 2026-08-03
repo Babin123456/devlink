@@ -23,6 +23,7 @@ from app.routers import (
     org_audit_logs,
     organizations,
     profile_summary,
+    profile_suggestions,
     project_members,
     project_tags,
     project_documents,
@@ -88,6 +89,12 @@ api_v1_router.include_router(activities.router)
 api_v1_router.include_router(conversations.router)
 api_v1_router.include_router(
     profile_summary.router, prefix="/profile-summary", tags=["Profile Summary"]
+)
+api_v1_router.include_router(
+    profile_suggestions.router, prefix="/profile-suggestions", tags=["Profile Suggestions"]
+)
+api_v1_router.include_router(
+    profile_suggestions.router, prefix="/users/me/profile-suggestions", tags=["Profile Suggestions"]
 )
 api_v1_router.include_router(
     conversation_starters.router,
