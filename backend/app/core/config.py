@@ -1,3 +1,5 @@
+import os
+import sys
 from functools import lru_cache
 
 # pyrefly: ignore [missing-import]
@@ -56,7 +58,13 @@ class Settings(BaseSettings):
     # Database
     # ==========================================================
 
-    DATABASE_URL: str = "postgresql+psycopg://postgres:password@localhost:5432/devlink"
+    DATABASE_URL: str = Field(
+        default_factory=lambda: (
+            "sqlite:///:memory:"
+            if os.getenv("TESTING") == "true" or "pytest" in sys.modules
+            else "postgresql+psycopg://postgres:password@localhost:5432/devlink"
+        )
+    )
 
     # ==========================================================
     # Redis
