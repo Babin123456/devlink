@@ -4,6 +4,7 @@ from app.routers import (
     activities,
     applications,
     auth,
+    backup,
     blocks,
     bookmark_collections,
     bookmarks,
@@ -16,6 +17,7 @@ from app.routers import (
     hackathons,
     health,
     messages,
+    mfa,
     notifications,
     oauth_linking,
     org_audit_logs,
@@ -32,6 +34,7 @@ from app.routers import (
     repository_quality,
     saved_searches,
     search,
+    security_dashboard,
     skills,
     users,
     webhooks,
@@ -57,10 +60,12 @@ async def v1_root():
 
 # Router inclusions under /api/v1
 api_v1_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+api_v1_router.include_router(mfa.router)
 api_v1_router.include_router(oauth_linking.router)
 api_v1_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_v1_router.include_router(blocks.router, prefix="/blocks", tags=["User Blocks"])
 api_v1_router.include_router(export.router, prefix="/users", tags=["Export"])
+api_v1_router.include_router(backup.router)
 api_v1_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
 api_v1_router.include_router(project_members.router)
 api_v1_router.include_router(project_documents.router)
@@ -114,6 +119,7 @@ api_v1_router.include_router(repository_quality.router, tags=["Repository Qualit
 api_v1_router.include_router(health.router)
 api_v1_router.include_router(search.router, prefix="/search", tags=["Search"])
 api_v1_router.include_router(saved_searches.router)
+api_v1_router.include_router(security_dashboard.router)
 api_v1_router.include_router(
     hackathons.router, prefix="/hackathons", tags=["Hackathons"]
 )

@@ -1,3 +1,5 @@
+import os
+import sys
 from functools import lru_cache
 
 # pyrefly: ignore [missing-import]
@@ -56,7 +58,13 @@ class Settings(BaseSettings):
     # Database
     # ==========================================================
 
-    DATABASE_URL: str = "postgresql+psycopg://postgres:password@localhost:5432/devlink"
+    DATABASE_URL: str = Field(
+        default_factory=lambda: (
+            "sqlite:///:memory:"
+            if os.getenv("TESTING") == "true" or "pytest" in sys.modules
+            else "postgresql+psycopg://postgres:password@localhost:5432/devlink"
+        )
+    )
 
     # ==========================================================
     # Redis
@@ -135,6 +143,8 @@ class Settings(BaseSettings):
     ENABLE_RATE_LIMIT: bool = True
     DEFAULT_RATE_LIMIT: str = "100/minute"
     AUTH_RATE_LIMIT: str = "5/minute"
+    LOGIN_RATE_LIMIT: str = "5/minute"
+    REGISTER_RATE_LIMIT: str = "3/hour"
     SEARCH_RATE_LIMIT: str = "30/minute"
     UPLOAD_RATE_LIMIT: str = "10/minute"
     MESSAGE_RATE_LIMIT: str = "30/minute"

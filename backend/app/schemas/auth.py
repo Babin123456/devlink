@@ -89,12 +89,12 @@ class AuthResponse(BaseModel):
     success: bool = True
     message: str
 
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-    user: Optional[UserResponse] = None
-
-    user: CurrentUser
+    access_token: Optional[str] = None
+    refresh_token: Optional[str] = None
+    token_type: Optional[str] = "bearer"
+    mfa_required: bool = False
+    mfa_token: Optional[str] = None
+    user: Optional[CurrentUser] = None
 
 
 # ==========================================================
