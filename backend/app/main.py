@@ -527,6 +527,8 @@ app.include_router(conversations.router)
 from app.routers import audit
 
 app.include_router(audit.router, prefix="/api", tags=["Audit"])
+from app.routers import security_events
+app.include_router(security_events.router, prefix="/api", tags=["Security Events Monitoring"])
 app.include_router(issues.router, prefix="/api", tags=["Issues"])
 app.include_router(
     profile_summary.router, prefix="/api/profile-summary", tags=["Profile Summary"]
