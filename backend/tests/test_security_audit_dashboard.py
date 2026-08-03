@@ -14,7 +14,6 @@ Tests cover:
   - CSV export helpers
   - require_admin RBAC guard
 """
-
 from __future__ import annotations
 
 import uuid
@@ -32,10 +31,10 @@ from app.services.security_dashboard_service import (
     _to_item,
 )
 
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
 
 def _make_audit_log(
     action: AuditAction = AuditAction.FAILED_LOGIN,
@@ -85,7 +84,6 @@ def _mock_db_paginated(logs: list) -> MagicMock:
 # _to_item
 # ---------------------------------------------------------------------------
 
-
 class TestToItem:
     def test_converts_log_to_schema(self):
         log = _make_audit_log()
@@ -104,7 +102,6 @@ class TestToItem:
 # ---------------------------------------------------------------------------
 # _export_csv
 # ---------------------------------------------------------------------------
-
 
 class TestExportCsv:
     def test_header_row_present(self):
@@ -130,7 +127,6 @@ class TestExportCsv:
 # SEVERITY_MAP
 # ---------------------------------------------------------------------------
 
-
 class TestSeverityMap:
     def test_suspicious_login_is_critical(self):
         assert SEVERITY_MAP[AuditAction.SUSPICIOUS_LOGIN_ATTEMPT] == "critical"
@@ -146,15 +142,11 @@ class TestSeverityMap:
 # SecurityDashboardService.get_summary (mocked DB)
 # ---------------------------------------------------------------------------
 
-
 class TestGetSummary:
     def test_returns_summary_schema(self):
         db = MagicMock()
         db.scalar.return_value = 3
-        db.execute.return_value.all.return_value = [
-            ("192.168.1.1", 10),
-            ("10.0.0.1", 7),
-        ]
+        db.execute.return_value.all.return_value = [("192.168.1.1", 10), ("10.0.0.1", 7)]
 
         result = SecurityDashboardService.get_summary(db)
 
@@ -178,7 +170,6 @@ class TestGetSummary:
 # ---------------------------------------------------------------------------
 # SecurityDashboardService.get_failed_logins
 # ---------------------------------------------------------------------------
-
 
 class TestGetFailedLogins:
     def test_returns_paginated_result(self):
@@ -205,7 +196,6 @@ class TestGetFailedLogins:
 # SecurityDashboardService.export_failed_logins_csv
 # ---------------------------------------------------------------------------
 
-
 class TestExportFailedLoginsCsv:
     def test_returns_string(self):
         db = MagicMock()
@@ -225,7 +215,6 @@ class TestExportFailedLoginsCsv:
 # ---------------------------------------------------------------------------
 # SecurityDashboardService.get_blocked_ips
 # ---------------------------------------------------------------------------
-
 
 class TestGetBlockedIps:
     def test_returns_list_of_blocked_ip_entries(self):
@@ -254,7 +243,6 @@ class TestGetBlockedIps:
 # SecurityDashboardService.get_suspicious_sessions
 # ---------------------------------------------------------------------------
 
-
 class TestGetSuspiciousSessions:
     def test_returns_paginated_result(self):
         logs = [_make_audit_log(action=AuditAction.SUSPICIOUS_LOGIN_ATTEMPT)]
@@ -267,7 +255,6 @@ class TestGetSuspiciousSessions:
 # ---------------------------------------------------------------------------
 # SecurityDashboardService.get_password_resets
 # ---------------------------------------------------------------------------
-
 
 class TestGetPasswordResets:
     def test_returns_paginated_result(self):
@@ -287,7 +274,6 @@ class TestGetPasswordResets:
 # SecurityDashboardService.get_api_abuse
 # ---------------------------------------------------------------------------
 
-
 class TestGetApiAbuse:
     def test_returns_paginated_result(self):
         logs = [_make_audit_log(action=AuditAction.API_ACCESS, success=False)]
@@ -300,7 +286,6 @@ class TestGetApiAbuse:
 # ---------------------------------------------------------------------------
 # SecurityDashboardService.get_security_alerts
 # ---------------------------------------------------------------------------
-
 
 class TestGetSecurityAlerts:
     def test_returns_dict_with_items(self):
@@ -335,7 +320,6 @@ class TestGetSecurityAlerts:
 # SecurityDashboardService.search_all
 # ---------------------------------------------------------------------------
 
-
 class TestSearchAll:
     def test_returns_paginated_result(self):
         logs = [_make_audit_log(description="suspicious ip login attempt")]
@@ -353,7 +337,6 @@ class TestSearchAll:
 # ---------------------------------------------------------------------------
 # require_admin RBAC guard
 # ---------------------------------------------------------------------------
-
 
 class TestRequireAdmin:
     def test_admin_system_role_passes(self):

@@ -7,7 +7,7 @@ client = TestClient(app)
 
 def test_api_root_version_info():
     """Test GET /api returns API versioning metadata."""
-    response = client.get("/api/api")
+    response = client.get("/api")
     assert response.status_code == 200
     data = response.json()
     assert data["name"] == "DevLink API"

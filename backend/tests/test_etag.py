@@ -170,7 +170,7 @@ def test_merge_vary_preserves_wildcard():
 
 
 def test_get_response_carries_an_etag(client):
-    response = client.get("/api/items")
+    response = client.get("/items")
 
     assert response.status_code == 200
     assert response.headers["etag"]
@@ -179,10 +179,10 @@ def test_get_response_carries_an_etag(client):
 
 
 def test_matching_if_none_match_returns_304_with_no_body(client):
-    first = client.get("/api/items")
+    first = client.get("/items")
     etag = first.headers["etag"]
 
-    second = client.get("/api/items", headers={"If-None-Match": etag})
+    second = client.get("/items", headers={"If-None-Match": etag})
 
     assert second.status_code == 304
     assert second.content == b""
@@ -192,63 +192,65 @@ def test_matching_if_none_match_returns_304_with_no_body(client):
 
 
 def test_weak_if_none_match_still_matches(client):
-    etag = client.get("/api/items").headers["etag"]
+    etag = client.get("/items").headers["etag"]
 
-    response = client.get("/api/items", headers={"If-None-Match": f"W/{etag}"})
+    response = client.get("/items", headers={"If-None-Match": f"W/{etag}"})
 
     assert response.status_code == 304
 
 
 def test_wildcard_if_none_match_returns_304(client):
-    response = client.get("/api/items", headers={"If-None-Match": "*"})
+    response = client.get("/items", headers={"If-None-Match": "*"})
 
     assert response.status_code == 304
 
 
 def test_non_matching_if_none_match_returns_full_body(client):
-    response = client.get("/api/items", headers={"If-None-Match": '"stale"'})
+    response = client.get("/items", headers={"If-None-Match": '"stale"'})
 
     assert response.status_code == 200
     assert response.json() == {"items": [{"id": 1, "name": "devlink"}]}
 
 
 def test_if_none_match_list_matches_any_member(client):
-    etag = client.get("/api/items").headers["etag"]
+    etag = client.get("/items").headers["etag"]
 
-    response = client.get("/items", headers={"If-None-Match": f'"other", {etag}'})
+    response = client.get(
+        "/items", headers={"If-None-Match": f'"other", {etag}'}
+    )
 
     assert response.status_code == 304
 
 
 def test_post_responses_are_untouched(client):
-    response = client.post("/api/items")
+    response = client.post("/items")
 
     assert response.status_code == 200
     assert "etag" not in response.headers
 
 
 def test_error_responses_are_untouched(client):
-    response = client.get("/api/missing")
+    response = client.get("/missing")
 
     assert response.status_code == 404
     assert "etag" not in response.headers
 
 
 def test_handler_supplied_etag_is_preserved(client):
-    response = client.get("/api/preset-etag")
+    response = client.get("/preset-etag")
 
     assert response.headers["etag"] == '"handler-owned"'
 
 
 def test_no_store_responses_are_skipped(client):
-    response = client.get("/api/no-store")
+    response = client.get("/no-store")
 
     assert "etag" not in response.headers
     assert response.headers["cache-control"] == "no-store"
 
 
 def test_binary_responses_are_skipped(client):
-    response = client.get("/api/download")
+    response = client.get("/download")
 
     assert response.status_code == 200
     assert response.content == b"\x00\x01\x02"
@@ -256,7 +258,7 @@ def test_binary_responses_are_skipped(client):
 
 
 def test_streaming_responses_pass_through(client):
-    response = client.get("/api/stream")
+    response = client.get("/stream")
 
     assert response.status_code == 200
     assert response.text == "chunk-0\nchunk-1\nchunk-2\n"
@@ -264,7 +266,7 @@ def test_streaming_responses_pass_through(client):
 
 
 def test_empty_body_gets_no_etag(client):
-    response = client.get("/api/empty")
+    response = client.get("/empty")
 
     assert response.status_code == 200
     assert response.content == b""
@@ -272,7 +274,7 @@ def test_empty_body_gets_no_etag(client):
 
 
 def test_plain_text_is_tagged(client):
-    response = client.get("/api/text")
+    response = client.get("/text")
 
     assert response.text == "hello"
     assert response.headers["etag"] == generate_etag(b"hello")
@@ -287,7 +289,7 @@ def test_oversized_body_streams_through_untagged():
         return {"payload": "x" * 512}
 
     with TestClient(app) as local_client:
-        response = local_client.get("/api/big")
+        response = local_client.get("/big")
 
     assert response.status_code == 200
     assert response.json()["payload"] == "x" * 512
@@ -305,8 +307,10 @@ def test_etag_changes_when_the_representation_changes():
         return {"count": counter["value"]}
 
     with TestClient(app) as local_client:
-        first = local_client.get("/api/counter").headers["etag"]
-        second = local_client.get("/counter", headers={"If-None-Match": first})
+        first = local_client.get("/counter").headers["etag"]
+        second = local_client.get(
+            "/counter", headers={"If-None-Match": first}
+        )
 
     assert second.status_code == 200
     assert second.headers["etag"] != first
@@ -325,7 +329,7 @@ def test_middleware_can_be_disabled(monkeypatch):
         return {"ok": True}
 
     with TestClient(app) as local_client:
-        response = local_client.get("/api/items")
+        response = local_client.get("/items")
 
     assert response.status_code == 200
     assert "etag" not in response.headers

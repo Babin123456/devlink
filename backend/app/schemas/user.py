@@ -14,15 +14,7 @@ from pydantic import (
     HttpUrl,
     model_validator,
 )
-from app.core.validation import (
-    NameStr,
-    UsernameStr,
-    ValidEmail,
-    HeadlineStr,
-    BioStr,
-    ValidURL,
-    SanitizedStr,
-)
+from app.core.validation import NameStr, UsernameStr, ValidEmail, HeadlineStr, BioStr, ValidURL, SanitizedStr
 
 
 class AvailabilitySlot(BaseModel):
@@ -117,7 +109,7 @@ class UserCreate(UserBase):
                 "username": "janedoe",
                 "email": "jane.doe@example.com",
                 "password": "StrongPassword123!",
-                "open_to_work": True,
+                "open_to_work": True
             }
         }
     )
@@ -162,7 +154,7 @@ class UserUpdate(BaseModel):
                 "headline": "Senior Full-Stack Developer",
                 "bio": "I love building scalable web applications.",
                 "location": "San Francisco, CA",
-                "github_url": "https://github.com/janesmith",
+                "github_url": "https://github.com/janesmith"
             }
         }
     )

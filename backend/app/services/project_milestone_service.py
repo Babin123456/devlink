@@ -45,9 +45,7 @@ class ProjectMilestoneService:
         return project
 
     @staticmethod
-    def is_user_project_maintainer(
-        db: Session, project: Project, user_id: uuid.UUID
-    ) -> bool:
+    def is_user_project_maintainer(db: Session, project: Project, user_id: uuid.UUID) -> bool:
         """
         Check if user is project owner, co-owner, admin, or maintainer.
         """
@@ -75,10 +73,7 @@ class ProjectMilestoneService:
         """
         Raise 403 Forbidden if user is not authorized to edit project milestones.
         """
-        if (
-            getattr(user, "system_role", None) == "admin"
-            or getattr(user, "role", None) == "admin"
-        ):
+        if getattr(user, "system_role", None) == "admin" or getattr(user, "role", None) == "admin":
             return
 
         if not ProjectMilestoneService.is_user_project_maintainer(db, project, user.id):
@@ -106,9 +101,7 @@ class ProjectMilestoneService:
             id=uuid.uuid4(),
             project_id=project_id,
             title=milestone_in.title.strip(),
-            description=(
-                milestone_in.description.strip() if milestone_in.description else None
-            ),
+            description=milestone_in.description.strip() if milestone_in.description else None,
             due_date=milestone_in.due_date,
             is_completed=False,
             is_archived=False,
@@ -122,9 +115,7 @@ class ProjectMilestoneService:
         return milestone
 
     @staticmethod
-    def get_milestone_or_404(
-        db: Session, project_id: uuid.UUID, milestone_id: uuid.UUID
-    ) -> Milestone:
+    def get_milestone_or_404(db: Session, project_id: uuid.UUID, milestone_id: uuid.UUID) -> Milestone:
         stmt = select(Milestone).where(
             Milestone.id == milestone_id,
             Milestone.project_id == project_id,
@@ -155,9 +146,7 @@ class ProjectMilestoneService:
             stmt = stmt.where(Milestone.is_completed.is_(is_completed))
 
         # Order by due_date nulls last, then created_at
-        stmt = stmt.order_by(
-            Milestone.due_date.asc().nulls_last(), Milestone.created_at.asc()
-        )
+        stmt = stmt.order_by(Milestone.due_date.asc().nulls_last(), Milestone.created_at.asc())
         return list(db.scalars(stmt).all())
 
     @staticmethod
@@ -171,18 +160,14 @@ class ProjectMilestoneService:
         project = ProjectMilestoneService.get_project_or_404(db, project_id)
         ProjectMilestoneService.require_project_maintainer(db, project, actor)
 
-        milestone = ProjectMilestoneService.get_milestone_or_404(
-            db, project_id, milestone_id
-        )
+        milestone = ProjectMilestoneService.get_milestone_or_404(db, project_id, milestone_id)
 
         now = datetime.now(timezone.utc)
 
         if milestone_in.title is not None:
             milestone.title = milestone_in.title.strip()
         if milestone_in.description is not None:
-            milestone.description = (
-                milestone_in.description.strip() if milestone_in.description else None
-            )
+            milestone.description = milestone_in.description.strip() if milestone_in.description else None
         if milestone_in.due_date is not None:
             milestone.due_date = milestone_in.due_date
 
@@ -219,9 +204,7 @@ class ProjectMilestoneService:
         project = ProjectMilestoneService.get_project_or_404(db, project_id)
         ProjectMilestoneService.require_project_maintainer(db, project, actor)
 
-        milestone = ProjectMilestoneService.get_milestone_or_404(
-            db, project_id, milestone_id
-        )
+        milestone = ProjectMilestoneService.get_milestone_or_404(db, project_id, milestone_id)
         now = datetime.now(timezone.utc)
 
         milestone.is_archived = archive
@@ -243,9 +226,7 @@ class ProjectMilestoneService:
         project = ProjectMilestoneService.get_project_or_404(db, project_id)
         ProjectMilestoneService.require_project_maintainer(db, project, actor)
 
-        milestone = ProjectMilestoneService.get_milestone_or_404(
-            db, project_id, milestone_id
-        )
+        milestone = ProjectMilestoneService.get_milestone_or_404(db, project_id, milestone_id)
         db.delete(milestone)
         db.commit()
 
@@ -254,9 +235,7 @@ class ProjectMilestoneService:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def calculate_progress(
-        db: Session, project_id: uuid.UUID
-    ) -> MilestoneProgressResponse:
+    def calculate_progress(db: Session, project_id: uuid.UUID) -> MilestoneProgressResponse:
         ProjectMilestoneService.get_project_or_404(db, project_id)
 
         stmt = select(Milestone).where(Milestone.project_id == project_id)
@@ -270,20 +249,15 @@ class ProjectMilestoneService:
         active_cnt = len(active_milestones)
 
         completed_cnt = len([m for m in active_milestones if m.is_completed])
-        overdue_cnt = len(
-            [
-                m
-                for m in active_milestones
-                if not m.is_completed and m.due_date and m.due_date < now
-            ]
-        )
+        overdue_cnt = len([
+            m for m in active_milestones
+            if not m.is_completed and m.due_date and m.due_date < now
+        ])
 
         if active_cnt > 0:
             percentage = round((completed_cnt / active_cnt) * 100.0, 1)
         elif total_cnt > 0:
-            percentage = round(
-                (len([m for m in milestones if m.is_completed]) / total_cnt) * 100.0, 1
-            )
+            percentage = round((len([m for m in milestones if m.is_completed]) / total_cnt) * 100.0, 1)
         else:
             percentage = 0.0
 
@@ -303,9 +277,7 @@ class ProjectMilestoneService:
 
         stmt = select(Milestone).where(Milestone.project_id == project_id)
         # Order by due_date asc (nulls last), then created_at
-        stmt = stmt.order_by(
-            Milestone.due_date.asc().nulls_last(), Milestone.created_at.asc()
-        )
+        stmt = stmt.order_by(Milestone.due_date.asc().nulls_last(), Milestone.created_at.asc())
         milestones = list(db.scalars(stmt).all())
 
         now = datetime.now(timezone.utc)
@@ -315,11 +287,7 @@ class ProjectMilestoneService:
             days_rem: Optional[int] = None
             if m.due_date:
                 # Ensure timezone aware comparison
-                due_dt = (
-                    m.due_date
-                    if m.due_date.tzinfo
-                    else m.due_date.replace(tzinfo=timezone.utc)
-                )
+                due_dt = m.due_date if m.due_date.tzinfo else m.due_date.replace(tzinfo=timezone.utc)
                 delta = due_dt - now
                 days_rem = delta.days
 
@@ -327,15 +295,7 @@ class ProjectMilestoneService:
                 m_status = "archived"
             elif m.is_completed:
                 m_status = "completed"
-            elif (
-                m.due_date
-                and (
-                    m.due_date
-                    if m.due_date.tzinfo
-                    else m.due_date.replace(tzinfo=timezone.utc)
-                )
-                < now
-            ):
+            elif m.due_date and (m.due_date if m.due_date.tzinfo else m.due_date.replace(tzinfo=timezone.utc)) < now:
                 m_status = "overdue"
             else:
                 m_status = "upcoming"

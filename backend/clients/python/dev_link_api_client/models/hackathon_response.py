@@ -202,9 +202,7 @@ class HackathonResponse:
 
         website_url = _parse_website_url(d.pop("website_url", UNSET))
 
-        def _parse_registration_starts_at(
-            data: object,
-        ) -> datetime.datetime | None | Unset:
+        def _parse_registration_starts_at(data: object) -> datetime.datetime | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -219,13 +217,9 @@ class HackathonResponse:
                 pass
             return cast(datetime.datetime | None | Unset, data)
 
-        registration_starts_at = _parse_registration_starts_at(
-            d.pop("registration_starts_at", UNSET)
-        )
+        registration_starts_at = _parse_registration_starts_at(d.pop("registration_starts_at", UNSET))
 
-        def _parse_registration_ends_at(
-            data: object,
-        ) -> datetime.datetime | None | Unset:
+        def _parse_registration_ends_at(data: object) -> datetime.datetime | None | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -240,9 +234,7 @@ class HackathonResponse:
                 pass
             return cast(datetime.datetime | None | Unset, data)
 
-        registration_ends_at = _parse_registration_ends_at(
-            d.pop("registration_ends_at", UNSET)
-        )
+        registration_ends_at = _parse_registration_ends_at(d.pop("registration_ends_at", UNSET))
 
         hackathon_response = cls(
             name=name,

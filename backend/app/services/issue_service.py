@@ -155,9 +155,9 @@ class IssueService:
 
         checked_count = (
             db.scalar(
-                select(func.count())
-                .select_from(Issue)
-                .where(Issue.project_id == project_id)
+                select(func.count()).select_from(Issue).where(
+                    Issue.project_id == project_id
+                )
             )
             or 0
         )

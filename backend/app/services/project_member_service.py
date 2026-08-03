@@ -25,14 +25,10 @@ from app.core.rbac import (
 class ProjectMemberService:
 
     @classmethod
-    def get_project_members(
-        cls, db: Session, project_id: uuid.UUID
-    ) -> List[Dict[str, Any]]:
+    def get_project_members(cls, db: Session, project_id: uuid.UUID) -> List[Dict[str, Any]]:
         project = db.get(Project, project_id)
         if not project:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
 
         stmt = (
             select(ProjectMember, User)
@@ -52,40 +48,35 @@ class ProjectMemberService:
         for pm, user in results:
             user_ids_seen.add(user.id)
             role_val = MemberRole.OWNER if user.id == project.owner_id else pm.role
-            members_list.append(
-                {
-                    "id": str(pm.id),
-                    "project_id": str(pm.project_id),
-                    "user_id": str(pm.user_id),
-                    "role": role_val,
-                    "is_active": pm.is_active,
-                    "joined_at": pm.joined_at,
-                    "username": user.username,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "avatar_url": getattr(user, "avatar_url", None),
-                }
-            )
+            members_list.append({
+                "id": str(pm.id),
+                "project_id": str(pm.project_id),
+                "user_id": str(pm.user_id),
+                "role": role_val,
+                "is_active": pm.is_active,
+                "joined_at": pm.joined_at,
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "avatar_url": getattr(user, "avatar_url", None),
+            })
 
         # If project owner is not in project_members table, add owner entry
         if project.owner_id not in user_ids_seen:
             owner_user = db.get(User, project.owner_id)
             if owner_user:
-                members_list.insert(
-                    0,
-                    {
-                        "id": str(uuid.uuid4()),
-                        "project_id": str(project.id),
-                        "user_id": str(owner_user.id),
-                        "role": MemberRole.OWNER,
-                        "is_active": True,
-                        "joined_at": project.created_at,
-                        "username": owner_user.username,
-                        "first_name": owner_user.first_name,
-                        "last_name": owner_user.last_name,
-                        "avatar_url": getattr(owner_user, "avatar_url", None),
-                    },
-                )
+                members_list.insert(0, {
+                    "id": str(uuid.uuid4()),
+                    "project_id": str(project.id),
+                    "user_id": str(owner_user.id),
+                    "role": MemberRole.OWNER,
+                    "is_active": True,
+                    "joined_at": project.created_at,
+                    "username": owner_user.username,
+                    "first_name": owner_user.first_name,
+                    "last_name": owner_user.last_name,
+                    "avatar_url": getattr(owner_user, "avatar_url", None),
+                })
 
         return members_list
 
@@ -100,15 +91,11 @@ class ProjectMemberService:
     ) -> ProjectMember:
         project = db.get(Project, project_id)
         if not project:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
 
         # Authorization check
         if actor_user.id != project.owner_id and not actor_user.is_superuser:
-            if not has_project_permission(
-                db, actor_user.id, project_id, PROJECT_MANAGE_ROLES
-            ):
+            if not has_project_permission(db, actor_user.id, project_id, PROJECT_MANAGE_ROLES):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Insufficient permissions to manage project roles",
@@ -185,9 +172,7 @@ class ProjectMemberService:
     ) -> Project:
         project = db.get(Project, project_id)
         if not project:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
 
         if project.owner_id != current_owner.id and not current_owner.is_superuser:
             raise HTTPException(
@@ -203,9 +188,7 @@ class ProjectMemberService:
 
         new_owner = db.get(User, new_owner_id)
         if not new_owner:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="New owner user not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="New owner user not found")
 
         previous_owner_id = project.owner_id
         project.owner_id = new_owner_id
@@ -220,14 +203,7 @@ class ProjectMemberService:
         if prev_pm:
             prev_pm.role = MemberRole.MAINTAINER
         else:
-            db.add(
-                ProjectMember(
-                    project_id=project_id,
-                    user_id=previous_owner_id,
-                    role=MemberRole.MAINTAINER,
-                    is_active=True,
-                )
-            )
+            db.add(ProjectMember(project_id=project_id, user_id=previous_owner_id, role=MemberRole.MAINTAINER, is_active=True))
 
         # Update new owner member record to OWNER
         new_pm = db.scalar(
@@ -240,14 +216,7 @@ class ProjectMemberService:
             new_pm.role = MemberRole.OWNER
             new_pm.is_active = True
         else:
-            db.add(
-                ProjectMember(
-                    project_id=project_id,
-                    user_id=new_owner_id,
-                    role=MemberRole.OWNER,
-                    is_active=True,
-                )
-            )
+            db.add(ProjectMember(project_id=project_id, user_id=new_owner_id, role=MemberRole.OWNER, is_active=True))
 
         db.commit()
         db.refresh(project)
@@ -295,9 +264,7 @@ class ProjectMemberService:
     ) -> None:
         project = db.get(Project, project_id)
         if not project:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
 
         if target_user_id == project.owner_id:
             raise HTTPException(
@@ -306,14 +273,8 @@ class ProjectMemberService:
             )
 
         # Allow self-removal, otherwise require manage permissions
-        if (
-            actor_user.id != target_user_id
-            and actor_user.id != project.owner_id
-            and not actor_user.is_superuser
-        ):
-            if not has_project_permission(
-                db, actor_user.id, project_id, PROJECT_REMOVE_MEMBERS
-            ):
+        if actor_user.id != target_user_id and actor_user.id != project.owner_id and not actor_user.is_superuser:
+            if not has_project_permission(db, actor_user.id, project_id, PROJECT_REMOVE_MEMBERS):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Insufficient permissions to remove team members",

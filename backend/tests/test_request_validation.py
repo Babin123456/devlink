@@ -39,13 +39,13 @@ client = TestClient(dummy_app)
 
 
 def test_valid_request_body():
-    response = client.post("/api/sample/body", json={"title": "DevLink", "age": 25})
+    response = client.post("/sample/body", json={"title": "DevLink", "age": 25})
     assert response.status_code == 200
     assert response.json() == {"message": "Success", "title": "DevLink"}
 
 
 def test_invalid_request_body_standardized_error():
-    response = client.post("/api/sample/body", json={"title": "a", "age": 12})
+    response = client.post("/sample/body", json={"title": "a", "age": 12})
     assert response.status_code == 422
     data = response.json()
     assert "error" in data
@@ -53,7 +53,7 @@ def test_invalid_request_body_standardized_error():
 
 
 def test_invalid_query_parameters():
-    response = client.get("/api/sample/query?page=0&limit=100")
+    response = client.get("/sample/query?page=0&limit=100")
     assert response.status_code == 422
     data = response.json()
     assert "error" in data

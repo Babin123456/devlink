@@ -9,9 +9,7 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.webhook_dispatch_params_headers_type_0 import (
-        WebhookDispatchParamsHeadersType0,
-    )
+    from ..models.webhook_dispatch_params_headers_type_0 import WebhookDispatchParamsHeadersType0
     from ..models.webhook_dispatch_params_payload import WebhookDispatchParamsPayload
 
 
@@ -37,9 +35,7 @@ class WebhookDispatchParams:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.webhook_dispatch_params_headers_type_0 import (
-            WebhookDispatchParamsHeadersType0,
-        )
+        from ..models.webhook_dispatch_params_headers_type_0 import WebhookDispatchParamsHeadersType0
 
         event_type = self.event_type
 
@@ -75,12 +71,8 @@ class WebhookDispatchParams:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.webhook_dispatch_params_headers_type_0 import (
-            WebhookDispatchParamsHeadersType0,
-        )
-        from ..models.webhook_dispatch_params_payload import (
-            WebhookDispatchParamsPayload,
-        )
+        from ..models.webhook_dispatch_params_headers_type_0 import WebhookDispatchParamsHeadersType0
+        from ..models.webhook_dispatch_params_payload import WebhookDispatchParamsPayload
 
         d = dict(src_dict)
         event_type = d.pop("event_type")
@@ -89,9 +81,7 @@ class WebhookDispatchParams:
 
         payload = WebhookDispatchParamsPayload.from_dict(d.pop("payload"))
 
-        def _parse_headers(
-            data: object,
-        ) -> None | Unset | WebhookDispatchParamsHeadersType0:
+        def _parse_headers(data: object) -> None | Unset | WebhookDispatchParamsHeadersType0:
             if data is None:
                 return data
             if isinstance(data, Unset):

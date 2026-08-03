@@ -30,9 +30,7 @@ def _get_kwargs(
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> (
-    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet
-    | HTTPValidationError
-    | None
+    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet | HTTPValidationError | None
 ):
     if response.status_code == 200:
         response_200 = GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet.from_dict(
@@ -55,8 +53,7 @@ def _parse_response(
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
 ) -> Response[
-    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet
-    | HTTPValidationError
+    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet | HTTPValidationError
 ]:
     return Response(
         status_code=HTTPStatus(response.status_code),
@@ -71,8 +68,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
 ) -> Response[
-    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet
-    | HTTPValidationError
+    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet | HTTPValidationError
 ]:
     """Get User Presence
 
@@ -105,9 +101,7 @@ def sync(
     *,
     client: AuthenticatedClient,
 ) -> (
-    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet
-    | HTTPValidationError
-    | None
+    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet | HTTPValidationError | None
 ):
     """Get User Presence
 
@@ -135,8 +129,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
 ) -> Response[
-    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet
-    | HTTPValidationError
+    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet | HTTPValidationError
 ]:
     """Get User Presence
 
@@ -167,9 +160,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
 ) -> (
-    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet
-    | HTTPValidationError
-    | None
+    GetUserPresenceApiV1WsPresenceUserIdGetResponseGetUserPresenceApiV1WsPresenceUserIdGet | HTTPValidationError | None
 ):
     """Get User Presence
 

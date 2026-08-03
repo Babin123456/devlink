@@ -118,9 +118,7 @@ Return as a JSON array of objects with a "text" field and a "confidence" field (
         return prompt
 
     @staticmethod
-    def _parse_suggestions(
-        raw: object,
-    ) -> Optional[list[ConversationStarterSuggestion]]:
+    def _parse_suggestions(raw: object) -> Optional[list[ConversationStarterSuggestion]]:
         """Parse the OpenAI response into suggestions, accepting several shapes."""
         if not isinstance(raw, list) or not raw:
             return None
@@ -141,9 +139,7 @@ Return as a JSON array of objects with a "text" field and a "confidence" field (
                     confidence = 0.5
                 confidence = max(0.0, min(1.0, confidence))
                 suggestions.append(
-                    ConversationStarterSuggestion(
-                        text=text.strip(), confidence=confidence
-                    )
+                    ConversationStarterSuggestion(text=text.strip(), confidence=confidence)
                 )
 
         if len(suggestions) < 3:

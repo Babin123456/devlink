@@ -39,9 +39,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[
-    GetAllPresencesApiV1WsPresenceGetResponseGetAllPresencesApiV1WsPresenceGet
-]:
+) -> Response[GetAllPresencesApiV1WsPresenceGetResponseGetAllPresencesApiV1WsPresenceGet]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -53,9 +51,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[
-    GetAllPresencesApiV1WsPresenceGetResponseGetAllPresencesApiV1WsPresenceGet
-]:
+) -> Response[GetAllPresencesApiV1WsPresenceGetResponseGetAllPresencesApiV1WsPresenceGet]:
     """Get All Presences
 
      Retrieve active presence states for all connected users.
@@ -101,9 +97,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[
-    GetAllPresencesApiV1WsPresenceGetResponseGetAllPresencesApiV1WsPresenceGet
-]:
+) -> Response[GetAllPresencesApiV1WsPresenceGetResponseGetAllPresencesApiV1WsPresenceGet]:
     """Get All Presences
 
      Retrieve active presence states for all connected users.

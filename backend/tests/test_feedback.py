@@ -45,3 +45,4 @@ def test_get_my_feedbacks(db, client, register_and_login):
     assert response.status_code == 200
     feedbacks = response.json()
     assert len(feedbacks) >= 1
+

@@ -16,7 +16,6 @@ from app.schemas.notification import (
 )
 from app.core.cache import cached
 
-
 class NotificationService:
     """
     Business logic for notifications.
@@ -82,7 +81,10 @@ class NotificationService:
         sender_id: uuid.UUID | None,
         notification: NotificationCreate,
     ) -> Notification:
-        db_notification = Notification(sender_id=sender_id, **notification.model_dump())
+        db_notification = Notification(
+            sender_id=sender_id,
+            **notification.model_dump()
+        )
         db.add(db_notification)
         db.flush()
         db.refresh(db_notification)

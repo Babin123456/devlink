@@ -11,7 +11,6 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-
 class CloudStorageService:
     def __init__(self):
         self.provider = settings.STORAGE_PROVIDER.lower()
@@ -21,15 +20,13 @@ class CloudStorageService:
         if self.provider in ["s3", "r2"]:
             if not self.bucket_name:
                 logger.warning("AWS_BUCKET_NAME is not set, cloud storage may fail.")
-
+            
             endpoint_url = None
             if self.provider == "r2":
                 if not settings.R2_ACCOUNT_ID:
                     logger.warning("R2_ACCOUNT_ID is not set for Cloudflare R2.")
                 else:
-                    endpoint_url = (
-                        f"https://{settings.R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
-                    )
+                    endpoint_url = f"https://{settings.R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
 
             self.client = boto3.client(
                 "s3",
@@ -52,7 +49,7 @@ class CloudStorageService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"File type {file.content_type} is not allowed. Allowed types: {settings.ALLOWED_IMAGE_TYPES}",
             )
-
+        
         # File size is often validated stream-side in FastAPI, but if we need strict validation:
         # We can check file.size if provided, or rely on nginx/fastapi middleware for MAX_UPLOAD_SIZE_MB
         if file.size and file.size > settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024:
@@ -74,10 +71,10 @@ class CloudStorageService:
             ext = os.path.splitext(file.filename)[1] if file.filename else ""
             filename = f"{uuid.uuid4().hex}{ext}"
             file_path = os.path.join(settings.UPLOAD_DIR, directory, filename)
-
+            
             with open(file_path, "wb") as buffer:
                 buffer.write(file.file.read())
-
+            
             return f"{directory}/{filename}"
 
         if not self.client:
@@ -97,7 +94,7 @@ class CloudStorageService:
                 Bucket=self.bucket_name,
                 Key=object_name,
                 Body=file_bytes,
-                ContentType=file.content_type,
+                ContentType=file.content_type
             )
             return object_name
         except ClientError as e:
@@ -121,9 +118,9 @@ class CloudStorageService:
 
         try:
             response = self.client.generate_presigned_url(
-                "get_object",
-                Params={"Bucket": self.bucket_name, "Key": object_name},
-                ExpiresIn=expiration,
+                'get_object',
+                Params={'Bucket': self.bucket_name, 'Key': object_name},
+                ExpiresIn=expiration
             )
             return response
         except ClientError as e:
@@ -150,6 +147,5 @@ class CloudStorageService:
         except ClientError as e:
             logger.error(f"Error deleting file from {self.provider}: {e}")
             return False
-
 
 storage_service = CloudStorageService()

@@ -9,9 +9,7 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.search_indexed_result_item_metadata import (
-        SearchIndexedResultItemMetadata,
-    )
+    from ..models.search_indexed_result_item_metadata import SearchIndexedResultItemMetadata
 
 
 T = TypeVar("T", bound="SearchIndexedResultItem")
@@ -75,9 +73,7 @@ class SearchIndexedResultItem:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.search_indexed_result_item_metadata import (
-            SearchIndexedResultItemMetadata,
-        )
+        from ..models.search_indexed_result_item_metadata import SearchIndexedResultItemMetadata
 
         d = dict(src_dict)
         id = d.pop("id")

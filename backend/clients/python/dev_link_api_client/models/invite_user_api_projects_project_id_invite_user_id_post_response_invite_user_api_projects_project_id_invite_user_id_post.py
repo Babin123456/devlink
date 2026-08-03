@@ -7,8 +7,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 T = TypeVar(
-    "T",
-    bound="InviteUserApiProjectsProjectIdInviteUserIdPostResponseInviteUserApiProjectsProjectIdInviteUserIdPost",
+    "T", bound="InviteUserApiProjectsProjectIdInviteUserIdPostResponseInviteUserApiProjectsProjectIdInviteUserIdPost"
 )
 
 
@@ -28,13 +27,9 @@ class InviteUserApiProjectsProjectIdInviteUserIdPostResponseInviteUserApiProject
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        invite_user_api_projects_project_id_invite_user_id_post_response_invite_user_api_projects_project_id_invite_user_id_post = (
-            cls()
-        )
+        invite_user_api_projects_project_id_invite_user_id_post_response_invite_user_api_projects_project_id_invite_user_id_post = cls()
 
-        invite_user_api_projects_project_id_invite_user_id_post_response_invite_user_api_projects_project_id_invite_user_id_post.additional_properties = (
-            d
-        )
+        invite_user_api_projects_project_id_invite_user_id_post_response_invite_user_api_projects_project_id_invite_user_id_post.additional_properties = d
         return invite_user_api_projects_project_id_invite_user_id_post_response_invite_user_api_projects_project_id_invite_user_id_post
 
     @property

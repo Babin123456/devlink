@@ -210,9 +210,8 @@ def get_analytics_dashboard(
     db: Session = Depends(get_database),
     current_user: User = Depends(get_current_user),
 ):
-    if getattr(current_user, "role", None) != UserRole.ADMIN and not getattr(
-        current_user, "is_admin", False
-    ):
+    if getattr(current_user, "role", None) != UserRole.ADMIN and not getattr(current_user, "is_admin", False):
         raise HTTPException(status_code=403, detail="Admin only")
 
     return SearchAnalyticsService.get_dashboard_metrics(db, days=days)
+

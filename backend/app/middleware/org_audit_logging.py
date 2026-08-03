@@ -55,7 +55,6 @@ class OrganizationAuditMiddleware(BaseHTTPMiddleware):
         # Record immutable audit entry
         try:
             from app.database.session import SessionLocal
-
             db = SessionLocal()
             try:
                 AuditLogService.create_log(

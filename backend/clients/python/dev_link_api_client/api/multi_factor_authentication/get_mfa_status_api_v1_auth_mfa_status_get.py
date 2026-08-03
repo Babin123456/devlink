@@ -19,9 +19,7 @@ def _get_kwargs() -> dict[str, Any]:
     return _kwargs
 
 
-def _parse_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> MFAStatusResponse | None:
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> MFAStatusResponse | None:
     if response.status_code == 200:
         response_200 = MFAStatusResponse.from_dict(response.json())
 
@@ -33,9 +31,7 @@ def _parse_response(
         return None
 
 
-def _build_response(
-    *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[MFAStatusResponse]:
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx.Response) -> Response[MFAStatusResponse]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,

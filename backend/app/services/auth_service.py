@@ -360,7 +360,6 @@ class AuthService:
             )
 
         from app.services.mfa_service import MFAService
-
         verified = MFAService.verify_user_mfa(self.db, user, code)
         if not verified:
             raise HTTPException(

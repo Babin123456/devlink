@@ -47,7 +47,7 @@ def test_recommend_tech_stack_domain_fallback():
 def test_recommend_tech_stack_rejects_short_idea():
     """project_idea shorter than 3 characters is rejected by validation."""
     client = _client()
-    r = client.post("/api/recommendations/tech-stack", json={"project_idea": "ab"})
+    r = client.post("/recommendations/tech-stack", json={"project_idea": "ab"})
     assert r.status_code == 422
 
 

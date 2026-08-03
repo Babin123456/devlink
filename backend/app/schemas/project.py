@@ -78,7 +78,7 @@ class ProjectCreate(ProjectBase):
                 "hiring": True,
                 "is_opensource": True,
                 "repository_url": "https://github.com/nensii21/devlink",
-                "tech_stack": "React, FastAPI, PostgreSQL",
+                "tech_stack": "React, FastAPI, PostgreSQL"
             }
         }
     )

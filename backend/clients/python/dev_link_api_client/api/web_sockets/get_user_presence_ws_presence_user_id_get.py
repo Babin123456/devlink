@@ -29,11 +29,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> (
-    GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet
-    | HTTPValidationError
-    | None
-):
+) -> GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet.from_dict(
             response.json()
@@ -54,10 +50,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[
-    GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet
-    | HTTPValidationError
-]:
+) -> Response[GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -70,10 +63,7 @@ def sync_detailed(
     user_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[
-    GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet
-    | HTTPValidationError
-]:
+) -> Response[GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet | HTTPValidationError]:
     """Get User Presence
 
      Retrieve presence status of a specific user.
@@ -104,11 +94,7 @@ def sync(
     user_id: str,
     *,
     client: AuthenticatedClient,
-) -> (
-    GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet
-    | HTTPValidationError
-    | None
-):
+) -> GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet | HTTPValidationError | None:
     """Get User Presence
 
      Retrieve presence status of a specific user.
@@ -134,10 +120,7 @@ async def asyncio_detailed(
     user_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[
-    GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet
-    | HTTPValidationError
-]:
+) -> Response[GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet | HTTPValidationError]:
     """Get User Presence
 
      Retrieve presence status of a specific user.
@@ -166,11 +149,7 @@ async def asyncio(
     user_id: str,
     *,
     client: AuthenticatedClient,
-) -> (
-    GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet
-    | HTTPValidationError
-    | None
-):
+) -> GetUserPresenceWsPresenceUserIdGetResponseGetUserPresenceWsPresenceUserIdGet | HTTPValidationError | None:
     """Get User Presence
 
      Retrieve presence status of a specific user.

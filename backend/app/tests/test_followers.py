@@ -9,7 +9,6 @@ Covers:
 - is-following status check
 - Mutual followers
 """
-
 import uuid
 
 import pytest
@@ -22,10 +21,10 @@ from app.models.follower import Follower  # noqa: F401
 from app.models.user import User
 from app.services.follower_service import FollowerService
 
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
 
 def create_user(db, email: str, username: str) -> User:
     user = User(
@@ -47,7 +46,6 @@ def create_user(db, email: str, username: str) -> User:
 # ---------------------------------------------------------------------------
 # Service-level unit tests (no HTTP, faster feedback)
 # ---------------------------------------------------------------------------
-
 
 def test_follow_user_service(db):
     """FollowerService.follow_user creates a relationship."""
@@ -154,7 +152,6 @@ def test_mutual_followers_service(db):
 # ---------------------------------------------------------------------------
 # HTTP endpoint integration tests
 # ---------------------------------------------------------------------------
-
 
 def test_api_follow_user(client: TestClient, db, register_and_login):
     """POST /api/followers/{user_id} – happy path."""

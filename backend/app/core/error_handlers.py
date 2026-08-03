@@ -177,16 +177,16 @@ async def integrity_error_handler(
     """
     # Extract the error detail from the exception
     detail = str(exc.orig) if exc.orig else str(exc)
-
+    
     # Generic message, but try to find the specific field if possible
     message = "A record with this information already exists."
-
+    
     # PostgreSQL duplicate key error usually looks like:
     # duplicate key value violates unique constraint "ix_users_email"
     # DETAIL:  Key (email)=(test@example.com) already exists.
     if "already exists" in detail.lower() or "unique constraint" in detail.lower():
         message = "This record already exists. Please use a unique value."
-
+        
         # Try to extract the field name from the detail
         # e.g., Key (username)=(admin) already exists.
         match = re.search(r"Key \((.*?)\)=", detail)

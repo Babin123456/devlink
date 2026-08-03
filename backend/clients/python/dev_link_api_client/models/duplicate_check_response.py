@@ -64,9 +64,7 @@ class DuplicateCheckResponse:
         suggestions = []
         _suggestions = d.pop("suggestions")
         for suggestions_item_data in _suggestions:
-            suggestions_item = DuplicateSuggestionResponse.from_dict(
-                suggestions_item_data
-            )
+            suggestions_item = DuplicateSuggestionResponse.from_dict(suggestions_item_data)
 
             suggestions.append(suggestions_item)
 

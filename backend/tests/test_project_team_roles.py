@@ -91,18 +91,14 @@ def test_get_project_members(client, db, test_project, owner_user, member_user):
     db.add(pm)
     db.commit()
 
-    members = ProjectMemberService.get_project_members(
-        db=db, project_id=test_project.id
-    )
+    members = ProjectMemberService.get_project_members(db=db, project_id=test_project.id)
     assert len(members) >= 2
     roles = {m["role"] for m in members}
     assert MemberRole.OWNER in roles
     assert MemberRole.CONTRIBUTOR in roles
 
 
-def test_update_member_role_success(
-    client, db, test_project, owner_user, member_user, owner_auth_headers
-):
+def test_update_member_role_success(client, db, test_project, owner_user, member_user, owner_auth_headers):
     # Update role to MAINTAINER
     res = client.put(
         f"/api/v1/projects/{test_project.id}/members/{member_user.id}/role",
@@ -114,9 +110,7 @@ def test_update_member_role_success(
     assert data["role"] == "maintainer"
 
 
-def test_update_member_role_unauthorized(
-    client, db, test_project, owner_user, member_user, member_auth_headers
-):
+def test_update_member_role_unauthorized(client, db, test_project, owner_user, member_user, member_auth_headers):
     # Viewer/member attempting to change roles should fail with 403
     res = client.put(
         f"/api/v1/projects/{test_project.id}/members/{owner_user.id}/role",
@@ -126,9 +120,7 @@ def test_update_member_role_unauthorized(
     assert res.status_code == 403
 
 
-def test_cannot_demote_project_owner(
-    client, db, test_project, owner_user, owner_auth_headers
-):
+def test_cannot_demote_project_owner(client, db, test_project, owner_user, owner_auth_headers):
     res = client.put(
         f"/api/v1/projects/{test_project.id}/members/{owner_user.id}/role",
         json={"role": "viewer"},
@@ -138,9 +130,7 @@ def test_cannot_demote_project_owner(
     assert "Cannot change project owner role" in res.json()["detail"]
 
 
-def test_transfer_project_ownership(
-    client, db, test_project, owner_user, member_user, owner_auth_headers
-):
+def test_transfer_project_ownership(client, db, test_project, owner_user, member_user, owner_auth_headers):
     res = client.post(
         f"/api/v1/projects/{test_project.id}/transfer-ownership",
         json={"new_owner_id": str(member_user.id)},
@@ -152,17 +142,13 @@ def test_transfer_project_ownership(
     assert test_project.owner_id == member_user.id
 
     # Verify old owner is now MAINTAINER and new owner is OWNER
-    members = ProjectMemberService.get_project_members(
-        db=db, project_id=test_project.id
-    )
+    members = ProjectMemberService.get_project_members(db=db, project_id=test_project.id)
     member_roles = {m["user_id"]: m["role"] for m in members}
     assert member_roles[str(member_user.id)] == MemberRole.OWNER
     assert member_roles[str(owner_user.id)] == MemberRole.MAINTAINER
 
 
-def test_remove_project_member(
-    client, db, test_project, owner_user, member_user, owner_auth_headers
-):
+def test_remove_project_member(client, db, test_project, owner_user, member_user, owner_auth_headers):
     # Add member
     ProjectMemberService.update_member_role(
         db=db,
@@ -178,15 +164,11 @@ def test_remove_project_member(
     )
     assert res.status_code in [200, 204]
 
-    members = ProjectMemberService.get_project_members(
-        db=db, project_id=test_project.id
-    )
+    members = ProjectMemberService.get_project_members(db=db, project_id=test_project.id)
     assert not any(m["user_id"] == str(member_user.id) for m in members)
 
 
-def test_cannot_remove_project_owner(
-    client, db, test_project, owner_user, owner_auth_headers
-):
+def test_cannot_remove_project_owner(client, db, test_project, owner_user, owner_auth_headers):
     res = client.delete(
         f"/api/v1/projects/{test_project.id}/members/{owner_user.id}",
         headers=owner_auth_headers,
@@ -196,16 +178,8 @@ def test_cannot_remove_project_owner(
 
 def test_rbac_permission_checks(db, test_project, owner_user, member_user):
     # Owner has all permissions
-    assert (
-        has_project_permission(
-            db, owner_user.id, test_project.id, PROJECT_TRANSFER_OWNERSHIP
-        )
-        is True
-    )
-    assert (
-        has_project_permission(db, owner_user.id, test_project.id, PROJECT_MANAGE_ROLES)
-        is True
-    )
+    assert has_project_permission(db, owner_user.id, test_project.id, PROJECT_TRANSFER_OWNERSHIP) is True
+    assert has_project_permission(db, owner_user.id, test_project.id, PROJECT_MANAGE_ROLES) is True
 
     # Set member_user as CONTRIBUTOR
     ProjectMemberService.update_member_role(
@@ -216,15 +190,5 @@ def test_rbac_permission_checks(db, test_project, owner_user, member_user):
         actor_user=owner_user,
     )
 
-    assert (
-        has_project_permission(
-            db, member_user.id, test_project.id, PROJECT_EDIT_CONTENT
-        )
-        is True
-    )
-    assert (
-        has_project_permission(
-            db, member_user.id, test_project.id, PROJECT_TRANSFER_OWNERSHIP
-        )
-        is False
-    )
+    assert has_project_permission(db, member_user.id, test_project.id, PROJECT_EDIT_CONTENT) is True
+    assert has_project_permission(db, member_user.id, test_project.id, PROJECT_TRANSFER_OWNERSHIP) is False

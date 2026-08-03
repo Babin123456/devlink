@@ -6,10 +6,7 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar(
-    "T",
-    bound="GetAnalyticsOverviewApiAnalyticsOverviewGetResponseGetAnalyticsOverviewApiAnalyticsOverviewGet",
-)
+T = TypeVar("T", bound="GetAnalyticsOverviewApiAnalyticsOverviewGetResponseGetAnalyticsOverviewApiAnalyticsOverviewGet")
 
 
 @_attrs_define
@@ -32,10 +29,10 @@ class GetAnalyticsOverviewApiAnalyticsOverviewGetResponseGetAnalyticsOverviewApi
             cls()
         )
 
-        get_analytics_overview_api_analytics_overview_get_response_get_analytics_overview_api_analytics_overview_get.additional_properties = (
-            d
+        get_analytics_overview_api_analytics_overview_get_response_get_analytics_overview_api_analytics_overview_get.additional_properties = d
+        return (
+            get_analytics_overview_api_analytics_overview_get_response_get_analytics_overview_api_analytics_overview_get
         )
-        return get_analytics_overview_api_analytics_overview_get_response_get_analytics_overview_api_analytics_overview_get
 
     @property
     def additional_keys(self) -> list[str]:

@@ -11,9 +11,7 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.org_audit_log_response_metadata_info_type_0 import (
-        OrgAuditLogResponseMetadataInfoType0,
-    )
+    from ..models.org_audit_log_response_metadata_info_type_0 import OrgAuditLogResponseMetadataInfoType0
 
 
 T = TypeVar("T", bound="OrgAuditLogResponse")
@@ -50,9 +48,7 @@ class OrgAuditLogResponse:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.org_audit_log_response_metadata_info_type_0 import (
-            OrgAuditLogResponseMetadataInfoType0,
-        )
+        from ..models.org_audit_log_response_metadata_info_type_0 import OrgAuditLogResponseMetadataInfoType0
 
         id: str
         if isinstance(self.id, UUID):
@@ -142,9 +138,7 @@ class OrgAuditLogResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.org_audit_log_response_metadata_info_type_0 import (
-            OrgAuditLogResponseMetadataInfoType0,
-        )
+        from ..models.org_audit_log_response_metadata_info_type_0 import OrgAuditLogResponseMetadataInfoType0
 
         d = dict(src_dict)
 
@@ -241,9 +235,7 @@ class OrgAuditLogResponse:
 
         ip_address = _parse_ip_address(d.pop("ip_address", UNSET))
 
-        def _parse_metadata_info(
-            data: object,
-        ) -> None | OrgAuditLogResponseMetadataInfoType0 | Unset:
+        def _parse_metadata_info(data: object) -> None | OrgAuditLogResponseMetadataInfoType0 | Unset:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -251,9 +243,7 @@ class OrgAuditLogResponse:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                metadata_info_type_0 = OrgAuditLogResponseMetadataInfoType0.from_dict(
-                    data
-                )
+                metadata_info_type_0 = OrgAuditLogResponseMetadataInfoType0.from_dict(data)
 
                 return metadata_info_type_0
             except (TypeError, ValueError, AttributeError, KeyError):
