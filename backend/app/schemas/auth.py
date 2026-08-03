@@ -36,7 +36,7 @@ class RegisterRequest(BaseModel):
                 "last_name": "Doe",
                 "username": "janedoe",
                 "email": "jane.doe@example.com",
-                "password": "StrongPassword123!"
+                "password": "StrongPassword123!",
             }
         }
     )
@@ -60,7 +60,7 @@ class LoginRequest(BaseModel):
         json_schema_extra={
             "example": {
                 "email": "jane.doe@example.com",
-                "password": "StrongPassword123!"
+                "password": "StrongPassword123!",
             }
         }
     )

@@ -86,7 +86,7 @@ def test_generate_error_code_helper():
 
 
 def test_http_exception_404_format(client):
-    response = client.get("/test/not-found")
+    response = client.get("/api/test/not-found")
     assert response.status_code == 404
     data = response.json()
     assert "error" in data
@@ -95,7 +95,7 @@ def test_http_exception_404_format(client):
 
 
 def test_http_exception_401_format(client):
-    response = client.get("/test/unauthorized")
+    response = client.get("/api/test/unauthorized")
     assert response.status_code == 401
     data = response.json()
     assert "error" in data
@@ -104,7 +104,7 @@ def test_http_exception_401_format(client):
 
 
 def test_http_exception_custom_dict_format(client):
-    response = client.get("/test/custom-dict")
+    response = client.get("/api/test/custom-dict")
     assert response.status_code == 400
     data = response.json()
     assert "error" in data
@@ -113,7 +113,7 @@ def test_http_exception_custom_dict_format(client):
 
 
 def test_validation_error_format(client):
-    response = client.post("/test/validation", json={})
+    response = client.post("/api/test/validation", json={})
     assert response.status_code == 422
     data = response.json()
     assert "error" in data
@@ -123,7 +123,7 @@ def test_validation_error_format(client):
 
 
 def test_rate_limit_error_format(client):
-    response = client.get("/test/rate-limit")
+    response = client.get("/api/test/rate-limit")
     assert response.status_code == 429
     data = response.json()
     assert "error" in data

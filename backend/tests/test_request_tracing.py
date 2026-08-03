@@ -31,7 +31,7 @@ def test_request_tracing_generates_correlation_id(client):
     """
     Test that a unique UUID4 correlation ID is generated when none is provided.
     """
-    response = client.get("/test-tracing")
+    response = client.get("/api/test-tracing")
     assert response.status_code == 200
 
     headers = response.headers

@@ -32,7 +32,9 @@ def test_detect_new_device_and_browser_signal(client, db, security_user):
     client.post(
         "/api/v1/auth/login",
         json={"email": security_user.email, "password": "SuperSecret123!"},
-        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0"},
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0"
+        },
     )
 
     # 2. Login from new device / browser (e.g. iPhone Safari)
@@ -102,6 +104,7 @@ def test_detect_multiple_failed_logins(client, db, security_user):
 def test_detect_rapid_login_attempts(db, security_user):
     # Log 2 audit entries within last 5 seconds to simulate rapid login attempts
     from app.services.audit_log_service import AuditLogService
+
     for _ in range(2):
         AuditLogService.create_log(
             db=db,
@@ -145,6 +148,7 @@ def test_warning_notification_and_audit_log_generation(client, db, security_user
 
     # Verify audit log recorded
     from sqlalchemy import select
+
     suspicious_logs = list(
         db.scalars(
             select(AuditLog).where(
@@ -154,4 +158,7 @@ def test_warning_notification_and_audit_log_generation(client, db, security_user
         )
     )
     assert len(suspicious_logs) >= 1
-    assert "NEW_DEVICE" in suspicious_logs[0].description or "NEW_BROWSER" in suspicious_logs[0].description
+    assert (
+        "NEW_DEVICE" in suspicious_logs[0].description
+        or "NEW_BROWSER" in suspicious_logs[0].description
+    )

@@ -17,4 +17,3 @@ engine = create_engine(
     echo=settings.DEBUG,
     **engine_kwargs
 )
-

@@ -171,7 +171,10 @@ class ProjectService:
             tech_list = [t.strip() for t in tech.split(",") if t.strip()]
             if tech_list:
                 from sqlalchemy import or_
-                stmt = stmt.where(or_(*[Project.tech_stack.ilike(f"%{t}%") for t in tech_list]))
+
+                stmt = stmt.where(
+                    or_(*[Project.tech_stack.ilike(f"%{t}%") for t in tech_list])
+                )
 
         stmt = stmt.offset(skip).limit(limit)
 

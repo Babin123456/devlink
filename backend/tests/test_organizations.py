@@ -228,7 +228,7 @@ def test_auto_slug_generation_and_lookup():
     assert data["slug"] == "devlink-labs"
 
     # Lookup by generated slug
-    lookup_res = client.get("/organizations/slug/devlink-labs")
+    lookup_res = client.get("/api/organizations/slug/devlink-labs")
     assert lookup_res.status_code == 200
     assert lookup_res.json()["id"] == data["id"]
     assert lookup_res.json()["name"] == "DevLink Labs"
@@ -273,7 +273,7 @@ def test_check_slug_availability():
     headers = {"Authorization": f"Bearer {owner_token}"}
 
     # Available check before creation
-    check_before = client.get("/organizations/check-slug/unique-org-slug")
+    check_before = client.get("/api/organizations/check-slug/unique-org-slug")
     assert check_before.status_code == 200
     assert check_before.json() == {"slug": "unique-org-slug", "available": True}
 
@@ -290,6 +290,6 @@ def test_check_slug_availability():
     assert res.status_code == 201
 
     # Check availability after creation
-    check_after = client.get("/organizations/check-slug/unique-org-slug")
+    check_after = client.get("/api/organizations/check-slug/unique-org-slug")
     assert check_after.status_code == 200
     assert check_after.json() == {"slug": "unique-org-slug", "available": False}

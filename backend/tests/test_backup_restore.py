@@ -9,6 +9,7 @@ Tests cover:
  - BackupService.restore_backup (profile, bookmarks, skills)
  - API router endpoints (mock-level)
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -26,10 +27,10 @@ from app.schemas.backup import (
 )
 from app.services.backup_service import BackupService, _sha256
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_user(username: str = "testuser") -> MagicMock:
     u = MagicMock()
@@ -106,6 +107,7 @@ def _make_minimal_export_data() -> MagicMock:
 # _sha256 helper
 # ---------------------------------------------------------------------------
 
+
 class TestSha256Helper:
     def test_consistent_hash(self):
         text = '{"key": "value"}'
@@ -122,6 +124,7 @@ class TestSha256Helper:
 # ---------------------------------------------------------------------------
 # BackupService.create_backup
 # ---------------------------------------------------------------------------
+
 
 class TestCreateBackup:
     @patch("app.services.backup_service.ExportService.collect_user_data")
@@ -193,6 +196,7 @@ class TestCreateBackup:
 # ---------------------------------------------------------------------------
 # BackupService.validate_backup
 # ---------------------------------------------------------------------------
+
 
 def _build_valid_payload(user: MagicMock | None = None) -> dict:
     """Return a structurally valid backup payload dict."""
@@ -271,6 +275,7 @@ class TestValidateBackup:
 # BackupService.preview_restore
 # ---------------------------------------------------------------------------
 
+
 class TestPreviewRestore:
     def test_preview_returns_expected_keys(self):
         payload = _build_valid_payload()
@@ -296,6 +301,7 @@ class TestPreviewRestore:
 # ---------------------------------------------------------------------------
 # BackupService.restore_backup
 # ---------------------------------------------------------------------------
+
 
 class TestRestoreBackup:
     def test_raises_on_invalid_payload(self):

@@ -65,7 +65,6 @@ class ExportService:
             builder_flares=builder_flares,
         )
 
-
     @staticmethod
     def export_portfolio_markdown(db: Session, user: User) -> str:
         """
@@ -98,7 +97,11 @@ class ExportService:
             md.append("## Skills & Expertise")
             for skill in data.skills:
                 level_str = f" ({skill.level})" if skill.level else ""
-                exp_str = f" - {skill.years_of_experience} yrs" if skill.years_of_experience else ""
+                exp_str = (
+                    f" - {skill.years_of_experience} yrs"
+                    if skill.years_of_experience
+                    else ""
+                )
                 md.append(f"- **{skill.name}**{level_str}{exp_str}")
             md.append("")
 

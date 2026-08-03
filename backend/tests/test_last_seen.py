@@ -40,6 +40,7 @@ def setup_db():
     Base.metadata.drop_all(bind=engine)
     app.dependency_overrides.clear()
 
+
 # ==================== Helper ====================
 def _register_and_login(
     client: TestClient, email: str, username: str

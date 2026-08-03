@@ -67,7 +67,7 @@ def test_caching_decorator_ignores_dependencies():
     Test that the cached decorator ignores FastAPI dependencies like Session, Request, User
     so that the cache key is stable across requests.
     """
-    response1 = client.get("/test/sync-cache?q=hello")
+    response1 = client.get("/api/test/sync-cache?q=hello")
     assert response1.status_code == 200
     assert response1.json()["data"] == "cached_result_for_hello"
 
@@ -85,9 +85,9 @@ def test_caching_decorator_ignores_dependencies():
 def test_cache_hit():
     """Test that subsequent requests hit the cache."""
     with patch("app.core.cache.logger.debug") as mock_logger:
-        client.get("/test/sync-cache?q=world")
+        client.get("/api/test/sync-cache?q=world")
         # Second hit
-        client.get("/test/sync-cache?q=world")
+        client.get("/api/test/sync-cache?q=world")
 
         # Check logs for cache hit
         calls = [call.args[0] for call in mock_logger.mock_calls]
@@ -96,7 +96,7 @@ def test_cache_hit():
 
 def test_object_serialization():
     """Test that the decorator correctly serializes complex objects and strips private fields."""
-    response = client.get("/test/object-serialization")
+    response = client.get("/api/test/object-serialization")
     assert response.status_code == 200
 
     data = response.json()
@@ -109,7 +109,7 @@ def test_object_serialization():
 def test_cache_miss():
     """Test cache miss logging."""
     with patch("app.core.cache.logger.debug") as mock_logger:
-        client.get("/test/sync-cache?q=new_query")
+        client.get("/api/test/sync-cache?q=new_query")
 
         calls = [call.args[0] for call in mock_logger.mock_calls]
         assert any("Cache MISS" in call for call in calls)

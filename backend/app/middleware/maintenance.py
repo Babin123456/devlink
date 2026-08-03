@@ -26,6 +26,7 @@ def get_active_maintenance():
         with SessionLocal() as db:
             now = datetime.now(timezone.utc)
             from sqlalchemy import select
+
             stmt = (
                 select(MaintenanceWindow)
                 .where(

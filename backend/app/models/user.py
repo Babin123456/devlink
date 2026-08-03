@@ -20,8 +20,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from enum import Enum
 from app.database.base import Base
 
+
 class UserRole(str, Enum):
     """Application-level user role."""
+
     USER = "user"
     ADMIN = "admin"
     DEVELOPER = "developer"
@@ -34,7 +36,6 @@ class UserRole(str, Enum):
     USER = "user"
     DEVELOPER = "developer"
     ADMIN = "admin"
-
 
 
 class User(Base):

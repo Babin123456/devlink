@@ -95,10 +95,15 @@ def get_community_stats(
     db: Annotated[Session, Depends(get_db)],
     _: Annotated[User, Depends(get_current_admin)],
     days: int = Query(
-        default=30, ge=1, le=365, description="Timeframe in days for trending technologies"
+        default=30,
+        ge=1,
+        le=365,
+        description="Timeframe in days for trending technologies",
     ),
 ) -> CommunityStatsResponse:
     return CommunityStatsService.get_community_stats(db=db, days=days)
+
+
 # ==========================================================
 # API Request Analytics
 # ==========================================================

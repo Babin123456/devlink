@@ -13,7 +13,6 @@ from app.main import app
 from app.models.skill import Skill
 from app.models.user_skill import UserSkill
 
-
 # SQLite setup for tests
 engine = create_engine(
     "sqlite://",

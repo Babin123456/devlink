@@ -128,9 +128,7 @@ class MFAService:
         return True
 
     @classmethod
-    def regenerate_backup_codes(
-        cls, db: Session, user: User, code: str
-    ) -> List[str]:
+    def regenerate_backup_codes(cls, db: Session, user: User, code: str) -> List[str]:
         """Regenerate recovery codes for user after verifying TOTP code."""
         if not user.mfa_enabled or not user.mfa_secret:
             raise HTTPException(

@@ -76,9 +76,7 @@ class DuplicateDetectionService:
             return response.data[0].embedding
 
         except Exception as e:
-            logger.error(
-                f"Failed to generate embedding, using keyword fallback: {e}"
-            )
+            logger.error(f"Failed to generate embedding, using keyword fallback: {e}")
             return None
 
     @staticmethod

@@ -1,6 +1,7 @@
 """
 Pydantic schemas for the Security Audit Dashboard (Issue #622).
 """
+
 from __future__ import annotations
 
 import uuid
@@ -9,10 +10,10 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict
 
-
 # ---------------------------------------------------------------------------
 # Shared audit log response
 # ---------------------------------------------------------------------------
+
 
 class SecurityAuditLogItem(BaseModel):
     """Single audit log entry returned by dashboard endpoints."""
@@ -43,6 +44,7 @@ class SecurityAuditLogItem(BaseModel):
 # Paginated response wrapper
 # ---------------------------------------------------------------------------
 
+
 class PaginatedSecurityLogs(BaseModel):
     """Paginated wrapper returned by all dashboard list endpoints."""
 
@@ -56,6 +58,7 @@ class PaginatedSecurityLogs(BaseModel):
 # ---------------------------------------------------------------------------
 # Dashboard summary (overview section)
 # ---------------------------------------------------------------------------
+
 
 class SecurityDashboardSummary(BaseModel):
     """Aggregated counters for the dashboard overview."""
@@ -74,6 +77,7 @@ class SecurityDashboardSummary(BaseModel):
 # IP block entry
 # ---------------------------------------------------------------------------
 
+
 class BlockedIPEntry(BaseModel):
     """An IP address flagged as suspicious with event statistics."""
 
@@ -86,6 +90,7 @@ class BlockedIPEntry(BaseModel):
 # ---------------------------------------------------------------------------
 # Security alert
 # ---------------------------------------------------------------------------
+
 
 class SecurityAlertItem(BaseModel):
     """A high-priority security alert."""

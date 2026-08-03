@@ -32,4 +32,3 @@ def test_rate_limit_constants_exported():
 def test_limiter_instance_configured():
     """Verify global Limiter instance is initialized."""
     assert limiter is not None
-

@@ -65,10 +65,10 @@ from app.schemas.backup import (
 )
 from app.services.export_service import ExportService
 
-
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
+
 
 def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode()).hexdigest()
@@ -83,6 +83,7 @@ def _serialize_export_data(data: Any) -> dict:
 # BackupService
 # ---------------------------------------------------------------------------
 
+
 class BackupService:
     """
     High-level service for creating and restoring user data backups.
@@ -96,7 +97,9 @@ class BackupService:
     # ------------------------------------------------------------------ #
 
     @classmethod
-    def create_backup(cls, db: Session, user: User) -> tuple[BackupCreateResponse, bytes]:
+    def create_backup(
+        cls, db: Session, user: User
+    ) -> tuple[BackupCreateResponse, bytes]:
         """
         Collect all user data, build a signed backup payload, and return:
           - a BackupCreateResponse (API response body)
@@ -247,9 +250,18 @@ class BackupService:
     def _restore_profile(db: Session, user: User, profile: dict) -> int:
         """Update mutable profile fields. Returns number of fields updated."""
         RESTORABLE_FIELDS = [
-            "headline", "bio", "location", "timezone", "website",
-            "portfolio_url", "public_email", "github_url", "linkedin_url",
-            "company", "experience_level", "open_to_work",
+            "headline",
+            "bio",
+            "location",
+            "timezone",
+            "website",
+            "portfolio_url",
+            "public_email",
+            "github_url",
+            "linkedin_url",
+            "company",
+            "experience_level",
+            "open_to_work",
         ]
         updated = 0
         for field in RESTORABLE_FIELDS:
