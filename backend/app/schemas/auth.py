@@ -8,6 +8,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.schemas.user import CurrentUser
+from app.core.validation import NameStr, UsernameStr, ValidEmail
 
 # ==========================================================
 # Register
@@ -15,17 +16,29 @@ from app.schemas.user import CurrentUser
 
 
 class RegisterRequest(BaseModel):
-    first_name: str = Field(..., min_length=2, max_length=100)
-    last_name: str = Field(..., min_length=2, max_length=100)
+    first_name: NameStr
+    last_name: NameStr
 
-    username: str = Field(..., min_length=3, max_length=50)
+    username: UsernameStr
 
-    email: EmailStr
+    email: ValidEmail
 
     password: str = Field(
         ...,
         min_length=8,
         max_length=128,
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "username": "janedoe",
+                "email": "jane.doe@example.com",
+                "password": "StrongPassword123!"
+            }
+        }
     )
 
 
@@ -35,12 +48,21 @@ class RegisterRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: ValidEmail
 
     password: str = Field(
         ...,
         min_length=8,
         max_length=128,
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "email": "jane.doe@example.com",
+                "password": "StrongPassword123!"
+            }
+        }
     )
 
 
