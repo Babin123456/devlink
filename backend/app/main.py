@@ -379,10 +379,13 @@ from app.middleware.org_audit_logging import OrganizationAuditMiddleware
 
 app.add_middleware(OrganizationAuditMiddleware)
 
+from app.middleware.request_logging import RequestLoggingMiddleware
+
+app.add_middleware(RequestLoggingMiddleware)
+
 # ------------------------------------------------------------------
 # CORS
 # ------------------------------------------------------------------
-
 
 app.add_middleware(
     CORSMiddleware,

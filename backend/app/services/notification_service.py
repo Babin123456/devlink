@@ -113,7 +113,7 @@ class NotificationService:
 
         return list(db.scalars(stmt))
 
-@staticmethod
+    @staticmethod
     @cached(ttl=30, key_prefix="notifications:unread_count")
     def unread_count(
         db: Session,
