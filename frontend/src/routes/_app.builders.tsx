@@ -21,10 +21,18 @@ import { LastActive } from "@/components/shared/LastActive";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-import { Search, Sparkles, Calendar, Briefcase, Check, Bookmark } from "lucide-react";
+import {
+  ArrowRight,
+  Bookmark,
+  Briefcase,
+  Calendar,
+  Check,
+  Search,
+  Sparkles,
+  UsersRound,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants } from "@/lib/animations";
-
 
 export const Route = createFileRoute("/_app/builders")({
   head: () => ({
@@ -38,7 +46,6 @@ export const Route = createFileRoute("/_app/builders")({
   }),
   component: BuildersPage,
 });
-
 
 const TARGET_SKILLS = [
   "React",
@@ -199,6 +206,47 @@ function AIMatchCard({ builder }: { builder: Builder }) {
   );
 }
 
+function BuilderRecommendationsEmptyState({ onExplore }: { onExplore: () => void }) {
+  return (
+    <section
+      className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/10 via-card to-card px-6 py-12 text-center shadow-soft sm:px-12"
+      aria-labelledby="builder-recommendations-empty-title"
+    >
+      <div className="pointer-events-none absolute -left-12 top-0 h-36 w-36 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 -right-8 h-44 w-44 rounded-full bg-violet-500/10 blur-3xl" />
+      <div className="relative mx-auto flex max-w-md flex-col items-center">
+        <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-card">
+          <Sparkles size={28} aria-hidden="true" />
+          <span className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full border-4 border-card bg-violet-500 text-white">
+            <UsersRound size={13} aria-hidden="true" />
+          </span>
+        </div>
+        <p className="mt-6 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+          AI-powered matches
+        </p>
+        <h2
+          id="builder-recommendations-empty-title"
+          className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+        >
+          We’re finding your best collaborators
+        </h2>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+          We don’t have a recommendation for you yet. Explore the community to discover builders who
+          share your interests and skills.
+        </p>
+        <button
+          type="button"
+          onClick={onExplore}
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
+          Explore builders
+          <ArrowRight size={16} aria-hidden="true" />
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function BuildersPage() {
   const childMatches = useChildMatches();
   const { tab } = Route.useSearch();
@@ -208,7 +256,6 @@ function BuildersPage() {
     queryKey: ["builders", tab],
     queryFn: () => (tab === "matches" ? buildersService.matches() : buildersService.list()),
   });
-
 
   const [connections, setConnections] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
@@ -258,7 +305,6 @@ function BuildersPage() {
           {tabs.map((t) => (
             <button
               key={t.k}
-              onClick={() => setTab(t.k)}
               type="button"
               onClick={() => navigate({ search: (prev) => ({ ...prev, tab: t.k }) })}
               className={cn(
@@ -315,11 +361,21 @@ function BuildersPage() {
               </div>
             </Card>
           ))
+        ) : filtered.length === 0 && tab === "matches" && !q ? (
+          <div className="col-span-full">
+            <BuilderRecommendationsEmptyState
+              onExplore={() => navigate({ search: (prev) => ({ ...prev, tab: "discover" }) })}
+            />
+          </div>
         ) : filtered.length === 0 ? (
           <div className="col-span-full">
             <EmptyState
-              title="No builders found"
-              desc="We couldn't find any developers matching your criteria."
+              title={tab === "connections" ? "No connections yet" : "No builders found"}
+              desc={
+                tab === "connections"
+                  ? "Connect with builders to keep track of potential collaborators here."
+                  : "We couldn't find any developers matching your criteria."
+              }
             />
           </div>
         ) : tab === "matches" ? (
