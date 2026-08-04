@@ -11,7 +11,10 @@ from app.models.issue import DuplicateSuggestion, Issue, IssueDifficulty, IssueS
 from app.models.project import Project, ProjectStage, ProjectVisibility
 from app.models.user import User
 from app.services.duplicate_detection_service import DuplicateDetectionService
-from app.services.issue_difficulty_service import DifficultyResult, IssueDifficultyService
+from app.services.issue_difficulty_service import (
+    DifficultyResult,
+    IssueDifficultyService,
+)
 from app.services.issue_service import IssueService
 
 
@@ -79,7 +82,9 @@ def _auth_headers(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
 
-def test_create_issue(client: TestClient, register_and_login, issue_project, db: Session):
+def test_create_issue(
+    client: TestClient, register_and_login, issue_project, db: Session
+):
     _, project = issue_project
     user_id, token = register_and_login("issues_create@example.com", "issues_create")
 
@@ -143,7 +148,10 @@ def test_get_issue_returns_duplicate_suggestions(
 
     created = client.post(
         f"/api/projects/{project.id}/issues",
-        json={"title": "Button not responding", "description": "Clicking does nothing."},
+        json={
+            "title": "Button not responding",
+            "description": "Clicking does nothing.",
+        },
         headers=_auth_headers(token),
     ).json()
 
@@ -311,9 +319,7 @@ def test_mark_as_duplicate_requires_author(
 ):
     _, project = issue_project
     user_id, token = register_and_login("issues_mark2@example.com", "issues_mark2")
-    _, other_token = register_and_login(
-        "issues_mark3@example.com", "issues_mark3"
-    )
+    _, other_token = register_and_login("issues_mark3@example.com", "issues_mark3")
 
     created = client.post(
         f"/api/projects/{project.id}/issues",
