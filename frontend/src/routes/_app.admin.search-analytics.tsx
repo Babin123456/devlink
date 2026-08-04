@@ -6,8 +6,16 @@ export const Route = createFileRoute("/_app/admin/search-analytics")({
   component: SearchAnalyticsDashboard,
 });
 
+interface SearchAnalyticsData {
+  total_searches: number;
+  zero_result_rate_pct: number;
+  click_through_rate_pct: number;
+  average_latency_ms: number;
+  top_keywords: { keyword: string; count: number }[];
+}
+
 function SearchAnalyticsDashboard() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<SearchAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,8 +25,7 @@ function SearchAnalyticsDashboard() {
   const fetchAnalytics = async () => {
     try {
       // Assuming api wrapper adds the base url and token
-      const res = await api.get("/api/search/analytics?days=30");
-      setData(res.data);
+      setData(await api.get<SearchAnalyticsData>("/api/search/analytics?days=30"));
     } catch (error) {
       console.error("Failed to fetch search analytics", error);
     } finally {
@@ -69,7 +76,7 @@ function SearchAnalyticsDashboard() {
               </tr>
             </thead>
             <tbody>
-              {data.top_keywords.map((item: unknown, idx: number) => (
+              {data.top_keywords.map((item: { keyword: string; count: number }, idx: number) => (
                 <tr key={idx} className="border-b">
                   <td className="p-3 text-gray-500">#{idx + 1}</td>
                   <td className="p-3 font-medium">{item.keyword}</td>

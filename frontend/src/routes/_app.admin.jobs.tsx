@@ -1,13 +1,26 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { api } from '@/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { api } from "@/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertCircle,
   CheckCircle,
@@ -20,44 +33,80 @@ import {
   Play,
   ChevronDown,
   ChevronUp,
-} from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+} from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
-export const Route = createFileRoute('/_app/admin/jobs')({
+export const Route = createFileRoute("/_app/admin/jobs")({
   component: AdminJobsPage,
 });
 
+interface AdminJobStats {
+  total: number;
+  running: number;
+  completed: number;
+  failed: number;
+  avg_processing_time?: number | null;
+  worker_health?: {
+    status: string;
+    workers?: Record<
+      string,
+      { status: string; active_tasks: number; queued_tasks: number; total_processed: number }
+    >;
+  };
+}
+
+interface AdminJob {
+  id: string;
+  task_name: string;
+  status: string;
+  worker?: string | null;
+  retries: number;
+  processing_time: number | null;
+  created_at: string;
+  payload?: unknown;
+  result?: unknown;
+  error?: unknown;
+}
+
+interface AdminJobsResponse {
+  total: number;
+  jobs: AdminJob[];
+}
+
 function AdminJobsPage() {
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
   const limit = 10;
 
   // Fetch stats and worker health every 5 seconds
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['admin-job-stats'],
+    queryKey: ["admin-job-stats"],
     queryFn: async () => {
-      const res = await api.get('/admin/background-jobs/stats');
-      return res.data;
+      return api.get<AdminJobStats>("/admin/background-jobs/stats");
     },
     refetchInterval: 5000,
   });
 
   // Fetch jobs list
   const { data: jobsData, isLoading: jobsLoading } = useQuery({
-    queryKey: ['admin-jobs', statusFilter, search, page],
+    queryKey: ["admin-jobs", statusFilter, search, page],
     queryFn: async () => {
-      const params: any = {
+      const params: {
+        skip: number;
+        limit: number;
+        status?: string;
+        search?: string;
+      } = {
         skip: (page - 1) * limit,
         limit: limit,
       };
-      if (statusFilter !== 'all') params.status = statusFilter;
+      if (statusFilter !== "all") params.status = statusFilter;
       if (search) params.search = search;
 
-      const res = await api.get('/admin/background-jobs/', { params });
-      return res.data;
+      return api.get<AdminJobsResponse>("/admin/background-jobs/", { query: params });
     },
   });
 
@@ -66,8 +115,8 @@ function AdminJobsPage() {
       await api.post(`/admin/background-jobs/${id}/retry`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-job-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-jobs'] });
+      queryClient.invalidateQueries({ queryKey: ["admin-job-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-jobs"] });
     },
   });
 
@@ -81,13 +130,15 @@ function AdminJobsPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'running':
-        return <Badge className="bg-blue-500 hover:bg-blue-600 text-white animate-pulse">Running</Badge>;
-      case 'completed':
+      case "running":
+        return (
+          <Badge className="bg-blue-500 hover:bg-blue-600 text-white animate-pulse">Running</Badge>
+        );
+      case "completed":
         return <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white">Completed</Badge>;
-      case 'failed':
+      case "failed":
         return <Badge variant="destructive">Failed</Badge>;
-      case 'retry':
+      case "retry":
         return <Badge className="bg-amber-500 hover:bg-amber-600 text-white">Retrying</Badge>;
       default:
         return <Badge variant="secondary">Pending</Badge>;
@@ -95,20 +146,27 @@ function AdminJobsPage() {
   };
 
   const formatTime = (seconds: number | null) => {
-    if (seconds === null) return '-';
+    if (seconds === null) return "-";
     if (seconds < 1) return `${(seconds * 1000).toFixed(0)}ms`;
     return `${seconds.toFixed(2)}s`;
   };
 
   const totalPages = jobsData ? Math.ceil(jobsData.total / limit) : 1;
 
-  if (statsLoading) return <div className="flex justify-center p-8"><RefreshCw className="animate-spin text-primary h-8 w-8" /></div>;
+  if (statsLoading)
+    return (
+      <div className="flex justify-center p-8">
+        <RefreshCw className="animate-spin text-primary h-8 w-8" />
+      </div>
+    );
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Background Job Monitoring</h2>
-        <p className="text-muted-foreground">Monitor asynchronous tasks, track worker health, and retry failed operations.</p>
+        <p className="text-muted-foreground">
+          Monitor asynchronous tasks, track worker health, and retry failed operations.
+        </p>
       </div>
 
       {/* Stats Cards */}
@@ -159,7 +217,9 @@ function AdminJobsPage() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.avg_processing_time ? `${stats.avg_processing_time}s` : '-'}</div>
+            <div className="text-2xl font-bold">
+              {stats?.avg_processing_time ? `${stats.avg_processing_time}s` : "-"}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -169,40 +229,65 @@ function AdminJobsPage() {
         <CardHeader className="pb-3">
           <CardTitle className="text-md font-bold flex items-center gap-2">
             <Cpu className="h-5 w-5 text-primary" />
-            Worker Cluster Health: 
-            <Badge className={stats?.worker_health?.status === 'healthy' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}>
-              {stats?.worker_health?.status === 'healthy' ? 'Healthy' : 'No Workers Detected'}
+            Worker Cluster Health:
+            <Badge
+              className={
+                stats?.worker_health?.status === "healthy"
+                  ? "bg-emerald-500 text-white"
+                  : "bg-amber-500 text-white"
+              }
+            >
+              {stats?.worker_health?.status === "healthy" ? "Healthy" : "No Workers Detected"}
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {stats?.worker_health?.workers && Object.keys(stats.worker_health.workers).length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-2">
-              {Object.entries(stats.worker_health.workers).map(([name, info]: [string, any]) => (
-                <div key={name} className="border border-border rounded-lg p-3 bg-surface/50 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-sm truncate max-w-[200px]" title={name}>{name}</span>
-                    <Badge variant={info.status === 'active' ? 'default' : 'secondary'}>{info.status}</Badge>
+              {Object.entries(stats.worker_health.workers).map(
+                ([name, info]: [
+                  string,
+                  {
+                    status: string;
+                    active_tasks: number;
+                    queued_tasks: number;
+                    total_processed: number;
+                  },
+                ]) => (
+                  <div
+                    key={name}
+                    className="border border-border rounded-lg p-3 bg-surface/50 space-y-2"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-sm truncate max-w-[200px]" title={name}>
+                        {name}
+                      </span>
+                      <Badge variant={info.status === "active" ? "default" : "secondary"}>
+                        {info.status}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+                      <div>
+                        <p className="font-medium text-foreground">{info.active_tasks}</p>
+                        <p>Active</p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">{info.queued_tasks}</p>
+                        <p>Queued</p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">{info.total_processed}</p>
+                        <p>Processed</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
-                    <div>
-                      <p className="font-medium text-foreground">{info.active_tasks}</p>
-                      <p>Active</p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{info.queued_tasks}</p>
-                      <p>Queued</p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{info.total_processed}</p>
-                      <p>Processed</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No active worker instances reporting heartbeat metrics.</p>
+            <p className="text-sm text-muted-foreground">
+              No active worker instances reporting heartbeat metrics.
+            </p>
           )}
         </CardContent>
       </Card>
@@ -248,7 +333,9 @@ function AdminJobsPage() {
         </div>
 
         {jobsLoading ? (
-          <div className="flex justify-center p-8"><RefreshCw className="animate-spin text-primary h-8 w-8" /></div>
+          <div className="flex justify-center p-8">
+            <RefreshCw className="animate-spin text-primary h-8 w-8" />
+          </div>
         ) : !jobsData?.jobs || jobsData.jobs.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
@@ -271,7 +358,7 @@ function AdminJobsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {jobsData.jobs.map((job: any) => (
+                {jobsData.jobs.map((job: AdminJob) => (
                   <>
                     <TableRow key={job.id} className="hover:bg-muted/50 transition-colors">
                       <TableCell>
@@ -281,20 +368,30 @@ function AdminJobsPage() {
                           className="h-8 w-8"
                           onClick={() => toggleExpand(job.id)}
                         >
-                          {expandedJobId === job.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          {expandedJobId === job.id ? (
+                            <ChevronUp size={16} />
+                          ) : (
+                            <ChevronDown size={16} />
+                          )}
                         </Button>
                       </TableCell>
                       <TableCell className="font-medium">
                         <div className="flex flex-col">
                           <span className="font-semibold text-sm">{job.task_name}</span>
-                          <span className="text-xs text-muted-foreground font-mono truncate max-w-[200px]" title={job.id}>
+                          <span
+                            className="text-xs text-muted-foreground font-mono truncate max-w-[200px]"
+                            title={job.id}
+                          >
                             {job.id}
                           </span>
                         </div>
                       </TableCell>
                       <TableCell>{getStatusBadge(job.status)}</TableCell>
-                      <TableCell className="text-sm font-mono truncate max-w-[150px]" title={job.worker || 'None'}>
-                        {job.worker || '-'}
+                      <TableCell
+                        className="text-sm font-mono truncate max-w-[150px]"
+                        title={job.worker || "None"}
+                      >
+                        {job.worker || "-"}
                       </TableCell>
                       <TableCell className="text-sm">{job.retries}</TableCell>
                       <TableCell className="text-sm">{formatTime(job.processing_time)}</TableCell>
@@ -309,7 +406,9 @@ function AdminJobsPage() {
                           onClick={() => retryMutation.mutate(job.id)}
                           className="h-8 hover:bg-primary hover:text-white transition-colors"
                         >
-                          <RefreshCw className={`h-3.5 w-3.5 mr-1 ${retryMutation.isPending && retryMutation.variables === job.id ? 'animate-spin' : ''}`} />
+                          <RefreshCw
+                            className={`h-3.5 w-3.5 mr-1 ${retryMutation.isPending && retryMutation.variables === job.id ? "animate-spin" : ""}`}
+                          />
                           Retry
                         </Button>
                       </TableCell>
@@ -320,23 +419,33 @@ function AdminJobsPage() {
                           <div className="space-y-4 text-sm max-w-4xl">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <div>
-                                <h4 className="font-semibold mb-1 text-xs uppercase tracking-wider text-muted-foreground">Payload Arguments</h4>
+                                <h4 className="font-semibold mb-1 text-xs uppercase tracking-wider text-muted-foreground">
+                                  Payload Arguments
+                                </h4>
                                 <pre className="bg-surface border border-border rounded p-3 text-xs overflow-x-auto font-mono text-foreground max-h-48">
-                                  {JSON.stringify(job.payload, null, 2)}
+                                  {JSON.stringify(job.payload ?? null, null, 2)}
                                 </pre>
                               </div>
                               <div>
-                                <h4 className="font-semibold mb-1 text-xs uppercase tracking-wider text-muted-foreground">Execution Result</h4>
+                                <h4 className="font-semibold mb-1 text-xs uppercase tracking-wider text-muted-foreground">
+                                  Execution Result
+                                </h4>
                                 <pre className="bg-surface border border-border rounded p-3 text-xs overflow-x-auto font-mono text-foreground max-h-48">
-                                  {job.result ? JSON.stringify(job.result, null, 2) : 'None'}
+                                  {job.result !== undefined && job.result !== null
+                                    ? JSON.stringify(job.result, null, 2)
+                                    : "None"}
                                 </pre>
                               </div>
                             </div>
-                            {job.error && (
+                            {job.error !== undefined && job.error !== null && (
                               <div>
-                                <h4 className="font-semibold mb-1 text-xs uppercase tracking-wider text-muted-foreground text-destructive">Error Traceback</h4>
+                                <h4 className="font-semibold mb-1 text-xs uppercase tracking-wider text-muted-foreground text-destructive">
+                                  Error Traceback
+                                </h4>
                                 <pre className="bg-destructive/5 border border-destructive/20 text-destructive rounded p-3 text-xs overflow-x-auto font-mono max-h-60">
-                                  {job.error}
+                                  {typeof job.error === "string"
+                                    ? job.error
+                                    : JSON.stringify(job.error, null, 2)}
                                 </pre>
                               </div>
                             )}
@@ -357,7 +466,7 @@ function AdminJobsPage() {
                   variant="outline"
                   size="sm"
                   disabled={page === 1}
-                  onClick={() => setPage(p => Math.max(p - 1, 1))}
+                  onClick={() => setPage((p) => Math.max(p - 1, 1))}
                 >
                   Previous
                 </Button>
@@ -365,7 +474,7 @@ function AdminJobsPage() {
                   variant="outline"
                   size="sm"
                   disabled={page === totalPages}
-                  onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+                  onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
                 >
                   Next
                 </Button>
