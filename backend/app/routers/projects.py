@@ -12,6 +12,9 @@ from sqlalchemy.orm import Session
 from app.dependencies import get_database, get_current_user, require_project_permission
 from app.middleware.rate_limit import limiter, PROJECT_LIMIT
 from app.models.user import User
+from app.schemas.project_audit import (
+    PaginatedProjectAuditLogsResponse,
+    ProjectAuditLogResponse,
 from app.schemas.duplicate_detection import (
     DuplicateProjectCheckRequest,
     DuplicateProjectCheckResponse,
@@ -286,8 +289,10 @@ def update_project(
         )
 
     old_values = {}
-    for key in project.model_dump(exclude_unset=True).keys():
-        old_values[key] = getattr(db_project, key, None)
+    new_values = project.model_dump(exclude_unset=True)
+    for key in new_values.keys():
+        val = getattr(db_project, key, None)
+        old_values[key] = str(val) if hasattr(val, "value") else val
 
     updated_project = ProjectService.update_project(
         db,
@@ -297,6 +302,49 @@ def update_project(
 
     from app.services.audit_log_service import AuditLogService
     from app.models.audit_log import AuditAction
+    from enum import Enum
+
+    # 1. Title update event
+    if "title" in new_values and old_values.get("title") != new_values["title"]:
+        AuditLogService.create_log(
+            db=db,
+            actor_id=current_user.id,
+            action=AuditAction.PROJECT_TITLE_UPDATED,
+            entity_type="project",
+            entity_id=str(updated_project.id),
+            project_id=updated_project.id,
+            old_values={"title": old_values.get("title")},
+            new_values={"title": new_values["title"]},
+        )
+
+    # 2. Description update event
+    if "description" in new_values and old_values.get("description") != new_values["description"]:
+        AuditLogService.create_log(
+            db=db,
+            actor_id=current_user.id,
+            action=AuditAction.PROJECT_DESCRIPTION_UPDATED,
+            entity_type="project",
+            entity_id=str(updated_project.id),
+            project_id=updated_project.id,
+            old_values={"description": old_values.get("description")},
+            new_values={"description": new_values["description"]},
+        )
+
+    # 3. Status/Stage change event
+    status_keys = {"stage", "visibility", "is_published", "hiring"}
+    if any(k in new_values for k in status_keys):
+        changed_old = {k: str(old_values[k]) if isinstance(old_values.get(k), Enum) else old_values.get(k) for k in status_keys if k in new_values}
+        changed_new = {k: str(new_values[k]) if isinstance(new_values.get(k), Enum) else new_values.get(k) for k in status_keys if k in new_values}
+        AuditLogService.create_log(
+            db=db,
+            actor_id=current_user.id,
+            action=AuditAction.PROJECT_STATUS_CHANGED,
+            entity_type="project",
+            entity_id=str(updated_project.id),
+            project_id=updated_project.id,
+            old_values=changed_old,
+            new_values=changed_new,
+        )
 
     AuditLogService.create_log(
         db=db,
@@ -306,10 +354,44 @@ def update_project(
         entity_id=str(updated_project.id),
         project_id=updated_project.id,
         old_values=old_values,
-        new_values=project.model_dump(exclude_unset=True),
+        new_values=new_values,
     )
 
     return updated_project
+
+
+@router.get(
+    "/{project_id}/audit-trail",
+    response_model=PaginatedProjectAuditLogsResponse,
+    summary="Get Project Audit Trail",
+    description="Retrieve paginated audit trail history of project events (creations, title/description updates, member changes, status changes, and archiving).",
+)
+def get_project_audit_trail(
+    project_id: uuid.UUID,
+    event_type: Optional[str] = Query(None, description="Filter by event type substring"),
+    user_id: Optional[uuid.UUID] = Query(None, description="Filter by actor or target user ID"),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_database),
+    current_user: User = Depends(require_project_permission("project:read")),
+) -> PaginatedProjectAuditLogsResponse:
+    from app.services.audit_log_service import AuditLogService
+    result = AuditLogService.search_project_audit_logs(
+        db,
+        project_id=project_id,
+        user_id=user_id,
+        event_type=event_type,
+        page=page,
+        limit=limit,
+    )
+    items = [ProjectAuditLogResponse.model_validate(log) for log in result["items"]]
+    return PaginatedProjectAuditLogsResponse(
+        items=items,
+        total=result["total"],
+        page=result["page"],
+        limit=result["limit"],
+        pages=result["pages"],
+    )
 
 
 @router.patch(
