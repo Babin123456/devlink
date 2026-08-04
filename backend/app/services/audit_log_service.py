@@ -285,6 +285,56 @@ class AuditLogService:
         }
 
     @staticmethod
+    def search_project_audit_logs(
+        db: Session,
+        project_id: uuid.UUID,
+        user_id: uuid.UUID | None = None,
+        event_type: str | None = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        page: int = 1,
+        limit: int = 20,
+    ) -> dict:
+        stmt = select(AuditLog).where(AuditLog.project_id == project_id)
+
+        if user_id:
+            stmt = stmt.where(
+                or_(
+                    AuditLog.actor_id == user_id,
+                    AuditLog.target_user_id == user_id,
+                )
+            )
+
+        if event_type:
+            event_clean = event_type.strip().lower()
+            stmt = stmt.where(func.lower(AuditLog.action).contains(event_clean))
+
+        if start_date:
+            stmt = stmt.where(AuditLog.created_at >= start_date)
+
+        if end_date:
+            stmt = stmt.where(AuditLog.created_at <= end_date)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_count = db.scalar(count_stmt) or 0
+
+        offset = (page - 1) * limit
+        paginated_stmt = (
+            stmt.order_by(AuditLog.created_at.desc()).offset(offset).limit(limit)
+        )
+
+        items = list(db.scalars(paginated_stmt))
+        pages = (total_count + limit - 1) // limit if limit > 0 else 1
+
+        return {
+            "items": items,
+            "total": total_count,
+            "page": page,
+            "limit": limit,
+            "pages": pages,
+        }
+
+    @staticmethod
     def export_org_audit_logs_csv(
         db: Session,
         organization_id: uuid.UUID,
