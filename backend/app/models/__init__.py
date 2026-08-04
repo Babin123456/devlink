@@ -70,6 +70,7 @@ from .announcement import Announcement as Announcement
 from .user_report import UserReport
 from .user_skill import UserSkill
 from .verification_request import VerificationRequest  # noqa: F401
+<<<<<<< HEAD
 from .maintenance import MaintenanceWindow
 from .search_analytics import SearchQueryLog, SearchClickLog
 from .feedback import UserFeedback
@@ -78,3 +79,7 @@ from .webhook import WebhookDelivery, WebhookDeadLetterQueue, WebhookDeliverySta
 from .security_event import SecurityEvent, SecurityEventType, SecurityEventSeverity
 from .profile_suggestion import ProfileSuggestionDismissal
 from .request_log import RequestLog  # noqa: F401
+=======
+from .background_job import BackgroundJob, JobStatus
+
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
