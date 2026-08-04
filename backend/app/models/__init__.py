@@ -23,6 +23,7 @@ from .message import Message  # noqa: F401
 from .notification import Notification  # noqa: F401
 from .organization import Organization  # noqa: F401
 from .organization_member import OrganizationMember, OrgMemberRole  # noqa: F401
+from .password_reset_token import PasswordResetToken  # noqa: F401
 from .project import Project  # noqa: F401
 from .project_document import ProjectDocument  # noqa: F401
 from .project_view import ProjectView  # noqa: F401
@@ -70,17 +71,12 @@ from .announcement import Announcement as Announcement
 from .user_report import UserReport
 from .user_skill import UserSkill
 from .verification_request import VerificationRequest  # noqa: F401
-<<<<<<< HEAD
 from .maintenance import MaintenanceWindow
 from .search_analytics import SearchQueryLog, SearchClickLog
 from .feedback import UserFeedback
-
 from .webhook import WebhookDelivery, WebhookDeadLetterQueue, WebhookDeliveryStatus
 from .plugin import Plugin, PluginInstallation, PluginType, PluginStatus
 from .security_event import SecurityEvent, SecurityEventType, SecurityEventSeverity
 from .profile_suggestion import ProfileSuggestionDismissal
 from .request_log import RequestLog  # noqa: F401
-=======
 from .background_job import BackgroundJob, JobStatus
-
->>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)

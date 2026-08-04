@@ -29,6 +29,8 @@ class AuditAction(str, Enum):
     REGISTER = "register"
     PASSWORD_CHANGED = "password_changed"
     PASSWORD_RESET = "password_reset"
+    PASSWORD_RESET_REQUESTED = "password_reset_requested"
+    PASSWORD_RESET_COMPLETED = "password_reset_completed"
     EMAIL_CHANGED = "email_changed"
 
     # User Profile

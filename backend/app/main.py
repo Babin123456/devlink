@@ -607,7 +607,9 @@ app.include_router(
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
 
-<<<<<<< HEAD
+from app.routers import background_jobs
+app.include_router(background_jobs.router, prefix="/api")
+
 from fastapi.openapi.utils import get_openapi
 
 def custom_openapi():
@@ -642,8 +644,3 @@ def custom_openapi():
     return app.openapi_schema
 
 app.openapi = custom_openapi
-=======
-from app.routers import background_jobs
-app.include_router(background_jobs.router, prefix="/api")
-
->>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
