@@ -67,7 +67,26 @@ class ProjectBase(BaseModel):
 
 
 class ProjectCreate(ProjectBase):
-    pass
+    allow_duplicate: bool = Field(
+        default=False,
+        description="Manual override flag to allow project creation even if a potential duplicate is detected",
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "title": "DevLink",
+                "tagline": "The ultimate developer collaboration platform.",
+                "description": "DevLink connects developers to open source projects, hackathons, and networking opportunities.",
+                "stage": "MVP",
+                "visibility": "PUBLIC",
+                "hiring": True,
+                "is_opensource": True,
+                "repository_url": "https://github.com/nensii21/devlink",
+                "tech_stack": "React, FastAPI, PostgreSQL"
+            }
+        }
+    )
 
 
 # ==========================================================
@@ -100,6 +119,17 @@ class ProjectUpdate(BaseModel):
 
     scheduled_publish_at: Optional[datetime] = None
     is_published: Optional[bool] = None
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "title": "DevLink Beta",
+                "hiring": False,
+                "stage": "BETA",
+                "team_size": 3,
+            }
+        }
+    )
 
 
 # ==========================================================

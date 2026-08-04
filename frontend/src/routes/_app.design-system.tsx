@@ -7,13 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Chip } from "@/components/ui/chip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Terminal } from "lucide-react";
@@ -120,16 +114,12 @@ function DesignSystemComponent() {
           <Alert>
             <Terminal className="h-4 w-4" />
             <AlertTitle>Heads up!</AlertTitle>
-            <AlertDescription>
-              You can add components to your app using the cli.
-            </AlertDescription>
+            <AlertDescription>You can add components to your app using the cli.</AlertDescription>
           </Alert>
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              Your session has expired. Please log in again.
-            </AlertDescription>
+            <AlertDescription>Your session has expired. Please log in again.</AlertDescription>
           </Alert>
         </div>
       </section>
@@ -147,10 +137,10 @@ function DesignSystemComponent() {
 
       <section className="space-y-4 border rounded-lg p-6">
         <h2 className="text-2xl font-semibold">Empty State</h2>
-        <EmptyState 
-          title="No projects found" 
-          description="Get started by creating a new project." 
-          action={<Button>Create Project</Button>} 
+        <EmptyState
+          title="No projects found"
+          description="Get started by creating a new project."
+          action={<Button>Create Project</Button>}
         />
       </section>
     </div>

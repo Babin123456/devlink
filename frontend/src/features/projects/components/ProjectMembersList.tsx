@@ -165,9 +165,13 @@ export const ProjectMembersList: React.FC<ProjectMembersListProps> = ({
 
       <div className="divide-y divide-gray-800/60 border border-gray-800 rounded-xl bg-gray-900/30 overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-gray-500 text-sm italic">Loading team members...</div>
+          <div className="p-8 text-center text-gray-500 text-sm italic">
+            Loading team members...
+          </div>
         ) : members.length === 0 ? (
-          <div className="p-8 text-center text-gray-500 text-sm italic">No team members assigned yet.</div>
+          <div className="p-8 text-center text-gray-500 text-sm italic">
+            No team members assigned yet.
+          </div>
         ) : (
           members.map((member) => {
             const isSelf = member.user_id === currentUserId;
@@ -185,9 +189,15 @@ export const ProjectMembersList: React.FC<ProjectMembersListProps> = ({
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-white">
-                        {member.first_name ? `${member.first_name} ${member.last_name || ""}` : member.username}
+                        {member.first_name
+                          ? `${member.first_name} ${member.last_name || ""}`
+                          : member.username}
                       </span>
-                      {isSelf && <span className="text-[10px] bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded">You</span>}
+                      {isSelf && (
+                        <span className="text-[10px] bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded">
+                          You
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs text-gray-400">@{member.username}</div>
                   </div>

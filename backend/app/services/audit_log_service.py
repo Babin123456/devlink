@@ -52,6 +52,28 @@ class AuditLogService:
         error_message: str | None = None,
     ) -> AuditLog:
 
+        def _sanitize_json(d: dict | None) -> dict | None:
+            if not d:
+                return d
+            import json
+            # A quick way to stringify complex objects like UUID or HttpUrl
+            res = {}
+            for k, v in d.items():
+                if isinstance(v, (int, float, bool, str, type(None))):
+                    res[k] = v
+                elif isinstance(v, dict):
+                    res[k] = _sanitize_json(v)
+                elif isinstance(v, list):
+                    res[k] = [
+                        _sanitize_json(i) if isinstance(i, dict) else (
+                            str(i) if not isinstance(i, (int, float, bool, str, type(None))) else i
+                        ) for i in v
+                    ]
+                else:
+                    res[k] = str(v)
+            return res
+
+
         resolved_ip = ip_address or audit_ip_address.get()
         resolved_ua = user_agent or audit_user_agent.get()
         resolved_method = request_method or audit_request_method.get()
@@ -65,9 +87,9 @@ class AuditLogService:
             target_user_id=target_user_id,
             project_id=project_id,
             organization_id=organization_id,
-            old_values=old_values,
-            new_values=new_values,
-            metadata_info=metadata_info,
+            old_values=_sanitize_json(old_values),
+            new_values=_sanitize_json(new_values),
+            metadata_info=_sanitize_json(metadata_info),
             description=description,
             ip_address=resolved_ip,
             user_agent=resolved_ua,

@@ -15,6 +15,9 @@ from app.models.user import User
 from app.schemas.project_audit import (
     PaginatedProjectAuditLogsResponse,
     ProjectAuditLogResponse,
+from app.schemas.duplicate_detection import (
+    DuplicateProjectCheckRequest,
+    DuplicateProjectCheckResponse,
 )
 from app.schemas.project import (
     ProjectCreate,
@@ -73,6 +76,27 @@ def create_project(
     )
 
     return new_project
+
+
+@router.post(
+    "/check-duplicate",
+    response_model=DuplicateProjectCheckResponse,
+    summary="Check AI-based duplicate projects",
+    description="Compare project title, description, and tags against existing projects using semantic embedding and token similarity.",
+)
+def check_duplicate_project(
+    req: DuplicateProjectCheckRequest,
+    db: Session = Depends(get_database),
+) -> DuplicateProjectCheckResponse:
+    from app.services.duplicate_detection_service import DuplicateDetectionService
+    return DuplicateDetectionService.find_duplicate_projects(
+        db,
+        title=req.title,
+        description=req.description,
+        tags=req.tags,
+        threshold=req.similarity_threshold,
+        limit=req.limit,
+    )
 
 
 @router.post(

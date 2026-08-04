@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<p>Hello {{ username }},</p>
+<p>We've just released some exciting new updates to DevLink!</p>
+<h2>{{ update_title }}</h2>
+<div>
+    {{ update_content | safe }}
+</div>
+<p style="text-align: center;">
+    <a href="{{ action_url }}" class="btn">Check it out</a>
+</p>
+<p>Best regards,<br>The DevLink Team</p>
+{% endblock %}

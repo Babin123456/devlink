@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
@@ -9,6 +10,8 @@ from app.services.suspicious_login_service import SuspiciousLoginService
 from app.services.audit_log_service import AuditLogService
 from app.models.audit_log import AuditAction
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 # pyrefly: ignore [missing-import]
 
@@ -128,7 +131,11 @@ class AuthService:
 
         payload.username = validate_username(payload.username)
 
-        validate_password(payload.password)
+        validate_password(
+            payload.password,
+            username=payload.username,
+            email=payload.email,
+        )
 
         if self.get_user_by_email(payload.email):
             raise HTTPException(
@@ -179,6 +186,7 @@ class AuthService:
         user = self.get_user_by_email(payload.email)
 
         if not user:
+            logger.warning("Login failed: user not found for email")
             # Log failed login and check suspicious signals
             AuditLogService.create_log(
                 db=self.db,
@@ -209,6 +217,7 @@ class AuthService:
             payload.password,
             user.password_hash,
         ):
+            logger.warning("Login failed: password mismatch for user %s", user.id)
             # Log failed login and check suspicious signals
             AuditLogService.create_log(
                 db=self.db,
@@ -237,6 +246,7 @@ class AuthService:
                 detail="Invalid email or password.",
             )
         if not user.is_active:
+            logger.warning("Login blocked: inactive account %s", user.id)
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Account is disabled.",
@@ -277,6 +287,19 @@ class AuthService:
 
         self.db.flush()
 
+        if user.mfa_enabled:
+            mfa_token = create_access_token(
+                str(user.id),
+                {"type": "mfa_pending"},
+            )
+            self.db.commit()
+            return {
+                "success": True,
+                "mfa_required": True,
+                "mfa_token": mfa_token,
+                "message": "MFA verification required.",
+            }
+
         access_token = create_access_token(
             str(user.id),
             {
@@ -305,6 +328,71 @@ class AuthService:
         return {
             "success": True,
             "message": "Login successful.",
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "user": user,
+        }
+
+    def complete_mfa_login(
+        self,
+        mfa_token: str,
+        code: str,
+        user_agent: Optional[str] = None,
+        ip_address: Optional[str] = None,
+    ):
+        try:
+            payload = decode_token(mfa_token)
+            if payload.get("type") != "mfa_pending":
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid MFA session token.",
+                )
+            user_id_str = payload.get("sub")
+            user_id = UUID(user_id_str)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired MFA session token.",
+            )
+
+        user = self.db.get(User, user_id)
+        if not user or not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User account unavailable.",
+            )
+
+        from app.services.mfa_service import MFAService
+        verified = MFAService.verify_user_mfa(self.db, user, code)
+        if not verified:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid verification code or recovery code.",
+            )
+
+        access_token = create_access_token(
+            str(user.id),
+            {
+                "username": user.username,
+            },
+        )
+        refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=refresh_token,
+            expires_at=expires_at,
+            user_agent=user_agent,
+            ip_address=ip_address,
+        )
+        self.db.commit()
+
+        return {
+            "success": True,
+            "message": "MFA authentication successful.",
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
@@ -490,10 +578,6 @@ class AuthService:
         expires_at = datetime.now(timezone.utc) + timedelta(
             days=settings.REFRESH_TOKEN_EXPIRE_DAYS
         )
-        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
-        expires_at = datetime.now(timezone.utc) + timedelta(
-            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
-        )
 
         RefreshTokenService.create_token_for_user(
             db=self.db,
@@ -660,7 +744,11 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Current password is incorrect.",
             )
-        validate_password(new_password)
+        validate_password(
+            new_password,
+            username=user.username,
+            email=user.email,
+        )
 
         if self._is_password_reused(user, new_password):
             raise HTTPException(
@@ -814,9 +902,15 @@ class AuthService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid or expired reset token.",
             )
-        validate_password(new_password)
-
+        # The user is resolved before validating so the candidate password can
+        # be screened against this account's own username and email.
         user = self.get_current_user(user_id)
+
+        validate_password(
+            new_password,
+            username=user.username,
+            email=user.email,
+        )
 
         expected_frag = user.password_hash[-10:] if user.password_hash else "nohash"
         if hash_frag and hash_frag != expected_frag:

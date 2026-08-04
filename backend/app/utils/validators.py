@@ -52,9 +52,21 @@ def validate_username(username: str) -> str:
 # ==========================================================
 
 
-def validate_password(password: str) -> str:
+def validate_password(
+    password: str,
+    username: str | None = None,
+    email: str | None = None,
+) -> str:
     """
     Validate password strength.
+
+    Runs the composition rules first, then screens the candidate against the
+    local blocklist of known-guessable passwords and, when enabled, the Have I
+    Been Pwned corpus. ``username`` and ``email`` are optional; passing them
+    additionally rejects passwords built out of the user's own identifiers.
+
+    The screening checks are ordered cheapest-first so the network call only
+    happens for a password that has already passed everything else.
     """
 
     if len(password) < 8:
@@ -93,7 +105,57 @@ def validate_password(password: str) -> str:
             detail="Password must contain a special character.",
         )
 
+    _screen_password(password, username=username, email=email)
+
     return password
+
+
+def _screen_password(
+    password: str,
+    username: str | None = None,
+    email: str | None = None,
+) -> None:
+    """
+    Reject passwords that are structurally fine but known to be guessable.
+
+    Imported lazily so that ``validators`` stays a leaf module -- the breach
+    service pulls in the cache manager and httpx, neither of which every
+    caller of this file needs.
+    """
+    from app.core.config import settings
+    from app.core.password_blocklist import (
+        contains_personal_information,
+        is_common_password,
+    )
+
+    if settings.ENABLE_PASSWORD_BLOCKLIST:
+        if is_common_password(password):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "This password is too common and appears on public "
+                    "password lists. Please choose a different one."
+                ),
+            )
+
+        if contains_personal_information(password, username=username, email=email):
+            raise HTTPException(
+                status_code=400,
+                detail=("Password must not contain your username or email address."),
+            )
+
+    if settings.ENABLE_HIBP_CHECK:
+        from app.services.password_breach_service import password_breach_service
+
+        # Fails open on any network trouble, so this cannot lock users out.
+        if password_breach_service.is_compromised(password):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "This password has appeared in a known data breach. "
+                    "Please choose a different one."
+                ),
+            )
 
 
 # ==========================================================

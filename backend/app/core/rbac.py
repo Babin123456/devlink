@@ -383,10 +383,11 @@ def has_project_permission(
         if permission in allowed_permissions:
             return True
 
-    if project.organization_id is not None:
+    org_id = getattr(project, "organization_id", None)
+    if org_id is not None:
         org_role_stmt = select(OrganizationMember).where(
             and_(
-                OrganizationMember.organization_id == project.organization_id,
+                OrganizationMember.organization_id == org_id,
                 OrganizationMember.user_id == user_id,
                 OrganizationMember.is_active == True,  # noqa: E712
             )

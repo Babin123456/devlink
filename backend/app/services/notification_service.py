@@ -14,7 +14,7 @@ from app.schemas.notification import (
     NotificationCreate,
     NotificationUpdate,
 )
-
+from app.core.cache import cached
 
 class NotificationService:
     """
@@ -75,6 +75,22 @@ class NotificationService:
         )
 
     @staticmethod
+    def create_notification(
+        db: Session,
+        recipient_id: uuid.UUID,
+        sender_id: uuid.UUID | None,
+        notification: NotificationCreate,
+    ) -> Notification:
+        db_notification = Notification(
+            sender_id=sender_id,
+            **notification.model_dump()
+        )
+        db.add(db_notification)
+        db.flush()
+        db.refresh(db_notification)
+        return db_notification
+
+    @staticmethod
     def get_notification(
         db: Session,
         notification_id: uuid.UUID,
@@ -114,11 +130,11 @@ class NotificationService:
         return list(db.scalars(stmt))
 
     @staticmethod
+    @cached(ttl=30, key_prefix="notifications:unread_count")
     def unread_count(
         db: Session,
         recipient_id: uuid.UUID,
     ) -> int:
-
         stmt = (
             select(func.count())
             .select_from(Notification)
