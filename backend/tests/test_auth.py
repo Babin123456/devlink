@@ -9,7 +9,7 @@ def test_register_success(client: TestClient):
             "last_name": "User",
             "email": "testregister@example.com",
             "username": "testregister",
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
     assert response.status_code == 201
@@ -27,7 +27,7 @@ def test_register_duplicate_email(client: TestClient, register_and_login):
             "last_name": "User",
             "email": "dup@example.com",
             "username": "dupuser2",
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
     assert response.status_code == 409
@@ -44,12 +44,12 @@ def test_login_success(client: TestClient, register_and_login):
             "last_name": "User",
             "email": "login@example.com",
             "username": "loginuser",
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
     response = client.post(
         "/api/auth/login",
-        json={"email": "login@example.com", "password": "Password123!"},
+        json={"email": "login@example.com", "password": "Vermilion-Kestrel97!"},
     )
     assert response.status_code == 200
     assert "access_token" in response.json()
@@ -59,7 +59,7 @@ def test_login_success(client: TestClient, register_and_login):
 def test_login_invalid_credentials(client: TestClient):
     response = client.post(
         "/api/auth/login",
-        json={"email": "nonexistent@example.com", "password": "Password123!"},
+        json={"email": "nonexistent@example.com", "password": "Vermilion-Kestrel97!"},
     )
     assert response.status_code == 401
 
@@ -82,12 +82,12 @@ def test_refresh_token(client: TestClient, register_and_login):
             "last_name": "User",
             "email": "refresh@example.com",
             "username": "refreshuser",
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
     login_resp = client.post(
         "/api/auth/login",
-        json={"email": "refresh@example.com", "password": "Password123!"},
+        json={"email": "refresh@example.com", "password": "Vermilion-Kestrel97!"},
     )
     refresh_token = login_resp.json()["refresh_token"]
 
