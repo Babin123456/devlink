@@ -52,6 +52,13 @@ class AuditAction(str, Enum):
     # Project
     PROJECT_CREATED = "project_created"
     PROJECT_UPDATED = "project_updated"
+    PROJECT_TITLE_UPDATED = "project_title_updated"
+    PROJECT_DESCRIPTION_UPDATED = "project_description_updated"
+    PROJECT_STATUS_CHANGED = "project_status_changed"
+    PROJECT_MEMBER_ADDED = "project_member_added"
+    PROJECT_MEMBER_REMOVED = "project_member_removed"
+    PROJECT_MEMBER_ROLE_UPDATED = "project_member_role_updated"
+    PROJECT_OWNERSHIP_TRANSFERRED = "project_ownership_transferred"
     PROJECT_ARCHIVED = "project_archived"
     PROJECT_RESTORED = "project_restored"
     PROJECT_DELETED = "project_deleted"

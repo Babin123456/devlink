@@ -131,7 +131,11 @@ class AuthService:
 
         payload.username = validate_username(payload.username)
 
-        validate_password(payload.password)
+        validate_password(
+            payload.password,
+            username=payload.username,
+            email=payload.email,
+        )
 
         if self.get_user_by_email(payload.email):
             raise HTTPException(
@@ -740,7 +744,11 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Current password is incorrect.",
             )
-        validate_password(new_password)
+        validate_password(
+            new_password,
+            username=user.username,
+            email=user.email,
+        )
 
         if self._is_password_reused(user, new_password):
             raise HTTPException(
@@ -894,9 +902,15 @@ class AuthService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid or expired reset token.",
             )
-        validate_password(new_password)
-
+        # The user is resolved before validating so the candidate password can
+        # be screened against this account's own username and email.
         user = self.get_current_user(user_id)
+
+        validate_password(
+            new_password,
+            username=user.username,
+            email=user.email,
+        )
 
         expected_frag = user.password_hash[-10:] if user.password_hash else "nohash"
         if hash_frag and hash_frag != expected_frag:

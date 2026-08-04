@@ -218,3 +218,156 @@ class DuplicateDetectionService:
         results.sort(key=lambda x: x["similarity_score"], reverse=True)
 
         return results[:limit]
+
+    @staticmethod
+    def _levenshtein_similarity(s1: str, s2: str) -> float:
+        """Normalized string edit similarity between s1 and s2 (0.0 to 1.0)."""
+        str1 = s1.lower().strip()
+        str2 = s2.lower().strip()
+        if str1 == str2:
+            return 1.0
+        if not str1 or not str2:
+            return 0.0
+
+        len1, len2 = len(str1), len(str2)
+        dp = [[0] * (len2 + 1) for _ in range(len1 + 1)]
+        for i in range(len1 + 1):
+            dp[i][0] = i
+        for j in range(len2 + 1):
+            dp[0][j] = j
+
+        for i in range(1, len1 + 1):
+            for j in range(1, len2 + 1):
+                cost = 0 if str1[i - 1] == str2[j - 1] else 1
+                dp[i][j] = min(
+                    dp[i - 1][j] + 1,
+                    dp[i][j - 1] + 1,
+                    dp[i - 1][j - 1] + cost,
+                )
+
+        dist = dp[len1][len2]
+        max_len = max(len1, len2)
+        return max(0.0, 1.0 - (dist / max_len))
+
+    @staticmethod
+    def find_duplicate_projects(
+        db: Session,
+        title: str,
+        description: Optional[str] = "",
+        tags: Optional[list[str]] = None,
+        threshold: float = 0.65,
+        limit: int = 5,
+        exclude_project_id: Optional[UUID] = None,
+    ) -> Any:
+        """
+        AI-based semantic and hybrid duplicate detection for project submissions (#608).
+
+        Returns DuplicateProjectCheckResponse with matches, confidence scores, and reasons.
+        """
+        from app.models.project import Project
+        from app.schemas.duplicate_detection import (
+            DuplicateProjectCheckResponse,
+            SuggestedProjectMatch,
+        )
+
+        query_title = title.strip()
+        query_desc = (description or "").strip()
+        query_tags = [t.lower().strip() for t in (tags or []) if t.strip()]
+
+        query_full_text = f"{query_title}\n{query_desc}"
+        query_embedding = DuplicateDetectionService.generate_embedding(query_full_text)
+
+        stmt = select(Project)
+        if exclude_project_id:
+            stmt = stmt.where(Project.id != exclude_project_id)
+
+        existing_projects = list(db.scalars(stmt).all())
+        candidates: list[SuggestedProjectMatch] = []
+
+        for p in existing_projects:
+            match_reasons: list[str] = []
+
+            # 1. Title Similarity (Jaccard + Levenshtein)
+            title_jaccard = DuplicateDetectionService.keyword_similarity(query_title, p.title)
+            title_lev = DuplicateDetectionService._levenshtein_similarity(query_title, p.title)
+            title_score = 0.5 * title_jaccard + 0.5 * title_lev
+
+            if title_lev >= 0.85:
+                match_reasons.append(f"Nearly identical project title ({int(title_lev * 100)}% title match)")
+            elif title_jaccard >= 0.6:
+                match_reasons.append("High title keyword overlap")
+
+            # 2. Description Similarity
+            desc_score = 0.0
+            p_desc = p.description or ""
+            if query_desc and p_desc:
+                desc_score = DuplicateDetectionService.keyword_similarity(query_desc, p_desc)
+                if desc_score >= 0.6:
+                    match_reasons.append("High description similarity")
+
+            # 3. Tech Stack / Tag Overlap
+            tag_score = 0.0
+            p_tags: set[str] = set()
+            if p.tech_stack:
+                p_tags.update(re.findall(r"[a-z0-9]+", p.tech_stack.lower()))
+            if query_tags and p_tags:
+                matched_tags = set(query_tags) & p_tags
+                if matched_tags:
+                    tag_score = len(matched_tags) / max(len(query_tags), len(p_tags))
+                    match_reasons.append(f"Matching tech stack/tags: {', '.join(list(matched_tags)[:4])}")
+
+            # 4. Semantic Embedding Similarity
+            semantic_score: Optional[float] = None
+            # If project embedding stored or computed on the fly
+            if query_embedding and hasattr(p, "embedding") and p.embedding:
+                try:
+                    p_vec = DuplicateDetectionService.json_to_embedding(p.embedding)
+                    semantic_score = DuplicateDetectionService.cosine_similarity(query_embedding, p_vec)
+                    if semantic_score >= 0.7:
+                        match_reasons.append("Strong AI semantic embedding similarity")
+                except Exception as e:
+                    logger.debug(f"Failed to compare embedding for project {p.id}: {e}")
+
+            # Hybrid Weighted Combination
+            hybrid_score = 0.45 * title_score + 0.35 * desc_score + 0.20 * tag_score
+
+            # Boost score if title is very close
+            if title_score >= 0.85:
+                hybrid_score = max(hybrid_score, title_score)
+
+            final_score = max(semantic_score or 0.0, hybrid_score)
+            final_score = min(1.0, max(0.0, final_score))
+
+            if final_score >= threshold:
+                confidence_score = round(final_score * 100.0, 1)
+                is_dup = final_score >= threshold
+                if not match_reasons:
+                    match_reasons.append("Overall content similarity")
+
+                candidates.append(
+                    SuggestedProjectMatch(
+                        project_id=p.id,
+                        title=p.title,
+                        slug=p.slug,
+                        description=p.description[:200] if p.description else "",
+                        similarity_score=round(final_score, 4),
+                        confidence_score=confidence_score,
+                        is_duplicate=is_dup,
+                        match_reasons=match_reasons,
+                    )
+                )
+
+        candidates.sort(key=lambda x: x.similarity_score, reverse=True)
+        top_candidates = candidates[:limit]
+
+        max_score = top_candidates[0].similarity_score if top_candidates else 0.0
+        has_duplicates = any(c.is_duplicate for c in top_candidates)
+
+        return DuplicateProjectCheckResponse(
+            has_duplicates=has_duplicates,
+            max_similarity_score=round(max_score, 4),
+            suggested_projects=top_candidates,
+            threshold_used=threshold,
+            manual_override_allowed=True,
+        )
+

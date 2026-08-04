@@ -548,6 +548,8 @@ app.include_router(conversations.router, prefix="/api/conversations", tags=["Con
 from app.routers import audit
 
 app.include_router(audit.router, prefix="/api", tags=["Audit"])
+from app.routers import plugins
+app.include_router(plugins.router, prefix="/api", tags=["Plugin & Extension System"])
 from app.routers import security_events
 app.include_router(security_events.router, prefix="/api", tags=["Security Events Monitoring"])
 app.include_router(issues.router, prefix="/api", tags=["Issues"])
@@ -605,6 +607,7 @@ app.include_router(
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
 
+<<<<<<< HEAD
 from fastapi.openapi.utils import get_openapi
 
 def custom_openapi():
@@ -639,3 +642,8 @@ def custom_openapi():
     return app.openapi_schema
 
 app.openapi = custom_openapi
+=======
+from app.routers import background_jobs
+app.include_router(background_jobs.router, prefix="/api")
+
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
