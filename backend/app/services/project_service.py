@@ -90,6 +90,19 @@ class ProjectService:
         )
         db.add(member)
         db.commit()
+
+        # Create initial Version 1 snapshot (#606)
+        try:
+            from app.services.project_version_service import ProjectVersionService
+            ProjectVersionService.create_version(
+                db=db,
+                project=db_project,
+                actor_id=owner_id,
+                change_summary="Initial project creation (Version 1)",
+            )
+        except Exception:
+            pass
+
         ActivityService.record_activity(
             db=db,
             actor_id=owner_id,
@@ -239,6 +252,18 @@ class ProjectService:
 
         db.flush()
         db.refresh(db_project)
+
+        # Create new version snapshot (#606)
+        try:
+            from app.services.project_version_service import ProjectVersionService
+            ProjectVersionService.create_version(
+                db=db,
+                project=db_project,
+                actor_id=db_project.owner_id,
+                change_summary="Updated project details",
+            )
+        except Exception:
+            pass
 
         ActivityService.record_activity(
             db=db,
