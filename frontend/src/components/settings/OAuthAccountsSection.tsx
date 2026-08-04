@@ -11,7 +11,7 @@ export interface OAuthProviderItem {
 }
 
 export interface OAuthProvidersResponse {
-  has_password: bool;
+  has_password: boolean;
   linked_count: number;
   providers: OAuthProviderItem[];
 }

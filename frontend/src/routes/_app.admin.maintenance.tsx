@@ -20,7 +20,7 @@ function AdminMaintenance() {
 
   const fetchWindows = async () => {
     try {
-      const res = await api.get("/api/maintenance");
+      const res: any = await api.get("/api/maintenance");
       setWindows(res.data);
     } catch (error) {
       console.error("Failed to fetch maintenance windows", error);

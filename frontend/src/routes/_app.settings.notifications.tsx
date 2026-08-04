@@ -18,7 +18,7 @@ function NotificationSettingsPage() {
   const { data: preferences, isLoading } = useQuery({
     queryKey: ["notification-preferences"],
     queryFn: async () => {
-      const res = await api.get("/api/notifications/preferences");
+      const res: any = await api.get("/api/notifications/preferences");
       return res.data;
     },
   });

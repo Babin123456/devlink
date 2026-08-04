@@ -82,7 +82,7 @@ function GraphView() {
   // Calculate layout simple circular or grid if no position
   const initialNodes = useMemo(() => {
     if (!data?.nodes) return [];
-    return data.nodes.map((n: unknown, i: number) => {
+    return data.nodes.map((n: any, i: number) => {
       if (n.position) return n;
       // Simple layout if no position provided by backend
       const radius = 300;
@@ -147,13 +147,13 @@ function GraphView() {
         attributionPosition="bottom-right"
       >
         <MiniMap
-          nodeStrokeColor={(n) => {
+          nodeStrokeColor={(n: any) => {
             if (n.data?.type === "project") return "#3b82f6";
             if (n.data?.type === "user") return "#10b981";
             if (n.data?.type === "skill") return "#f59e0b";
             return "#6366f1";
           }}
-          nodeColor={(n) => {
+          nodeColor={(n: any) => {
             if (n.data?.type === "project") return "#3b82f6";
             if (n.data?.type === "user") return "#10b981";
             if (n.data?.type === "skill") return "#f59e0b";

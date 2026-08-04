@@ -17,7 +17,7 @@ function SearchAnalyticsDashboard() {
   const fetchAnalytics = async () => {
     try {
       // Assuming api wrapper adds the base url and token
-      const res = await api.get("/api/search/analytics?days=30");
+      const res: any = await api.get("/api/search/analytics?days=30");
       setData(res.data);
     } catch (error) {
       console.error("Failed to fetch search analytics", error);
@@ -69,11 +69,11 @@ function SearchAnalyticsDashboard() {
               </tr>
             </thead>
             <tbody>
-              {data.top_keywords.map((item: unknown, idx: number) => (
+              {data.top_keywords.map((item: any, idx: number) => (
                 <tr key={idx} className="border-b">
                   <td className="p-3 text-gray-500">#{idx + 1}</td>
-                  <td className="p-3 font-medium">{item.keyword}</td>
-                  <td className="p-3">{item.count}</td>
+                  <td className="p-3 font-medium">{item?.keyword}</td>
+                  <td className="p-3">{item?.count}</td>
                 </tr>
               ))}
             </tbody>

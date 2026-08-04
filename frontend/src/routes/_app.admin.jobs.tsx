@@ -39,7 +39,7 @@ function AdminJobsPage() {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['admin-job-stats'],
     queryFn: async () => {
-      const res = await api.get('/admin/background-jobs/stats');
+      const res: any = await api.get('/admin/background-jobs/stats');
       return res.data;
     },
     refetchInterval: 5000,
@@ -56,7 +56,7 @@ function AdminJobsPage() {
       if (statusFilter !== 'all') params.status = statusFilter;
       if (search) params.search = search;
 
-      const res = await api.get('/admin/background-jobs/', { params });
+      const res: any = await api.get('/admin/background-jobs/', { params } as any);
       return res.data;
     },
   });

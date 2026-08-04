@@ -136,7 +136,7 @@ export function FilterDrawer({
           />
           <input
             type="text"
-            value={draftValues[section.id] || ""}
+            value={(draftValues[section.id] as any) || ""}
             onChange={(e) => handleTextChange(section.id, e.target.value)}
             placeholder={section.placeholder || `Search ${section.title.toLowerCase()}...`}
             className="w-full rounded-md border border-border bg-surface py-1.5 pl-8 pr-3 text-[13px] text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
@@ -149,7 +149,7 @@ export function FilterDrawer({
     if (type === "select") {
       return (
         <select
-          value={draftValues[section.id] || ""}
+          value={(draftValues[section.id] as any) || ""}
           onChange={(e) => handleTextChange(section.id, e.target.value)}
           className="mt-2 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-[13px] text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           aria-label={section.title}
@@ -174,7 +174,7 @@ export function FilterDrawer({
         <div className="mt-2 space-y-2">
           <div className="flex items-center justify-between text-[12px] text-muted-foreground">
             <span>{min}</span>
-            <span className="font-semibold text-foreground">{val}</span>
+            <span className="font-semibold text-foreground">{val as any}</span>
             <span>{max}</span>
           </div>
           <input
@@ -182,8 +182,8 @@ export function FilterDrawer({
             min={min}
             max={max}
             step={step}
-            value={val}
-            onChange={(e) => handleTextChange(section.id, Number(e.target.value))}
+            value={val as any}
+            onChange={(e) => handleTextChange(section.id, e.target.value as any)}
             className="w-full cursor-pointer accent-primary"
             aria-label={section.title}
           />
