@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy import func, select
@@ -221,3 +221,61 @@ class NotificationService:
         }
 
         send_notification_task.delay(payload)
+
+    @staticmethod
+    def get_preferences(
+        db: Session,
+        user_id: uuid.UUID,
+    ):
+        from app.models.notification import NotificationPreference
+        pref = db.scalar(
+            select(NotificationPreference).where(NotificationPreference.user_id == user_id)
+        )
+        if not pref:
+            now = datetime.now(timezone.utc)
+            pref = NotificationPreference(
+                id=uuid.uuid4(),
+                user_id=user_id,
+                email_enabled=True,
+                websocket_enabled=True,
+                database_enabled=True,
+                messages=True,
+                team_invitations=True,
+                project_updates=True,
+                mentions=True,
+                system_announcements=True,
+                email_messages=True,
+                email_team_invitations=True,
+                email_project_updates=True,
+                email_mentions=True,
+                email_system_announcements=True,
+                invitations=True,
+                role_changes=True,
+                marketing_emails=False,
+                system_alerts=True,
+                updated_at=now,
+            )
+            db.add(pref)
+            db.commit()
+            db.refresh(pref)
+        return pref
+
+    @staticmethod
+    def update_preferences(
+        db: Session,
+        user_id: uuid.UUID,
+        update_in: Any,
+    ):
+        from app.models.notification import NotificationPreference
+        pref = NotificationService.get_preferences(db, user_id)
+        data = update_in.model_dump(exclude_unset=True)
+
+        for key, value in data.items():
+            if hasattr(pref, key) and value is not None:
+                setattr(pref, key, value)
+
+        pref.updated_at = datetime.now(timezone.utc)
+        db.add(pref)
+        db.commit()
+        db.refresh(pref)
+        return pref
