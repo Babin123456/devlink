@@ -16,9 +16,9 @@ function MaintenancePage() {
     // Try to get maintenance info from local storage or an unauthenticated endpoint
     const checkMaintenance = async () => {
       try {
-        const res = await api.get("/api/maintenance/active");
+        const res: any = await api.get("/api/maintenance/active");
         setMaintenance(res.data);
-      } catch (e) {
+      } catch (e: any) {
         // If 404, there is no active maintenance. We could redirect to home.
         if (e.response?.status === 404) {
           window.location.href = "/";

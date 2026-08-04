@@ -306,23 +306,23 @@ function ProjectsPage() {
             },
           ]}
           values={{
-            language: language ? language.split(",") : [],
-            experience: experience,
-            remote: remote,
-            paid: paid,
-            opensource: openSource,
+            language: filters.language ? filters.language : [],
+            experience: filters.experience ? filters.experience[0] : "",
+            remote: filters.remote || "",
+            paid: filters.paid || "",
+            opensource: filters.opensource || "",
           }}
           onApply={(newValues) => {
             const selectedLangs = Array.isArray(newValues.language)
-              ? newValues.language.join(",")
-              : newValues.language;
-            handleSetFilters({
-              language: selectedLangs || "",
-              experience: newValues.experience || "",
-              remote: newValues.remote || "",
-              paid: newValues.paid || "",
-              openSource: newValues.opensource || "",
-              techStack: techStack || "",
+              ? newValues.language
+              : [newValues.language].filter(Boolean) as string[];
+            setFilters({
+              language: selectedLangs,
+              experience: newValues.experience ? [String(newValues.experience)] : [],
+              remote: newValues.remote ? newValues.remote === "true" : undefined,
+              paid: newValues.paid ? newValues.paid === "true" : undefined,
+              opensource: newValues.opensource ? newValues.opensource === "true" : undefined,
+              tech: filters.tech || [],
             });
           }}
           onReset={clearFilters}

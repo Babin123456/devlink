@@ -30,8 +30,8 @@ import {
   Search,
   Sparkles,
   UsersRound,
+  BadgeCheck,
 } from "lucide-react";
-import { Search, Sparkles, Calendar, Briefcase, Check, Bookmark, BadgeCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants } from "@/lib/animations";
 
