@@ -46,7 +46,7 @@ DevLink is an open-source developer collaboration platform. Developers can creat
 > **Status:** Active development. Open to contributors. See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
 **Documentation:**
-[Architecture](docs/architecture.md) · [API Reference](docs/api.md) · [Development Setup](docs/development.md) · [Deployment Guide](docs/deployment.md) · [Coding Standards](docs/coding-standards.md) · [WebSockets](docs/WEBSOCKETS.md)
+[Architecture](docs/architecture.md) · [API Reference](docs/api.md) · [Authentication Guide](docs/authentication.md) · [Development Setup](docs/development.md) · [Deployment Guide](docs/deployment.md) · [Coding Standards](docs/coding-standards.md) · [WebSockets](docs/WEBSOCKETS.md)
 
 ---
 
