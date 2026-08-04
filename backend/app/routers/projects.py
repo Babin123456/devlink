@@ -90,6 +90,7 @@ def check_duplicate_project(
     db: Session = Depends(get_database),
 ) -> DuplicateProjectCheckResponse:
     from app.services.duplicate_detection_service import DuplicateDetectionService
+
     return DuplicateDetectionService.find_duplicate_projects(
         db,
         title=req.title,
@@ -319,7 +320,10 @@ def update_project(
         )
 
     # 2. Description update event
-    if "description" in new_values and old_values.get("description") != new_values["description"]:
+    if (
+        "description" in new_values
+        and old_values.get("description") != new_values["description"]
+    ):
         AuditLogService.create_log(
             db=db,
             actor_id=current_user.id,
@@ -334,8 +338,24 @@ def update_project(
     # 3. Status/Stage change event
     status_keys = {"stage", "visibility", "is_published", "hiring"}
     if any(k in new_values for k in status_keys):
-        changed_old = {k: str(old_values[k]) if isinstance(old_values.get(k), Enum) else old_values.get(k) for k in status_keys if k in new_values}
-        changed_new = {k: str(new_values[k]) if isinstance(new_values.get(k), Enum) else new_values.get(k) for k in status_keys if k in new_values}
+        changed_old = {
+            k: (
+                str(old_values[k])
+                if isinstance(old_values.get(k), Enum)
+                else old_values.get(k)
+            )
+            for k in status_keys
+            if k in new_values
+        }
+        changed_new = {
+            k: (
+                str(new_values[k])
+                if isinstance(new_values.get(k), Enum)
+                else new_values.get(k)
+            )
+            for k in status_keys
+            if k in new_values
+        }
         AuditLogService.create_log(
             db=db,
             actor_id=current_user.id,
@@ -369,14 +389,19 @@ def update_project(
 )
 def get_project_audit_trail(
     project_id: uuid.UUID,
-    event_type: Optional[str] = Query(None, description="Filter by event type substring"),
-    user_id: Optional[uuid.UUID] = Query(None, description="Filter by actor or target user ID"),
+    event_type: Optional[str] = Query(
+        None, description="Filter by event type substring"
+    ),
+    user_id: Optional[uuid.UUID] = Query(
+        None, description="Filter by actor or target user ID"
+    ),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_database),
     current_user: User = Depends(require_project_permission("project:read")),
 ) -> PaginatedProjectAuditLogsResponse:
     from app.services.audit_log_service import AuditLogService
+
     result = AuditLogService.search_project_audit_logs(
         db,
         project_id=project_id,
