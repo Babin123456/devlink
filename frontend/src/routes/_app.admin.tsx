@@ -10,7 +10,11 @@ export const Route = createFileRoute("/_app/admin")({
     //   throw redirect({ to: "/" });
     // }
   },
-  component: () => (
+  component: AdminLayout,
+});
+
+function AdminLayout() {
+  return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto p-4 md:p-8">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Admin Console</h1>
@@ -71,6 +75,6 @@ export const Route = createFileRoute("/_app/admin")({
 
       <Outlet />
     </div>
-  ),
-});
+  );
+}
 
