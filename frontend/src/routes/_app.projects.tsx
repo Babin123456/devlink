@@ -306,23 +306,29 @@ function ProjectsPage() {
             },
           ]}
           values={{
-            language: language ? language.split(",") : [],
-            experience: experience,
-            remote: remote,
-            paid: paid,
-            opensource: openSource,
+            language: filters.language ?? [],
+            experience: filters.experience?.[0] ?? "",
+            remote: filters.remote === undefined ? "" : String(filters.remote),
+            paid: filters.paid === undefined ? "" : String(filters.paid),
+            opensource: filters.opensource === undefined ? "" : String(filters.opensource),
           }}
           onApply={(newValues) => {
-            const selectedLangs = Array.isArray(newValues.language)
-              ? newValues.language.join(",")
-              : newValues.language;
-            handleSetFilters({
-              language: selectedLangs || "",
-              experience: newValues.experience || "",
-              remote: newValues.remote || "",
-              paid: newValues.paid || "",
-              openSource: newValues.opensource || "",
-              techStack: techStack || "",
+            const boolOrUndefined = (v: unknown): boolean | undefined =>
+              v === "" || v === undefined ? undefined : v === "true";
+            const stringOrUndefined = (v: unknown): string | undefined =>
+              typeof v === "string" && v !== "" ? v : undefined;
+            setFilters({
+              language: Array.isArray(newValues.language)
+                ? (newValues.language as string[])
+                : stringOrUndefined(newValues.language)
+                  ? [newValues.language as string]
+                  : [],
+              experience: stringOrUndefined(newValues.experience)
+                ? [newValues.experience as string]
+                : [],
+              remote: boolOrUndefined(newValues.remote),
+              paid: boolOrUndefined(newValues.paid),
+              opensource: boolOrUndefined(newValues.opensource),
             });
           }}
           onReset={clearFilters}

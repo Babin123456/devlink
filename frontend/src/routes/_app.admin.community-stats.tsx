@@ -92,8 +92,7 @@ function CommunityStatsDashboard() {
 
   if (!data) return null;
 
-  const formatNumber = (n: number) =>
-    new Intl.NumberFormat().format(n);
+  const formatNumber = (n: number) => new Intl.NumberFormat().format(n);
 
   const metricCards = [
     {
@@ -142,8 +141,8 @@ function CommunityStatsDashboard() {
             Community Statistics Dashboard
           </h1>
           <p className="text-muted-foreground mt-1">
-            Platform-wide metrics for the last {data.timeframe_days} days.
-            Updated: {new Date(data.generated_at).toLocaleString()}
+            Platform-wide metrics for the last {data.timeframe_days} days. Updated:{" "}
+            {new Date(data.generated_at).toLocaleString()}
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -183,7 +182,9 @@ function CommunityStatsDashboard() {
               className={`rounded-xl border p-5 ${metric.color} transition-shadow hover:shadow-md`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span aria-hidden="true" className="text-xl">{metric.icon}</span>
+                <span aria-hidden="true" className="text-xl">
+                  {metric.icon}
+                </span>
                 <h3 className="text-sm font-medium">{metric.title}</h3>
               </div>
               <p className="text-3xl font-bold">{metric.value}</p>
@@ -198,9 +199,7 @@ function CommunityStatsDashboard() {
             Most Popular Skills
           </h2>
           {data.most_popular_skills.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">
-              No skill data available.
-            </p>
+            <p className="text-muted-foreground text-center py-8">No skill data available.</p>
           ) : (
             <div className="h-80" role="img" aria-label="Bar chart showing most popular skills">
               <ResponsiveContainer width="100%" height="100%">
@@ -211,12 +210,7 @@ function CommunityStatsDashboard() {
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis type="number" tick={{ fontSize: 12 }} />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    width={120}
-                    tick={{ fontSize: 12 }}
-                  />
+                  <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12 }} />
                   <Tooltip
                     formatter={(value: number) => [formatNumber(value), "Developers"]}
                     contentStyle={{
@@ -226,11 +220,7 @@ function CommunityStatsDashboard() {
                       boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                     }}
                   />
-                  <Bar
-                    dataKey="count"
-                    radius={[0, 4, 4, 0]}
-                    maxBarSize={32}
-                  >
+                  <Bar dataKey="count" radius={[0, 4, 4, 0]} maxBarSize={32}>
                     {data.most_popular_skills.map((_, idx) => (
                       <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
                     ))}
@@ -264,9 +254,7 @@ function CommunityStatsDashboard() {
             Trending Technologies
           </h2>
           {data.trending_technologies.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">
-              No technology data available.
-            </p>
+            <p className="text-muted-foreground text-center py-8">No technology data available.</p>
           ) : (
             <div className="h-80" role="img" aria-label="Bar chart showing trending technologies">
               <ResponsiveContainer width="100%" height="100%">
@@ -277,12 +265,7 @@ function CommunityStatsDashboard() {
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis type="number" tick={{ fontSize: 12 }} />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    width={120}
-                    tick={{ fontSize: 12 }}
-                  />
+                  <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 12 }} />
                   <Tooltip
                     formatter={(value: number) => [formatNumber(value), "Projects"]}
                     contentStyle={{
@@ -292,11 +275,7 @@ function CommunityStatsDashboard() {
                       boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                     }}
                   />
-                  <Bar
-                    dataKey="count"
-                    radius={[0, 4, 4, 0]}
-                    maxBarSize={32}
-                  >
+                  <Bar dataKey="count" radius={[0, 4, 4, 0]} maxBarSize={32}>
                     {data.trending_technologies.map((_, idx) => (
                       <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
                     ))}
