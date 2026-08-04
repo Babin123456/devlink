@@ -12,9 +12,7 @@ def _auth_headers(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
 
-def test_generate_profile_summary(
-    client: TestClient, register_and_login, db
-):
+def test_generate_profile_summary(client: TestClient, register_and_login, db):
     user_id, token = register_and_login(
         "profile_summary@example.com", "profile_summary"
     )
@@ -43,9 +41,7 @@ def test_generate_profile_summary_uses_default_when_openai_unavailable(
     monkeypatch.setattr(
         ProfileSummaryService,
         "generate_summary",
-        staticmethod(
-            lambda db, user, stats=None: "Default fallback summary."
-        ),
+        staticmethod(lambda db, user, stats=None: "Default fallback summary."),
     )
 
     response = client.post(
