@@ -10,23 +10,35 @@ export const Route = createFileRoute("/_app/admin/notifications")({
   component: AdminNotificationsPage,
 });
 
+interface NotificationDeliveryStats {
+  total: number;
+  pending: number;
+  sent: number;
+  failed: number;
+}
+
+interface FailedNotification {
+  id: string;
+  title: string;
+  message: string;
+  channel: string;
+  recipient_id: string;
+}
+
 function AdminNotificationsPage() {
   const queryClient = useQueryClient();
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["admin-notification-stats"],
-    queryFn: async () => {
-      const res = await api.get("/admin/notifications/stats");
-      return res.data;
-    },
+    // The API client already resolves to the parsed body. Reading `.data` off
+    // it handed React Query `undefined`, so every tile rendered its `|| 0`
+    // fallback no matter what the server said.
+    queryFn: () => api.get<NotificationDeliveryStats>("/admin/notifications/stats"),
   });
 
   const { data: failed, isLoading: failedLoading } = useQuery({
     queryKey: ["admin-notification-failed"],
-    queryFn: async () => {
-      const res = await api.get("/admin/notifications/failed");
-      return res.data;
-    },
+    queryFn: () => api.get<FailedNotification[]>("/admin/notifications/failed"),
   });
 
   const retryMutation = useMutation({
@@ -98,7 +110,7 @@ function AdminNotificationsPage() {
           <p className="text-muted-foreground">No failed deliveries to display.</p>
         ) : (
           <div className="space-y-4">
-            {failed?.map((notification: any) => (
+            {failed?.map((notification) => (
               <Card key={notification.id}>
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>

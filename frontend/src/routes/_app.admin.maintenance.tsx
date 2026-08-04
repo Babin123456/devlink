@@ -6,26 +6,35 @@ export const Route = createFileRoute("/_app/admin/maintenance")({
   component: AdminMaintenance,
 });
 
+interface MaintenanceWindowRow {
+  id: string | number;
+  start_time: string;
+  end_time: string;
+  message: string;
+  is_active: boolean;
+}
+
 function AdminMaintenance() {
-  const [windows, setWindows] = useState<any[]>([]);
+  const [windows, setWindows] = useState<MaintenanceWindowRow[]>([]);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [message, setMessage] = useState("The system is undergoing scheduled maintenance.");
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchWindows();
-  }, []);
-
   const fetchWindows = async () => {
     try {
-      const res = await api.get("/api/maintenance");
-      setWindows(res.data);
+      // The API client resolves to the parsed body, not an axios response.
+      setWindows(await api.get<MaintenanceWindowRow[]>("/api/maintenance"));
     } catch (error) {
       console.error("Failed to fetch maintenance windows", error);
     }
   };
+
+  useEffect(() => {
+    void fetchWindows();
+    // fetchWindows closes over nothing that changes between renders.
+  }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +48,7 @@ function AdminMaintenance() {
       };
       await api.post("/api/maintenance", payload);
       alert("Maintenance window scheduled");
-      fetchWindows();
+      void fetchWindows();
     } catch (error) {
       alert("Failed to schedule maintenance");
       console.error(error);
@@ -52,7 +61,7 @@ function AdminMaintenance() {
     if (!confirm("Are you sure you want to delete this maintenance window?")) return;
     try {
       await api.delete(`/api/maintenance/${id}`);
-      fetchWindows();
+      void fetchWindows();
     } catch (error) {
       console.error("Failed to delete window", error);
     }

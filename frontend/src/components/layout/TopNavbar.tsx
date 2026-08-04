@@ -103,7 +103,7 @@ export function TopNavbar() {
             {isDark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           <NotificationCenter />
-          <IconButton to="/messages" count={3}>
+          <IconButton to="/messages" count={3} ariaLabel="Messages, 3 unread">
             <MessageSquare size={16} />
           </IconButton>
         </div>

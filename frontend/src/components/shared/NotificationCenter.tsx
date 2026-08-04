@@ -61,10 +61,9 @@ export function NotificationCenter() {
 
   const { data: notifications = [] } = useQuery({
     queryKey: ["notifications"],
-    queryFn: async () => {
-      const res = await api.get("/api/notifications/");
-      return res.data as Notification[];
-    },
+    // api.get resolves to the parsed body directly; there is no `.data`
+    // envelope to unwrap, and unwrapping one left the panel permanently empty.
+    queryFn: () => api.get<Notification[]>("/api/notifications/"),
     enabled: !!user,
   });
 

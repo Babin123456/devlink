@@ -6,25 +6,38 @@ export const Route = createFileRoute("/_app/admin/search-analytics")({
   component: SearchAnalyticsDashboard,
 });
 
+interface KeywordCount {
+  keyword: string;
+  count: number;
+}
+
+interface SearchAnalytics {
+  total_searches: number;
+  zero_result_rate_pct: number;
+  click_through_rate_pct: number;
+  average_latency_ms: number;
+  top_keywords?: KeywordCount[];
+}
+
 function SearchAnalyticsDashboard() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<SearchAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAnalytics();
-  }, []);
+    const fetchAnalytics = async () => {
+      try {
+        // The client prefixes the base URL and attaches the token, and it
+        // resolves to the parsed body — there is no response envelope.
+        setData(await api.get<SearchAnalytics>("/api/search/analytics?days=30"));
+      } catch (error) {
+        console.error("Failed to fetch search analytics", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchAnalytics = async () => {
-    try {
-      // Assuming api wrapper adds the base url and token
-      const res = await api.get("/api/search/analytics?days=30");
-      setData(res.data);
-    } catch (error) {
-      console.error("Failed to fetch search analytics", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    void fetchAnalytics();
+  }, []);
 
   if (loading) return <div className="p-6">Loading Analytics...</div>;
   if (!data) return <div className="p-6 text-red-500">Failed to load data.</div>;
@@ -69,7 +82,7 @@ function SearchAnalyticsDashboard() {
               </tr>
             </thead>
             <tbody>
-              {data.top_keywords.map((item: unknown, idx: number) => (
+              {data.top_keywords?.map((item, idx) => (
                 <tr key={idx} className="border-b">
                   <td className="p-3 text-gray-500">#{idx + 1}</td>
                   <td className="p-3 font-medium">{item.keyword}</td>

@@ -7,6 +7,7 @@ from pathlib import Path
 # pyrefly: ignore [missing-import]
 
 from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 from fastapi.staticfiles import StaticFiles
 
 # pyrefly: ignore [missing-import]
@@ -607,43 +608,49 @@ app.include_router(
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
 
-<<<<<<< HEAD
-from fastapi.openapi.utils import get_openapi
+from app.routers import background_jobs
 
+app.include_router(background_jobs.router, prefix="/api")
+
+
+# The generated OpenAPI document only lists the responses each handler declares
+# explicitly, which leaves the error shapes out of the published schema even
+# though every endpoint can return them (they come from the global exception
+# handlers, not from the route signatures). Generated SDK clients therefore had
+# no error types at all. Filling them in here keeps that knowledge in one place
+# instead of repeating a `responses={...}` block on several hundred routes.
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
-    
+
     openapi_schema = get_openapi(
         title="DevLink API",
         version="1.0.0",
         description="Backend API for the DevLink Developer Collaboration Platform",
         routes=app.routes,
     )
-    
-    error_400 = {"description": "Bad Request"}
-    error_401 = {"description": "Unauthorized"}
-    error_403 = {"description": "Forbidden"}
-    error_404 = {"description": "Not Found"}
-    error_409 = {"description": "Conflict"}
-    error_500 = {"description": "Internal Server Error"}
-    
+
+    shared_responses = {
+        "400": {"description": "Bad Request"},
+        "401": {"description": "Unauthorized"},
+        "403": {"description": "Forbidden"},
+        "404": {"description": "Not Found"},
+        "409": {"description": "Conflict"},
+        "500": {"description": "Internal Server Error"},
+    }
+
     for path in openapi_schema.get("paths", {}).values():
         for method in path.values():
+            # A path item also holds non-operation keys such as "parameters",
+            # whose value is a list rather than an operation object.
+            if not isinstance(method, dict):
+                continue
             responses = method.setdefault("responses", {})
-            if "400" not in responses: responses["400"] = error_400
-            if "401" not in responses: responses["401"] = error_401
-            if "403" not in responses: responses["403"] = error_403
-            if "404" not in responses: responses["404"] = error_404
-            if "409" not in responses: responses["409"] = error_409
-            if "500" not in responses: responses["500"] = error_500
-            
+            for status_code, description in shared_responses.items():
+                responses.setdefault(status_code, description)
+
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
-app.openapi = custom_openapi
-=======
-from app.routers import background_jobs
-app.include_router(background_jobs.router, prefix="/api")
 
->>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+app.openapi = custom_openapi

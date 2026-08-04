@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 
 import {
   ArrowRight,
+  BadgeCheck,
   Bookmark,
   Briefcase,
   Calendar,
@@ -31,7 +32,6 @@ import {
   Sparkles,
   UsersRound,
 } from "lucide-react";
-import { Search, Sparkles, Calendar, Briefcase, Check, Bookmark, BadgeCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants } from "@/lib/animations";
 
