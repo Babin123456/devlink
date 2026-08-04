@@ -544,6 +544,8 @@ app.include_router(followers.router, prefix="/api/followers", tags=["Followers"]
 app.include_router(bookmarks.router, prefix="/api/bookmarks", tags=["Bookmarks"])
 app.include_router(bookmark_collections.router, prefix="/api/bookmark-collections", tags=["Bookmark Collections"])
 app.include_router(activities.router, prefix="/api/activities", tags=["Activities"])
+from app.routers import moderation
+app.include_router(moderation.router, prefix="/api", tags=["Moderation"])
 app.include_router(conversations.router, prefix="/api/conversations", tags=["Conversations"])
 from app.routers import audit
 
