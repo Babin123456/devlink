@@ -85,4 +85,12 @@ export const issuesApi = {
 
   markAsDuplicate: (projectId: string, issueId: string, duplicateOfId: string) =>
     api.post<Issue>(`/api/projects/${projectId}/issues/${issueId}/mark-duplicate/${duplicateOfId}`),
+
+  estimateDifficulty: (projectId: string, issueId: string) =>
+    api.post<DifficultyEstimateResponse>(`/api/projects/${projectId}/issues/${issueId}/estimate`),
+
+  overrideDifficulty: (projectId: string, issueId: string, difficulty: Issue["difficulty"]) =>
+    api.patch<Issue>(`/api/projects/${projectId}/issues/${issueId}/difficulty`, {
+      difficulty,
+    }),
 };
