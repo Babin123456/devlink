@@ -258,6 +258,24 @@ class Settings(BaseSettings):
     ETAG_CACHE_CONTROL: str = "private, no-cache"
 
     # ==========================================================
+    # Calendar Feeds
+    # ==========================================================
+
+    # Mixed into the feed-token signing key. Changing it invalidates every
+    # issued feed URL at once, which is the blunt revocation lever available
+    # while tokens are stateless.
+    CALENDAR_FEED_TOKEN_SALT: str = "devlink-calendar-feed"
+
+    # A year. Long enough that a subscription is genuinely set-and-forget,
+    # short enough that a URL abandoned in a browser history stops working.
+    CALENDAR_FEED_TOKEN_MAX_AGE_DAYS: int = 365
+
+    # Advertised to clients via REFRESH-INTERVAL and X-PUBLISHED-TTL. Without
+    # a hint, clients pick their own interval, often an hour for a feed that
+    # changes daily.
+    CALENDAR_FEED_REFRESH_MINUTES: int = 360
+
+    # ==========================================================
     # Celery
     # ==========================================================
 
