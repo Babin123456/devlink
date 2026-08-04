@@ -315,7 +315,7 @@ function ProjectsPage() {
           onApply={(newValues) => {
             const selectedLangs = Array.isArray(newValues.language)
               ? newValues.language
-              : [newValues.language].filter(Boolean) as string[];
+              : ([newValues.language].filter(Boolean) as string[]);
             setFilters({
               language: selectedLangs,
               experience: newValues.experience ? [String(newValues.experience)] : [],
