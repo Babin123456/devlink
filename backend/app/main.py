@@ -548,6 +548,8 @@ app.include_router(conversations.router, prefix="/api/conversations", tags=["Con
 from app.routers import audit
 
 app.include_router(audit.router, prefix="/api", tags=["Audit"])
+from app.routers import plugins
+app.include_router(plugins.router, prefix="/api", tags=["Plugin & Extension System"])
 from app.routers import security_events
 app.include_router(security_events.router, prefix="/api", tags=["Security Events Monitoring"])
 app.include_router(issues.router, prefix="/api", tags=["Issues"])
