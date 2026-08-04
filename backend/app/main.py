@@ -47,6 +47,7 @@ from app.routers import (
     bookmark_collections,
     bookmarks,
     builder_flares,
+    centralized_analytics,
     conversation_starters,
     contributor_matching,
     conversations,
@@ -606,9 +607,10 @@ app.include_router(
     notification_templates.router, prefix="/api", tags=["Notification Templates"]
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
+app.include_router(centralized_analytics.router, prefix="/api", tags=["Centralized Analytics"])
 
-<<<<<<< HEAD
 from fastapi.openapi.utils import get_openapi
+from app.routers import background_jobs
 
 def custom_openapi():
     if app.openapi_schema:
@@ -642,8 +644,5 @@ def custom_openapi():
     return app.openapi_schema
 
 app.openapi = custom_openapi
-=======
-from app.routers import background_jobs
 app.include_router(background_jobs.router, prefix="/api")
 
->>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
