@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import uuid
 
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -30,6 +32,29 @@ class ProjectService:
         owner_id: uuid.UUID,
         project: ProjectCreate,
     ) -> Project:
+        # AI-based duplicate project detection check (#608)
+        allow_dup = getattr(project, "allow_duplicate", False)
+        if not allow_dup:
+            from app.services.duplicate_detection_service import DuplicateDetectionService
+            dup_res = DuplicateDetectionService.find_duplicate_projects(
+                db,
+                title=project.title,
+                description=project.description,
+                threshold=0.80,
+                limit=3,
+            )
+            if dup_res.has_duplicates:
+                top_match = dup_res.suggested_projects[0]
+                from fastapi import HTTPException, status
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "message": f"Potential duplicate project detected: '{top_match.title}' ({top_match.confidence_score}% match).",
+                        "max_similarity_score": dup_res.max_similarity_score,
+                        "suggested_projects": [p.model_dump() for p in dup_res.suggested_projects],
+                        "manual_override_instruction": "Pass 'allow_duplicate': true in request payload to bypass this check.",
+                    },
+                )
 
         db_project = Project(
             owner_id=owner_id,
@@ -86,7 +111,28 @@ class ProjectService:
         project_id: uuid.UUID,
     ) -> Project | None:
 
-        return db.get(Project, project_id)
+        stmt = (
+            select(Project)
+            .options(selectinload(Project.owner))
+            .where(
+                Project.id == project_id,
+                Project.deleted_at.is_(None),
+            )
+        )
+        return db.scalar(stmt)
+
+    @staticmethod
+    def get_project_including_deleted(
+        db: Session,
+        project_id: uuid.UUID,
+    ) -> Project | None:
+        """Retrieve a project regardless of soft-delete status (admin use)."""
+        stmt = (
+            select(Project)
+            .options(selectinload(Project.owner))
+            .where(Project.id == project_id)
+        )
+        return db.scalar(stmt)
 
     @staticmethod
     @cached(ttl=300, key_prefix="proj")
@@ -98,7 +144,10 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.slug == slug)
+            .where(
+                Project.slug == slug,
+                Project.deleted_at.is_(None),
+            )
         )
         return db.scalar(stmt)
 
@@ -119,13 +168,22 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.is_published.is_(True))
+            .where(
+                Project.deleted_at.is_(None),
+                Project.is_published.is_(True),
+            )
+            .offset(skip)
+            .limit(limit)
         )
 
         if language:
-            stmt = stmt.where(Project.language == language)
+            lang_list = [l.strip() for l in language.split(",") if l.strip()]
+            if lang_list:
+                stmt = stmt.where(Project.language.in_(lang_list))
         if experience:
-            stmt = stmt.where(Project.experience == experience)
+            exp_list = [e.strip() for e in experience.split(",") if e.strip()]
+            if exp_list:
+                stmt = stmt.where(Project.experience.in_(exp_list))
         if remote is not None:
             stmt = stmt.where(Project.is_remote == remote)
         if paid is not None:
@@ -133,7 +191,10 @@ class ProjectService:
         if opensource is not None:
             stmt = stmt.where(Project.is_open_source == opensource)
         if tech:
-            stmt = stmt.where(Project.tech_stack.ilike(f"%{tech}%"))
+            tech_list = [t.strip() for t in tech.split(",") if t.strip()]
+            if tech_list:
+                from sqlalchemy import or_
+                stmt = stmt.where(or_(*[Project.tech_stack.ilike(f"%{t}%") for t in tech_list]))
 
         stmt = stmt.offset(skip).limit(limit)
 
@@ -149,7 +210,10 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.owner_id == owner_id)
+            .where(
+                Project.owner_id == owner_id,
+                Project.deleted_at.is_(None),
+            )
         )
 
         return list(db.scalars(stmt))
@@ -310,7 +374,10 @@ class ProjectService:
             db.scalar(
                 select(func.count())
                 .select_from(Bookmark)
-                .where(Bookmark.project_id == project_id)
+                .where(
+                    Bookmark.target_type == "project",
+                    Bookmark.target_id == project_id,
+                )
             )
             or 0
         )
@@ -323,7 +390,6 @@ class ProjectService:
             bookmark_count=bookmark_count,
         )
 
-
     @staticmethod
     def find_similar_projects(
         db: Session,
@@ -333,19 +399,23 @@ class ProjectService:
         description_threshold: float = 0.65,
     ) -> list[SimilarProjectWarning]:
         from difflib import SequenceMatcher
-    
-        candidates = list(db.scalars(select(Project).where(Project.is_archived.is_(False))))
-    
+
+        candidates = list(
+            db.scalars(select(Project).where(Project.is_archived.is_(False)))
+        )
+
         results = []
         title_lower = title.lower()
         desc_lower = description.lower()
-    
+
         for project in candidates:
-            title_sim = SequenceMatcher(None, title_lower, project.title.lower()).ratio()
+            title_sim = SequenceMatcher(
+                None, title_lower, project.title.lower()
+            ).ratio()
             desc_sim = SequenceMatcher(
                 None, desc_lower, project.description.lower()
             ).ratio()
-    
+
             if title_sim >= title_threshold or desc_sim >= description_threshold:
                 results.append(
                     SimilarProjectWarning(
@@ -356,14 +426,38 @@ class ProjectService:
                         description_similarity=round(desc_sim, 2),
                     )
                 )
-    
+
         return results
 
     @staticmethod
-    def delete_project(
+    def soft_delete_project(
+        db: Session,
+        db_project: Project,
+        deleted_by_id: uuid.UUID,
+    ) -> None:
+        """Mark a project as deleted without removing the row."""
+        db_project.deleted_at = func.now()
+        db_project.deleted_by_id = deleted_by_id
+        db.commit()
+
+    @staticmethod
+    def restore_soft_deleted_project(
+        db: Session,
+        db_project: Project,
+    ) -> Project:
+        """Restore a soft-deleted project."""
+        db_project.deleted_at = None
+        db_project.deleted_by_id = None
+        db.commit()
+        db.refresh(db_project)
+        return db_project
+
+    @staticmethod
+    def hard_delete_project(
         db: Session,
         db_project: Project,
     ) -> None:
+        """Permanently remove a project from the database (admin only)."""
         from app.models.project_member import ProjectMember
 
         # Explicitly delete member rows first to avoid SQLAlchemy FK nullification

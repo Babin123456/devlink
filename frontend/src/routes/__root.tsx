@@ -6,27 +6,45 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
+import { AnimatePresence } from "framer-motion";
 import { useEffect, useRef, type ReactNode } from "react";
-import { Toaster } from "sonner";
-import lottie from "lottie-web";
+import { Toaster, toast } from "sonner";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { I18nProvider } from "@/context/I18nContext";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { applyServiceWorkerUpdate, registerServiceWorker } from "@/lib/pwa";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import searchAnimation from "@/assets/404 Error - Doodle animation.json";
+import { ApiError } from "@/api/client";
+
+import { UnauthorizedPage } from "@/components/errors/UnauthorizedPage";
+import { ForbiddenPage } from "@/components/errors/ForbiddenPage";
+import { ServerErrorPage } from "@/components/errors/ServerErrorPage";
+import { OfflinePage } from "@/components/errors/OfflinePage";
+import { NetworkErrorPage } from "@/components/errors/NetworkErrorPage";
 
 function NotFoundComponent() {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!ref.current) return;
-    const anim = lottie.loadAnimation({
-      container: ref.current,
-      animationData: searchAnimation,
-      loop: true,
-      autoplay: true,
-    });
-    return () => anim.destroy();
+    let destroy: (() => void) | undefined;
+    Promise.all([import("lottie-web"), import("@/assets/404 Error - Doodle animation.json")]).then(
+      ([lottieMod, animMod]) => {
+        if (!ref.current) return;
+        const anim = lottieMod.default.loadAnimation({
+          container: ref.current,
+          animationData: animMod.default,
+          loop: true,
+          autoplay: true,
+        });
+        destroy = () => anim.destroy();
+      },
+    );
+    return () => destroy?.();
   }, []);
 
   return (
@@ -61,12 +79,63 @@ function NotFoundComponent() {
   );
 }
 
+/**
+ * The root route's errorComponent and notFoundComponent replace RootComponent
+ * rather than rendering inside it, so anything they show sits outside the
+ * providers. The error pages call useTranslation(), so they need their own
+ * I18nProvider — without it an API 401 would surface as a provider error
+ * instead of the sign-in page.
+ */
+function OutsideRootProviders({ children }: { children: ReactNode }) {
+  return <I18nProvider>{children}</I18nProvider>;
+}
+
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
+
+  if (error instanceof ApiError) {
+    if (error.status === 401) {
+      return (
+        <OutsideRootProviders>
+          <UnauthorizedPage />
+        </OutsideRootProviders>
+      );
+    }
+
+    if (error.status === 403) {
+      return (
+        <OutsideRootProviders>
+          <ForbiddenPage />
+        </OutsideRootProviders>
+      );
+    }
+
+    if (error.status >= 500) {
+      return (
+        <OutsideRootProviders>
+          <ServerErrorPage />
+        </OutsideRootProviders>
+      );
+    }
+
+    // status 0  -> fetch/network failure (coreFetch's catch block)
+    // status 408 -> request aborted/timed out (coreFetch's AbortError branch)
+    // Both are network-class failures from the user's perspective.
+    if (error.status === 0 || error.status === 408) {
+      // navigator is undefined during SSR; assume online in that case so we
+      // don't render OfflinePage on the server for a purely client-side signal.
+      const isOnline = typeof navigator === "undefined" ? true : navigator.onLine;
+      return (
+        <OutsideRootProviders>
+          {isOnline ? <NetworkErrorPage /> : <OfflinePage />}
+        </OutsideRootProviders>
+      );
+    }
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -80,19 +149,21 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
-              router.invalidate();
+              // router.invalidate() returns a Promise; explicitly discard it
+              // rather than leaving a floating unhandled promise.
+              void router.invalidate();
               reset();
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
           >
             Try again
           </button>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="inline-flex items-center justify-center rounded-md border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
             Go home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -118,8 +189,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      // Colours the browser/OS chrome when installed, and matches the
+      // manifest's theme_color.
+      { name: "theme-color", content: "#05b7d7" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "DevLink" },
+      {
+        name: "apple-mobile-web-app-status-bar-style",
+        content: "black-translucent",
+      },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", type: "image/svg+xml", href: "/icons/icon.svg" },
+      { rel: "apple-touch-icon", href: "/icons/icon.svg" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -143,10 +228,36 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useRouterState({ select: (s) => s.location });
+
+  useEffect(() => {
+    // No-ops outside a production browser build; see src/lib/pwa.ts.
+    void registerServiceWorker({
+      onUpdateAvailable: (registration) => {
+        toast("A new version of DevLink is available.", {
+          duration: Infinity,
+          action: {
+            label: "Reload",
+            onClick: () => applyServiceWorkerUpdate(registration),
+          },
+        });
+      },
+    });
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster position="top-right" richColors />
+      <I18nProvider>
+        <ThemeProvider defaultTheme="system">
+          <OfflineBanner />
+          <Outlet />
+          <Toaster position="top-right" richColors />
+        </ThemeProvider>
+        <AnimatePresence mode="wait" initial={false}>
+          <Outlet key={location.pathname} />
+        </AnimatePresence>
+        <Toaster position="top-right" richColors />
+      </I18nProvider>
     </QueryClientProvider>
   );
 }

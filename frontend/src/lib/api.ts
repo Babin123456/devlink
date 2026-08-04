@@ -1,4 +1,8 @@
 "use client";
+import { toast } from "sonner";
+import { api } from "../api/client";
+
+export default api;
 
 export type ProjectSearchResult = {
   id: string;
@@ -61,6 +65,10 @@ async function fetchJson<T>(signal: AbortSignal, url: string): Promise<T> {
   return response.json();
 }
 
+type ApiConfig = {
+  baseUrl: string;
+};
+
 function getApiConfig(): ApiConfig {
   const baseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
 
@@ -103,7 +111,7 @@ async function requestJson<TResponse, TBody extends JsonValue | undefined = unde
 
     throw new Error(message);
   }
-  return (await response.json()) as T;
+  return (await res.json()) as TResponse;
 }
 
 export async function searchProjects(
@@ -123,17 +131,11 @@ export async function searchUsers(
 }
 
 export async function rejectApplication(id: UUID): Promise<ApplicationResponse> {
-  return requestJson<ApplicationResponse>({
-    url: `/applications/${id}/reject`,
-    method: "PATCH",
-  });
+  return api.patch<ApplicationResponse>(`/applications/${id}/reject`);
 }
 
 export async function withdrawApplication(id: UUID): Promise<ApplicationResponse> {
-  return requestJson<ApplicationResponse>({
-    url: `/applications/${id}/withdraw`,
-    method: "PATCH",
-  });
+  return api.patch<ApplicationResponse>(`/applications/${id}/withdraw`);
 }
 
 export function toastError(err: unknown, fallback = "Something went wrong") {
@@ -148,33 +150,43 @@ export type FollowStatusResponse = {
 };
 
 export async function getFollowStatus(userId: UUID): Promise<FollowStatusResponse> {
-  const [isFollowingRes, followerCountRes, followingCountRes] = await Promise.all([
-    requestJson<{ following: boolean }>({
-      url: `/followers/${userId}/is-following`,
-      method: "GET",
-    }),
-    requestJson<{ count: number }>({ url: `/followers/${userId}/count`, method: "GET" }),
-    requestJson<{ count: number }>({ url: `/followers/${userId}/following-count`, method: "GET" }),
-  ]);
-  return {
-    is_following: isFollowingRes.following,
-    follower_count: followerCountRes.count,
-    following_count: followingCountRes.count,
-  };
+  return requestJson<FollowStatusResponse>({
+    url: `/followers/${userId}/status`,
+    method: "GET",
+  });
 }
 
 export async function followUser(userId: UUID): Promise<FollowStatusResponse> {
-  await requestJson<void>({
-    url: `/followers/${userId}`,
-    method: "POST",
-  });
+  await api.post<void>(`/followers/${userId}`);
+
   return getFollowStatus(userId);
 }
 
 export async function unfollowUser(userId: UUID): Promise<FollowStatusResponse> {
-  await requestJson<void>({
-    url: `/followers/${userId}`,
-    method: "DELETE",
-  });
+  await api.delete<void>(`/followers/${userId}`);
   return getFollowStatus(userId);
+}
+
+export async function getMyApplications(): Promise<ApplicationResponse[]> {
+  return api.get<ApplicationResponse[]>("/applications/my");
+}
+
+export async function acceptApplication(id: UUID): Promise<ApplicationResponse> {
+  return api.patch<ApplicationResponse>(`/applications/${id}/accept`);
+}
+
+export async function getProjectApplications(projectId: UUID): Promise<ApplicationResponse[]> {
+  return api.get<ApplicationResponse[]>(`/projects/${projectId}/applications`);
+}
+
+export async function applyToFlare(
+  flareId: UUID,
+  projectId: UUID,
+  payload: Omit<ApplicationCreatePayload, "project_id" | "flare_id">,
+): Promise<ApplicationResponse> {
+  return api.post<ApplicationResponse>("/applications", {
+    ...payload,
+    project_id: projectId,
+    flare_id: flareId,
+  });
 }

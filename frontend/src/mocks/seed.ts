@@ -23,9 +23,41 @@ export interface Builder {
   badges: string[];
   interests: string[];
   online: boolean;
-  bio: string;
+  headline?: string;
+  bio?: string;
+  location?: string;
+  timezone?: string;
+  website?: string;
+  resumeUrl?: string;
+  portfolioUrl?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  experienceLevel?: string;
+  company?: string;
+  profileSkills?: { name: string; level?: string; category?: string; yearsOfExperience?: number }[];
+  techStack?: string[];
   lastActiveAt: string | null;
   publicEmail?: string;
+  verified?: boolean;
+  pinnedProjects?: string[];
+  contributions?: number;
+  followers?: number;
+  following?: number;
+  experience?: {
+    company: string;
+    role: string;
+    duration: string;
+  }[];
+  education?: {
+    school: string;
+    degree: string;
+    duration: string;
+  }[];
+  language?: string[];
+  activityTimeline?: {
+    title: string;
+    date: string;
+  }[];
 }
 export interface Project {
   id: ID;
@@ -105,11 +137,53 @@ export interface Notification {
 export interface Hackathon {
   id: ID;
   name: string;
+  description: string;
   theme: string;
-  startsIn: number;
+  starts_at: string;
+  ends_at: string;
+  min_team_size: number;
+  max_team_size: number;
   prize: string;
-  teamSize: string;
-  registered: boolean;
+  status: string;
+  is_published: boolean;
+  created_by: string;
+  website_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HackathonTeam {
+  id: ID;
+  hackathon_id: string;
+  name: string;
+  description?: string;
+  created_by: string;
+  member_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HackathonSubmission {
+  id: ID;
+  hackathon_id: string;
+  team_id: string;
+  submitted_by: string;
+  title: string;
+  description: string;
+  repo_url?: string;
+  demo_url?: string;
+  status: "draft" | "submitted" | "in_review" | "accepted" | "rejected";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HackathonLeaderboardEntry {
+  rank: number;
+  team_id: string;
+  team_name: string;
+  submission_title: string;
+  avg_score: number;
+  judge_count: number;
 }
 export interface Deadline {
   id: ID;
@@ -141,6 +215,45 @@ export const builders: Builder[] = [
     interests: ["Web Dev", "Design Systems", "AI"],
     lastActiveAt: ago(1),
     publicEmail: "priya@example.com",
+    verified: true,
+    contributions: 842,
+    followers: 238,
+    following: 124,
+    language: ["English", "Hindi"],
+    pinnedProjects: ["AI Chatbot", "DevOps Dashboard"],
+    experience: [
+      {
+        company: "Google",
+        role: "Frontend Engineer",
+        duration: "2023- Present",
+      },
+      {
+        company: "StartupX",
+        role: "React Developer",
+        duration: "2021-2023",
+      },
+    ],
+    education: [
+      {
+        school: "IIT Delhi",
+        degree: "B.Tech Computer Science",
+        duration: "2017-2021",
+      },
+    ],
+    activityTimeline: [
+      {
+        title: "Joined DevLink",
+        date: "Jan 2024",
+      },
+      {
+        title: "Created AI Chatbot",
+        date: "Mar 2024",
+      },
+      {
+        title: "Reached 200 Followers",
+        date: "Jul 2024",
+      },
+    ],
   },
   {
     id: "b2",
@@ -550,29 +663,156 @@ export const hackathons: Hackathon[] = [
   {
     id: "h1",
     name: "AI for Good 2025",
+    description:
+      "Build AI-powered tools that drive social impact. Use machine learning, NLP, or computer vision to solve real-world problems.",
     theme: "Social impact",
-    startsIn: 12,
+    starts_at: "2025-09-15T09:00:00Z",
+    ends_at: "2025-09-17T18:00:00Z",
+    min_team_size: 2,
+    max_team_size: 5,
     prize: "$25k",
-    teamSize: "2–5",
-    registered: true,
+    status: "registration_open",
+    is_published: true,
+    created_by: "u1",
+    created_at: "2025-08-01T00:00:00Z",
+    updated_at: "2025-08-01T00:00:00Z",
   },
   {
     id: "h2",
     name: "DevLink Winter Jam",
+    description:
+      "A weekend hackathon for the DevLink community. Ship something cool, win prizes, and meet fellow developers.",
     theme: "Any theme",
-    startsIn: 30,
+    starts_at: "2025-12-10T09:00:00Z",
+    ends_at: "2025-12-12T18:00:00Z",
+    min_team_size: 1,
+    max_team_size: 4,
     prize: "$10k",
-    teamSize: "1–4",
-    registered: false,
+    status: "draft",
+    is_published: false,
+    created_by: "u1",
+    created_at: "2025-11-01T00:00:00Z",
+    updated_at: "2025-11-01T00:00:00Z",
   },
   {
     id: "h3",
     name: "Chain Builders",
+    description:
+      "Build the next generation of decentralized applications. Focus on DeFi, NFTs, DAOs, or blockchain infrastructure.",
     theme: "Web3",
-    startsIn: 45,
+    starts_at: "2026-01-20T09:00:00Z",
+    ends_at: "2026-01-22T18:00:00Z",
+    min_team_size: 1,
+    max_team_size: 5,
     prize: "$50k",
-    teamSize: "1–5",
-    registered: false,
+    status: "completed",
+    is_published: true,
+    created_by: "u2",
+    created_at: "2025-12-15T00:00:00Z",
+    updated_at: "2026-01-23T00:00:00Z",
+  },
+];
+
+export const hackathonTeams: HackathonTeam[] = [
+  {
+    id: "ht1",
+    hackathon_id: "h1",
+    name: "Neural Nexus",
+    description: "Building an AI tool to help NGOs manage volunteer coordination.",
+    created_by: "u1",
+    member_count: 3,
+    created_at: "2025-08-10T10:00:00Z",
+    updated_at: "2025-08-10T10:00:00Z",
+  },
+  {
+    id: "ht2",
+    hackathon_id: "h1",
+    name: "Green Coders",
+    description: "Using computer vision to detect and classify waste for recycling.",
+    created_by: "u2",
+    member_count: 2,
+    created_at: "2025-08-11T14:00:00Z",
+    updated_at: "2025-08-11T14:00:00Z",
+  },
+  {
+    id: "ht3",
+    hackathon_id: "h1",
+    name: "AccessAI",
+    description: "AI-powered accessibility tools for visually impaired users.",
+    created_by: "u3",
+    member_count: 4,
+    created_at: "2025-08-12T09:00:00Z",
+    updated_at: "2025-08-12T09:00:00Z",
+  },
+  {
+    id: "ht4",
+    hackathon_id: "h3",
+    name: "DeFi Degen Squad",
+    description: "A yield aggregator with gas optimization on Ethereum L2.",
+    created_by: "u2",
+    member_count: 3,
+    created_at: "2026-01-05T10:00:00Z",
+    updated_at: "2026-01-05T10:00:00Z",
+  },
+  {
+    id: "ht5",
+    hackathon_id: "h3",
+    name: "Zero Knowledge Labs",
+    description: "ZK-proof based identity verification without exposing personal data.",
+    created_by: "u4",
+    member_count: 2,
+    created_at: "2026-01-06T12:00:00Z",
+    updated_at: "2026-01-06T12:00:00Z",
+  },
+];
+
+export const hackathonSubmissions: HackathonSubmission[] = [
+  {
+    id: "hs1",
+    hackathon_id: "h3",
+    team_id: "ht4",
+    submitted_by: "u2",
+    title: "YieldMax Protocol",
+    description:
+      "A multi-strategy yield aggregator that automatically routes funds to the highest APY protocols on Arbitrum and Optimism, saving up to 40% on gas.",
+    repo_url: "https://github.com/defidegen/yieldmax",
+    demo_url: "https://yieldmax.demo.xyz",
+    status: "accepted",
+    created_at: "2026-01-21T20:00:00Z",
+    updated_at: "2026-01-22T10:00:00Z",
+  },
+  {
+    id: "hs2",
+    hackathon_id: "h3",
+    team_id: "ht5",
+    submitted_by: "u4",
+    title: "ZKident",
+    description:
+      "Privacy-preserving identity verification using zk-SNARKs. Prove you are over 18 or a citizen of a country without revealing your actual documents.",
+    repo_url: "https://github.com/zklabs/zkident",
+    demo_url: "https://zkident.vercel.app",
+    status: "accepted",
+    created_at: "2026-01-22T08:00:00Z",
+    updated_at: "2026-01-22T14:00:00Z",
+  },
+];
+
+export const hackathonLeaderboard: HackathonLeaderboardEntry[] = [
+  {
+    rank: 1,
+    team_id: "ht5",
+    team_name: "Zero Knowledge Labs",
+    submission_title: "ZKident",
+    avg_score: 94,
+    judge_count: 3,
+  },
+  {
+    rank: 2,
+    team_id: "ht4",
+    team_name: "DeFi Degen Squad",
+    submission_title: "YieldMax Protocol",
+    avg_score: 88,
+    judge_count: 3,
   },
 ];
 
@@ -601,6 +841,7 @@ export const currentUser = {
   handle: "nancy_dev",
   avatar: AV("Nancy"),
   premium: true,
+  verified: true,
 };
 
 export const stats = [

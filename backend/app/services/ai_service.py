@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """
 AI-powered tech stack recommendation service.
 
@@ -28,18 +29,29 @@ Given a project idea, recommend 6-10 technologies ranked by importance. For each
 - name: The technology name (e.g. "React", "FastAPI", "PostgreSQL")
 - category: One of "frontend", "backend", "database", "cache", "devops", "testing", "auth", "storage"
 - reason: A concise 1-2 sentence explanation of why this technology is a good fit
+- confidence: A number between 0 and 1 indicating how confident you are that this technology fits the project idea
 
 Also provide a brief summary (2-3 sentences) explaining the overall stack strategy.
 
 IMPORTANT: Return ONLY valid JSON matching this exact schema:
 {
   "recommendations": [
-    {"name": "...", "category": "...", "reason": "..."}
+    {"name": "...", "category": "...", "reason": "...", "confidence": 0.0}
   ],
   "summary": "..."
 }
 
 Do not include any text outside the JSON object."""
+
+
+def _rec(name: str, category: str, reason: str, confidence: float) -> TechStackRecommendation:
+    """Build a fallback recommendation with an explicit confidence score."""
+    return TechStackRecommendation(
+        name=name,
+        category=category,
+        reason=reason,
+        confidence=confidence,
+    )
 
 
 def _fallback_response(request: TechStackRequest) -> TechStackResponse:
@@ -53,125 +65,41 @@ def _fallback_response(request: TechStackRequest) -> TechStackResponse:
         for kw in ["food", "delivery", "ecommerce", "e-commerce", "shop", "marketplace"]
     ):
         recommendations = [
-            TechStackRecommendation(
-                name="React",
-                category="frontend",
-                reason="Fast, component-based UI ideal for dynamic product catalogs and real-time order tracking.",
-            ),
-            TechStackRecommendation(
-                name="Next.js",
-                category="frontend",
-                reason="Server-side rendering improves SEO for restaurant/store pages and enables fast page loads.",
-            ),
-            TechStackRecommendation(
-                name="FastAPI",
-                category="backend",
-                reason="High-performance async Python framework perfect for handling concurrent orders and real-time updates.",
-            ),
-            TechStackRecommendation(
-                name="PostgreSQL",
-                category="database",
-                reason="Robust relational database for orders, users, inventory, and payment records with ACID compliance.",
-            ),
-            TechStackRecommendation(
-                name="Redis",
-                category="cache",
-                reason="In-memory cache for session management, cart data, and real-time order status.",
-            ),
-            TechStackRecommendation(
-                name="Docker",
-                category="devops",
-                reason="Containerization ensures consistent deployments across development and production environments.",
-            ),
+            _rec("React", "frontend", "Fast, component-based UI ideal for dynamic product catalogs and real-time order tracking.", 0.85),
+            _rec("Next.js", "frontend", "Server-side rendering improves SEO for restaurant/store pages and enables fast page loads.", 0.8),
+            _rec("FastAPI", "backend", "High-performance async Python framework perfect for handling concurrent orders and real-time updates.", 0.85),
+            _rec("PostgreSQL", "database", "Robust relational database for orders, users, inventory, and payment records with ACID compliance.", 0.9),
+            _rec("Redis", "cache", "In-memory cache for session management, cart data, and real-time order status.", 0.75),
+            _rec("Docker", "devops", "Containerization ensures consistent deployments across development and production environments.", 0.8),
         ]
     elif any(
         kw in idea_lower for kw in ["chat", "messaging", "social", "community", "forum"]
     ):
         recommendations = [
-            TechStackRecommendation(
-                name="React",
-                category="frontend",
-                reason="Component-based architecture is ideal for building real-time chat interfaces.",
-            ),
-            TechStackRecommendation(
-                name="Node.js",
-                category="backend",
-                reason="Event-driven architecture handles thousands of concurrent WebSocket connections efficiently.",
-            ),
-            TechStackRecommendation(
-                name="MongoDB",
-                category="database",
-                reason="Flexible document storage suits varied message formats and conversation threads.",
-            ),
-            TechStackRecommendation(
-                name="Redis",
-                category="cache",
-                reason="Pub/Sub capability powers real-time message broadcasting between connected clients.",
-            ),
-            TechStackRecommendation(
-                name="WebSockets",
-                category="backend",
-                reason="Native bidirectional communication for instant message delivery and typing indicators.",
-            ),
+            _rec("React", "frontend", "Component-based architecture is ideal for building real-time chat interfaces.", 0.85),
+            _rec("Node.js", "backend", "Event-driven architecture handles thousands of concurrent WebSocket connections efficiently.", 0.85),
+            _rec("MongoDB", "database", "Flexible document storage suits varied message formats and conversation threads.", 0.8),
+            _rec("Redis", "cache", "Pub/Sub capability powers real-time message broadcasting between connected clients.", 0.85),
+            _rec("WebSockets", "backend", "Native bidirectional communication for instant message delivery and typing indicators.", 0.75),
         ]
     elif any(
         kw in idea_lower
         for kw in ["ai", "ml", "machine learning", "data", "analytics", "analytics"]
     ):
         recommendations = [
-            TechStackRecommendation(
-                name="React",
-                category="frontend",
-                reason="Interactive dashboard components with rich data visualization libraries like D3.js and Recharts.",
-            ),
-            TechStackRecommendation(
-                name="Python",
-                category="backend",
-                reason="Rich ecosystem of ML/AI libraries (scikit-learn, PyTorch, TensorFlow) for model serving.",
-            ),
-            TechStackRecommendation(
-                name="FastAPI",
-                category="backend",
-                reason="Async support handles ML inference requests without blocking, with automatic API docs.",
-            ),
-            TechStackRecommendation(
-                name="PostgreSQL",
-                category="database",
-                reason="Structured data storage with JSON support for flexible schema evolution.",
-            ),
-            TechStackRecommendation(
-                name="Redis",
-                category="cache",
-                reason="Caches model predictions and feature store data for low-latency inference.",
-            ),
+            _rec("React", "frontend", "Interactive dashboard components with rich data visualization libraries like D3.js and Recharts.", 0.8),
+            _rec("Python", "backend", "Rich ecosystem of ML/AI libraries (scikit-learn, PyTorch, TensorFlow) for model serving.", 0.9),
+            _rec("FastAPI", "backend", "Async support handles ML inference requests without blocking, with automatic API docs.", 0.85),
+            _rec("PostgreSQL", "database", "Structured data storage with JSON support for flexible schema evolution.", 0.8),
+            _rec("Redis", "cache", "Caches model predictions and feature store data for low-latency inference.", 0.75),
         ]
     else:
         recommendations = [
-            TechStackRecommendation(
-                name="React",
-                category="frontend",
-                reason="Industry-standard component library with massive ecosystem and community support.",
-            ),
-            TechStackRecommendation(
-                name="FastAPI",
-                category="backend",
-                reason="Modern, fast Python web framework with automatic OpenAPI docs and type safety.",
-            ),
-            TechStackRecommendation(
-                name="PostgreSQL",
-                category="database",
-                reason="Battle-tested relational database with excellent performance and extensibility.",
-            ),
-            TechStackRecommendation(
-                name="Redis",
-                category="cache",
-                reason="High-performance in-memory store for caching, sessions, and real-time features.",
-            ),
-            TechStackRecommendation(
-                name="Docker",
-                category="devops",
-                reason="Industry-standard containerization for reproducible builds and easy deployments.",
-            ),
+            _rec("React", "frontend", "Industry-standard component library with massive ecosystem and community support.", 0.8),
+            _rec("FastAPI", "backend", "Modern, fast Python web framework with automatic OpenAPI docs and type safety.", 0.8),
+            _rec("PostgreSQL", "database", "Battle-tested relational database with excellent performance and extensibility.", 0.85),
+            _rec("Redis", "cache", "High-performance in-memory store for caching, sessions, and real-time features.", 0.7),
+            _rec("Docker", "devops", "Industry-standard containerization for reproducible builds and easy deployments.", 0.75),
         ]
 
     return TechStackResponse(
@@ -217,10 +145,22 @@ class AIService:
             content = response.choices[0].message.content or ""
             data = json.loads(content)
 
-            recommendations = [
-                TechStackRecommendation(**rec)
-                for rec in data.get("recommendations", [])
-            ]
+            recommendations: list[TechStackRecommendation] = []
+            for rec in data.get("recommendations", []):
+                if not isinstance(rec, dict) or not rec.get("name"):
+                    continue
+                try:
+                    confidence = max(0.0, min(1.0, float(rec.get("confidence", 0.5))))
+                except (TypeError, ValueError):
+                    confidence = 0.5
+                recommendations.append(
+                    TechStackRecommendation(
+                        name=rec["name"],
+                        category=rec.get("category", "general"),
+                        reason=rec.get("reason", ""),
+                        confidence=confidence,
+                    )
+                )
 
             if not recommendations:
                 logger.warning("Empty recommendations from OpenAI, using fallback")

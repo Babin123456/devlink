@@ -21,11 +21,7 @@ new_imports = """from app.schemas.auth import (
     RefreshTokenRequest,
 )"""
 
-content = re.sub(
-    r"from app\.schemas\.auth import \([\s\S]*?\)",
-    new_imports,
-    content
-)
+content = re.sub(r"from app\.schemas\.auth import \([\s\S]*?\)", new_imports, content)
 
 with open("app/routers/auth.py", "w") as f:
     f.write(content)

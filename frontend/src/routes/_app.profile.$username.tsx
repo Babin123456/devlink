@@ -1,6 +1,8 @@
 import { createFileRoute, notFound, Link, useNavigate } from "@tanstack/react-router";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
-import { builders, currentUser, projects } from "@/mocks/seed";
+import { UserAvatar } from "@/components/user-avatar";
+import { ImageCropUploadModal } from "@/components/shared/ImageCropUploadModal";
+import { builders, currentUser, projects, type Builder, type UserRole } from "@/mocks/seed";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -15,10 +17,17 @@ import {
   AlertTriangle,
   Sparkles,
   Pencil,
-  RotateCw
+  RotateCw,
+  BadgeCheck,
+  Camera,
 } from "lucide-react";
 import { copyText } from "@/lib/clipboard";
 import { ReportUserModal } from "@/components/shared/ReportUserModal";
+import SkillsCard from "@/components/profile/SkillsCard";
+import ExperienceCard from "@/components/profile/ExperienceCard";
+import { ProfileViewersList } from "@/components/profile/ProfileViewersList";
+import { FollowButton } from "@/components/shared/FollowButton";
+import { useFollowStatus } from "@/hooks/useFollow";
 
 export const Route = createFileRoute("/_app/profile/$username")({
   head: ({ params }) => ({
@@ -32,6 +41,13 @@ export const Route = createFileRoute("/_app/profile/$username")({
   }),
   component: ProfilePage,
 });
+
+type ProfileSkill = {
+  name: string;
+  level?: string;
+  category?: string;
+  yearsOfExperience?: number;
+};
 
 type ProfileFormValues = {
   headline: string;
@@ -64,10 +80,17 @@ function mapBuilderToFormValues(builder: Builder): ProfileFormValues {
     role: builder.role ?? "",
     experienceLevel: builder.experienceLevel ?? "",
     company: builder.company ?? "",
-    profileSkills:
-      builder.profileSkills?.length
-        ? builder.profileSkills.map((skill) => ({ ...skill, level: skill.level ?? "Intermediate", yearsOfExperience: skill.yearsOfExperience ?? 0 }))
-        : builder.skills.map((skill) => ({ name: skill, level: "Intermediate", category: "general" })),
+    profileSkills: builder.profileSkills?.length
+      ? builder.profileSkills.map((skill: ProfileSkill) => ({
+          ...skill,
+          level: skill.level ?? "Intermediate",
+          yearsOfExperience: skill.yearsOfExperience ?? 0,
+        }))
+      : builder.skills.map((skill: string) => ({
+          name: skill,
+          level: "Intermediate",
+          category: "general",
+        })),
     techStack: builder.techStack ?? [],
   };
 }
@@ -76,7 +99,7 @@ function buildUpdatedBuilder(builder: Builder, values: ProfileFormValues): Build
   return {
     ...builder,
     headline: values.headline || undefined,
-    bio: values.bio || undefined,
+    bio: values.bio || "",
     location: values.location || undefined,
     timezone: values.timezone || undefined,
     website: values.website || undefined,
@@ -84,7 +107,7 @@ function buildUpdatedBuilder(builder: Builder, values: ProfileFormValues): Build
     portfolioUrl: values.portfolioUrl || undefined,
     githubUrl: values.githubUrl || undefined,
     linkedinUrl: values.linkedinUrl || undefined,
-    role: values.role || undefined,
+    role: (values.role as UserRole) || "Developer",
     experienceLevel: values.experienceLevel || undefined,
     company: values.company || undefined,
     profileSkills: values.profileSkills.map((skill) => ({
@@ -110,12 +133,20 @@ function ProfilePage() {
         handle: currentUser.handle,
         avatar: currentUser.avatar,
         bio: "Product engineer. Ships fast, sleeps sometimes.",
-        role: "Developer",
         role: "Full Stack Developer",
         id: currentUser.id,
       }
     : builders.find((x) => x.handle === username);
   if (!b) throw notFound();
+
+  const { data: followStatus } = useFollowStatus(b.id);
+
+  // Profile banner & avatar state
+  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(
+    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&h=400&fit=crop&auto=format",
+  );
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(b.avatar);
 
   // Profile summary state
   const [summary, setSummary] = useState<string | null>(null);
@@ -202,42 +233,115 @@ function ProfilePage() {
         </Card>
       )}
 
-      <Card className="p-6">
-        <div className="flex flex-wrap items-start gap-5">
-          <Avatar src={b.avatar} alt={b.name} size={96} online={b.online} />
-          <div className="min-w-0 flex-1">
-            <h1 className="text-[22px] font-bold text-foreground">{b.name}</h1>
-            <p className="text-[13px] text-muted-foreground">
-              @{b.handle} · {b.role}
-            </p>
-            <p className="mt-2 text-[13px] text-foreground">{b.bio}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <MapPin size={12} /> {b.country}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Calendar size={12} /> Joined 2024
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <LinkIcon size={12} /> devlink.io/{b.handle}
-              </span>
-            </div>
-          </div>
-          {!me && (
+      {/* Profile Card with Cover Banner & Avatar */}
+      <Card className="overflow-hidden p-0">
+        {/* Cover Banner */}
+        <div className="group relative h-44 w-full overflow-hidden bg-muted">
+          {bannerUrl ? (
+            <img src={bannerUrl} alt="Profile banner" className="h-full w-full object-cover" />
+          ) : (
+            <div className="h-full w-full bg-gradient-to-r from-primary/30 to-purple-500/30" />
+          )}
+
+          {me && (
             <button
               type="button"
-              onClick={() =>
-                navigate({
-                  to: "/messages/$conversationId",
-                  params: { conversationId: b.id },
-                })
-              }
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              onClick={() => setIsBannerModalOpen(true)}
+              className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-md bg-black/60 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-all hover:bg-black/80 cursor-pointer"
             >
-              <MessageCircle size={16} />
-              Contact Developer
+              <Camera size={14} />
+              Edit cover banner
             </button>
           )}
+        </div>
+
+        <div className="p-6 pt-0">
+          <div className="flex flex-wrap items-start gap-5 -mt-12">
+            <UserAvatar
+              src={avatarUrl}
+              name={b.name}
+              size="2xl"
+              status={b.online}
+              verified={b.verified}
+              editable={me}
+              onImageUpload={(url) => {
+                setAvatarUrl(url);
+                toast.success("Avatar updated!");
+              }}
+              className="ring-4 ring-card shadow-lg"
+            />
+            <div className="min-w-0 flex-1 pt-12 sm:pt-4">
+              <h1 className="text-[22px] font-bold text-foreground flex items-center gap-2">
+                {b.name}
+                {b.verified && (
+                  <BadgeCheck className="text-primary h-6 w-6" aria-label="Verified User" />
+                )}
+              </h1>
+              <p className="text-[13px] text-muted-foreground">
+                @{b.handle} · {b.role}
+              </p>
+              <p className="mt-2 text-[13px] text-foreground">{b.bio}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
+                <div>
+                  <span className="font-semibold">
+                    {followStatus?.follower_count ?? b.followers ?? 0}
+                  </span>
+                  <span className="m-1 text-muted-foreground">Followers</span>
+                </div>
+                <div>
+                  <span className="font-semibold">
+                    {followStatus?.following_count ?? b.following ?? 0}
+                  </span>
+                  <span className="m-1 text-muted-foreground">Following</span>
+                </div>
+                <div>
+                  <span className="font-semibold">{b.contributions ?? 0}</span>
+                  <span className="ml-1 text-muted-foreground">Contributions</span>
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <MapPin size={12} /> {b.country}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <Calendar size={12} /> Joined 2024
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <LinkIcon size={12} /> devlink.io/{b.handle}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {!me && <FollowButton userId={b.id} />}
+              {!me && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate({
+                      to: "/messages/$conversationId",
+                      params: { conversationId: b.id },
+                    })
+                  }
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  <MessageCircle size={16} />
+                  Contact Developer
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  const url = `${window.location.origin}/profile/${b.handle}`;
+                  navigator.clipboard.writeText(url);
+                  toast.success("Profile link copied to clipboard!");
+                }}
+                className="inline-flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-2 text-[13px] font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                <LinkIcon size={16} />
+                Copy Link
+              </button>
+            </div>
+          </div>
         </div>
       </Card>
 
@@ -261,7 +365,8 @@ function ProfilePage() {
                 disabled={summaryMutation.isPending}
                 className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted/50 hover:text-foreground disabled:opacity-50"
               >
-                <RotateCw size={12} className={summaryMutation.isPending ? "animate-spin" : ""} /> Regenerate
+                <RotateCw size={12} className={summaryMutation.isPending ? "animate-spin" : ""} />{" "}
+                Regenerate
               </button>
             </div>
           )}
@@ -295,10 +400,12 @@ function ProfilePage() {
                   className="w-full rounded-md border border-border bg-surface px-3 py-2 text-[13px] text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
                 />
                 <div className="flex items-center justify-between">
-                  <p className={cn(
-                    "text-[11px]",
-                    editedSummary.length > 450 ? "text-orange-500" : "text-muted-foreground"
-                  )}>
+                  <p
+                    className={cn(
+                      "text-[11px]",
+                      editedSummary.length > 450 ? "text-orange-500" : "text-muted-foreground",
+                    )}
+                  >
                     {editedSummary.length}/500 characters
                   </p>
                   <div className="flex items-center gap-2">
@@ -359,16 +466,32 @@ function ProfilePage() {
         )}
       </Card>
 
+      {me && <ProfileViewersList className="mt-4" />}
+
       <div className="grid gap-4 lg:grid-cols-3 items-start">
         <div className="flex flex-col gap-4">
-          <Card className="p-4">
+          {/* <Card className="p-4">
             <p className="text-[13px] font-semibold text-foreground">Skills</p>
             <div className="mt-3 flex flex-wrap gap-1">
               {b.skills.map((s) => (
                 <TagChip key={s}>{s}</TagChip>
               ))}
             </div>
-          </Card>
+          </Card> */}
+          <SkillsCard skills={b.profileSkills ?? []} />
+          <ExperienceCard role={b.role} company={b.company} experienceLevel={b.experienceLevel} />
+
+          {b.pinnedProjects?.length ? (
+            <Card className="p-4">
+              <p className="text-[13px] font-semibold text-foreground">Pinned Projects</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {b.pinnedProjects.map((project) => (
+                  <TagChip key={project}>{project}</TagChip>
+                ))}
+              </div>
+            </Card>
+          ) : null}
+
           {b.badges && b.badges.length > 0 && (
             <Card className="p-4">
               <p className="text-[13px] font-semibold text-foreground">Badges</p>
@@ -411,6 +534,19 @@ function ProfilePage() {
           onClose={() => setIsReportModalOpen(false)}
           userId={b.id || ""}
           username={b.handle}
+        />
+      )}
+
+      {me && (
+        <ImageCropUploadModal
+          isOpen={isBannerModalOpen}
+          onClose={() => setIsBannerModalOpen(false)}
+          onUploadSuccess={(url) => {
+            setBannerUrl(url);
+            toast.success("Cover banner updated!");
+          }}
+          mode="banner"
+          title="Upload Cover Banner"
         />
       )}
     </div>

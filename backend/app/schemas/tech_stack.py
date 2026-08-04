@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """
 Pydantic schemas for the AI Tech Stack Recommendation feature.
 """
@@ -36,6 +37,12 @@ class TechStackRecommendation(BaseModel):
     reason: str = Field(
         ...,
         description="Why this technology is recommended for the given project idea.",
+    )
+    confidence: float = Field(
+        default=0.5,
+        ge=0.0,
+        le=1.0,
+        description="Confidence score for this recommendation (0.0 to 1.0).",
     )
 
 

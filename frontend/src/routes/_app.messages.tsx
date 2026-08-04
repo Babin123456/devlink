@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { messagesService } from "@/services";
-import { Card, Avatar, NoMessagesEmptyState } from "@/components/shared/primitives";
+import { Card, Avatar, EmptyState } from "@/components/shared/primitives";
 import { MessageSquareDashed } from "lucide-react";
 
 export const Route = createFileRoute("/_app/messages")({
@@ -26,10 +26,7 @@ function MessagesIndex() {
           <p className="text-[14px] font-semibold text-foreground">Conversations</p>
         </div>
         {data.length === 0 ? (
-          <NoMessagesEmptyState
-            title="No conversations"
-            desc="You don't have any open conversations yet."
-          />
+          <EmptyState title="No conversations" desc="You don't have any open conversations yet." />
         ) : (
           <ul className="divide-y divide-border">
             {data.map((c) => (
@@ -61,7 +58,7 @@ function MessagesIndex() {
         )}
       </Card>
       <Card className="flex items-center justify-center p-8">
-        <NoMessagesEmptyState
+        <EmptyState
           title="Select a conversation"
           desc="Choose a chat on the left or search builders to start a new conversation."
         />

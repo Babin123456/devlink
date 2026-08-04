@@ -9,7 +9,9 @@ import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { builders, conversations } from "@/mocks/seed";
 import { cn } from "@/lib/utils";
 import { conversationStartersApi, type ConversationStarterResponse } from "@/api";
-
+import { useAuth } from "@/contexts/auth-context";
+import { useChatWebSocket } from "@/hooks/useChatWebSocket";
+import { useQueryClient } from "@tanstack/react-query";
 export const Route = createFileRoute("/_app/messages/$conversationId")({
   head: () => ({ meta: [{ title: "Chat — DevLink" }] }),
   component: Thread,
@@ -31,20 +33,48 @@ function Thread() {
 
   // Conversation starters state
   const [starters, setStarters] = useState<ConversationStarterResponse | null>(null);
+  const [startersError, setStartersError] = useState<string | null>(null);
+  const conversationIdRef = useRef(conversationId);
 
   const startersMutation = useMutation({
     mutationFn: () => conversationStartersApi.generate(conversationId),
-    onSuccess: (data) => setStarters(data),
+    onSuccess: (data) => {
+      if (conversationIdRef.current !== conversationId) return;
+      setStarters(data);
+      setStartersError(null);
+    },
+    onError: (err) => {
+      if (conversationIdRef.current !== conversationId) return;
+      setStartersError(err instanceof Error ? err.message : "Failed to load suggestions");
+    },
   });
-  // ---- Typing indicator (issue #337) ----
-  // `themTyping` is true when the other participant is typing. In this
-  // mock-driven UI we simulate the remote party typing shortly after the
-  // local user starts typing, so the indicator is visibly exercised. In a
-  // real deployment this flag would be driven by polling
-  // GET /api/messages/conversation/:id/typing (or a WebSocket push).
-  const [themTyping, setThemTyping] = useState(false);
+
+  // Reset starters when switching conversations
+  useEffect(() => {
+    conversationIdRef.current = conversationId;
+    setStarters(null);
+    setStartersError(null);
+  }, [conversationId]);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  // Use the websocket hook for real-time messaging and typing
+  const { isConnected, typingUsers, broadcastMessage, broadcastTyping } = useChatWebSocket(
+    conversationId,
+    user?.id || "",
+    useCallback(
+      (msg: unknown) => {
+        // Invalidate thread query when a new message arrives via WS
+        queryClient.invalidateQueries({ queryKey: ["thread", conversationId] });
+        // Invalidate conversations list to update latest preview/timestamp
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      },
+      [queryClient, conversationId],
+    ),
+  );
+
+  const themTyping = typingUsers.length > 0;
   const lastTypingPingRef = useRef<number>(0);
-  const typingSimTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Notify the server that the local user is typing. Debounced to once
   // per second so we don't hammer the endpoint. Failures are swallowed —
@@ -78,23 +108,13 @@ function Thread() {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setText(e.target.value);
       notifyTyping();
-
-      // Simulate the remote party typing back after a short delay, so the
-      // indicator is visible in the mock-driven UI. Remove this block in
-      // a real deployment where typing state comes from the server.
-      if (typingSimTimerRef.current) clearTimeout(typingSimTimerRef.current);
-      typingSimTimerRef.current = setTimeout(() => {
-        setThemTyping(true);
-        setTimeout(() => setThemTyping(false), 2600);
-      }, 900);
     },
     [notifyTyping],
   );
 
-  // Clean up the simulation timer + clear typing on unmount.
+  // Clear typing on unmount.
   useEffect(() => {
     return () => {
-      if (typingSimTimerRef.current) clearTimeout(typingSimTimerRef.current);
       clearTyping();
     };
   }, [clearTyping]);
@@ -104,16 +124,24 @@ function Thread() {
       e.preventDefault();
       if (!text.trim() || submitting) return;
       setSubmitting(true);
-      setThemTyping(false);
       clearTyping();
       try {
-        await new Promise((r) => setTimeout(r, 400));
+        // Optimistic UI could be added here, but for simplicity we rely on React Query
+        await messagesService.send(conversationId, text);
         setText("");
+        // Notify others via WS
+        broadcastMessage(text);
+
+        // Invalidate queries to reload thread and conversations
+        queryClient.invalidateQueries({ queryKey: ["thread", conversationId] });
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      } catch (err) {
+        console.error("Failed to send message", err);
       } finally {
         setSubmitting(false);
       }
     },
-    [text, submitting, clearTyping],
+    [text, submitting, clearTyping, conversationId, broadcastMessage, queryClient],
   );
 
   return (
@@ -168,7 +196,7 @@ function Thread() {
               </p>
 
               {/* Conversation Starters Section */}
-              {!starters && !startersMutation.isPending && (
+              {!starters && !startersMutation.isPending && !startersError && (
                 <button
                   onClick={() => startersMutation.mutate()}
                   className="mx-auto flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-[12px] text-muted-foreground hover:bg-muted/50 hover:text-foreground"
@@ -186,6 +214,22 @@ function Thread() {
                 </div>
               )}
 
+              {startersError && (
+                <div className="space-y-2">
+                  <p className="text-center text-[12px] text-destructive">{startersError}</p>
+                  <button
+                    onClick={() => {
+                      setStartersError(null);
+                      startersMutation.mutate();
+                    }}
+                    className="mx-auto flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-[12px] text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  >
+                    <Sparkles size={14} />
+                    Try again
+                  </button>
+                </div>
+              )}
+
               {starters && (
                 <div className="space-y-2">
                   <p className="text-center text-[11px] text-muted-foreground">
@@ -194,10 +238,13 @@ function Thread() {
                   {starters.suggestions.map((suggestion, i) => (
                     <button
                       key={i}
-                      onClick={() => setText(suggestion)}
-                      className="w-full rounded-md border border-border bg-surface px-3 py-2 text-left text-[13px] text-foreground hover:bg-muted/50"
+                      onClick={() => setText(suggestion.text)}
+                      className="flex w-full items-center justify-between gap-2 rounded-md border border-border bg-surface px-3 py-2 text-left text-[13px] text-foreground hover:bg-muted/50"
                     >
-                      {suggestion}
+                      <span>{suggestion.text}</span>
+                      <span className="shrink-0 rounded-sm bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        {Math.round(suggestion.confidence * 100)}%
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -239,7 +286,6 @@ function Thread() {
             </div>
           )}
         </div>
-
 
         {/* Inline typing label above the input for extra visibility. */}
         {themTyping && (

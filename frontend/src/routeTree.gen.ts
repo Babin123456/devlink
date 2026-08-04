@@ -9,7 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+<<<<<<< HEAD
+import { Route as MaintenanceRouteImport } from './routes/maintenance'
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as AvatarRouteImport } from './routes/avatar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
@@ -22,23 +28,63 @@ import { Route as AppOrganizationsRouteImport } from './routes/_app.organization
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMessagesRouteImport } from './routes/_app.messages'
 import { Route as AppHackathonsRouteImport } from './routes/_app.hackathons'
+<<<<<<< HEAD
+import { Route as AppGraphRouteImport } from './routes/_app.graph'
 import { Route as AppFlaresRouteImport } from './routes/_app.flares'
 import { Route as AppFeedRouteImport } from './routes/_app.feed'
+import { Route as AppDesignSystemRouteImport } from './routes/_app.design-system'
+=======
+import { Route as AppFlaresRouteImport } from './routes/_app.flares'
+import { Route as AppFeedRouteImport } from './routes/_app.feed'
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBuildersRouteImport } from './routes/_app.builders'
 import { Route as AppBookmarksRouteImport } from './routes/_app.bookmarks'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
+import { Route as AppAdminRouteImport } from './routes/_app.admin'
 import { Route as AppOrganizationsIndexRouteImport } from './routes/_app.organizations.index'
+import { Route as AppSettingsNotificationsRouteImport } from './routes/_app.settings.notifications'
 import { Route as AppProjectsProjectIdRouteImport } from './routes/_app.projects.$projectId'
 import { Route as AppProfileUsernameRouteImport } from './routes/_app.profile.$username'
 import { Route as AppOrganizationsOrgIdRouteImport } from './routes/_app.organizations.$orgId'
 import { Route as AppMessagesConversationIdRouteImport } from './routes/_app.messages.$conversationId'
+import { Route as AppHackathonsHackathonIdRouteImport } from './routes/_app.hackathons.$hackathonId'
 import { Route as AppBuildersBuilderIdRouteImport } from './routes/_app.builders.$builderId'
+<<<<<<< HEAD
+import { Route as AppAdminSearchAnalyticsRouteImport } from './routes/_app.admin.search-analytics'
+import { Route as AppAdminNotificationsRouteImport } from './routes/_app.admin.notifications'
+import { Route as AppAdminMaintenanceRouteImport } from './routes/_app.admin.maintenance'
+import { Route as AppAdminCommunityStatsRouteImport } from './routes/_app.admin.community-stats'
+import { Route as AppAdminAuditLogsRouteImport } from './routes/_app.admin.audit-logs'
+import { Route as AppAdminApiRequestAnalyticsRouteImport } from './routes/_app.admin.api-request-analytics'
+=======
+import { Route as AppAdminNotificationsRouteImport } from './routes/_app.admin.notifications'
+import { Route as AppAdminJobsRouteImport } from './routes/_app.admin.jobs'
+import { Route as AppAdminAuditLogsRouteImport } from './routes/_app.admin.audit-logs'
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
 import { Route as AppProjectsProjectIdIssuesRouteImport } from './routes/_app.projects.$projectId.issues'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+<<<<<<< HEAD
+const MaintenanceRoute = MaintenanceRouteImport.update({
+  id: '/maintenance',
+  path: '/maintenance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AvatarRoute = AvatarRouteImport.update({
+  id: '/avatar',
+  path: '/avatar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -100,6 +146,14 @@ const AppHackathonsRoute = AppHackathonsRouteImport.update({
   path: '/hackathons',
   getParentRoute: () => AppRoute,
 } as any)
+<<<<<<< HEAD
+const AppGraphRoute = AppGraphRouteImport.update({
+  id: '/graph',
+  path: '/graph',
+  getParentRoute: () => AppRoute,
+} as any)
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
 const AppFlaresRoute = AppFlaresRouteImport.update({
   id: '/flares',
   path: '/flares',
@@ -110,6 +164,14 @@ const AppFeedRoute = AppFeedRouteImport.update({
   path: '/feed',
   getParentRoute: () => AppRoute,
 } as any)
+<<<<<<< HEAD
+const AppDesignSystemRoute = AppDesignSystemRouteImport.update({
+  id: '/design-system',
+  path: '/design-system',
+  getParentRoute: () => AppRoute,
+} as any)
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -130,11 +192,22 @@ const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOrganizationsIndexRoute = AppOrganizationsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppOrganizationsRoute,
 } as any)
+const AppSettingsNotificationsRoute =
+  AppSettingsNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AppSettingsRoute,
+  } as any)
 const AppProjectsProjectIdRoute = AppProjectsProjectIdRouteImport.update({
   id: '/$projectId',
   path: '/$projectId',
@@ -156,11 +229,60 @@ const AppMessagesConversationIdRoute =
     path: '/$conversationId',
     getParentRoute: () => AppMessagesRoute,
   } as any)
+const AppHackathonsHackathonIdRoute =
+  AppHackathonsHackathonIdRouteImport.update({
+    id: '/$hackathonId',
+    path: '/$hackathonId',
+    getParentRoute: () => AppHackathonsRoute,
+  } as any)
 const AppBuildersBuilderIdRoute = AppBuildersBuilderIdRouteImport.update({
   id: '/$builderId',
   path: '/$builderId',
   getParentRoute: () => AppBuildersRoute,
 } as any)
+<<<<<<< HEAD
+const AppAdminSearchAnalyticsRoute = AppAdminSearchAnalyticsRouteImport.update({
+  id: '/search-analytics',
+  path: '/search-analytics',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+const AppAdminNotificationsRoute = AppAdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+<<<<<<< HEAD
+const AppAdminMaintenanceRoute = AppAdminMaintenanceRouteImport.update({
+  id: '/maintenance',
+  path: '/maintenance',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminCommunityStatsRoute = AppAdminCommunityStatsRouteImport.update({
+  id: '/community-stats',
+  path: '/community-stats',
+=======
+const AppAdminJobsRoute = AppAdminJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminAuditLogsRoute = AppAdminAuditLogsRouteImport.update({
+  id: '/audit-logs',
+  path: '/audit-logs',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+<<<<<<< HEAD
+const AppAdminApiRequestAnalyticsRoute =
+  AppAdminApiRequestAnalyticsRouteImport.update({
+    id: '/api-request-analytics',
+    path: '/api-request-analytics',
+    getParentRoute: () => AppAdminRoute,
+  } as any)
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
 const AppProjectsProjectIdIssuesRoute =
   AppProjectsProjectIdIssuesRouteImport.update({
     id: '/issues',
@@ -171,53 +293,109 @@ const AppProjectsProjectIdIssuesRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/avatar': typeof AvatarRoute
   '/forgot-password': typeof ForgotPasswordRoute
+<<<<<<< HEAD
+  '/maintenance': typeof MaintenanceRoute
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+  '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AppAdminRouteWithChildren
   '/analytics': typeof AppAnalyticsRoute
   '/bookmarks': typeof AppBookmarksRoute
   '/builders': typeof AppBuildersRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+<<<<<<< HEAD
+  '/design-system': typeof AppDesignSystemRoute
   '/feed': typeof AppFeedRoute
   '/flares': typeof AppFlaresRoute
-  '/hackathons': typeof AppHackathonsRoute
+  '/graph': typeof AppGraphRoute
+=======
+  '/feed': typeof AppFeedRoute
+  '/flares': typeof AppFlaresRoute
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+  '/hackathons': typeof AppHackathonsRouteWithChildren
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
   '/organizations': typeof AppOrganizationsRouteWithChildren
   '/projects': typeof AppProjectsRouteWithChildren
   '/repository-quality': typeof AppRepositoryQualityRoute
   '/search': typeof AppSearchRoute
-  '/settings': typeof AppSettingsRoute
+  '/settings': typeof AppSettingsRouteWithChildren
   '/portfolio/$username': typeof PortfolioUsernameRoute
+<<<<<<< HEAD
+  '/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
+  '/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/admin/community-stats': typeof AppAdminCommunityStatsRoute
+  '/admin/maintenance': typeof AppAdminMaintenanceRoute
+  '/admin/notifications': typeof AppAdminNotificationsRoute
+  '/admin/search-analytics': typeof AppAdminSearchAnalyticsRoute
+=======
+  '/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/admin/jobs': typeof AppAdminJobsRoute
+  '/admin/notifications': typeof AppAdminNotificationsRoute
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
   '/builders/$builderId': typeof AppBuildersBuilderIdRoute
+  '/hackathons/$hackathonId': typeof AppHackathonsHackathonIdRoute
   '/messages/$conversationId': typeof AppMessagesConversationIdRoute
   '/organizations/$orgId': typeof AppOrganizationsOrgIdRoute
   '/profile/$username': typeof AppProfileUsernameRoute
   '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
+  '/settings/notifications': typeof AppSettingsNotificationsRoute
   '/organizations/': typeof AppOrganizationsIndexRoute
   '/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/avatar': typeof AvatarRoute
   '/forgot-password': typeof ForgotPasswordRoute
+<<<<<<< HEAD
+  '/maintenance': typeof MaintenanceRoute
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+  '/reset-password': typeof ResetPasswordRoute
+  '/admin': typeof AppAdminRouteWithChildren
   '/analytics': typeof AppAnalyticsRoute
   '/bookmarks': typeof AppBookmarksRoute
   '/builders': typeof AppBuildersRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+<<<<<<< HEAD
+  '/design-system': typeof AppDesignSystemRoute
   '/feed': typeof AppFeedRoute
   '/flares': typeof AppFlaresRoute
-  '/hackathons': typeof AppHackathonsRoute
+  '/graph': typeof AppGraphRoute
+=======
+  '/feed': typeof AppFeedRoute
+  '/flares': typeof AppFlaresRoute
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+  '/hackathons': typeof AppHackathonsRouteWithChildren
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
   '/projects': typeof AppProjectsRouteWithChildren
   '/repository-quality': typeof AppRepositoryQualityRoute
   '/search': typeof AppSearchRoute
-  '/settings': typeof AppSettingsRoute
+  '/settings': typeof AppSettingsRouteWithChildren
   '/portfolio/$username': typeof PortfolioUsernameRoute
+<<<<<<< HEAD
+  '/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
+  '/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/admin/community-stats': typeof AppAdminCommunityStatsRoute
+  '/admin/maintenance': typeof AppAdminMaintenanceRoute
+  '/admin/notifications': typeof AppAdminNotificationsRoute
+  '/admin/search-analytics': typeof AppAdminSearchAnalyticsRoute
+=======
+  '/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/admin/jobs': typeof AppAdminJobsRoute
+  '/admin/notifications': typeof AppAdminNotificationsRoute
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
   '/builders/$builderId': typeof AppBuildersBuilderIdRoute
+  '/hackathons/$hackathonId': typeof AppHackathonsHackathonIdRoute
   '/messages/$conversationId': typeof AppMessagesConversationIdRoute
   '/organizations/$orgId': typeof AppOrganizationsOrgIdRoute
   '/profile/$username': typeof AppProfileUsernameRoute
   '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
+  '/settings/notifications': typeof AppSettingsNotificationsRoute
   '/organizations': typeof AppOrganizationsIndexRoute
   '/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
@@ -226,27 +404,55 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
+  '/avatar': typeof AvatarRoute
   '/forgot-password': typeof ForgotPasswordRoute
+<<<<<<< HEAD
+  '/maintenance': typeof MaintenanceRoute
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+  '/reset-password': typeof ResetPasswordRoute
+  '/_app/admin': typeof AppAdminRouteWithChildren
   '/_app/analytics': typeof AppAnalyticsRoute
   '/_app/bookmarks': typeof AppBookmarksRoute
   '/_app/builders': typeof AppBuildersRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
+<<<<<<< HEAD
+  '/_app/design-system': typeof AppDesignSystemRoute
   '/_app/feed': typeof AppFeedRoute
   '/_app/flares': typeof AppFlaresRoute
-  '/_app/hackathons': typeof AppHackathonsRoute
+  '/_app/graph': typeof AppGraphRoute
+=======
+  '/_app/feed': typeof AppFeedRoute
+  '/_app/flares': typeof AppFlaresRoute
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+  '/_app/hackathons': typeof AppHackathonsRouteWithChildren
   '/_app/messages': typeof AppMessagesRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/organizations': typeof AppOrganizationsRouteWithChildren
   '/_app/projects': typeof AppProjectsRouteWithChildren
   '/_app/repository-quality': typeof AppRepositoryQualityRoute
   '/_app/search': typeof AppSearchRoute
-  '/_app/settings': typeof AppSettingsRoute
+  '/_app/settings': typeof AppSettingsRouteWithChildren
   '/portfolio/$username': typeof PortfolioUsernameRoute
+<<<<<<< HEAD
+  '/_app/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
+  '/_app/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/_app/admin/community-stats': typeof AppAdminCommunityStatsRoute
+  '/_app/admin/maintenance': typeof AppAdminMaintenanceRoute
+  '/_app/admin/notifications': typeof AppAdminNotificationsRoute
+  '/_app/admin/search-analytics': typeof AppAdminSearchAnalyticsRoute
+=======
+  '/_app/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/_app/admin/jobs': typeof AppAdminJobsRoute
+  '/_app/admin/notifications': typeof AppAdminNotificationsRoute
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
   '/_app/builders/$builderId': typeof AppBuildersBuilderIdRoute
+  '/_app/hackathons/$hackathonId': typeof AppHackathonsHackathonIdRoute
   '/_app/messages/$conversationId': typeof AppMessagesConversationIdRoute
   '/_app/organizations/$orgId': typeof AppOrganizationsOrgIdRoute
   '/_app/profile/$username': typeof AppProfileUsernameRoute
   '/_app/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
+  '/_app/settings/notifications': typeof AppSettingsNotificationsRoute
   '/_app/organizations/': typeof AppOrganizationsIndexRoute
   '/_app/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
@@ -255,13 +461,27 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/avatar'
     | '/forgot-password'
+<<<<<<< HEAD
+    | '/maintenance'
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+    | '/reset-password'
+    | '/admin'
     | '/analytics'
     | '/bookmarks'
     | '/builders'
     | '/dashboard'
+<<<<<<< HEAD
+    | '/design-system'
     | '/feed'
     | '/flares'
+    | '/graph'
+=======
+    | '/feed'
+    | '/flares'
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
     | '/hackathons'
     | '/messages'
     | '/notifications'
@@ -271,24 +491,52 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/portfolio/$username'
+<<<<<<< HEAD
+    | '/admin/api-request-analytics'
+    | '/admin/audit-logs'
+    | '/admin/community-stats'
+    | '/admin/maintenance'
+    | '/admin/notifications'
+    | '/admin/search-analytics'
+=======
+    | '/admin/audit-logs'
+    | '/admin/jobs'
+    | '/admin/notifications'
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
     | '/builders/$builderId'
+    | '/hackathons/$hackathonId'
     | '/messages/$conversationId'
     | '/organizations/$orgId'
     | '/profile/$username'
     | '/projects/$projectId'
+    | '/settings/notifications'
     | '/organizations/'
     | '/projects/$projectId/issues'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/avatar'
     | '/forgot-password'
+<<<<<<< HEAD
+    | '/maintenance'
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+    | '/reset-password'
+    | '/admin'
     | '/analytics'
     | '/bookmarks'
     | '/builders'
     | '/dashboard'
+<<<<<<< HEAD
+    | '/design-system'
     | '/feed'
     | '/flares'
+    | '/graph'
+=======
+    | '/feed'
+    | '/flares'
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
     | '/hackathons'
     | '/messages'
     | '/notifications'
@@ -297,11 +545,25 @@ export interface FileRouteTypes {
     | '/search'
     | '/settings'
     | '/portfolio/$username'
+<<<<<<< HEAD
+    | '/admin/api-request-analytics'
+    | '/admin/audit-logs'
+    | '/admin/community-stats'
+    | '/admin/maintenance'
+    | '/admin/notifications'
+    | '/admin/search-analytics'
+=======
+    | '/admin/audit-logs'
+    | '/admin/jobs'
+    | '/admin/notifications'
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
     | '/builders/$builderId'
+    | '/hackathons/$hackathonId'
     | '/messages/$conversationId'
     | '/organizations/$orgId'
     | '/profile/$username'
     | '/projects/$projectId'
+    | '/settings/notifications'
     | '/organizations'
     | '/projects/$projectId/issues'
   id:
@@ -309,13 +571,27 @@ export interface FileRouteTypes {
     | '/'
     | '/_app'
     | '/auth'
+    | '/avatar'
     | '/forgot-password'
+<<<<<<< HEAD
+    | '/maintenance'
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+    | '/reset-password'
+    | '/_app/admin'
     | '/_app/analytics'
     | '/_app/bookmarks'
     | '/_app/builders'
     | '/_app/dashboard'
+<<<<<<< HEAD
+    | '/_app/design-system'
     | '/_app/feed'
     | '/_app/flares'
+    | '/_app/graph'
+=======
+    | '/_app/feed'
+    | '/_app/flares'
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
     | '/_app/hackathons'
     | '/_app/messages'
     | '/_app/notifications'
@@ -325,11 +601,25 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/settings'
     | '/portfolio/$username'
+<<<<<<< HEAD
+    | '/_app/admin/api-request-analytics'
+    | '/_app/admin/audit-logs'
+    | '/_app/admin/community-stats'
+    | '/_app/admin/maintenance'
+    | '/_app/admin/notifications'
+    | '/_app/admin/search-analytics'
+=======
+    | '/_app/admin/audit-logs'
+    | '/_app/admin/jobs'
+    | '/_app/admin/notifications'
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
     | '/_app/builders/$builderId'
+    | '/_app/hackathons/$hackathonId'
     | '/_app/messages/$conversationId'
     | '/_app/organizations/$orgId'
     | '/_app/profile/$username'
     | '/_app/projects/$projectId'
+    | '/_app/settings/notifications'
     | '/_app/organizations/'
     | '/_app/projects/$projectId/issues'
   fileRoutesById: FileRoutesById
@@ -338,17 +628,47 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
+  AvatarRoute: typeof AvatarRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+<<<<<<< HEAD
+  MaintenanceRoute: typeof MaintenanceRoute
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+  ResetPasswordRoute: typeof ResetPasswordRoute
   PortfolioUsernameRoute: typeof PortfolioUsernameRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+<<<<<<< HEAD
+    '/maintenance': {
+      id: '/maintenance'
+      path: '/maintenance'
+      fullPath: '/maintenance'
+      preLoaderRoute: typeof MaintenanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
     '/forgot-password': {
       id: '/forgot-password'
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/avatar': {
+      id: '/avatar'
+      path: '/avatar'
+      fullPath: '/avatar'
+      preLoaderRoute: typeof AvatarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -435,6 +755,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHackathonsRouteImport
       parentRoute: typeof AppRoute
     }
+<<<<<<< HEAD
+    '/_app/graph': {
+      id: '/_app/graph'
+      path: '/graph'
+      fullPath: '/graph'
+      preLoaderRoute: typeof AppGraphRouteImport
+      parentRoute: typeof AppRoute
+    }
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
     '/_app/flares': {
       id: '/_app/flares'
       path: '/flares'
@@ -449,6 +779,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFeedRouteImport
       parentRoute: typeof AppRoute
     }
+<<<<<<< HEAD
+    '/_app/design-system': {
+      id: '/_app/design-system'
+      path: '/design-system'
+      fullPath: '/design-system'
+      preLoaderRoute: typeof AppDesignSystemRouteImport
+      parentRoute: typeof AppRoute
+    }
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -477,12 +817,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAnalyticsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/organizations/': {
       id: '/_app/organizations/'
       path: '/'
       fullPath: '/organizations/'
       preLoaderRoute: typeof AppOrganizationsIndexRouteImport
       parentRoute: typeof AppOrganizationsRoute
+    }
+    '/_app/settings/notifications': {
+      id: '/_app/settings/notifications'
+      path: '/notifications'
+      fullPath: '/settings/notifications'
+      preLoaderRoute: typeof AppSettingsNotificationsRouteImport
+      parentRoute: typeof AppSettingsRoute
     }
     '/_app/projects/$projectId': {
       id: '/_app/projects/$projectId'
@@ -512,6 +866,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMessagesConversationIdRouteImport
       parentRoute: typeof AppMessagesRoute
     }
+    '/_app/hackathons/$hackathonId': {
+      id: '/_app/hackathons/$hackathonId'
+      path: '/$hackathonId'
+      fullPath: '/hackathons/$hackathonId'
+      preLoaderRoute: typeof AppHackathonsHackathonIdRouteImport
+      parentRoute: typeof AppHackathonsRoute
+    }
     '/_app/builders/$builderId': {
       id: '/_app/builders/$builderId'
       path: '/$builderId'
@@ -519,6 +880,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBuildersBuilderIdRouteImport
       parentRoute: typeof AppBuildersRoute
     }
+<<<<<<< HEAD
+    '/_app/admin/search-analytics': {
+      id: '/_app/admin/search-analytics'
+      path: '/search-analytics'
+      fullPath: '/admin/search-analytics'
+      preLoaderRoute: typeof AppAdminSearchAnalyticsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+    '/_app/admin/notifications': {
+      id: '/_app/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AppAdminNotificationsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+<<<<<<< HEAD
+    '/_app/admin/maintenance': {
+      id: '/_app/admin/maintenance'
+      path: '/maintenance'
+      fullPath: '/admin/maintenance'
+      preLoaderRoute: typeof AppAdminMaintenanceRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/community-stats': {
+      id: '/_app/admin/community-stats'
+      path: '/community-stats'
+      fullPath: '/admin/community-stats'
+      preLoaderRoute: typeof AppAdminCommunityStatsRouteImport
+=======
+    '/_app/admin/jobs': {
+      id: '/_app/admin/jobs'
+      path: '/jobs'
+      fullPath: '/admin/jobs'
+      preLoaderRoute: typeof AppAdminJobsRouteImport
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/audit-logs': {
+      id: '/_app/admin/audit-logs'
+      path: '/audit-logs'
+      fullPath: '/admin/audit-logs'
+      preLoaderRoute: typeof AppAdminAuditLogsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+<<<<<<< HEAD
+    '/_app/admin/api-request-analytics': {
+      id: '/_app/admin/api-request-analytics'
+      path: '/api-request-analytics'
+      fullPath: '/admin/api-request-analytics'
+      preLoaderRoute: typeof AppAdminApiRequestAnalyticsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+=======
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
     '/_app/projects/$projectId/issues': {
       id: '/_app/projects/$projectId/issues'
       path: '/issues'
@@ -528,6 +945,40 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppAdminRouteChildren {
+<<<<<<< HEAD
+  AppAdminApiRequestAnalyticsRoute: typeof AppAdminApiRequestAnalyticsRoute
+  AppAdminAuditLogsRoute: typeof AppAdminAuditLogsRoute
+  AppAdminCommunityStatsRoute: typeof AppAdminCommunityStatsRoute
+  AppAdminMaintenanceRoute: typeof AppAdminMaintenanceRoute
+  AppAdminNotificationsRoute: typeof AppAdminNotificationsRoute
+  AppAdminSearchAnalyticsRoute: typeof AppAdminSearchAnalyticsRoute
+}
+
+const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminApiRequestAnalyticsRoute: AppAdminApiRequestAnalyticsRoute,
+  AppAdminAuditLogsRoute: AppAdminAuditLogsRoute,
+  AppAdminCommunityStatsRoute: AppAdminCommunityStatsRoute,
+  AppAdminMaintenanceRoute: AppAdminMaintenanceRoute,
+  AppAdminNotificationsRoute: AppAdminNotificationsRoute,
+  AppAdminSearchAnalyticsRoute: AppAdminSearchAnalyticsRoute,
+=======
+  AppAdminAuditLogsRoute: typeof AppAdminAuditLogsRoute
+  AppAdminJobsRoute: typeof AppAdminJobsRoute
+  AppAdminNotificationsRoute: typeof AppAdminNotificationsRoute
+}
+
+const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminAuditLogsRoute: AppAdminAuditLogsRoute,
+  AppAdminJobsRoute: AppAdminJobsRoute,
+  AppAdminNotificationsRoute: AppAdminNotificationsRoute,
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+}
+
+const AppAdminRouteWithChildren = AppAdminRoute._addFileChildren(
+  AppAdminRouteChildren,
+)
 
 interface AppBuildersRouteChildren {
   AppBuildersBuilderIdRoute: typeof AppBuildersBuilderIdRoute
@@ -539,6 +990,18 @@ const AppBuildersRouteChildren: AppBuildersRouteChildren = {
 
 const AppBuildersRouteWithChildren = AppBuildersRoute._addFileChildren(
   AppBuildersRouteChildren,
+)
+
+interface AppHackathonsRouteChildren {
+  AppHackathonsHackathonIdRoute: typeof AppHackathonsHackathonIdRoute
+}
+
+const AppHackathonsRouteChildren: AppHackathonsRouteChildren = {
+  AppHackathonsHackathonIdRoute: AppHackathonsHackathonIdRoute,
+}
+
+const AppHackathonsRouteWithChildren = AppHackathonsRoute._addFileChildren(
+  AppHackathonsRouteChildren,
 )
 
 interface AppMessagesRouteChildren {
@@ -589,39 +1052,62 @@ const AppProjectsRouteWithChildren = AppProjectsRoute._addFileChildren(
   AppProjectsRouteChildren,
 )
 
+interface AppSettingsRouteChildren {
+  AppSettingsNotificationsRoute: typeof AppSettingsNotificationsRoute
+}
+
+const AppSettingsRouteChildren: AppSettingsRouteChildren = {
+  AppSettingsNotificationsRoute: AppSettingsNotificationsRoute,
+}
+
+const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
+  AppSettingsRouteChildren,
+)
+
 interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRouteWithChildren
   AppAnalyticsRoute: typeof AppAnalyticsRoute
   AppBookmarksRoute: typeof AppBookmarksRoute
   AppBuildersRoute: typeof AppBuildersRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
+<<<<<<< HEAD
+  AppDesignSystemRoute: typeof AppDesignSystemRoute
   AppFeedRoute: typeof AppFeedRoute
   AppFlaresRoute: typeof AppFlaresRoute
-  AppHackathonsRoute: typeof AppHackathonsRoute
+  AppGraphRoute: typeof AppGraphRoute
+=======
+  AppFeedRoute: typeof AppFeedRoute
+  AppFlaresRoute: typeof AppFlaresRoute
+>>>>>>> d54dec75 (feat(jobs): implement background job monitoring and retry support)
+  AppHackathonsRoute: typeof AppHackathonsRouteWithChildren
   AppMessagesRoute: typeof AppMessagesRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppOrganizationsRoute: typeof AppOrganizationsRouteWithChildren
   AppProjectsRoute: typeof AppProjectsRouteWithChildren
   AppRepositoryQualityRoute: typeof AppRepositoryQualityRoute
   AppSearchRoute: typeof AppSearchRoute
-  AppSettingsRoute: typeof AppSettingsRoute
+  AppSettingsRoute: typeof AppSettingsRouteWithChildren
   AppProfileUsernameRoute: typeof AppProfileUsernameRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRouteWithChildren,
   AppAnalyticsRoute: AppAnalyticsRoute,
   AppBookmarksRoute: AppBookmarksRoute,
   AppBuildersRoute: AppBuildersRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
+  AppDesignSystemRoute: AppDesignSystemRoute,
   AppFeedRoute: AppFeedRoute,
   AppFlaresRoute: AppFlaresRoute,
-  AppHackathonsRoute: AppHackathonsRoute,
+  AppGraphRoute: AppGraphRoute,
+  AppHackathonsRoute: AppHackathonsRouteWithChildren,
   AppMessagesRoute: AppMessagesRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,
   AppOrganizationsRoute: AppOrganizationsRouteWithChildren,
   AppProjectsRoute: AppProjectsRouteWithChildren,
   AppRepositoryQualityRoute: AppRepositoryQualityRoute,
   AppSearchRoute: AppSearchRoute,
-  AppSettingsRoute: AppSettingsRoute,
+  AppSettingsRoute: AppSettingsRouteWithChildren,
   AppProfileUsernameRoute: AppProfileUsernameRoute,
 }
 
@@ -631,7 +1117,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
+  AvatarRoute: AvatarRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  MaintenanceRoute: MaintenanceRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   PortfolioUsernameRoute: PortfolioUsernameRoute,
 }
 export const routeTree = rootRouteImport

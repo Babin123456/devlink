@@ -13,7 +13,12 @@ def visit_ARRAY(self, type_, **kw):
     return "JSON"
 
 
+def visit_JSONB(self, type_, **kw):
+    return "JSON"
+
+
 SQLiteTypeCompiler.visit_ARRAY = visit_ARRAY
+SQLiteTypeCompiler.visit_JSONB = visit_JSONB
 
 
 class MockPwdContext:
@@ -80,10 +85,10 @@ def setup_db():
     from app.main import app
 
     app.dependency_overrides[get_database] = override_get_db
+    import app.models
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
-    app.dependency_overrides.clear()
 
 
 @pytest.fixture(scope="function")
@@ -108,7 +113,7 @@ def register_and_login(client: TestClient):
     """
 
     def _register_and_login_func(
-        email: str, username: str, password: str = "Passw0rd!"
+        email: str, username: str, password: str = "Vermilion-Kestrel97!"
     ) -> tuple[str, str]:
         # Register
         client.post(

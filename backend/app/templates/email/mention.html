@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<p>Hello {{ username }},</p>
+<p>You were mentioned by <strong>{{ mentioner_name }}</strong> in a comment on <strong>{{ context_name }}</strong>.</p>
+<blockquote style="border-left: 4px solid #e5e7eb; padding-left: 16px; color: #6b7280; font-style: italic;">
+    "{{ mention_text }}"
+</blockquote>
+<p style="text-align: center;">
+    <a href="{{ context_url }}" class="btn">View Discussion</a>
+</p>
+<p>Best regards,<br>The DevLink Team</p>
+{% endblock %}

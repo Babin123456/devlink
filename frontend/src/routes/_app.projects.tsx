@@ -1,5 +1,6 @@
-import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
 import { projectsService } from "@/services";
 import { Card, TagChip, SectionHeader } from "@/components/shared/primitives";
 import {
@@ -11,12 +12,34 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Star, GitFork, Users2, Plus, Search, SlidersHorizontal, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
 import { ProjectFilters } from "@/components/projects/ProjectFilters";
+import { useProjectFilters } from "@/hooks/useProjectFilters";
 import { cn } from "@/lib/utils";
 import { getRecentlyViewedProjectIds } from "@/lib/recentlyViewedProjects";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { FilterDrawer, FilterSection } from "@/components/ui/filter-drawer";
+
+export const projectSearchSchema = z.object({
+  page: z.number().catch(1).optional(),
+  q: z.string().optional(),
+  language: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  experience: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  tech: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  remote: z.boolean().optional(),
+  paid: z.boolean().optional(),
+  opensource: z.boolean().optional(),
+});
 
 export const Route = createFileRoute("/_app/projects")({
   head: () => ({
@@ -25,20 +48,25 @@ export const Route = createFileRoute("/_app/projects")({
       { name: "description", content: "Browse and manage your DevLink projects." },
     ],
   }),
+  validateSearch: projectSearchSchema,
   component: ProjectsPage,
 });
 
-
-
 function ProjectsPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const search = useRouterState({ select: (state) => state.location.search as Record<string, unknown> });
   const navigate = Route.useNavigate();
-  const page = Number(search?.page) || 1;
+  const {
+    filters,
+    setFilters,
+    clearFilters,
+    hasActiveFilters: hasFilters,
+    chipFilterCount,
+  } = useProjectFilters();
+  const page = filters.page || 1;
   const ITEMS_PER_PAGE = 6;
   const [createOpen, setCreateOpen] = useState(false);
-  const [q, setQ] = useState("");
-  
+  const [q, setQ] = useState(filters.q || "");
+
   // Status filter state (keep for now as it's separate from ProjectFilters component)
   const [statusFilter, setStatusFilter] = useState<
     "all" | "recruiting" | "in-progress" | "completed" | "archived"
@@ -46,67 +74,60 @@ function ProjectsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [recentProjectIds, setRecentProjectIds] = useState<string[]>([]);
 
-  // Extracted URL filters
-  const language = (search?.language as string) || "";
-  const experience = (search?.experience as string) || "";
-  const remote = (search?.remote as string) || "";
-  const paid = (search?.paid as string) || "";
-  const openSource = (search?.opensource as string) || "";
-  const techStack = (search?.tech as string) || "";
-
   useEffect(() => {
     setRecentProjectIds(getRecentlyViewedProjectIds());
   }, []);
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ["projects", language, experience, remote, paid, openSource, techStack],
-    queryFn: () => projectsService.list({ 
-      language: language || undefined,
-      experience: experience || undefined,
-      remote: remote ? (remote.toLowerCase() === "yes" || remote.toLowerCase() === "true" ? "true" : "false") : undefined,
-      paid: paid ? (paid.toLowerCase() === "paid" || paid.toLowerCase() === "true" ? "true" : "false") : undefined,
-      opensource: openSource ? (openSource.toLowerCase() === "yes" || openSource.toLowerCase() === "true" ? "true" : "false") : undefined,
-      tech: techStack || undefined,
-    }),
+    queryKey: [
+      "projects",
+      filters.language,
+      filters.experience,
+      filters.remote,
+      filters.paid,
+      filters.opensource,
+      filters.tech,
+    ],
+    queryFn: () =>
+      projectsService.list({
+        language: filters.language?.length ? filters.language.join(",") : undefined,
+        experience: filters.experience?.length ? filters.experience.join(",") : undefined,
+        remote: filters.remote,
+        paid: filters.paid,
+        opensource: filters.opensource,
+        tech: filters.tech?.length ? filters.tech.join(",") : undefined,
+      }),
   });
 
-  const recentlyViewed = recentProjectIds
-    .map((id) => data.find((project) => project.id === id))
-    .filter((project): project is NonNullable<typeof project> => Boolean(project));
+  const recentlyViewed = useMemo(
+    () =>
+      recentProjectIds
+        .map((id) => data.find((project) => project.id === id))
+        .filter((project): project is NonNullable<typeof project> => Boolean(project)),
+    [recentProjectIds, data],
+  );
 
-  const chipFilterCount = [language, experience, remote, paid, openSource, techStack].filter(f => f !== "").length;
-  const hasActiveFilters = q !== "" || statusFilter !== "all" || chipFilterCount > 0;
+  const hasActiveFilters = q !== "" || statusFilter !== "all" || hasFilters;
+
+  const filtered = useMemo(
+    () =>
+      data.filter((p) => {
+        if (statusFilter !== "all" && p.status !== statusFilter) return false;
+        if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false;
+        return true;
+      }),
+    [data, statusFilter, q],
+  );
 
   if (pathname !== "/projects" && pathname !== "/projects/") {
     return <Outlet />;
   }
 
-  function clearFilters() {
+  function handleClearAllFilters() {
     setQ("");
     setStatusFilter("all");
-    navigate({ search: { page: 1 } });
+    clearFilters();
   }
-
-  const handleSetFilters = (newFilters: { language: string; experience: string; remote: string; paid: string; openSource: string; techStack: string }) => {
-    navigate({
-      search: (prev: any) => ({
-        ...prev,
-        page: 1,
-        language: newFilters.language || undefined,
-        experience: newFilters.experience || undefined,
-        remote: newFilters.remote || undefined,
-        paid: newFilters.paid || undefined,
-        opensource: newFilters.openSource || undefined,
-        tech: newFilters.techStack || undefined,
-      }),
-    });
-  };
-
-  const filtered = data.filter((p) => {
-    if (statusFilter !== "all" && p.status !== statusFilter) return false;
-    if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
-  });
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -216,7 +237,7 @@ function ProjectsPage() {
           </button>
           {hasActiveFilters && (
             <button
-              onClick={clearFilters}
+              onClick={handleClearAllFilters}
               className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-[7px] text-[12px] font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-destructive/20"
               aria-label="Clear all active filters"
             >
@@ -226,38 +247,86 @@ function ProjectsPage() {
           )}
         </div>
 
-        <BottomSheet
+        <FilterDrawer
           open={showFilters}
           onOpenChange={setShowFilters}
-          title="Filters"
-          description={
-            chipFilterCount > 0
-              ? `${chipFilterCount} active filter${chipFilterCount !== 1 ? "s" : ""}`
-              : undefined
-          }
-          footer={
-            hasActiveFilters ? (
-              <button
-                onClick={clearFilters}
-                className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-border px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
-              >
-                <X size={13} /> Clear all filters
-              </button>
-            ) : undefined
-          }
-        >
-          <ProjectFilters 
-            filters={{
-              language,
-              experience,
-              remote,
-              paid,
-              openSource,
-              techStack,
-            }}
-            setFilters={handleSetFilters}
-          />
-        </BottomSheet>
+          title="Filter Projects"
+          description="Filter projects by programming language, experience, type, and tech stack"
+          activeCount={chipFilterCount}
+          sections={[
+            {
+              id: "language",
+              title: "Language",
+              type: "multi",
+              options: [
+                { label: "JavaScript", value: "JavaScript" },
+                { label: "TypeScript", value: "TypeScript" },
+                { label: "Python", value: "Python" },
+                { label: "Java", value: "Java" },
+                { label: "Go", value: "Go" },
+                { label: "Rust", value: "Rust" },
+              ],
+            },
+            {
+              id: "experience",
+              title: "Experience Level",
+              type: "select",
+              options: [
+                { label: "Beginner", value: "beginner" },
+                { label: "Intermediate", value: "intermediate" },
+                { label: "Advanced", value: "advanced" },
+              ],
+            },
+            {
+              id: "remote",
+              title: "Work Location",
+              type: "single",
+              options: [
+                { label: "Remote", value: "true" },
+                { label: "Onsite", value: "false" },
+              ],
+            },
+            {
+              id: "paid",
+              title: "Compensation",
+              type: "single",
+              options: [
+                { label: "Paid", value: "true" },
+                { label: "Unpaid", value: "false" },
+              ],
+            },
+            {
+              id: "opensource",
+              title: "Open Source",
+              type: "single",
+              options: [
+                { label: "Yes", value: "true" },
+                { label: "No", value: "false" },
+              ],
+            },
+          ]}
+          values={{
+            language: language ? language.split(",") : [],
+            experience: experience,
+            remote: remote,
+            paid: paid,
+            opensource: openSource,
+          }}
+          onApply={(newValues) => {
+            const selectedLangs = Array.isArray(newValues.language)
+              ? newValues.language.join(",")
+              : newValues.language;
+            handleSetFilters({
+              language: selectedLangs || "",
+              experience: newValues.experience || "",
+              remote: newValues.remote || "",
+              paid: newValues.paid || "",
+              openSource: newValues.opensource || "",
+              techStack: techStack || "",
+            });
+          }}
+          onReset={clearFilters}
+        />
       </Card>
 
       {isLoading ? (
@@ -279,7 +348,7 @@ function ProjectsPage() {
           </p>
           {hasActiveFilters && (
             <button
-              onClick={clearFilters}
+              onClick={handleClearAllFilters}
               className="mt-3 text-[13px] font-medium text-primary hover:underline"
             >
               Clear filters
@@ -315,9 +384,9 @@ function ProjectsPage() {
                     {p.difficulty && (
                       <TagChip
                         className={cn(
-                          p.difficulty === "beginner"
+                          p.difficulty === "Beginner"
                             ? "border-success/30 bg-success/10 text-success"
-                            : p.difficulty === "intermediate"
+                            : p.difficulty === "Intermediate"
                               ? "border-warning/30 bg-warning/10 text-warning"
                               : "border-destructive/30 bg-destructive/10 text-destructive",
                         )}
@@ -380,10 +449,7 @@ function ProjectsPage() {
                   </PaginationItem>
                   {Array.from({ length: totalPages }).map((_, i) => (
                     <PaginationItem key={i}>
-                      <PaginationLink
-                        href={`/projects?page=${i + 1}`}
-                        isActive={page === i + 1}
-                      >
+                      <PaginationLink href={`/projects?page=${i + 1}`} isActive={page === i + 1}>
                         {i + 1}
                       </PaginationLink>
                     </PaginationItem>

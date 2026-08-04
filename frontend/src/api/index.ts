@@ -35,11 +35,16 @@ export type {
 } from "./modules/search";
 export { activitiesApi } from "./modules/activities";
 export { collectionsApi } from "./modules/collections";
-export { recommendationsApi } from "./modules/recommendations";
+export { recommendationsApi, fallbackTechStack } from "./modules/recommendations";
 export type { TechStackRecommendation, TechStackResponse } from "./modules/recommendations";
 export { bookmarksApi } from "./modules/bookmarks";
 export { issuesApi } from "./modules/issues";
-export type { Issue, DifficultyEstimateResponse } from "./modules/issues";
+export type {
+  Issue,
+  DifficultyEstimateResponse,
+  IssueCreateInput,
+  IssueUpdateInput,
+} from "./modules/issues";
 export { profileSummaryApi } from "./modules/profileSummary";
 export type { ProfileSummaryResponse } from "./modules/profileSummary";
 export { conversationStartersApi } from "./modules/conversationStarters";
@@ -58,6 +63,8 @@ export type {
 } from "./modules/repositoryQuality";
 export { exportApi } from "./modules/export";
 export type { UserExportData, ExportResponse } from "./modules/export";
+export { auditApi } from "./modules/audit";
+export type { AuditLog, AuditLogQuery } from "./modules/audit";
 export type {
   BookmarkResponse as BookmarkItem,
   BookmarkCheckResponse,

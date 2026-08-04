@@ -1,12 +1,33 @@
-import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { X } from "lucide-react";
+import { useProjectFilters } from "@/hooks/useProjectFilters";
+import { X, Check, ChevronsUpDown } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
-const LANGUAGES = ["All", "JavaScript", "TypeScript", "Python", "Java", "Go", "Rust"];
+const LANGUAGES = [
+  "JavaScript",
+  "TypeScript",
+  "Python",
+  "Java",
+  "Go",
+  "Rust",
+  "C++",
+  "C#",
+  "Ruby",
+  "PHP",
+];
 const EXPERIENCES = ["Beginner", "Intermediate", "Advanced"];
-const REMOTE_OPTIONS = ["All", "Remote", "Hybrid", "Onsite"];
-const PAID_OPTIONS = ["All", "Paid", "Unpaid"];
-const OPENSOURCE_OPTIONS = ["All", "Yes", "No"];
 const TECH_STACKS = [
   "React",
   "Next.js",
@@ -19,174 +40,195 @@ const TECH_STACKS = [
   "AWS",
   "Python",
   "AI/ML",
+  "Vue.js",
+  "Angular",
+  "Svelte",
+  "Tailwind CSS",
+  "React Native",
+  "Flutter",
+  "Swift",
+  "Kotlin",
 ];
 
-interface FilterSectionProps {
-  title: string;
-  options: readonly string[];
-  value: string;
-  onChange: (val: string) => void;
-}
-
-function FilterDropdown({ title, options, value, onChange }: FilterSectionProps) {
-  return (
-    <div className="relative inline-block text-left mr-3 mb-3">
-      <div className="flex flex-col">
-        <label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
-          {title}
-        </label>
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="rounded-md border border-border bg-surface px-3 py-1.5 text-[13px] text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-        >
-          {options.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
-  );
-}
-
 export function ProjectFilters() {
-  const navigate = useNavigate({ from: "/projects" });
-  const search = useRouterState({
-    select: (state) => state.location.search as Record<string, string>,
-  });
+  const { filters, setFilters, clearFilters, hasActiveFilters } = useProjectFilters();
 
-  const language = search.language || "All";
-  const experience = search.experience || "";
-  const remote = search.remote === "true" ? "Remote" : search.remote === "false" ? "Onsite" : "All";
-  const paid = search.paid === "true" ? "Paid" : search.paid === "false" ? "Unpaid" : "All";
-  const opensource =
-    search.opensource === "true" ? "Yes" : search.opensource === "false" ? "No" : "All";
-  const tech = search.tech || "";
-
-  const updateSearch = (newParams: Record<string, string | undefined>) => {
-    navigate({
-      search: (prev: Record<string, unknown>) => {
-        const updated: Record<string, unknown> = { ...prev, ...newParams };
-        Object.keys(updated).forEach((key) => {
-          if (updated[key] === undefined || updated[key] === "" || updated[key] === "All") {
-            delete updated[key];
-          }
-        });
-        if (newParams.remote === undefined) delete updated.remote;
-        if (newParams.paid === undefined) delete updated.paid;
-        if (newParams.opensource === undefined) delete updated.opensource;
-
-        return updated;
-      },
-      replace: true,
-    });
+  const handleLanguageChange = (lang: string, checked: boolean) => {
+    const current = filters.language || [];
+    const next = checked ? [...current, lang] : current.filter((l) => l !== lang);
+    setFilters({ language: next });
   };
 
-  const clearFilters = () => {
-    navigate({
-      search: (prev: Record<string, unknown>) => {
-        const { language, experience, remote, paid, opensource, tech, ...rest } = prev;
-        return rest;
-      },
-      replace: true,
-    });
+  const handleExperienceChange = (exp: string, checked: boolean) => {
+    const current = filters.experience || [];
+    const next = checked ? [...current, exp] : current.filter((e) => e !== exp);
+    setFilters({ experience: next });
   };
+
+  const handleTechToggle = (tech: string) => {
+    const current = filters.tech || [];
+    const next = current.includes(tech) ? current.filter((t) => t !== tech) : [...current, tech];
+    setFilters({ tech: next });
+  };
+
+  const [techOpen, setTechOpen] = useState(false);
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 my-4">
-      <div className="mb-2">
-        <h3 className="text-[14px] font-semibold text-foreground flex items-center gap-2">
-          Search Projects
-        </h3>
-      </div>
-
-      <div className="flex flex-wrap items-end">
-        <FilterDropdown
-          title="Language"
-          options={LANGUAGES}
-          value={language}
-          onChange={(val) => updateSearch({ language: val === "All" ? undefined : val })}
-        />
-
-        <div className="relative inline-block text-left mr-3 mb-3">
-          <div className="flex flex-col">
-            <label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
-              Experience
-            </label>
-            <select
-              value={experience}
-              onChange={(e) => updateSearch({ experience: e.target.value })}
-              className="rounded-md border border-border bg-surface px-3 py-1.5 text-[13px] text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            >
-              <option value="">All</option>
-              {EXPERIENCES.map((opt) => (
-                <option key={opt} value={opt.toLowerCase()}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <FilterDropdown
-          title="Remote"
-          options={REMOTE_OPTIONS}
-          value={remote}
-          onChange={(val) => {
-            const mapped = val === "Remote" ? "true" : val === "Onsite" ? "false" : undefined;
-            updateSearch({ remote: mapped });
-          }}
-        />
-
-        <FilterDropdown
-          title="Paid"
-          options={PAID_OPTIONS}
-          value={paid}
-          onChange={(val) => {
-            const mapped = val === "Paid" ? "true" : val === "Unpaid" ? "false" : undefined;
-            updateSearch({ paid: mapped });
-          }}
-        />
-
-        <FilterDropdown
-          title="Open Source"
-          options={OPENSOURCE_OPTIONS}
-          value={opensource}
-          onChange={(val) => {
-            const mapped = val === "Yes" ? "true" : val === "No" ? "false" : undefined;
-            updateSearch({ opensource: mapped });
-          }}
-        />
-
-        <div className="relative inline-block text-left mr-3 mb-3">
-          <div className="flex flex-col">
-            <label className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1">
-              Tech Stack
-            </label>
-            <select
-              value={tech}
-              onChange={(e) => updateSearch({ tech: e.target.value })}
-              className="rounded-md border border-border bg-surface px-3 py-1.5 text-[13px] text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            >
-              <option value="">All</option>
-              {TECH_STACKS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="mb-3 flex items-center h-full">
+    <div className="rounded-lg border border-border bg-card p-5 my-4 flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-[15px] font-semibold text-foreground">Filters</h3>
+        {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-destructive/20"
+            className="inline-flex items-center gap-1.5 rounded-md text-[12px] font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            <X size={13} /> Clear Filters
+            <X size={14} /> Clear all
           </button>
+        )}
+      </div>
+
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Language Filter */}
+        <div className="space-y-4">
+          <h4 className="text-[13px] font-medium text-foreground">Language</h4>
+          <div className="flex flex-col gap-3">
+            {LANGUAGES.map((lang) => (
+              <div key={lang} className="flex items-center gap-2">
+                <Checkbox
+                  id={`lang-${lang}`}
+                  checked={(filters.language || []).includes(lang)}
+                  onCheckedChange={(checked) => handleLanguageChange(lang, !!checked)}
+                />
+                <label
+                  htmlFor={`lang-${lang}`}
+                  className="text-[13px] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  {lang}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Experience Filter */}
+        <div className="space-y-4">
+          <h4 className="text-[13px] font-medium text-foreground">Experience Level</h4>
+          <div className="flex flex-col gap-3">
+            {EXPERIENCES.map((exp) => (
+              <div key={exp} className="flex items-center gap-2">
+                <Checkbox
+                  id={`exp-${exp}`}
+                  checked={(filters.experience || []).includes(exp.toLowerCase())}
+                  onCheckedChange={(checked) =>
+                    handleExperienceChange(exp.toLowerCase(), !!checked)
+                  }
+                />
+                <label
+                  htmlFor={`exp-${exp}`}
+                  className="text-[13px] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  {exp}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Additional Filters */}
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <h4 className="text-[13px] font-medium text-foreground">Project Details</h4>
+
+            <div className="flex items-center justify-between">
+              <label htmlFor="remote-toggle" className="text-[13px] font-medium cursor-pointer">
+                Remote Only
+              </label>
+              <Switch
+                id="remote-toggle"
+                checked={filters.remote === true}
+                onCheckedChange={(checked) => setFilters({ remote: checked || undefined })}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label htmlFor="paid-toggle" className="text-[13px] font-medium cursor-pointer">
+                Paid Only
+              </label>
+              <Switch
+                id="paid-toggle"
+                checked={filters.paid === true}
+                onCheckedChange={(checked) => setFilters({ paid: checked || undefined })}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label htmlFor="opensource-toggle" className="text-[13px] font-medium cursor-pointer">
+                Open Source Only
+              </label>
+              <Switch
+                id="opensource-toggle"
+                checked={filters.opensource === true}
+                onCheckedChange={(checked) => setFilters({ opensource: checked || undefined })}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h4 className="text-[13px] font-medium text-foreground">Tech Stack</h4>
+            <Popover open={techOpen} onOpenChange={setTechOpen}>
+              <PopoverTrigger asChild>
+                <button className="flex w-full items-center justify-between rounded-md border border-border bg-surface px-3 py-2 text-[13px] hover:bg-muted">
+                  <span className="truncate">
+                    {(filters.tech || []).length > 0
+                      ? `${(filters.tech || []).length} selected`
+                      : "Select tech stack..."}
+                  </span>
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search tech..." />
+                  <CommandList>
+                    <CommandEmpty>No tech found.</CommandEmpty>
+                    <CommandGroup>
+                      {TECH_STACKS.map((tech) => {
+                        const isSelected = (filters.tech || []).includes(tech);
+                        return (
+                          <CommandItem key={tech} onSelect={() => handleTechToggle(tech)}>
+                            <div
+                              className={cn(
+                                "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                isSelected
+                                  ? "bg-primary text-primary-foreground"
+                                  : "opacity-50 [&_svg]:invisible",
+                              )}
+                            >
+                              <Check className={cn("h-3 w-3")} />
+                            </div>
+                            {tech}
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            <div className="flex flex-wrap gap-1">
+              {(filters.tech || []).map((t) => (
+                <Badge
+                  key={t}
+                  variant="secondary"
+                  className="px-1.5 py-0 text-[11px] font-normal cursor-pointer flex items-center gap-1"
+                  onClick={() => handleTechToggle(t)}
+                >
+                  {t}
+                  <X className="h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

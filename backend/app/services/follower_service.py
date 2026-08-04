@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 
 # pyrefly: ignore [missing-import]
-from sqlalchemy import and_, select
+from sqlalchemy import and_, select, func
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
@@ -17,6 +17,10 @@ from app.services.activity_service import ActivityService
 from app.services.notification_service import NotificationService
 
 
+from app.services.block_service import BlockService
+from fastapi import HTTPException, status
+
+
 class FollowerService:
     """
     Business logic for user follow relationships.
@@ -28,6 +32,12 @@ class FollowerService:
         follower_id: uuid.UUID,
         following_id: uuid.UUID,
     ) -> Follower:
+
+        if BlockService.is_blocked(db, follower_id, following_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Cannot follow a user who has blocked you or whom you have blocked.",
+            )
 
         relationship = Follower(
             follower_id=follower_id,
@@ -137,9 +147,13 @@ class FollowerService:
         user_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(Follower).where(Follower.following_id == user_id)
+        stmt = (
+            select(func.count())
+            .select_from(Follower)
+            .where(Follower.following_id == user_id)
+        )
 
-        return len(list(db.scalars(stmt)))
+        return db.scalar(stmt) or 0
 
     @staticmethod
     def following_count(
@@ -147,9 +161,13 @@ class FollowerService:
         user_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(Follower).where(Follower.follower_id == user_id)
+        stmt = (
+            select(func.count())
+            .select_from(Follower)
+            .where(Follower.follower_id == user_id)
+        )
 
-        return len(list(db.scalars(stmt)))
+        return db.scalar(stmt) or 0
 
     @staticmethod
     def mutual_followers(

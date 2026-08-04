@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, time
+from enum import Enum
 from typing import Optional
 
 # pyrefly: ignore [missing-import]
@@ -13,6 +14,7 @@ from pydantic import (
     HttpUrl,
     model_validator,
 )
+from app.core.validation import NameStr, UsernameStr, ValidEmail, HeadlineStr, BioStr, ValidURL, SanitizedStr
 
 
 class AvailabilitySlot(BaseModel):
@@ -27,47 +29,62 @@ class AvailabilitySlot(BaseModel):
         return self
 
 
+class PrivacyVisibility(str, Enum):
+    PUBLIC = "public"
+    FOLLOWERS = "followers"
+    AUTHENTICATED = "authenticated"
+    PRIVATE = "private"
+
+
+class PrivacySettings(BaseModel):
+    email: PrivacyVisibility = PrivacyVisibility.PRIVATE
+    github: PrivacyVisibility = PrivacyVisibility.PUBLIC
+    resume: PrivacyVisibility = PrivacyVisibility.PUBLIC
+    social_links: PrivacyVisibility = PrivacyVisibility.PUBLIC
+    availability: PrivacyVisibility = PrivacyVisibility.PUBLIC
+
+
+class PrivacySettingsUpdate(BaseModel):
+    email: Optional[PrivacyVisibility] = None
+    github: Optional[PrivacyVisibility] = None
+    resume: Optional[PrivacyVisibility] = None
+    social_links: Optional[PrivacyVisibility] = None
+    availability: Optional[PrivacyVisibility] = None
+
+
 # ==========================================================
 # Base User Schema
 # ==========================================================
 
 
 class UserBase(BaseModel):
-    first_name: str = Field(..., min_length=2, max_length=100)
-    last_name: str = Field(..., min_length=2, max_length=100)
+    first_name: NameStr
+    last_name: NameStr
 
-    username: str = Field(
-        ...,
-        min_length=3,
-        max_length=50,
-    )
+    username: UsernameStr
 
-    public_email: Optional[EmailStr] = None
+    public_email: Optional[ValidEmail] = None
 
-    headline: Optional[str] = Field(
-        default=None,
-        max_length=150,
-    )
+    headline: Optional[HeadlineStr] = None
 
-    bio: Optional[str] = Field(
-        default=None,
-        max_length=1000,
-    )
+    bio: Optional[BioStr] = None
 
-    location: Optional[str] = None
-    timezone: Optional[str] = None
+    location: Optional[SanitizedStr] = None
+    timezone: Optional[SanitizedStr] = None
 
-    website: Optional[HttpUrl] = None
-    resume_url: Optional[str] = None
-    portfolio_url: Optional[HttpUrl] = None
-    github_url: Optional[HttpUrl] = None
-    linkedin_url: Optional[HttpUrl] = None
+    website: Optional[ValidURL] = None
+    resume_url: Optional[ValidURL] = None
+    portfolio_url: Optional[ValidURL] = None
+    github_url: Optional[ValidURL] = None
+    linkedin_url: Optional[ValidURL] = None
 
-    role: Optional[str] = None
-    experience_level: Optional[str] = None
-    company: Optional[str] = None
+    role: Optional[SanitizedStr] = None
+    experience_level: Optional[SanitizedStr] = None
+    company: Optional[SanitizedStr] = None
 
     open_to_work: bool = True
+    is_private: bool = False
+    privacy_settings: Optional[PrivacySettings] = Field(default_factory=PrivacySettings)
     availability: list[AvailabilitySlot] = Field(default_factory=list)
 
 
@@ -77,11 +94,24 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    email: EmailStr
+    email: ValidEmail
     password: str = Field(
         ...,
         min_length=8,
         max_length=128,
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "username": "janedoe",
+                "email": "jane.doe@example.com",
+                "password": "StrongPassword123!",
+                "open_to_work": True
+            }
+        }
     )
 
 
@@ -91,28 +121,43 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    first_name: Optional[NameStr] = None
+    last_name: Optional[NameStr] = None
 
-    headline: Optional[str] = Field(default=None, max_length=150)
-    bio: Optional[str] = Field(default=None, max_length=1000)
+    headline: Optional[HeadlineStr] = None
+    bio: Optional[BioStr] = None
 
-    location: Optional[str] = None
-    timezone: Optional[str] = None
-    public_email: Optional[EmailStr] = None
+    location: Optional[SanitizedStr] = None
+    timezone: Optional[SanitizedStr] = None
+    public_email: Optional[ValidEmail] = None
 
-    website: Optional[HttpUrl] = None
-    resume_url: Optional[str] = None
-    portfolio_url: Optional[HttpUrl] = None
-    github_url: Optional[HttpUrl] = None
-    linkedin_url: Optional[HttpUrl] = None
+    website: Optional[ValidURL] = None
+    resume_url: Optional[ValidURL] = None
+    portfolio_url: Optional[ValidURL] = None
+    github_url: Optional[ValidURL] = None
+    linkedin_url: Optional[ValidURL] = None
 
-    role: Optional[str] = None
-    experience_level: Optional[str] = None
-    company: Optional[str] = None
+    role: Optional[SanitizedStr] = None
+    experience_level: Optional[SanitizedStr] = None
+    company: Optional[SanitizedStr] = None
 
     open_to_work: Optional[bool] = None
+    is_private: Optional[bool] = None
+    privacy_settings: Optional[PrivacySettingsUpdate] = None
     availability: Optional[list[AvailabilitySlot]] = None
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "first_name": "Jane",
+                "last_name": "Smith",
+                "headline": "Senior Full-Stack Developer",
+                "bio": "I love building scalable web applications.",
+                "location": "San Francisco, CA",
+                "github_url": "https://github.com/janesmith"
+            }
+        }
+    )
 
 
 # ==========================================================
@@ -146,6 +191,9 @@ class UserResponse(UserBase):
     created_at: datetime
     updated_at: datetime
 
+    deleted_at: Optional[datetime] = None
+    deleted_by_id: Optional[uuid.UUID] = None
+
 
 # ==========================================================
 # Private User Response
@@ -153,7 +201,7 @@ class UserResponse(UserBase):
 
 
 class CurrentUser(UserResponse):
-    email: EmailStr
+    email: ValidEmail
     email_verified_at: Optional[datetime] = None
     last_login: Optional[datetime] = None
 
@@ -198,3 +246,21 @@ class UserMessage(BaseModel):
 class UsernameAvailabilityResponse(BaseModel):
     available: bool
     message: str
+
+
+# ==========================================================
+# Profile Completion Response
+# ==========================================================
+
+
+class ProfileCompletionResponse(BaseModel):
+    completion: int = Field(
+        ...,
+        ge=0,
+        le=100,
+        description="Profile completion percentage (0-100)",
+    )
+    missing: list[str] = Field(
+        ...,
+        description="List of missing profile factors",
+    )

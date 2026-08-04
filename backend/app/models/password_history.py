@@ -45,5 +45,5 @@ class PasswordHistory(Base):
 
     user = relationship(
         "User",
-        back_populates="password_history",
+        backref="password_history",
     )

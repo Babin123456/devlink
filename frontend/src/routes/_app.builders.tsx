@@ -18,7 +18,7 @@ import {
 } from "@/components/shared/primitives";
 import { HighlightText } from "@/components/shared/HighlightText";
 import { LastActive } from "@/components/shared/LastActive";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 import {
@@ -31,6 +31,7 @@ import {
   Sparkles,
   UsersRound,
 } from "lucide-react";
+import { Search, Sparkles, Calendar, Briefcase, Check, Bookmark, BadgeCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants } from "@/lib/animations";
 
@@ -108,8 +109,14 @@ function AIMatchCard({ builder }: { builder: Builder }) {
               params={{ builderId: builder.id }}
               className="block hover:underline"
             >
-              <h3 className="font-bold text-foreground text-[20px] leading-tight truncate">
+              <h3 className="font-bold text-foreground text-[20px] leading-tight truncate flex items-center gap-1">
                 {builder.name}
+                {builder.verified && (
+                  <BadgeCheck
+                    className="text-primary shrink-0 h-5 w-5"
+                    aria-label="Verified User"
+                  />
+                )}
               </h3>
             </Link>
             <p className="text-muted-foreground text-[13px] font-medium mt-0.5 truncate">
@@ -249,7 +256,8 @@ function BuilderRecommendationsEmptyState({ onExplore }: { onExplore: () => void
 
 function BuildersPage() {
   const childMatches = useChildMatches();
-  const { tab } = Route.useSearch();
+  const search = Route.useSearch() as { tab?: string };
+  const tab = search.tab;
   const navigate = useNavigate({ from: Route.fullPath });
   const [q, setQ] = useState("");
   const { data = [], isLoading } = useQuery({
@@ -275,17 +283,24 @@ function BuildersPage() {
     });
   };
 
+  const baseData = useMemo(
+    () => (tab === "connections" ? data.filter((b) => connections.includes(b.id)) : data),
+    [data, tab, connections],
+  );
+
+  const filtered = useMemo(
+    () =>
+      baseData.filter(
+        (b) =>
+          b.name.toLowerCase().includes(q.toLowerCase()) ||
+          b.skills.some((s) => s.toLowerCase().includes(q.toLowerCase())),
+      ),
+    [baseData, q],
+  );
+
   if (childMatches.length > 0) {
     return <Outlet />;
   }
-
-  const baseData = tab === "connections" ? data.filter((b) => connections.includes(b.id)) : data;
-
-  const filtered = baseData.filter(
-    (b) =>
-      b.name.toLowerCase().includes(q.toLowerCase()) ||
-      b.skills.some((s) => s.toLowerCase().includes(q.toLowerCase())),
-  );
 
   const tabs = [
     { k: "discover", label: "Discover" },
@@ -394,8 +409,14 @@ function BuildersPage() {
                     <div className="mx-auto w-fit">
                       <Avatar src={b.avatar} alt={b.name} size={64} online={b.online} />
                     </div>
-                    <p className="mt-2 text-[14px] font-semibold text-foreground">
+                    <p className="mt-2 text-[14px] font-semibold text-foreground flex items-center justify-center gap-1">
                       <HighlightText text={b.name} query={q} />
+                      {b.verified && (
+                        <BadgeCheck
+                          className="text-primary h-3.5 w-3.5"
+                          aria-label="Verified User"
+                        />
+                      )}
                     </p>
                     <p className="text-[12px] text-muted-foreground">
                       <HighlightText text={b.role} query={q} />

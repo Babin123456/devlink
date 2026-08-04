@@ -32,7 +32,6 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
 )
 def create_activity(
-
     activity: ActivityCreate,
     db: Session = Depends(get_database),
     current_user: User = Depends(get_current_user),
@@ -72,8 +71,8 @@ def get_activity(
     "/",
     response_model=list[ActivityResponse],
 )
-def get_feed(
-    limit: int = Query(50, ge=1, le=100),
+@cached(ttl=60, key_prefix="feed")
+def get_feed(    limit: int = Query(50, ge=1, le=100),
     cursor: datetime | None = Query(
         None, description="Cursor for pagination (created_at timestamp)"
     ),

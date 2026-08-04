@@ -20,6 +20,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
 
+# Forward reference for type annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.user import User
+
 
 class ProjectStage(str, Enum):
     IDEA = "idea"
@@ -62,7 +68,7 @@ class Project(Base):
         index=True,
     )
 
-    owner = relationship("User", backref="projects")
+    owner = relationship("User", foreign_keys=[owner_id], backref="projects")
 
     # ----------------------------------------------------------
     # Basic Information
@@ -233,6 +239,29 @@ class Project(Base):
         default=True,
         nullable=False,
         index=True,
+    )
+
+    # ----------------------------------------------------------
+    # Soft Delete
+    # ----------------------------------------------------------
+
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
+    )
+
+    deleted_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+        index=True,
+    )
+
+    deleted_by: Mapped[User | None] = relationship(
+        "User",
+        foreign_keys=[deleted_by_id],
     )
 
     # ----------------------------------------------------------
