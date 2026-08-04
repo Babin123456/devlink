@@ -123,7 +123,7 @@ def test_router_prevent_self_messaging_integration(client):
             "last_name": "Test",
             "email": "charlie@example.com",
             "username": "charlie",
-            "password": "Passw0rd!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
 
@@ -131,7 +131,7 @@ def test_router_prevent_self_messaging_integration(client):
         "/api/auth/login",
         json={
             "email": "charlie@example.com",
-            "password": "Passw0rd!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
     token = login_resp.json()["access_token"]

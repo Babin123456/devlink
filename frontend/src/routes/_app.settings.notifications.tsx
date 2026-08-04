@@ -4,7 +4,6 @@ import api from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -28,7 +27,16 @@ function NotificationSettingsPage() {
     email_enabled: true,
     websocket_enabled: true,
     database_enabled: true,
+    messages: true,
+    team_invitations: true,
     project_updates: true,
+    mentions: true,
+    system_announcements: true,
+    email_messages: true,
+    email_team_invitations: true,
+    email_project_updates: true,
+    email_mentions: true,
+    email_system_announcements: true,
     invitations: true,
     role_changes: true,
     marketing_emails: false,
@@ -37,7 +45,7 @@ function NotificationSettingsPage() {
 
   useEffect(() => {
     if (preferences) {
-      setFormData(preferences);
+      setFormData((prev) => ({ ...prev, ...preferences }));
     }
   }, [preferences]);
 
@@ -67,28 +75,26 @@ function NotificationSettingsPage() {
     updateMutation.mutate(newData);
   };
 
-  if (isLoading) return <div>Loading preferences...</div>;
+  if (isLoading) return <div className="p-6">Loading notification preferences...</div>;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto p-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Notification Preferences</h2>
-        <p className="text-muted-foreground">Manage how and when you receive notifications.</p>
+        <h2 className="text-2xl font-bold tracking-tight">Notification Preferences Center</h2>
+        <p className="text-muted-foreground">Manage your notification channels, category alerts, and email delivery preferences.</p>
       </div>
 
       <div className="grid gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Delivery Channels</CardTitle>
-            <CardDescription>Choose where you want to receive notifications.</CardDescription>
+            <CardDescription>Master controls for global notification delivery methods.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-base font-semibold">Email Notifications</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receive updates via your registered email address.
-                </p>
+                <Label className="text-base font-semibold">Master Email Notifications</Label>
+                <p className="text-sm text-muted-foreground">Master switch to enable or disable all email notifications.</p>
               </div>
               <Switch
                 checked={formData.email_enabled}
@@ -98,10 +104,8 @@ function NotificationSettingsPage() {
 
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className="text-base font-semibold">In-App Notifications (Database)</Label>
-                <p className="text-sm text-muted-foreground">
-                  Store notifications in the app notification center.
-                </p>
+                <Label className="text-base font-semibold">In-App Notifications</Label>
+                <p className="text-sm text-muted-foreground">Store notifications in your notification center tray.</p>
               </div>
               <Switch
                 checked={formData.database_enabled}
@@ -112,9 +116,7 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Real-time Popups (WebSocket)</Label>
-                <p className="text-sm text-muted-foreground">
-                  Show instant notification toasts while you are active.
-                </p>
+                <p className="text-sm text-muted-foreground">Receive instant desktop toast popups while actively using DevLink.</p>
               </div>
               <Switch
                 checked={formData.websocket_enabled}
@@ -126,42 +128,140 @@ function NotificationSettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Event Triggers</CardTitle>
-            <CardDescription>Select which events should trigger a notification.</CardDescription>
+            <CardTitle>Notification Categories</CardTitle>
+            <CardDescription>Configure in-app and email preferences for specific notification categories.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
+            {/* Messages */}
+            <div className="flex items-center justify-between pb-4 border-b">
+              <div className="space-y-0.5">
+                <Label className="text-base font-semibold">Messages</Label>
+                <p className="text-sm text-muted-foreground">Direct messages and active conversation alerts.</p>
+              </div>
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <Label className="text-xs text-muted-foreground">In-App</Label>
+                  <Switch
+                    checked={formData.messages}
+                    onCheckedChange={() => handleToggle("messages")}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Label className="text-xs text-muted-foreground">Email</Label>
+                  <Switch
+                    checked={formData.email_messages}
+                    onCheckedChange={() => handleToggle("email_messages")}
+                    disabled={!formData.email_enabled}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Team Invitations */}
+            <div className="flex items-center justify-between pb-4 border-b">
+              <div className="space-y-0.5">
+                <Label className="text-base font-semibold">Team Invitations</Label>
+                <p className="text-sm text-muted-foreground">Project invites, team membership, and role changes.</p>
+              </div>
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <Label className="text-xs text-muted-foreground">In-App</Label>
+                  <Switch
+                    checked={formData.team_invitations}
+                    onCheckedChange={() => handleToggle("team_invitations")}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Label className="text-xs text-muted-foreground">Email</Label>
+                  <Switch
+                    checked={formData.email_team_invitations}
+                    onCheckedChange={() => handleToggle("email_team_invitations")}
+                    disabled={!formData.email_enabled}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Project Updates */}
+            <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Project Updates</Label>
-                <p className="text-sm text-muted-foreground">
-                  When projects you are involved in are updated.
-                </p>
+                <p className="text-sm text-muted-foreground">Milestones, project status changes, and repository activity.</p>
               </div>
-              <Switch
-                checked={formData.project_updates}
-                onCheckedChange={() => handleToggle("project_updates")}
-              />
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <Label className="text-xs text-muted-foreground">In-App</Label>
+                  <Switch
+                    checked={formData.project_updates}
+                    onCheckedChange={() => handleToggle("project_updates")}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Label className="text-xs text-muted-foreground">Email</Label>
+                  <Switch
+                    checked={formData.email_project_updates}
+                    onCheckedChange={() => handleToggle("email_project_updates")}
+                    disabled={!formData.email_enabled}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            {/* Mentions */}
+            <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
-                <Label className="text-base font-semibold">Invitations</Label>
-                <p className="text-sm text-muted-foreground">
-                  When you are invited to a project or team.
-                </p>
+                <Label className="text-base font-semibold">Mentions</Label>
+                <p className="text-sm text-muted-foreground">When developers tag or mention @username in issues or discussions.</p>
               </div>
-              <Switch
-                checked={formData.invitations}
-                onCheckedChange={() => handleToggle("invitations")}
-              />
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <Label className="text-xs text-muted-foreground">In-App</Label>
+                  <Switch
+                    checked={formData.mentions}
+                    onCheckedChange={() => handleToggle("mentions")}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Label className="text-xs text-muted-foreground">Email</Label>
+                  <Switch
+                    checked={formData.email_mentions}
+                    onCheckedChange={() => handleToggle("email_mentions")}
+                    disabled={!formData.email_enabled}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            {/* System Announcements */}
+            <div className="flex items-center justify-between pb-4 border-b">
+              <div className="space-y-0.5">
+                <Label className="text-base font-semibold">System Announcements</Label>
+                <p className="text-sm text-muted-foreground">Platform updates, scheduled maintenance, and system alerts.</p>
+              </div>
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <Label className="text-xs text-muted-foreground">In-App</Label>
+                  <Switch
+                    checked={formData.system_announcements}
+                    onCheckedChange={() => handleToggle("system_announcements")}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Label className="text-xs text-muted-foreground">Email</Label>
+                  <Switch
+                    checked={formData.email_system_announcements}
+                    onCheckedChange={() => handleToggle("email_system_announcements")}
+                    disabled={!formData.email_enabled}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Role Changes */}
+            <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Role Changes</Label>
-                <p className="text-sm text-muted-foreground">
-                  When your permissions or roles are modified.
-                </p>
+                <p className="text-sm text-muted-foreground">When your permissions or roles are modified.</p>
               </div>
               <Switch
                 checked={formData.role_changes}
@@ -169,26 +269,24 @@ function NotificationSettingsPage() {
               />
             </div>
 
-            <div className="flex items-center justify-between">
+            {/* System Alerts */}
+            <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">System Alerts</Label>
-                <p className="text-sm text-muted-foreground">
-                  Critical security and system notifications.
-                </p>
+                <p className="text-sm text-muted-foreground">Critical security and system notifications.</p>
               </div>
               <Switch
                 checked={formData.system_alerts}
                 onCheckedChange={() => handleToggle("system_alerts")}
-                disabled={true} // Usually shouldn't be disabled fully, but just for demo
+                disabled={true}
               />
             </div>
 
+            {/* Marketing & News */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Marketing & News</Label>
-                <p className="text-sm text-muted-foreground">
-                  Occasional updates about DevLink features.
-                </p>
+                <p className="text-sm text-muted-foreground">Occasional updates about DevLink features.</p>
               </div>
               <Switch
                 checked={formData.marketing_emails}

@@ -75,6 +75,8 @@ from .search_analytics import SearchQueryLog, SearchClickLog
 from .feedback import UserFeedback
 
 from .webhook import WebhookDelivery, WebhookDeadLetterQueue, WebhookDeliveryStatus
+from .plugin import Plugin, PluginInstallation, PluginType, PluginStatus
 from .security_event import SecurityEvent, SecurityEventType, SecurityEventSeverity
 from .profile_suggestion import ProfileSuggestionDismissal
 from .request_log import RequestLog  # noqa: F401
+from .background_job import BackgroundJob, JobStatus
