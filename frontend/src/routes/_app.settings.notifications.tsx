@@ -1,14 +1,13 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/lib/api";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
-export const Route = createFileRoute('/_app/settings/notifications')({
+export const Route = createFileRoute("/_app/settings/notifications")({
   component: NotificationSettingsPage,
 });
 
@@ -17,9 +16,9 @@ function NotificationSettingsPage() {
   const { toast } = useToast();
 
   const { data: preferences, isLoading } = useQuery({
-    queryKey: ['notification-preferences'],
+    queryKey: ["notification-preferences"],
     queryFn: async () => {
-      const res = await api.get('/api/notifications/preferences');
+      const res = await api.get("/api/notifications/preferences");
       return res.data;
     },
   });
@@ -52,10 +51,10 @@ function NotificationSettingsPage() {
 
   const updateMutation = useMutation({
     mutationFn: async (newData: typeof formData) => {
-      await api.put('/api/notifications/preferences', newData);
+      await api.put("/api/notifications/preferences", newData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notification-preferences'] });
+      queryClient.invalidateQueries({ queryKey: ["notification-preferences"] });
       toast({
         title: "Preferences updated",
         description: "Your notification settings have been saved successfully.",
@@ -67,7 +66,7 @@ function NotificationSettingsPage() {
         title: "Error",
         description: "Failed to update preferences.",
       });
-    }
+    },
   });
 
   const handleToggle = (key: keyof typeof formData) => {
@@ -97,20 +96,20 @@ function NotificationSettingsPage() {
                 <Label className="text-base font-semibold">Master Email Notifications</Label>
                 <p className="text-sm text-muted-foreground">Master switch to enable or disable all email notifications.</p>
               </div>
-              <Switch 
-                checked={formData.email_enabled} 
-                onCheckedChange={() => handleToggle('email_enabled')} 
+              <Switch
+                checked={formData.email_enabled}
+                onCheckedChange={() => handleToggle("email_enabled")}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">In-App Notifications</Label>
                 <p className="text-sm text-muted-foreground">Store notifications in your notification center tray.</p>
               </div>
-              <Switch 
-                checked={formData.database_enabled} 
-                onCheckedChange={() => handleToggle('database_enabled')} 
+              <Switch
+                checked={formData.database_enabled}
+                onCheckedChange={() => handleToggle("database_enabled")}
               />
             </div>
 
@@ -119,9 +118,9 @@ function NotificationSettingsPage() {
                 <Label className="text-base font-semibold">Real-time Popups (WebSocket)</Label>
                 <p className="text-sm text-muted-foreground">Receive instant desktop toast popups while actively using DevLink.</p>
               </div>
-              <Switch 
-                checked={formData.websocket_enabled} 
-                onCheckedChange={() => handleToggle('websocket_enabled')} 
+              <Switch
+                checked={formData.websocket_enabled}
+                onCheckedChange={() => handleToggle("websocket_enabled")}
               />
             </div>
           </CardContent>
@@ -142,16 +141,16 @@ function NotificationSettingsPage() {
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
                   <Label className="text-xs text-muted-foreground">In-App</Label>
-                  <Switch 
-                    checked={formData.messages} 
-                    onCheckedChange={() => handleToggle('messages')} 
+                  <Switch
+                    checked={formData.messages}
+                    onCheckedChange={() => handleToggle("messages")}
                   />
                 </div>
                 <div className="flex items-center space-x-2">
                   <Label className="text-xs text-muted-foreground">Email</Label>
-                  <Switch 
-                    checked={formData.email_messages} 
-                    onCheckedChange={() => handleToggle('email_messages')}
+                  <Switch
+                    checked={formData.email_messages}
+                    onCheckedChange={() => handleToggle("email_messages")}
                     disabled={!formData.email_enabled}
                   />
                 </div>
@@ -167,16 +166,16 @@ function NotificationSettingsPage() {
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
                   <Label className="text-xs text-muted-foreground">In-App</Label>
-                  <Switch 
-                    checked={formData.team_invitations} 
-                    onCheckedChange={() => handleToggle('team_invitations')} 
+                  <Switch
+                    checked={formData.team_invitations}
+                    onCheckedChange={() => handleToggle("team_invitations")}
                   />
                 </div>
                 <div className="flex items-center space-x-2">
                   <Label className="text-xs text-muted-foreground">Email</Label>
-                  <Switch 
-                    checked={formData.email_team_invitations} 
-                    onCheckedChange={() => handleToggle('email_team_invitations')}
+                  <Switch
+                    checked={formData.email_team_invitations}
+                    onCheckedChange={() => handleToggle("email_team_invitations")}
                     disabled={!formData.email_enabled}
                   />
                 </div>
@@ -192,16 +191,16 @@ function NotificationSettingsPage() {
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
                   <Label className="text-xs text-muted-foreground">In-App</Label>
-                  <Switch 
-                    checked={formData.project_updates} 
-                    onCheckedChange={() => handleToggle('project_updates')} 
+                  <Switch
+                    checked={formData.project_updates}
+                    onCheckedChange={() => handleToggle("project_updates")}
                   />
                 </div>
                 <div className="flex items-center space-x-2">
                   <Label className="text-xs text-muted-foreground">Email</Label>
-                  <Switch 
-                    checked={formData.email_project_updates} 
-                    onCheckedChange={() => handleToggle('email_project_updates')}
+                  <Switch
+                    checked={formData.email_project_updates}
+                    onCheckedChange={() => handleToggle("email_project_updates")}
                     disabled={!formData.email_enabled}
                   />
                 </div>
@@ -217,16 +216,16 @@ function NotificationSettingsPage() {
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
                   <Label className="text-xs text-muted-foreground">In-App</Label>
-                  <Switch 
-                    checked={formData.mentions} 
-                    onCheckedChange={() => handleToggle('mentions')} 
+                  <Switch
+                    checked={formData.mentions}
+                    onCheckedChange={() => handleToggle("mentions")}
                   />
                 </div>
                 <div className="flex items-center space-x-2">
                   <Label className="text-xs text-muted-foreground">Email</Label>
-                  <Switch 
-                    checked={formData.email_mentions} 
-                    onCheckedChange={() => handleToggle('email_mentions')}
+                  <Switch
+                    checked={formData.email_mentions}
+                    onCheckedChange={() => handleToggle("email_mentions")}
                     disabled={!formData.email_enabled}
                   />
                 </div>
@@ -234,7 +233,7 @@ function NotificationSettingsPage() {
             </div>
 
             {/* System Announcements */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">System Announcements</Label>
                 <p className="text-sm text-muted-foreground">Platform updates, scheduled maintenance, and system alerts.</p>
@@ -242,20 +241,57 @@ function NotificationSettingsPage() {
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
                   <Label className="text-xs text-muted-foreground">In-App</Label>
-                  <Switch 
-                    checked={formData.system_announcements} 
-                    onCheckedChange={() => handleToggle('system_announcements')} 
+                  <Switch
+                    checked={formData.system_announcements}
+                    onCheckedChange={() => handleToggle("system_announcements")}
                   />
                 </div>
                 <div className="flex items-center space-x-2">
                   <Label className="text-xs text-muted-foreground">Email</Label>
-                  <Switch 
-                    checked={formData.email_system_announcements} 
-                    onCheckedChange={() => handleToggle('email_system_announcements')}
+                  <Switch
+                    checked={formData.email_system_announcements}
+                    onCheckedChange={() => handleToggle("email_system_announcements")}
                     disabled={!formData.email_enabled}
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Role Changes */}
+            <div className="flex items-center justify-between pb-4 border-b">
+              <div className="space-y-0.5">
+                <Label className="text-base font-semibold">Role Changes</Label>
+                <p className="text-sm text-muted-foreground">When your permissions or roles are modified.</p>
+              </div>
+              <Switch
+                checked={formData.role_changes}
+                onCheckedChange={() => handleToggle("role_changes")}
+              />
+            </div>
+
+            {/* System Alerts */}
+            <div className="flex items-center justify-between pb-4 border-b">
+              <div className="space-y-0.5">
+                <Label className="text-base font-semibold">System Alerts</Label>
+                <p className="text-sm text-muted-foreground">Critical security and system notifications.</p>
+              </div>
+              <Switch
+                checked={formData.system_alerts}
+                onCheckedChange={() => handleToggle("system_alerts")}
+                disabled={true}
+              />
+            </div>
+
+            {/* Marketing & News */}
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label className="text-base font-semibold">Marketing & News</Label>
+                <p className="text-sm text-muted-foreground">Occasional updates about DevLink features.</p>
+              </div>
+              <Switch
+                checked={formData.marketing_emails}
+                onCheckedChange={() => handleToggle("marketing_emails")}
+              />
             </div>
           </CardContent>
         </Card>

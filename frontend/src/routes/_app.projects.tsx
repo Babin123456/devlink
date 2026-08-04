@@ -19,13 +19,23 @@ import { useProjectFilters } from "@/hooks/useProjectFilters";
 import { cn } from "@/lib/utils";
 import { getRecentlyViewedProjectIds } from "@/lib/recentlyViewedProjects";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { FilterDrawer, FilterSection } from "@/components/ui/filter-drawer";
 
 export const projectSearchSchema = z.object({
   page: z.number().catch(1).optional(),
   q: z.string().optional(),
-  language: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
-  experience: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
-  tech: z.union([z.string(), z.array(z.string())]).optional().transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  language: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  experience: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
+  tech: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => (Array.isArray(val) ? val : val ? [val] : [])),
   remote: z.boolean().optional(),
   paid: z.boolean().optional(),
   opensource: z.boolean().optional(),
@@ -45,7 +55,13 @@ export const Route = createFileRoute("/_app/projects")({
 function ProjectsPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const navigate = Route.useNavigate();
-  const { filters, setFilters, clearFilters, hasActiveFilters: hasFilters, chipFilterCount } = useProjectFilters();
+  const {
+    filters,
+    setFilters,
+    clearFilters,
+    hasActiveFilters: hasFilters,
+    chipFilterCount,
+  } = useProjectFilters();
   const page = filters.page || 1;
   const ITEMS_PER_PAGE = 6;
   const [createOpen, setCreateOpen] = useState(false);
@@ -63,7 +79,15 @@ function ProjectsPage() {
   }, []);
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ["projects", filters.language, filters.experience, filters.remote, filters.paid, filters.opensource, filters.tech],
+    queryKey: [
+      "projects",
+      filters.language,
+      filters.experience,
+      filters.remote,
+      filters.paid,
+      filters.opensource,
+      filters.tech,
+    ],
     queryFn: () =>
       projectsService.list({
         language: filters.language?.length ? filters.language.join(",") : undefined,
@@ -104,7 +128,6 @@ function ProjectsPage() {
     setStatusFilter("all");
     clearFilters();
   }
-
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -224,28 +247,86 @@ function ProjectsPage() {
           )}
         </div>
 
-        <BottomSheet
+        <FilterDrawer
           open={showFilters}
           onOpenChange={setShowFilters}
-          title="Filters"
-          description={
-            chipFilterCount > 0
-              ? `${chipFilterCount} active filter${chipFilterCount !== 1 ? "s" : ""}`
-              : undefined
-          }
-          footer={
-            hasActiveFilters ? (
-              <button
-                onClick={handleClearAllFilters}
-                className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-border px-3 py-2 text-[13px] font-medium text-muted-foreground transition-colors hover:border-destructive/50 hover:text-destructive"
-              >
-                <X size={13} /> Clear all filters
-              </button>
-            ) : undefined
-          }
-        >
-          <ProjectFilters />
-        </BottomSheet>
+          title="Filter Projects"
+          description="Filter projects by programming language, experience, type, and tech stack"
+          activeCount={chipFilterCount}
+          sections={[
+            {
+              id: "language",
+              title: "Language",
+              type: "multi",
+              options: [
+                { label: "JavaScript", value: "JavaScript" },
+                { label: "TypeScript", value: "TypeScript" },
+                { label: "Python", value: "Python" },
+                { label: "Java", value: "Java" },
+                { label: "Go", value: "Go" },
+                { label: "Rust", value: "Rust" },
+              ],
+            },
+            {
+              id: "experience",
+              title: "Experience Level",
+              type: "select",
+              options: [
+                { label: "Beginner", value: "beginner" },
+                { label: "Intermediate", value: "intermediate" },
+                { label: "Advanced", value: "advanced" },
+              ],
+            },
+            {
+              id: "remote",
+              title: "Work Location",
+              type: "single",
+              options: [
+                { label: "Remote", value: "true" },
+                { label: "Onsite", value: "false" },
+              ],
+            },
+            {
+              id: "paid",
+              title: "Compensation",
+              type: "single",
+              options: [
+                { label: "Paid", value: "true" },
+                { label: "Unpaid", value: "false" },
+              ],
+            },
+            {
+              id: "opensource",
+              title: "Open Source",
+              type: "single",
+              options: [
+                { label: "Yes", value: "true" },
+                { label: "No", value: "false" },
+              ],
+            },
+          ]}
+          values={{
+            language: language ? language.split(",") : [],
+            experience: experience,
+            remote: remote,
+            paid: paid,
+            opensource: openSource,
+          }}
+          onApply={(newValues) => {
+            const selectedLangs = Array.isArray(newValues.language)
+              ? newValues.language.join(",")
+              : newValues.language;
+            handleSetFilters({
+              language: selectedLangs || "",
+              experience: newValues.experience || "",
+              remote: newValues.remote || "",
+              paid: newValues.paid || "",
+              openSource: newValues.opensource || "",
+              techStack: techStack || "",
+            });
+          }}
+          onReset={clearFilters}
+        />
       </Card>
 
       {isLoading ? (

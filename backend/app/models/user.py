@@ -30,6 +30,13 @@ class UserRole(str, Enum):
     MODERATOR = "moderator"
 
 
+class UserRole(str, Enum):
+    USER = "user"
+    DEVELOPER = "developer"
+    ADMIN = "admin"
+
+
+
 class User(Base):
     """
     DevLink User Model
@@ -238,6 +245,26 @@ class User(Base):
         Boolean,
         default=False,
         nullable=False,
+    )
+
+    # ------------------------------------------------------------------
+    # Multi-Factor Authentication (MFA)
+    # ------------------------------------------------------------------
+
+    mfa_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    mfa_secret: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+
+    mfa_backup_codes: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
     )
 
     # System-level RBAC role (issue #357).

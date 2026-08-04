@@ -62,12 +62,15 @@ function Thread() {
   const { isConnected, typingUsers, broadcastMessage, broadcastTyping } = useChatWebSocket(
     conversationId,
     user?.id || "",
-    useCallback((msg: any) => {
-      // Invalidate thread query when a new message arrives via WS
-      queryClient.invalidateQueries({ queryKey: ["thread", conversationId] });
-      // Invalidate conversations list to update latest preview/timestamp
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
-    }, [queryClient, conversationId])
+    useCallback(
+      (msg: unknown) => {
+        // Invalidate thread query when a new message arrives via WS
+        queryClient.invalidateQueries({ queryKey: ["thread", conversationId] });
+        // Invalidate conversations list to update latest preview/timestamp
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      },
+      [queryClient, conversationId],
+    ),
   );
 
   const themTyping = typingUsers.length > 0;
@@ -128,7 +131,7 @@ function Thread() {
         setText("");
         // Notify others via WS
         broadcastMessage(text);
-        
+
         // Invalidate queries to reload thread and conversations
         queryClient.invalidateQueries({ queryKey: ["thread", conversationId] });
         queryClient.invalidateQueries({ queryKey: ["conversations"] });

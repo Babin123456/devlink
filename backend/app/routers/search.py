@@ -12,7 +12,6 @@ from app.schemas.search_index import (
 from app.services.search_service import SearchService
 from app.services.search_index_service import SearchIndexService
 from app.services.search_analytics_service import SearchAnalyticsService
-from app.dependencies import get_optional_current_user as get_current_user_optional, get_current_user
 from app.dependencies import get_current_user, get_optional_current_user
 from app.models.user import User, UserRole
 import time
@@ -203,8 +202,7 @@ def run_search_benchmark(
 
 
 @router.get(
-    "/analytics/dashboard",
-    response_model=dict,
+    "/analytics",
     summary="Get search analytics dashboard metrics",
 )
 def get_analytics_dashboard(
