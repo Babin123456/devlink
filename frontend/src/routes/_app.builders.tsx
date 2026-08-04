@@ -389,8 +389,9 @@ function BuildersPage() {
               desc={
                 tab === "connections"
                   ? "Connect with builders to keep track of potential collaborators here."
-                  : "We couldn't find any developers matching your criteria."
+                  : "Try adjusting your search filters or explore more builders."
               }
+              illustration="no-results"
             />
           </div>
         ) : tab === "matches" ? (
