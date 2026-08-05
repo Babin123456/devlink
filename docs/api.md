@@ -119,7 +119,36 @@ All error responses across the API follow a unified JSON payload structure:
 
 ---
 
+## API Pagination Standard
+
+DevLink APIs use a standardized cursor-based pagination model (with optional offset support) across list endpoints.
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `limit` | `integer` | `20` | Maximum number of items to return (1-100). |
+| `cursor` | `string` | `null` | Base64-encoded cursor token from previous response `next_cursor` or `prev_cursor`. |
+| `offset` | `integer` | `0` | Optional numeric offset for offset-based pagination. |
+
+### Paginated Response Structure
+
+```json
+{
+  "items": [ ... ],
+  "total": 142,
+  "limit": 20,
+  "next_cursor": "eyJpZCI6ICIxMjMiLCAidmFsIjogIjIwMjYtMDgtMDQifQ==",
+  "prev_cursor": null,
+  "has_next": true,
+  "has_prev": false
+}
+```
+
+---
+
 ## Authentication Endpoints (`/api/auth`)
+
 
 ### 1. Register User
 
