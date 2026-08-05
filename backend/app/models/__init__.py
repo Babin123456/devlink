@@ -5,6 +5,7 @@ Database models package.
 """
 
 from .activity import Activity  # noqa: F401
+from .api_key import ApiKey  # noqa: F401
 from .application import Application  # noqa: F401
 from .audit_log import AuditLog  # noqa: F401
 from .bookmark import Bookmark  # noqa: F401

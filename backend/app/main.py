@@ -615,6 +615,10 @@ app.include_router(
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
 
+from app.routers import api_keys
+app.include_router(api_keys.router, prefix="/api/v1")
+app.include_router(api_keys.org_api_keys_router, prefix="/api/v1")
+
 from app.routers import background_jobs
 app.include_router(background_jobs.router, prefix="/api")
 
