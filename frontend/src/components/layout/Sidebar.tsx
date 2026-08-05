@@ -27,41 +27,109 @@ export const SIDEBAR_SECTIONS: SidebarSectionProps[] = [
   {
     label: "Navigation",
     items: [
-      { label: "Dashboard", to: "/dashboard", icon: <LayoutDashboard size={16} /> },
-      { label: "Projects", to: "/projects", icon: <FolderKanban size={16} /> },
-      { label: "Explore", to: "/search", icon: <Compass size={16} /> },
-      { label: "Bookmarks", to: "/bookmarks", icon: <Bookmark size={16} /> },
+      {
+        label: "Dashboard",
+        to: "/dashboard",
+        icon: <LayoutDashboard size={16} strokeWidth={2} />,
+      },
+      {
+        label: "Projects",
+        to: "/projects",
+        icon: <FolderKanban size={16} strokeWidth={2} />,
+      },
+      {
+        label: "Explore",
+        to: "/search",
+        icon: <Compass size={16} strokeWidth={2} />,
+      },
+      {
+        label: "Bookmarks",
+        to: "/bookmarks",
+        icon: <Bookmark size={16} strokeWidth={2} />,
+      },
     ],
   },
   {
     label: "Community",
     items: [
-      { label: "Builders", to: "/builders", icon: <Users2 size={16} /> },
-      { label: "Organizations", to: "/organizations", icon: <Building2 size={16} /> },
-      { label: "AI Matches", to: "/builders?tab=matches", icon: <Sparkles size={16} /> },
-      { label: "Connections", to: "/builders?tab=connections", icon: <Share2 size={16} /> },
+      {
+        label: "Builders",
+        to: "/builders",
+        icon: <Users2 size={16} strokeWidth={2} />,
+      },
+      {
+        label: "Organizations",
+        to: "/organizations",
+        icon: <Building2 size={16} strokeWidth={2} />,
+      },
+      {
+        label: "AI Matches",
+        to: "/builders?tab=matches",
+        icon: <Sparkles size={16} strokeWidth={2} />,
+      },
+      {
+        label: "Connections",
+        to: "/builders?tab=connections",
+        icon: <Share2 size={16} strokeWidth={2} />,
+      },
     ],
   },
   {
     label: "Flares",
     items: [
-      { label: "Community Feed", to: "/flares", icon: <Rss size={16} /> },
-      { label: "My Flares", to: "/flares?tab=mine", icon: <Flame size={16} /> },
-      { label: "Trending", to: "/flares?tab=trending", icon: <TrendingUp size={16} /> },
+      {
+        label: "Community Feed",
+        to: "/flares",
+        icon: <Rss size={16} strokeWidth={2} />,
+      },
+      {
+        label: "My Flares",
+        to: "/flares?tab=mine",
+        icon: <Flame size={16} strokeWidth={2} />,
+      },
+      {
+        label: "Trending",
+        to: "/flares?tab=trending",
+        icon: <TrendingUp size={16} strokeWidth={2} />,
+      },
     ],
   },
   {
     label: "Productivity",
     items: [
-      { label: "Messages", to: "/messages", icon: <MessageSquare size={16} />, badge: 3 },
-      { label: "Hackathons", to: "/hackathons", icon: <Trophy size={16} /> },
-      { label: "Notifications", to: "/notifications", icon: <Bell size={16} />, badge: 8 },
-      { label: "Analytics", to: "/analytics", icon: <BarChart3 size={16} /> },
+      {
+        label: "Messages",
+        to: "/messages",
+        icon: <MessageSquare size={16} strokeWidth={2} />,
+        badge: 3,
+      },
+      {
+        label: "Hackathons",
+        to: "/hackathons",
+        icon: <Trophy size={16} strokeWidth={2} />,
+      },
+      {
+        label: "Notifications",
+        to: "/notifications",
+        icon: <Bell size={16} strokeWidth={2} />,
+        badge: 8,
+      },
+      {
+        label: "Analytics",
+        to: "/analytics",
+        icon: <BarChart3 size={16} strokeWidth={2} />,
+      },
     ],
   },
   {
     label: "Account",
-    items: [{ label: "Settings", to: "/settings", icon: <Settings size={16} /> }],
+    items: [
+      {
+        label: "Settings",
+        to: "/settings",
+        icon: <Settings size={16} strokeWidth={2} />,
+      },
+    ],
   },
 ];
 
