@@ -16,6 +16,11 @@ from app.schemas.project_audit import (
     PaginatedProjectAuditLogsResponse,
     ProjectAuditLogResponse,
 )
+from app.schemas.project_version import (
+    PaginatedProjectVersionsResponse,
+    ProjectVersionCompareResponse,
+    ProjectVersionResponse,
+)
 from app.schemas.duplicate_detection import (
     DuplicateProjectCheckRequest,
     DuplicateProjectCheckResponse,
