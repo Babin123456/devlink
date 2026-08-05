@@ -76,3 +76,11 @@ export type {
   Bookmark,
 } from "./modules/collections";
 export type { TeamMatchRequest, TeamMatchResponse } from "./modules/teamMatch";
+export { projectInsightsApi } from "./modules/projectInsights";
+export type {
+  ProjectInsightsResponse,
+  ProjectInsightsRequest,
+  SuggestedBuilder,
+  RoleGap,
+  RiskAlert,
+} from "./modules/projectInsights";
