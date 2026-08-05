@@ -615,6 +615,10 @@ app.include_router(
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
 
+from app.routers import background_jobs
+app.include_router(background_jobs.router, prefix="/api")
+
+from fastapi.openapi.utils import get_openapi
 from app.routers import feature_flags
 
 app.include_router(feature_flags.router, prefix="/api", tags=["Feature Flags"])

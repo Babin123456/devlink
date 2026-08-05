@@ -16,6 +16,11 @@ from app.schemas.project_audit import (
     PaginatedProjectAuditLogsResponse,
     ProjectAuditLogResponse,
 )
+from app.schemas.project_version import (
+    PaginatedProjectVersionsResponse,
+    ProjectVersionCompareResponse,
+    ProjectVersionResponse,
+)
 from app.schemas.duplicate_detection import (
     DuplicateProjectCheckRequest,
     DuplicateProjectCheckResponse,
@@ -811,3 +816,112 @@ def hard_delete_project(
         db,
         project,
     )
+
+
+# ==========================================================
+# Project Version History Endpoints (#606)
+# ==========================================================
+
+
+@router.get(
+    "/{project_id}/versions",
+    response_model=PaginatedProjectVersionsResponse,
+    summary="List Project Version History",
+    description="Retrieve paginated history of edits made to project details (title, description, tech stack, team roles, requirements).",
+)
+def list_project_versions(
+    project_id: uuid.UUID,
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_database),
+) -> PaginatedProjectVersionsResponse:
+    from app.services.project_version_service import ProjectVersionService
+
+    res = ProjectVersionService.list_versions(
+        db,
+        project_id=project_id,
+        page=page,
+        limit=limit,
+    )
+    items = [ProjectVersionResponse.model_validate(v) for v in res["items"]]
+    return PaginatedProjectVersionsResponse(
+        items=items,
+        total=res["total"],
+        page=res["page"],
+        limit=res["limit"],
+        pages=res["pages"],
+    )
+
+
+@router.get(
+    "/{project_id}/versions/compare",
+    response_model=ProjectVersionCompareResponse,
+    summary="Compare Project Versions",
+    description="Compare two versions (or compare a version against current state) to view field-level diffs.",
+)
+def compare_project_versions(
+    project_id: uuid.UUID,
+    v1: str = Query(..., description="First version identifier (UUID or version number)"),
+    v2: str = Query("current", description="Second version identifier (UUID, version number, or 'current')"),
+    db: Session = Depends(get_database),
+) -> ProjectVersionCompareResponse:
+    from app.services.project_version_service import ProjectVersionService
+
+    res = ProjectVersionService.compare_versions(
+        db,
+        project_id=project_id,
+        v1_identifier=v1,
+        v2_identifier=v2,
+    )
+    return ProjectVersionCompareResponse(
+        project_id=res["project_id"],
+        v1_version_number=res["v1_version_number"],
+        v2_version_number=res["v2_version_number"],
+        v1_snapshot=ProjectVersionResponse.model_validate(res["v1_snapshot"]),
+        v2_snapshot=res["v2_snapshot"],
+        diff=res["diff"],
+    )
+
+
+@router.get(
+    "/{project_id}/versions/{version_identifier}",
+    response_model=ProjectVersionResponse,
+    summary="Get Specific Project Version",
+    description="Retrieve snapshot details for a specific project version.",
+)
+def get_project_version(
+    project_id: uuid.UUID,
+    version_identifier: str,
+    db: Session = Depends(get_database),
+) -> ProjectVersionResponse:
+    from app.services.project_version_service import ProjectVersionService
+
+    version = ProjectVersionService.get_version(
+        db,
+        project_id=project_id,
+        version_identifier=version_identifier,
+    )
+    return ProjectVersionResponse.model_validate(version)
+
+
+@router.post(
+    "/{project_id}/versions/{version_identifier}/restore",
+    response_model=ProjectResponse,
+    summary="Restore Project Version",
+    description="Restore project details to a previous version snapshot. Automatically captures a backup version of the current state before reverting.",
+)
+def restore_project_version(
+    project_id: uuid.UUID,
+    version_identifier: str,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+) -> ProjectResponse:
+    from app.services.project_version_service import ProjectVersionService
+
+    restored_project = ProjectVersionService.restore_version(
+        db,
+        project_id=project_id,
+        version_identifier=version_identifier,
+        actor_user=current_user,
+    )
+    return restored_project
