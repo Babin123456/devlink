@@ -16,6 +16,7 @@ import { Star, GitFork, Users2, Plus, Search, SlidersHorizontal, X } from "lucid
 import { useEffect, useMemo, useState } from "react";
 import { CreateProjectDialog } from "@/components/projects/CreateProjectDialog";
 import { ProjectFilters } from "@/components/projects/ProjectFilters";
+import { ProjectInsightsCard } from "@/components/projects/ProjectInsightsCard";
 import { useProjectFilters } from "@/hooks/useProjectFilters";
 import { cn } from "@/lib/utils";
 import { getRecentlyViewedProjectIds } from "@/lib/recentlyViewedProjects";
@@ -437,6 +438,15 @@ function ProjectsPage() {
                         .join(" ")}
                     </span>
                   </div>
+                  <ProjectInsightsCard
+                    compact
+                    projectId={p.id}
+                    title={p.name}
+                    description={p.description}
+                    techStack={p.stack}
+                    status={p.status}
+                    members={p.members}
+                  />
                 </Card>
               </Link>
             ))}
