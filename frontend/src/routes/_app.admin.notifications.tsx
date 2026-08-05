@@ -14,19 +14,30 @@ export const Route = createFileRoute("/_app/admin/notifications")({
 function AdminNotificationsPage() {
   const queryClient = useQueryClient();
 
+  interface FailedNotification {
+    id: string;
+    title: string;
+    message: string;
+    channel: string;
+    recipient_id: string;
+  }
+
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["admin-notification-stats"],
     queryFn: async () => {
-      const res = await api.get("/admin/notifications/stats");
-      return res.data;
+      return api.get<{
+        total: number;
+        pending: number;
+        sent: number;
+        failed: number;
+      }>("/admin/notifications/stats");
     },
   });
 
   const { data: failed, isLoading: failedLoading } = useQuery({
     queryKey: ["admin-notification-failed"],
     queryFn: async () => {
-      const res = await api.get("/admin/notifications/failed");
-      return res.data;
+      return api.get<FailedNotification[]>("/admin/notifications/failed");
     },
   });
 
@@ -99,7 +110,7 @@ function AdminNotificationsPage() {
           <p className="text-muted-foreground">No failed deliveries to display.</p>
         ) : (
           <div className="space-y-4">
-            {failed?.map((notification: any) => (
+            {failed?.map((notification: FailedNotification) => (
               <Card key={notification.id}>
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>

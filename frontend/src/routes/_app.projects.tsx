@@ -308,6 +308,29 @@ function ProjectsPage() {
             },
           ]}
           values={{
+            language: filters.language ?? [],
+            experience: filters.experience?.[0] ?? "",
+            remote: filters.remote === undefined ? "" : String(filters.remote),
+            paid: filters.paid === undefined ? "" : String(filters.paid),
+            opensource: filters.opensource === undefined ? "" : String(filters.opensource),
+          }}
+          onApply={(newValues) => {
+            const boolOrUndefined = (v: unknown): boolean | undefined =>
+              v === "" || v === undefined ? undefined : v === "true";
+            const stringOrUndefined = (v: unknown): string | undefined =>
+              typeof v === "string" && v !== "" ? v : undefined;
+            setFilters({
+              language: Array.isArray(newValues.language)
+                ? (newValues.language as string[])
+                : stringOrUndefined(newValues.language)
+                  ? [newValues.language as string]
+                  : [],
+              experience: stringOrUndefined(newValues.experience)
+                ? [newValues.experience as string]
+                : [],
+              remote: boolOrUndefined(newValues.remote),
+              paid: boolOrUndefined(newValues.paid),
+              opensource: boolOrUndefined(newValues.opensource),
             language: filters.language ? filters.language : [],
             experience: filters.experience,
             remote: filters.remote ? "true" : "false",

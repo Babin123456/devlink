@@ -177,16 +177,16 @@ export function toast({
 }
 
 toast.success = (title: React.ReactNode, options?: ToastOptions) =>
-  toast({ title, type: "success", variant: "success", ...options });
+  toast({ title, type: "success", variant: "success", ...options } as ToastProps);
 
 toast.error = (title: React.ReactNode, options?: ToastOptions) =>
-  toast({ title, type: "error", variant: "destructive", ...options });
+  toast({ title, type: "error", variant: "destructive", ...options } as ToastProps);
 
 toast.warning = (title: React.ReactNode, options?: ToastOptions) =>
-  toast({ title, type: "warning", variant: "warning", ...options });
+  toast({ title, type: "warning", variant: "warning", ...options } as ToastProps);
 
 toast.info = (title: React.ReactNode, options?: ToastOptions) =>
-  toast({ title, type: "info", variant: "info", ...options });
+  toast({ title, type: "info", variant: "info", ...options } as ToastProps);
 
 toast.dismiss = (toastId?: string) => {
   sonnerToast.dismiss(toastId);

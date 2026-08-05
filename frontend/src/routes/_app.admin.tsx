@@ -66,6 +66,45 @@ export const Route = createFileRoute("/_app/admin")({
       </div>
 
       <div className="flex border-b border-border gap-2 md:gap-4 overflow-x-auto scrollbar-none">
+        <Link
+          to="/admin/audit-logs"
+          activeProps={{
+            className:
+              "border-b-2 border-primary font-semibold text-foreground px-4 py-2 text-sm whitespace-nowrap",
+          }}
+          inactiveProps={{
+            className:
+              "text-muted-foreground px-4 py-2 hover:text-foreground transition-colors text-sm whitespace-nowrap",
+          }}
+        >
+          Audit Logs
+        </Link>
+        <Link
+          to="/admin/notifications"
+          activeProps={{
+            className:
+              "border-b-2 border-primary font-semibold text-foreground px-4 py-2 text-sm whitespace-nowrap",
+          }}
+          inactiveProps={{
+            className:
+              "text-muted-foreground px-4 py-2 hover:text-foreground transition-colors text-sm whitespace-nowrap",
+          }}
+        >
+          Notification Delivery
+        </Link>
+        <Link
+          to="/admin/jobs"
+          activeProps={{
+            className:
+              "border-b-2 border-primary font-semibold text-foreground px-4 py-2 text-sm whitespace-nowrap",
+          }}
+          inactiveProps={{
+            className:
+              "text-muted-foreground px-4 py-2 hover:text-foreground transition-colors text-sm whitespace-nowrap",
+          }}
+        >
+          Background Jobs
+        </Link>
         {ADMIN_TABS.map((tab) => (
           <Link
             key={tab.to}

@@ -20,7 +20,7 @@ function NotificationSettingsPage() {
     queryKey: ["notification-preferences"],
     queryFn: async () => {
       const res = await api.get("/api/notifications/preferences");
-      return res.data;
+      return res;
     },
   });
 
@@ -82,20 +82,26 @@ function NotificationSettingsPage() {
     <div className="space-y-6 max-w-4xl mx-auto p-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Notification Preferences Center</h2>
-        <p className="text-muted-foreground">Manage your notification channels, category alerts, and email delivery preferences.</p>
+        <p className="text-muted-foreground">
+          Manage your notification channels, category alerts, and email delivery preferences.
+        </p>
       </div>
 
       <div className="grid gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Delivery Channels</CardTitle>
-            <CardDescription>Master controls for global notification delivery methods.</CardDescription>
+            <CardDescription>
+              Master controls for global notification delivery methods.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Master Email Notifications</Label>
-                <p className="text-sm text-muted-foreground">Master switch to enable or disable all email notifications.</p>
+                <p className="text-sm text-muted-foreground">
+                  Master switch to enable or disable all email notifications.
+                </p>
               </div>
               <Switch
                 checked={formData.email_enabled}
@@ -106,7 +112,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">In-App Notifications</Label>
-                <p className="text-sm text-muted-foreground">Store notifications in your notification center tray.</p>
+                <p className="text-sm text-muted-foreground">
+                  Store notifications in your notification center tray.
+                </p>
               </div>
               <Switch
                 checked={formData.database_enabled}
@@ -117,7 +125,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Real-time Popups (WebSocket)</Label>
-                <p className="text-sm text-muted-foreground">Receive instant desktop toast popups while actively using DevLink.</p>
+                <p className="text-sm text-muted-foreground">
+                  Receive instant desktop toast popups while actively using DevLink.
+                </p>
               </div>
               <Switch
                 checked={formData.websocket_enabled}
@@ -130,14 +140,18 @@ function NotificationSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Notification Categories</CardTitle>
-            <CardDescription>Configure in-app and email preferences for specific notification categories.</CardDescription>
+            <CardDescription>
+              Configure in-app and email preferences for specific notification categories.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Messages */}
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Messages</Label>
-                <p className="text-sm text-muted-foreground">Direct messages and active conversation alerts.</p>
+                <p className="text-sm text-muted-foreground">
+                  Direct messages and active conversation alerts.
+                </p>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
@@ -162,7 +176,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Team Invitations</Label>
-                <p className="text-sm text-muted-foreground">Project invites, team membership, and role changes.</p>
+                <p className="text-sm text-muted-foreground">
+                  Project invites, team membership, and role changes.
+                </p>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
@@ -187,7 +203,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Project Updates</Label>
-                <p className="text-sm text-muted-foreground">Milestones, project status changes, and repository activity.</p>
+                <p className="text-sm text-muted-foreground">
+                  Milestones, project status changes, and repository activity.
+                </p>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
@@ -212,7 +230,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Mentions</Label>
-                <p className="text-sm text-muted-foreground">When developers tag or mention @username in issues or discussions.</p>
+                <p className="text-sm text-muted-foreground">
+                  When developers tag or mention @username in issues or discussions.
+                </p>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
@@ -237,7 +257,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">System Announcements</Label>
-                <p className="text-sm text-muted-foreground">Platform updates, scheduled maintenance, and system alerts.</p>
+                <p className="text-sm text-muted-foreground">
+                  Platform updates, scheduled maintenance, and system alerts.
+                </p>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
@@ -262,7 +284,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Role Changes</Label>
-                <p className="text-sm text-muted-foreground">When your permissions or roles are modified.</p>
+                <p className="text-sm text-muted-foreground">
+                  When your permissions or roles are modified.
+                </p>
               </div>
               <Switch
                 checked={formData.role_changes}
@@ -274,7 +298,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">System Alerts</Label>
-                <p className="text-sm text-muted-foreground">Critical security and system notifications.</p>
+                <p className="text-sm text-muted-foreground">
+                  Critical security and system notifications.
+                </p>
               </div>
               <Switch
                 checked={formData.system_alerts}
@@ -287,7 +313,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Marketing & News</Label>
-                <p className="text-sm text-muted-foreground">Occasional updates about DevLink features.</p>
+                <p className="text-sm text-muted-foreground">
+                  Occasional updates about DevLink features.
+                </p>
               </div>
               <Switch
                 checked={formData.marketing_emails}
