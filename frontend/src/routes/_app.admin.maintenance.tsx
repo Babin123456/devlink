@@ -29,14 +29,13 @@ function AdminMaintenance() {
 
   const fetchWindows = async () => {
     try {
-      setWindows(await api.get<MaintenanceWindow[]>("/api/maintenance"));
-    } catch (error) {
-      const res = await api.get("/api/maintenance");
-      setWindows(res.data);
+      const res = await api.get<any>("/api/maintenance");
+      setWindows(res.data || res);
     } catch (error: any) {
       console.error("Failed to fetch maintenance windows", error);
     }
   };
+
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

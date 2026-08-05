@@ -18,11 +18,10 @@ function MaintenancePage() {
     // Try to get maintenance info from local storage or an unauthenticated endpoint
     const checkMaintenance = async () => {
       try {
-        setMaintenance(await api.get("/api/maintenance/active"));
-      } catch (e) {
-        const res = await api.get("/api/maintenance/active");
-        setMaintenance(res.data);
+        const res = await api.get<any>("/api/maintenance/active");
+        setMaintenance(res.data || res);
       } catch (e: any) {
+
         // If 404, there is no active maintenance. We could redirect to home.
         const status = e instanceof ApiError ? e.status : undefined;
         if (status === 404) {
