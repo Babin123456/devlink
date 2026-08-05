@@ -35,3 +35,5 @@ dist-ssr/
 
 # Runtime artifacts
 backend/logs/
+
+backend/logs/devlink.log
