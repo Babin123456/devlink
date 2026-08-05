@@ -43,9 +43,7 @@ export const analyticsApi = {
   profile: () => api.get<unknown>("/api/analytics/profile"),
   projects: () => api.get<unknown>("/api/analytics/projects"),
   communityStats: (days?: number) =>
-    api.get<CommunityStatsResponse>(
-      `/api/analytics/community/stats${days ? `?days=${days}` : ""}`
-    ),
+    api.get<CommunityStatsResponse>(`/api/analytics/community/stats${days ? `?days=${days}` : ""}`),
   requestAnalytics: (days: number) =>
     api.get<RequestAnalytics>(`/api/analytics/requests?days=${days}`),
 };
