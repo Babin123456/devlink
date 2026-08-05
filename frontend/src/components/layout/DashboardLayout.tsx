@@ -29,10 +29,18 @@ export function DashboardLayout() {
         <TopNavbar />
 
         <main
+          // The skip link's destination. tabIndex={-1} makes it focusable so
+          // the link can move focus here, not just the scroll position --
+          // otherwise the next Tab starts from the top of the document again.
+          id="main-content"
+          tabIndex={-1}
           className={[
             "flex-1 overflow-y-auto",
             // On mobile add bottom padding so bottom nav never obscures content
             "pb-16 md:pb-0",
+            // No focus ring: focus lands here programmatically, and a ring
+            // around the whole page reads as a rendering bug.
+            "outline-none",
           ].join(" ")}
         >
           <AnimatePresence mode="wait">
