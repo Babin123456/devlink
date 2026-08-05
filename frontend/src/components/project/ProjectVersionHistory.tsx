@@ -70,7 +70,6 @@ export function ProjectVersionHistory({ projectId, isOwnerOrMaintainer = true }:
   const restoreMutation = useMutation({
     mutationFn: async (v1: number) => {
       const res: any = await api.post(`/api/projects/${projectId}/versions/${v1}/restore`);
-
       return res.data || res;
     },
 

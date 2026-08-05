@@ -21,7 +21,6 @@ from app.schemas.project_version import (
     ProjectVersionCompareResponse,
     ProjectVersionResponse,
 )
-
 from app.schemas.duplicate_detection import (
     DuplicateProjectCheckRequest,
     DuplicateProjectCheckResponse,
@@ -96,7 +95,6 @@ def check_duplicate_project(
     db: Session = Depends(get_database),
 ) -> DuplicateProjectCheckResponse:
     from app.services.duplicate_detection_service import DuplicateDetectionService
-
     return DuplicateDetectionService.find_duplicate_projects(
         db,
         title=req.title,
@@ -241,6 +239,7 @@ def list_projects(
     paid: bool | None = Query(None),
     opensource: bool | None = Query(None),
     tech: str | None = Query(None),
+    sort_by: str | None = Query("newest", description="Sorting option: newest, oldest, most_active, most_bookmarked, most_applications, recently_updated, ai_match_score"),
     db: Session = Depends(get_database),
 ):
 
@@ -254,6 +253,7 @@ def list_projects(
         paid=paid,
         opensource=opensource,
         tech=tech,
+        sort_by=sort_by,
     )
 
 
@@ -326,10 +326,7 @@ def update_project(
         )
 
     # 2. Description update event
-    if (
-        "description" in new_values
-        and old_values.get("description") != new_values["description"]
-    ):
+    if "description" in new_values and old_values.get("description") != new_values["description"]:
         AuditLogService.create_log(
             db=db,
             actor_id=current_user.id,
@@ -344,24 +341,8 @@ def update_project(
     # 3. Status/Stage change event
     status_keys = {"stage", "visibility", "is_published", "hiring"}
     if any(k in new_values for k in status_keys):
-        changed_old = {
-            k: (
-                str(old_values[k])
-                if isinstance(old_values.get(k), Enum)
-                else old_values.get(k)
-            )
-            for k in status_keys
-            if k in new_values
-        }
-        changed_new = {
-            k: (
-                str(new_values[k])
-                if isinstance(new_values.get(k), Enum)
-                else new_values.get(k)
-            )
-            for k in status_keys
-            if k in new_values
-        }
+        changed_old = {k: str(old_values[k]) if isinstance(old_values.get(k), Enum) else old_values.get(k) for k in status_keys if k in new_values}
+        changed_new = {k: str(new_values[k]) if isinstance(new_values.get(k), Enum) else new_values.get(k) for k in status_keys if k in new_values}
         AuditLogService.create_log(
             db=db,
             actor_id=current_user.id,
@@ -395,19 +376,14 @@ def update_project(
 )
 def get_project_audit_trail(
     project_id: uuid.UUID,
-    event_type: Optional[str] = Query(
-        None, description="Filter by event type substring"
-    ),
-    user_id: Optional[uuid.UUID] = Query(
-        None, description="Filter by actor or target user ID"
-    ),
+    event_type: Optional[str] = Query(None, description="Filter by event type substring"),
+    user_id: Optional[uuid.UUID] = Query(None, description="Filter by actor or target user ID"),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_database),
     current_user: User = Depends(require_project_permission("project:read")),
 ) -> PaginatedProjectAuditLogsResponse:
     from app.services.audit_log_service import AuditLogService
-
     result = AuditLogService.search_project_audit_logs(
         db,
         project_id=project_id,
@@ -842,112 +818,3 @@ def hard_delete_project(
         db,
         project,
     )
-
-
-# ==========================================================
-# Project Version History Endpoints (#606)
-# ==========================================================
-
-
-@router.get(
-    "/{project_id}/versions",
-    response_model=PaginatedProjectVersionsResponse,
-    summary="List Project Version History",
-    description="Retrieve paginated history of edits made to project details (title, description, tech stack, team roles, requirements).",
-)
-def list_project_versions(
-    project_id: uuid.UUID,
-    page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=100),
-    db: Session = Depends(get_database),
-) -> PaginatedProjectVersionsResponse:
-    from app.services.project_version_service import ProjectVersionService
-
-    res = ProjectVersionService.list_versions(
-        db,
-        project_id=project_id,
-        page=page,
-        limit=limit,
-    )
-    items = [ProjectVersionResponse.model_validate(v) for v in res["items"]]
-    return PaginatedProjectVersionsResponse(
-        items=items,
-        total=res["total"],
-        page=res["page"],
-        limit=res["limit"],
-        pages=res["pages"],
-    )
-
-
-@router.get(
-    "/{project_id}/versions/compare",
-    response_model=ProjectVersionCompareResponse,
-    summary="Compare Project Versions",
-    description="Compare two versions (or compare a version against current state) to view field-level diffs.",
-)
-def compare_project_versions(
-    project_id: uuid.UUID,
-    v1: str = Query(..., description="First version identifier (UUID or version number)"),
-    v2: str = Query("current", description="Second version identifier (UUID, version number, or 'current')"),
-    db: Session = Depends(get_database),
-) -> ProjectVersionCompareResponse:
-    from app.services.project_version_service import ProjectVersionService
-
-    res = ProjectVersionService.compare_versions(
-        db,
-        project_id=project_id,
-        v1_identifier=v1,
-        v2_identifier=v2,
-    )
-    return ProjectVersionCompareResponse(
-        project_id=res["project_id"],
-        v1_version_number=res["v1_version_number"],
-        v2_version_number=res["v2_version_number"],
-        v1_snapshot=ProjectVersionResponse.model_validate(res["v1_snapshot"]),
-        v2_snapshot=res["v2_snapshot"],
-        diff=res["diff"],
-    )
-
-
-@router.get(
-    "/{project_id}/versions/{version_identifier}",
-    response_model=ProjectVersionResponse,
-    summary="Get Specific Project Version",
-    description="Retrieve snapshot details for a specific project version.",
-)
-def get_project_version(
-    project_id: uuid.UUID,
-    version_identifier: str,
-    db: Session = Depends(get_database),
-) -> ProjectVersionResponse:
-    from app.services.project_version_service import ProjectVersionService
-
-    version = ProjectVersionService.get_version(
-        db,
-        project_id=project_id,
-        version_identifier=version_identifier,
-    )
-    return ProjectVersionResponse.model_validate(version)
-
-
-@router.post(
-    "/{project_id}/versions/{version_identifier}/restore",
-    response_model=ProjectResponse,
-    summary="Restore Project Version",
-    description="Restore project details to a previous version snapshot. Automatically captures a backup version of the current state before reverting.",
-)
-def restore_project_version(
-    project_id: uuid.UUID,
-    version_identifier: str,
-    db: Session = Depends(get_database),
-    current_user: User = Depends(get_current_user),
-) -> ProjectResponse:
-    from app.services.project_version_service import ProjectVersionService
-
-    restored_project = ProjectVersionService.restore_version(
-        db,
-        project_id=project_id,
-        version_identifier=version_identifier,
-        actor_user=current_user,
-    )
-    return restored_project
