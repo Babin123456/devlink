@@ -24,6 +24,7 @@ from .message import Message  # noqa: F401
 from .notification import Notification  # noqa: F401
 from .organization import Organization  # noqa: F401
 from .organization_member import OrganizationMember, OrgMemberRole  # noqa: F401
+from .password_reset_token import PasswordResetToken  # noqa: F401
 from .project import Project  # noqa: F401
 from .project_document import ProjectDocument  # noqa: F401
 from .project_view import ProjectView  # noqa: F401
