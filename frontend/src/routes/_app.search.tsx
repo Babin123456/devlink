@@ -45,11 +45,13 @@ function SearchPage() {
   const trackClick = (entityType: string, entityId: string) => {
     const trimmed = debouncedQuery.trim();
     if (trimmed) {
-      api.post("/api/search/track-click", {
-        query: trimmed,
-        clicked_entity_type: entityType,
-        clicked_entity_id: entityId,
-      }).catch(() => {});
+      api
+        .post("/api/search/track-click", {
+          query: trimmed,
+          clicked_entity_type: entityType,
+          clicked_entity_id: entityId,
+        })
+        .catch(() => {});
     }
   };
 
@@ -67,7 +69,9 @@ function SearchPage() {
     const queryLower = q.toLowerCase().trim();
     return builders
       .filter((b) =>
-        (b.name + " " + b.role + " " + (b.skills || []).join(" ")).toLowerCase().includes(queryLower),
+        (b.name + " " + b.role + " " + (b.skills || []).join(" "))
+          .toLowerCase()
+          .includes(queryLower),
       )
       .map((b) => ({
         id: b.id,
@@ -92,7 +96,9 @@ function SearchPage() {
     const queryLower = q.toLowerCase().trim();
     return projects
       .filter((p) =>
-        (p.name + " " + p.description + " " + (p.stack || []).join(" ")).toLowerCase().includes(queryLower),
+        (p.name + " " + p.description + " " + (p.stack || []).join(" "))
+          .toLowerCase()
+          .includes(queryLower),
       )
       .map((p) => ({
         id: p.id,
@@ -106,7 +112,9 @@ function SearchPage() {
   const posts = useMemo(() => {
     const queryLower = q.toLowerCase().trim();
     return flares.filter((f) =>
-      (f.author.name + " " + f.content + " " + (f.tags || []).join(" ")).toLowerCase().includes(queryLower),
+      (f.author.name + " " + f.content + " " + (f.tags || []).join(" "))
+        .toLowerCase()
+        .includes(queryLower),
     );
   }, [q]);
 
@@ -252,9 +260,9 @@ function SearchPage() {
                 <EmptyState query={q} label="developers" />
               ) : (
                 devs.map((b) => (
-                  <Link 
-                    key={b.id} 
-                    to="/profile/$username" 
+                  <Link
+                    key={b.id}
+                    to="/profile/$username"
                     params={{ username: b.username }}
                     onClick={() => trackClick("user", b.id)}
                   >
@@ -286,9 +294,9 @@ function SearchPage() {
                 <EmptyState query={q} label="projects" />
               ) : (
                 projs.map((p) => (
-                  <Link 
-                    key={p.id} 
-                    to="/projects/$projectId" 
+                  <Link
+                    key={p.id}
+                    to="/projects/$projectId"
                     params={{ projectId: p.id }}
                     onClick={() => trackClick("project", p.id)}
                   >
