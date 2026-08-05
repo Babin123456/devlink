@@ -113,7 +113,7 @@ def register_and_login(client: TestClient):
     """
 
     def _register_and_login_func(
-        email: str, username: str, password: str = "Passw0rd!"
+        email: str, username: str, password: str = "Vermilion-Kestrel97!"
     ) -> tuple[str, str]:
         # Register
         client.post(

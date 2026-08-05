@@ -20,7 +20,7 @@ def mfa_user(db):
         last_name="Tester",
         username=f"mfa_{uuid4().hex[:6]}",
         email=f"mfa_{uuid4().hex[:6]}@example.com",
-        password_hash=hash_password("Password123!"),
+        password_hash=hash_password("Vermilion-Kestrel97!"),
         is_active=True,
         mfa_enabled=False,
     )
@@ -90,7 +90,7 @@ def test_mfa_enable_and_login_flow(client, db, mfa_user, mfa_auth_headers):
     # 4. Login with password requires MFA
     login_res = client.post(
         "/api/v1/auth/login",
-        json={"email": mfa_user.email, "password": "Password123!"},
+        json={"email": mfa_user.email, "password": "Vermilion-Kestrel97!"},
     )
     assert login_res.status_code == 200
     login_data = login_res.json()
@@ -121,7 +121,7 @@ def test_mfa_login_with_recovery_code(client, db, mfa_user):
     # Trigger password login
     login_res = client.post(
         "/api/v1/auth/login",
-        json={"email": mfa_user.email, "password": "Password123!"},
+        json={"email": mfa_user.email, "password": "Vermilion-Kestrel97!"},
     )
     mfa_token = login_res.json()["mfa_token"]
 
@@ -136,7 +136,7 @@ def test_mfa_login_with_recovery_code(client, db, mfa_user):
     # Reuse of same recovery code should fail
     login_res2 = client.post(
         "/api/v1/auth/login",
-        json={"email": mfa_user.email, "password": "Password123!"},
+        json={"email": mfa_user.email, "password": "Vermilion-Kestrel97!"},
     )
     mfa_token2 = login_res2.json()["mfa_token"]
 

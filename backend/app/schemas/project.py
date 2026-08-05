@@ -67,6 +67,11 @@ class ProjectBase(BaseModel):
 
 
 class ProjectCreate(ProjectBase):
+    allow_duplicate: bool = Field(
+        default=False,
+        description="Manual override flag to allow project creation even if a potential duplicate is detected",
+    )
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
