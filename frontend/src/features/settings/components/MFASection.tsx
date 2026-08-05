@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, ShieldAlert, Key, Copy, Download, RefreshCw, Lock, Check } from "lucide-react";
+import {
+  ShieldCheck,
+  ShieldAlert,
+  Key,
+  Copy,
+  Download,
+  RefreshCw,
+  Lock,
+  Check,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export const MFASection: React.FC = () => {
@@ -170,7 +179,8 @@ export const MFASection: React.FC = () => {
             <Lock size={18} className="text-indigo-400" /> Two-Factor Authentication (2FA)
           </h3>
           <p className="text-xs text-gray-400">
-            Secure your DevLink account using Time-based One-Time Passwords (TOTP) from authenticator apps like Google Authenticator or 1Password.
+            Secure your DevLink account using Time-based One-Time Passwords (TOTP) from
+            authenticator apps like Google Authenticator or 1Password.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -191,7 +201,8 @@ export const MFASection: React.FC = () => {
       ) : mfaEnabled ? (
         <div className="space-y-4 pt-2">
           <p className="text-xs text-gray-300">
-            Your account is protected with Two-Factor Authentication. You will be prompted for an authenticator code during login.
+            Your account is protected with Two-Factor Authentication. You will be prompted for an
+            authenticator code during login.
           </p>
           <div className="flex flex-wrap gap-3">
             <button
@@ -226,12 +237,15 @@ export const MFASection: React.FC = () => {
           <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5 shadow-2xl">
             <h4 className="text-lg font-semibold text-white">Set Up Authenticator App</h4>
             <p className="text-xs text-gray-400">
-              1. Scan the secret key or enter it into your authenticator app (Google Authenticator, Authy, 1Password).
+              1. Scan the secret key or enter it into your authenticator app (Google Authenticator,
+              Authy, 1Password).
             </p>
 
             <div className="bg-gray-950 p-4 rounded-lg border border-gray-800 text-center space-y-2">
               <div className="text-xs text-gray-400 font-mono">Secret Key</div>
-              <div className="text-base font-mono font-bold text-indigo-400 tracking-wider select-all">{secret}</div>
+              <div className="text-base font-mono font-bold text-indigo-400 tracking-wider select-all">
+                {secret}
+              </div>
             </div>
 
             <form onSubmit={handleEnableMFA} className="space-y-4">
@@ -279,7 +293,8 @@ export const MFASection: React.FC = () => {
                 <Key className="text-amber-400" size={18} /> Recovery Codes
               </h4>
               <p className="text-xs text-gray-400">
-                Save these single-use recovery codes in a safe place. If you lose your phone, you can use one of these codes to log in.
+                Save these single-use recovery codes in a safe place. If you lose your phone, you
+                can use one of these codes to log in.
               </p>
             </div>
 
@@ -297,7 +312,8 @@ export const MFASection: React.FC = () => {
                   onClick={copyCodes}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-800 text-white hover:bg-gray-700"
                 >
-                  {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />} Copy
+                  {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}{" "}
+                  Copy
                 </button>
                 <button
                   onClick={downloadCodes}
@@ -321,9 +337,12 @@ export const MFASection: React.FC = () => {
       {showDisableModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
           <div className="w-full max-w-sm bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 shadow-2xl">
-            <h4 className="text-base font-semibold text-white">Disable Two-Factor Authentication</h4>
+            <h4 className="text-base font-semibold text-white">
+              Disable Two-Factor Authentication
+            </h4>
             <p className="text-xs text-gray-400">
-              Enter your current 6-digit authenticator code or a recovery code to confirm disabling 2FA.
+              Enter your current 6-digit authenticator code or a recovery code to confirm disabling
+              2FA.
             </p>
             <form onSubmit={handleDisableMFA} className="space-y-4">
               <input

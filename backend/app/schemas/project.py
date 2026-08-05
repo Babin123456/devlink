@@ -39,6 +39,7 @@ class ProjectBase(BaseModel):
     visibility: ProjectVisibility = ProjectVisibility.PUBLIC
 
     tech_stack: Optional[str] = None
+    requirements: Optional[str] = None
 
     repository_url: Optional[str] = None
     website_url: Optional[str] = None
@@ -102,6 +103,7 @@ class ProjectUpdate(BaseModel):
     stage: Optional[ProjectStage] = None
     visibility: Optional[ProjectVisibility] = None
     tech_stack: Optional[str] = None
+    requirements: Optional[str] = None
     repository_url: Optional[str] = None
     website_url: Optional[str] = None
     demo_url: Optional[str] = None

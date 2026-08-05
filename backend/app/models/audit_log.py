@@ -62,6 +62,8 @@ class AuditAction(str, Enum):
     PROJECT_ARCHIVED = "project_archived"
     PROJECT_RESTORED = "project_restored"
     PROJECT_DELETED = "project_deleted"
+    PROJECT_VERSION_CREATED = "project_version_created"
+    PROJECT_VERSION_RESTORED = "project_version_restored"
 
     # Invitations
     INVITATION_SENT = "invitation_sent"
