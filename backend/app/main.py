@@ -674,6 +674,7 @@ from app.routers import background_jobs
 app.include_router(background_jobs.router, prefix="/api")
 
 
+
 # The generated OpenAPI document only lists the responses each handler declares
 # explicitly, which leaves the error shapes out of the published schema even
 # though every endpoint can return them (they come from the global exception
@@ -735,6 +736,8 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 from app.routers import background_jobs
+
+app.include_router(background_jobs.router, prefix="/api")
 
 app.include_router(background_jobs.router, prefix="/api")
 
