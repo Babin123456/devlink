@@ -84,3 +84,5 @@ from .profile_suggestion import ProfileSuggestionDismissal
 from .request_log import RequestLog  # noqa: F401
 
 from .background_job import BackgroundJob, JobStatus
+from .badge import Badge, UserBadge  # noqa: F401
+
