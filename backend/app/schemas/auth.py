@@ -172,6 +172,12 @@ class ForgotPasswordResponse(BaseModel):
     message: str
 
 
+class VerifyRecoveryTokenResponse(BaseModel):
+    valid: bool = True
+    message: str
+    email: Optional[str] = None
+
+
 # ==========================================================
 # Reset Password
 # ==========================================================

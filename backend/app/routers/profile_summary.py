@@ -23,7 +23,7 @@ PROFILE_SUMMARY_LIMIT = "5/minute"
 
 
 @router.post(
-    "/profile-summary",
+    "",
     response_model=ProfileSummaryResponse,
 )
 @limiter.limit(PROFILE_SUMMARY_LIMIT)

@@ -32,6 +32,7 @@ import { addRecentlyViewedProject } from "@/lib/recentlyViewedProjects";
 
 import { usePermissions } from "@/hooks/usePermissions";
 import { ProjectTimeline } from "@/components/project/ProjectTimeline";
+import { ProjectInsightsCard } from "@/components/projects/ProjectInsightsCard";
 
 export const Route = createFileRoute("/_app/projects/$projectId")({
   head: ({ params }) => ({
@@ -292,6 +293,17 @@ function ProjectDetail() {
                 </div>
               )}
             </div>
+          </Card>
+
+          <Card className="p-4 lg:col-span-3">
+            <ProjectInsightsCard
+              projectId={projectId}
+              title={p.name}
+              description={p.description}
+              techStack={p.stack}
+              status={p.status}
+              members={p.members}
+            />
           </Card>
 
           <ProjectTimeline className="mt-6" />
