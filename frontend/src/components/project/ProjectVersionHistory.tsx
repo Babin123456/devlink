@@ -45,15 +45,15 @@ export function ProjectVersionHistory({ projectId, isOwnerOrMaintainer = true }:
   const { data: versionsData, isLoading } = useQuery({
     queryKey: ["project-versions", projectId],
     queryFn: async () => {
-      const res = await api.get(`/api/projects/${projectId}/versions`);
-      return res.data;
+      const res: any = await api.get(`/api/projects/${projectId}/versions`);
+      return res.data || res;
     },
   });
 
   const compareMutation = useMutation({
     mutationFn: async (v1: number) => {
-      const res = await api.get(`/api/projects/${projectId}/versions/compare?v1=${v1}&v2=current`);
-      return res.data;
+      const res: any = await api.get(`/api/projects/${projectId}/versions/compare?v1=${v1}&v2=current`);
+      return res.data || res;
     },
     onSuccess: (data) => {
       setCompareData(data);
@@ -69,9 +69,10 @@ export function ProjectVersionHistory({ projectId, isOwnerOrMaintainer = true }:
 
   const restoreMutation = useMutation({
     mutationFn: async (v1: number) => {
-      const res = await api.post(`/api/projects/${projectId}/versions/${v1}/restore`);
-      return res.data;
+      const res: any = await api.post(`/api/projects/${projectId}/versions/${v1}/restore`);
+      return res.data || res;
     },
+
     onSuccess: (_, v1) => {
       queryClient.invalidateQueries({ queryKey: ["project-versions", projectId] });
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
