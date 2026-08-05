@@ -331,12 +331,16 @@ function ProjectsPage() {
               remote: boolOrUndefined(newValues.remote),
               paid: boolOrUndefined(newValues.paid),
               opensource: boolOrUndefined(newValues.opensource),
+            });
+          }}
+          initialFilters={{
             language: filters.language ? filters.language : [],
             experience: filters.experience,
             remote: filters.remote ? "true" : "false",
             paid: filters.paid ? "true" : "false",
             opensource: filters.opensource ? "true" : "false",
           }}
+
           onApply={(newValues) => {
             // const selectedLangs = Array.isArray(newValues.language)
             // ? newValues.language.join(",")
