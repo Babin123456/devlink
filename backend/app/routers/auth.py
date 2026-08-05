@@ -671,6 +671,7 @@ from app.schemas.auth import (  # noqa: E402
     SuccessResponse,
     VerifyEmailRequest,
     VerifyEmailResponse,
+    VerifyRecoveryTokenResponse,
     ResendVerificationEmailRequest,
 )
 
@@ -717,12 +718,31 @@ def forgot_password(
     payload: ForgotPasswordRequest,
     db: Session = Depends(get_database),
 ):
-
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
     auth_service = AuthService(db)
 
     return auth_service.forgot_password(
-        payload.email,
+        email=payload.email,
+        ip_address=ip_address,
+        user_agent=user_agent,
     )
+
+
+@router.get(
+    "/verify-recovery-token",
+    response_model=VerifyRecoveryTokenResponse,
+    summary="Verify Recovery Token Status",
+    description="Validates a password recovery token without consuming it.",
+)
+@limiter.limit(AUTH_LIMIT)
+def verify_recovery_token(
+    request: Request,
+    token: str = Query(..., description="Recovery token string"),
+    db: Session = Depends(get_database),
+):
+    auth_service = AuthService(db)
+    return auth_service.verify_recovery_token(token)
 
 
 # ==========================================================
@@ -741,10 +761,14 @@ def reset_password(
     payload: ResetPasswordRequest,
     db: Session = Depends(get_database),
 ):
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
     auth_service = AuthService(db)
     return auth_service.reset_password(
         token=payload.token,
         new_password=payload.new_password,
+        ip_address=ip_address,
+        user_agent=user_agent,
     )
 
 
