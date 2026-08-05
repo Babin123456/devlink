@@ -287,6 +287,37 @@ class Settings(BaseSettings):
     ENABLE_APPLICATIONS: bool = True
 
     # ==========================================================
+    # Link Previews
+    # ==========================================================
+
+    # Short, because a preview is a nice-to-have sitting in front of a user
+    # waiting for a message to send. A slow site gets no card rather than a
+    # slow card.
+    LINK_PREVIEW_TIMEOUT_SECONDS: float = 5.0
+
+    # Everything we want lives in <head>. 512 KiB is generous for that and
+    # bounds what a hostile server can make us buffer.
+    LINK_PREVIEW_MAX_BYTES: int = 512 * 1024
+
+    # Each hop is re-validated against the SSRF rules, so this is a cost
+    # ceiling rather than a safety one.
+    LINK_PREVIEW_MAX_REDIRECTS: int = 3
+
+    # A day: Open Graph tags change rarely, and a stale title is a much smaller
+    # problem than re-fetching a popular link for every reader.
+    LINK_PREVIEW_CACHE_TTL_SECONDS: int = 86400
+
+    # Failures are cached far more briefly, so a site that was down for five
+    # minutes is not written off for a day.
+    LINK_PREVIEW_FAILURE_CACHE_TTL_SECONDS: int = 300
+
+    # Identifying ourselves honestly, with a contact URL, is what lets a site
+    # owner rate-limit us instead of silently blackholing us.
+    LINK_PREVIEW_USER_AGENT: str = (
+        "DevLinkBot/1.0 (+https://github.com/nensii21/devlink)"
+    )
+
+    # ==========================================================
     # Helper Properties
     # ==========================================================
 
