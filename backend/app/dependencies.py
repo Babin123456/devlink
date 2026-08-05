@@ -419,3 +419,43 @@ def require_roles(*allowed_roles: SystemRole):
         return current_user
 
     return dependency
+
+
+# ---------------------------------------------------------------------
+# Feature Flag Guard
+# ---------------------------------------------------------------------
+
+
+def require_flag(key: str):
+    """Dependency factory that gates a route behind a feature flag.
+
+    Usage::
+
+        @router.get("/graph", dependencies=[Depends(require_flag("graph_view"))])
+        def collaboration_graph(...): ...
+
+    A disabled flag yields ``404``, not ``403``. A 403 tells the caller the
+    route exists and they are merely not allowed to use it, which leaks the
+    shape of unreleased work; a 404 is indistinguishable from the route not
+    being deployed yet.
+
+    The flag is evaluated against the calling user, so a percentage rollout or
+    an allowlist works here exactly as it does elsewhere. Authentication is
+    optional -- an anonymous caller is evaluated as such rather than being
+    rejected, leaving the route's own auth requirements to decide.
+    """
+
+    def dependency(
+        current_user: User | None = Depends(get_optional_current_user),
+    ) -> None:
+        from app.services.feature_flag_service import feature_flag_service
+
+        user_id = str(current_user.id) if current_user else None
+
+        if not feature_flag_service.is_enabled(key, user_id):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Not Found",
+            )
+
+    return dependency

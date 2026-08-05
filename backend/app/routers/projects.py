@@ -15,6 +15,7 @@ from app.models.user import User
 from app.schemas.project_audit import (
     PaginatedProjectAuditLogsResponse,
     ProjectAuditLogResponse,
+)
 from app.schemas.duplicate_detection import (
     DuplicateProjectCheckRequest,
     DuplicateProjectCheckResponse,
