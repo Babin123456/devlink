@@ -7,6 +7,7 @@ from pathlib import Path
 # pyrefly: ignore [missing-import]
 
 from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 from fastapi.staticfiles import StaticFiles
 
 # pyrefly: ignore [missing-import]
@@ -517,6 +518,9 @@ from app.routers import (
 
 
 app.include_router(media.router, prefix="/api", tags=["Media"])
+from app.routers import link_previews
+
+app.include_router(link_previews.router, prefix="/api", tags=["Link Previews"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 from app.routers import mfa
 
@@ -539,6 +543,9 @@ from app.routers import project_milestones
 app.include_router(
     project_milestones.router, prefix="/api", tags=["Project Milestones"]
 )
+app.include_router(project_milestones.router, prefix="/api", tags=["Project Milestones"])
+from app.routers import calendar as calendar_router
+app.include_router(calendar_router.router, prefix="/api", tags=["Calendar"])
 app.include_router(analytics.router, prefix="/api", tags=["Analytics"])
 app.include_router(builder_flares.router, prefix="/api/flare", tags=["Builder's Flare"])
 app.include_router(messages.router, prefix="/api/messages", tags=["Messages"])
@@ -562,6 +569,9 @@ app.include_router(activities.router, prefix="/api/activities", tags=["Activitie
 app.include_router(
     conversations.router, prefix="/api/conversations", tags=["Conversations"]
 )
+from app.routers import moderation
+app.include_router(moderation.router, prefix="/api", tags=["Moderation"])
+app.include_router(conversations.router, prefix="/api/conversations", tags=["Conversations"])
 from app.routers import audit
 
 app.include_router(audit.router, prefix="/api", tags=["Audit"])
@@ -647,9 +657,30 @@ app.include_router(
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
 
+from app.routers import api_keys
+app.include_router(api_keys.router, prefix="/api/v1")
+app.include_router(api_keys.org_api_keys_router, prefix="/api/v1")
+
+from app.routers import background_jobs
+app.include_router(background_jobs.router, prefix="/api")
+
 from fastapi.openapi.utils import get_openapi
+from app.routers import feature_flags
+
+app.include_router(feature_flags.router, prefix="/api", tags=["Feature Flags"])
+
+from app.routers import background_jobs
+
+app.include_router(background_jobs.router, prefix="/api")
 
 
+
+# The generated OpenAPI document only lists the responses each handler declares
+# explicitly, which leaves the error shapes out of the published schema even
+# though every endpoint can return them (they come from the global exception
+# handlers, not from the route signatures). Generated SDK clients therefore had
+# no error types at all. Filling them in here keeps that knowledge in one place
+# instead of repeating a `responses={...}` block on several hundred routes.
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
@@ -667,9 +698,21 @@ def custom_openapi():
     error_404 = {"description": "Not Found"}
     error_409 = {"description": "Conflict"}
     error_500 = {"description": "Internal Server Error"}
+    shared_responses = {
+        "400": {"description": "Bad Request"},
+        "401": {"description": "Unauthorized"},
+        "403": {"description": "Forbidden"},
+        "404": {"description": "Not Found"},
+        "409": {"description": "Conflict"},
+        "500": {"description": "Internal Server Error"},
+    }
 
     for path in openapi_schema.get("paths", {}).values():
         for method in path.values():
+            # A path item also holds non-operation keys such as "parameters",
+            # whose value is a list rather than an operation object.
+            if not isinstance(method, dict):
+                continue
             responses = method.setdefault("responses", {})
             if "400" not in responses:
                 responses["400"] = error_400
@@ -683,6 +726,8 @@ def custom_openapi():
                 responses["409"] = error_409
             if "500" not in responses:
                 responses["500"] = error_500
+            for status_code, description in shared_responses.items():
+                responses.setdefault(status_code, description)
 
     app.openapi_schema = openapi_schema
     return app.openapi_schema
@@ -693,3 +738,7 @@ app.openapi = custom_openapi
 from app.routers import background_jobs
 
 app.include_router(background_jobs.router, prefix="/api")
+
+app.include_router(background_jobs.router, prefix="/api")
+
+app.openapi = custom_openapi

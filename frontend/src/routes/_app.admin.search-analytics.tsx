@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";

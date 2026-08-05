@@ -14,6 +14,8 @@ import { Toaster, toast } from "sonner";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { I18nProvider } from "@/context/I18nContext";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { AnnouncerProvider } from "@/components/a11y/Announcer";
+import { SkipLink } from "@/components/a11y/SkipLink";
 import { applyServiceWorkerUpdate, registerServiceWorker } from "@/lib/pwa";
 
 import appCss from "../styles.css?url";
@@ -248,11 +250,16 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <ThemeProvider defaultTheme="system">
-          <OfflineBanner />
-          <Outlet />
-          <Toaster position="top-right" richColors />
-        </ThemeProvider>
+        <AnnouncerProvider>
+          <ThemeProvider defaultTheme="system">
+            {/* First thing in the tab order, so a keyboard user is not made to
+                walk the sidebar and header on every single navigation. */}
+            <SkipLink />
+            <OfflineBanner />
+            <Outlet />
+            <Toaster position="top-right" richColors />
+          </ThemeProvider>
+        </AnnouncerProvider>
         <AnimatePresence mode="wait" initial={false}>
           <Outlet key={location.pathname} />
         </AnimatePresence>
