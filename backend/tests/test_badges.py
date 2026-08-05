@@ -21,7 +21,8 @@ def test_get_all_badges_api(client, register_and_login):
 
 
 def test_evaluate_badges(db, client, register_and_login):
-    headers = register_and_login("badge_user1@example.com", "badge_user1")
+    _, token = register_and_login("badge_user1@example.com", "badge_user1")
+    headers = {"Authorization": f"Bearer {token}"}
     
     # Evaluate badges for current user
     response = client.post("/api/badges/evaluate", headers=headers)
@@ -32,7 +33,8 @@ def test_evaluate_badges(db, client, register_and_login):
 
 
 def test_get_my_badges(client, register_and_login):
-    headers = register_and_login("badge_user2@example.com", "badge_user2")
+    _, token = register_and_login("badge_user2@example.com", "badge_user2")
+    headers = {"Authorization": f"Bearer {token}"}
     
     # Trigger evaluate first
     client.post("/api/badges/evaluate", headers=headers)
@@ -41,3 +43,4 @@ def test_get_my_badges(client, register_and_login):
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
+
