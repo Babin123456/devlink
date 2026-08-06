@@ -985,11 +985,17 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print(f"\n{counts.total()} rows written.")
 
+    # The shared password is deliberately not echoed here. It is a local
+    # fixture rather than a secret, but printing it trips CodeQL's clear-text
+    # logging rule on every scan, and an alert that is always present is an
+    # alert nobody reads. It is named in the DEMO_PASSWORD constant above and
+    # written down in docs/environment-setup.md, which covers the same need.
     print(
         "\nSign in with any demo account:\n"
         "  admin@example.com          (superuser)\n"
         "  aditialmeida@example.com   (regular user)\n"
-        f"  password: {DEMO_PASSWORD}"
+        "\nThe shared password is the DEMO_PASSWORD constant in this script, "
+        "and is listed in docs/environment-setup.md."
     )
 
     return 0
