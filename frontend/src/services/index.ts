@@ -144,6 +144,13 @@ export const dashboardService = {
         seed.deadlines,
       seed.deadlines,
     ),
+  quickActions: () =>
+    withFallback<typeof seed.quickActions>(
+      async () =>
+        ((await analyticsApi.dashboard()).quickActions as unknown as typeof seed.quickActions) ??
+        seed.quickActions,
+      seed.quickActions,
+    ),
 };
 
 export const activitiesService = {
@@ -356,6 +363,7 @@ export type {
   HackathonSubmission,
   HackathonLeaderboardEntry,
   Deadline,
+  QuickAction,
 } from "@/mocks/seed";
 
 const COLLECTIONS_STORAGE_KEY = "devlink-collections";
