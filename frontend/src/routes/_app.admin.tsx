@@ -123,5 +123,5 @@ function AdminLayout() {
 
       <Outlet />
     </div>
-  ),
-});
+  );
+}

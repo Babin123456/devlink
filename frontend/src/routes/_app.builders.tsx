@@ -23,7 +23,6 @@ import { cn } from "@/lib/utils";
 
 import {
   ArrowRight,
-  BadgeCheck,
   Bookmark,
   Briefcase,
   Calendar,
