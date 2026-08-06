@@ -19,6 +19,12 @@ import {
 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useTheme } from "@/hooks/useTheme";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,6 +48,33 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const { isDark, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const faqs = [
+    {
+      question: "Is DevLink free to use?",
+      answer:
+        "Yes. You can start using DevLink for free to discover builders, create projects, and collaborate with your team.",
+    },
+    {
+      question: "How does AI matching work?",
+      answer:
+        "Our AI recommends collaborators by analyzing skills, interests, project history, and availability to help you build balanced teams.",
+    },
+    {
+      question: "Can I invite my team?",
+      answer:
+        "Yes. You can collaborate with teammates, manage projects together, and communicate in one shared workspace.",
+    },
+    {
+      question: "Which authentication methods are supported?",
+      answer:
+        "You can sign in securely using GitHub, with support for additional authentication methods as the platform grows.",
+    },
+    {
+      question: "How is my data protected?",
+      answer:
+        "Your account data is handled securely, and privacy is a priority. Sensitive information is protected using industry-standard security practices.",
+    },
+  ];
   const [billingCycle, setBillingCycle] = React.useState<"monthly" | "yearly">("yearly");
   const [openFaq, setOpenFaq] = React.useState<number | null>(0);
 
@@ -503,6 +536,34 @@ function Landing() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="border-b border-border bg-background">
+        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+          <div className="text-center">
+            <h2 className="text-[28px] font-bold tracking-tight text-foreground">
+              Frequently Asked Questions
+            </h2>
+            <p className="mt-2 text-[14px] text-muted-foreground">
+              Everything you need to know about DevLink.
+            </p>
+          </div>
+
+          <Accordion
+            type="single"
+            collapsible
+            className="mt-10 w-full rounded-md border border-border bg-card px-4"
+          >
+            {faqs.map((faq, index) => (
+              <AccordionItem key={index} value={`item-${index}`}>
+                <AccordionTrigger>{faq.question}</AccordionTrigger>
+                <AccordionContent>
+                  <p className="text-sm text-muted-foreground">{faq.answer}</p>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 
