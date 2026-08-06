@@ -135,7 +135,24 @@ Two things enforce this now:
 - `.pre-commit-config.yaml` refuses the commit locally, and `detect-private-key`
   catches a key pasted into any file.
 
+### What was in the tracked `backend/.env`
+
+For the record, since "a committed .env" sounds worse than this one was. The
+`SECRET_KEY` in it was the placeholder
+`CHANGE_THIS_TO_A_LONG_RANDOM_SECRET_KEY_AT_LEAST_64_CHARACTERS`, and every API
+key and OAuth secret was an empty string. **No rotation was required.**
+
+The one real credential was a developer's local Postgres password inside
+`DATABASE_URL`. Local-only, but people reuse passwords, so it is worth changing.
+
+The other consequence was quieter and affected everyone: pydantic-settings
+loads `backend/.env` automatically, so a tracked one overrides `config.py` on
+every machine and in CI. `SEARCH_RATE_LIMIT` read `60/minute` repository-wide
+while the declared default was `30/minute`, and a test asserted the former.
+
 ### Rotating a leaked `SECRET_KEY`
+
+If a **real** `SECRET_KEY` is ever committed, this is the procedure.
 
 `SECRET_KEY` signs JWTs (`app/core/config.py`). Anyone who can read a leaked
 value can mint tokens that every deployment still running it will accept.
