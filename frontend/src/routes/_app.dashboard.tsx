@@ -3,15 +3,12 @@ import { GreetingHero } from "@/features/dashboard/GreetingHero";
 import { StatsRow } from "@/features/dashboard/StatsRow";
 import {
   RecentActivity,
-  BuilderRequests,
-  InviteRequests,
-  SuggestedBuilders,
+  RecommendedBuilders,
   TrendingProjects,
-  AIRecommendations,
+  CollaborationRequests,
   MessagesPreview,
   QuickActions,
   UpcomingDeadlines,
-  NotificationsFeed,
 } from "@/features/dashboard/sections";
 
 export const Route = createFileRoute("/_app/dashboard")({
@@ -38,24 +35,19 @@ function Dashboard() {
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         {/* Left/Main Column - 8 cols */}
         <div className="lg:col-span-8 flex flex-col gap-6">
-          <SuggestedBuilders />
+          <RecommendedBuilders />
           <TrendingProjects />
           <div className="grid gap-6 sm:grid-cols-2">
-            <BuilderRequests />
-            <InviteRequests />
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2">
+            <CollaborationRequests />
             <MessagesPreview />
-            <RecentActivity />
           </div>
         </div>
 
         {/* Right Sidebar - 4 cols */}
         <div className="lg:col-span-4 flex flex-col gap-6">
           <QuickActions />
-          <AIRecommendations />
           <UpcomingDeadlines />
-          <NotificationsFeed />
+          <RecentActivity />
         </div>
       </div>
     </div>
