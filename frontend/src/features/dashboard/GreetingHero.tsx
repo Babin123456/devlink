@@ -26,8 +26,7 @@ export function GreetingHero() {
         </div>
       </div>
 
-      <div className="flex flex-row gap-3 sm:w-auto shrink-0 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
-        <MiniStat icon={<TrendingUp size={14} />} label="Progress" value="75%" progress={75} />
+<div className="grid grid-cols-3 gap-3 sm:flex sm:w-auto sm:flex-row sm:shrink-0">        <MiniStat icon={<TrendingUp size={14} />} label="Progress" value="75%" progress={75} />
         <MiniStat icon={<Flame size={14} />} label="Streak" value="12d" />
         <MiniStat icon={<Sparkles size={14} />} label="AI Score" value="96" />
       </div>
@@ -47,7 +46,7 @@ function MiniStat({
   progress?: number;
 }) {
   return (
-<div className="flex flex-col justify-between gap-2 rounded-2xl border border-border/40 bg-muted/20 p-3.5 min-w-[120px] sm:min-w-[130px] shrink-0">      <div className="flex items-center gap-1.5 text-muted-foreground">
+<div className="flex flex-col justify-between gap-1.5 rounded-xl border border-border/50 bg-muted/20 p-3 sm:min-w-[130px] sm:shrink-0"><div className="flex items-center gap-1.5 text-muted-foreground">
         {icon}
         <p className="text-[10px] font-medium uppercase tracking-wider truncate">{label}</p>
       </div>

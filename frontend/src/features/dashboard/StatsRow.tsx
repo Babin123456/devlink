@@ -35,8 +35,7 @@ const trends = [
 
 export function StatsRow() {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-      {primaryStats.map((s, i) => {
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-5">      {primaryStats.map((s, i) => {
         const Icon = iconMap[s.icon] ?? Folder;
         const trend = trends[i];
         return (

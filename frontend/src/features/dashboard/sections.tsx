@@ -313,7 +313,8 @@ export function QuickActions() {
     },
   ];
   return (
-<Card className="bg-transparent shadow-none border-none">      <div className="grid grid-cols-2 gap-4">
+<Card className="bg-transparent shadow-none border-none">      
+  <div className="grid grid-cols-2 gap-4">
         {actions.map((a) => (
           <Link
             key={a.label}
