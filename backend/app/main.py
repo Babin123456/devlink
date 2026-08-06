@@ -659,6 +659,11 @@ app.include_router(
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
 app.include_router(centralized_analytics.router, prefix="/api", tags=["Centralized Analytics"])
 
+from app.routers import background_jobs
+
+app.include_router(background_jobs.router, prefix="/api")
+
+
 from app.routers import badges
 app.include_router(badges.router, prefix="/api", tags=["Badges"])
 
