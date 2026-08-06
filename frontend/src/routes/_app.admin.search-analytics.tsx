@@ -7,11 +7,22 @@ export const Route = createFileRoute("/_app/admin/search-analytics")({
   component: SearchAnalyticsDashboard,
 });
 
+interface KeywordCount {
+  keyword: string;
+  count: number;
+}
+
+interface SearchAnalytics {
 interface SearchAnalyticsData {
   total_searches: number;
   zero_result_rate_pct: number;
   click_through_rate_pct: number;
   average_latency_ms: number;
+  top_keywords?: KeywordCount[];
+}
+
+function SearchAnalyticsDashboard() {
+  const [data, setData] = useState<SearchAnalytics | null>(null);
   top_keywords: { keyword: string; count: number }[];
 }
 
@@ -20,9 +31,20 @@ function SearchAnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAnalytics();
-  }, []);
+    const fetchAnalytics = async () => {
+      try {
+        // The client prefixes the base URL and attaches the token, and it
+        // resolves to the parsed body — there is no response envelope.
+        setData(await api.get<SearchAnalytics>("/api/search/analytics?days=30"));
+      } catch (error) {
+        console.error("Failed to fetch search analytics", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    void fetchAnalytics();
+  }, []);
   const fetchAnalytics = async () => {
     try {
       // Assuming api wrapper adds the base url and token
@@ -77,6 +99,7 @@ function SearchAnalyticsDashboard() {
               </tr>
             </thead>
             <tbody>
+              {data.top_keywords?.map((item, idx) => (
               {data.top_keywords.map((item: { keyword: string; count: number }, idx: number) => (
                 <tr key={idx} className="border-b">
                   <td className="p-3 text-gray-500">#{idx + 1}</td>

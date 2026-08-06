@@ -26,6 +26,11 @@ export const Route = createFileRoute("/_app/graph")({
   component: GraphView,
 });
 
+/** A node as the backend sends it, before we lay it out. */
+interface GraphNode {
+  id: string;
+  data: { label?: string; type?: string };
+  position?: { x: number; y: number };
 interface GraphNodeData {
   label: string;
   type: string;
@@ -50,13 +55,23 @@ interface GraphResponse {
   edges: GraphEdge[];
 }
 
+/** A node after layout, which is what React Flow requires: position is set. */
+type GraphFlowNode = Node<GraphNode["data"], GraphNode["type"]>;
+
+const NODE_COLOURS: Record<string, string> = {
+  project: "#3b82f6",
+  user: "#10b981",
+  skill: "#f59e0b",
+  default: "#6366f1",
+};
+
 const fetchGraph = async (): Promise<GraphResponse> => {
   const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
   const response = await fetch(`${apiBaseUrl}/api/graph/dependencies`);
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
-  return response.json();
+  return (await response.json()) as GraphResponse;
 };
 
 const MOCK_DATA = {
@@ -105,26 +120,30 @@ function GraphView() {
     },
   });
 
-  // Calculate layout simple circular or grid if no position
-  const initialNodes = useMemo(() => {
+  // Lay out anything the backend sent without coordinates on a circle, so a
+  // position-free response still renders instead of stacking every node at the
+  // origin.
+  const initialNodes = useMemo<GraphFlowNode[]>(() => {
     if (!data?.nodes) return [];
+
+    const radius = 300;
+
+    return data.nodes.map((n, i) => {
+      if (n.position) {
+        return { ...n, position: n.position };
+      }
+
     return data.nodes.map((n: GraphNode, i: number) => {
       if (n.position) return n;
       // Simple layout if no position provided by backend
       const radius = 300;
       const angle = (i / data.nodes.length) * 2 * Math.PI;
+
       return {
         ...n,
         position: { x: 400 + radius * Math.cos(angle), y: 300 + radius * Math.sin(angle) },
         style: {
-          background:
-            n.data?.type === "project"
-              ? "#3b82f6"
-              : n.data?.type === "user"
-                ? "#10b981"
-                : n.data?.type === "skill"
-                  ? "#f59e0b"
-                  : "#6366f1",
+          background: NODE_COLOURS[n.data.type ?? ""] ?? NODE_COLOURS.default,
           color: "#fff",
           border: "none",
           borderRadius: "8px",
