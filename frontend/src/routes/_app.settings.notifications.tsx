@@ -12,12 +12,22 @@ export const Route = createFileRoute("/_app/settings/notifications")({
   component: NotificationSettingsPage,
 });
 
+/**
+ * Every preference the server stores, all booleans. Kept as a partial on the
+ * read side because the server may add keys ahead of the client knowing them.
+ */
+type NotificationPreferences = Record<string, boolean>;
+
 function NotificationSettingsPage() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const { data: preferences, isLoading } = useQuery({
     queryKey: ["notification-preferences"],
+    // api.get resolves to the parsed body; there is no `.data` envelope, and
+    // unwrapping one meant the form always rendered its defaults instead of
+    // the user's saved settings.
+    queryFn: () => api.get<NotificationPreferences>("/api/notifications/preferences"),
     queryFn: async () => {
       const res = await api.get("/api/notifications/preferences");
       return res;

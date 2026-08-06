@@ -139,14 +139,29 @@ async def rate_limit_exception_handler(
 ) -> JSONResponse:
     """
     Handle SlowAPI rate limit exceeded exceptions (429).
+    Enforces HTTP 429 status code and includes Retry-After header (#590).
     """
+    retry_after = getattr(exc, "retry_after", None)
+    if retry_after is None:
+        retry_after = 60
+
+    try:
+        retry_after_int = max(1, int(retry_after))
+    except (ValueError, TypeError):
+        retry_after_int = 60
+
+    headers = {"Retry-After": str(retry_after_int)}
+
     payload = format_error_response(
         code="RATE_LIMIT_EXCEEDED",
-        message="Rate limit exceeded. Please try again later.",
+        message="Too many requests. Rate limit exceeded. Please try again later.",
+        details={"retry_after_seconds": retry_after_int},
     )
+
     return JSONResponse(
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         content=payload,
+        headers=headers,
     )
 
 
