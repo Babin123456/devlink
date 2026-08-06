@@ -1,6 +1,5 @@
 import { ActivityFeed } from "@/components/activity/ActivityFeed";
-import { Card, SectionHeader, TagChip, Avatar } from "@/components/shared/primitives";
-import { useQuery } from "@tanstack/react-query";
+import { Card, SectionHeader, TagChip, Avatar, ListRowsSkeleton } from "@/components/shared/primitives";import { useQuery } from "@tanstack/react-query";
 import {
   activitiesService,
   dashboardService,
@@ -45,14 +44,14 @@ export function RecentActivity() {
 }
 
 export function BuilderRequests() {
-  const { data = [] } = useQuery({
+const { data = [], isLoading } = useQuery({
     queryKey: ["builder-requests"],
     queryFn: dashboardService.builderRequests,
-  });
-  return (
+  });  return (
 <Card className="hover:shadow-md transition-shadow duration-200">      <SectionHeader title="Builder Requests" action="View All" />
-      <ul className="divide-y divide-border/40">
-        {data.slice(0, 3).map((r) => (
+{isLoading && <ListRowsSkeleton rows={3} />}
+      {!isLoading && (
+      <ul className="divide-y divide-border/40">        {data.slice(0, 3).map((r) => (
           <li key={r.id} className="px-5 py-4 transition-colors hover:bg-muted/20">
             <div className="flex items-start gap-3">
               <Avatar src={r.builder.avatar} alt={r.builder.name} size={40} />
@@ -80,17 +79,16 @@ export function BuilderRequests() {
             </div>
           </li>
         ))}
-      </ul>
-    </Card>
-  );
+</ul>
+      )}
+    </Card>  );
 }
 
 export function InviteRequests() {
-  const { data = [] } = useQuery({
+const { data = [], isLoading } = useQuery({
     queryKey: ["invite-requests"],
     queryFn: dashboardService.inviteRequests,
-  });
-  return (
+  });  return (
 <Card className="hover:shadow-md transition-shadow duration-200">      <SectionHeader title="Invite Requests" action="View All" />
       <ul className="divide-y divide-border/40">
         {data.slice(0, 3).map((r) => (
@@ -126,9 +124,10 @@ export function SuggestedBuilders() {
 
   return (
 <Card className="hover:shadow-md transition-shadow duration-200">      <SectionHeader title="Suggested Builders" action="View All" actionTo="/builders" />
+{isLoading && <ListRowsSkeleton rows={3} />}
+      {!isLoading && (
       <motion.div
-        className="grid grid-cols-1 gap-4 p-5 pt-2 sm:grid-cols-2 lg:grid-cols-3"
-        variants={containerVariants}
+        className="grid grid-cols-1 gap-4 p-5 pt-2 sm:grid-cols-2 lg:grid-cols-3"        variants={containerVariants}
         initial={prefersReducedMotion ? undefined : "hidden"}
         animate={prefersReducedMotion ? undefined : "visible"}
       >
@@ -180,9 +179,9 @@ className="flex flex-col h-full rounded-3xl border border-border/40 bg-surface p
             </motion.div>
           );
         })}
-      </motion.div>
-    </Card>
-  );
+</motion.div>
+      )}
+    </Card>  );
 }
 
 export function TrendingProjects() {
