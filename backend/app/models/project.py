@@ -116,6 +116,11 @@ class Project(Base):
         Text,
     )
 
+    requirements: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
     language: Mapped[str | None] = mapped_column(
         String(100),
         index=True,

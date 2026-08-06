@@ -5,6 +5,7 @@ Database models package.
 """
 
 from .activity import Activity  # noqa: F401
+from .api_key import ApiKey  # noqa: F401
 from .application import Application  # noqa: F401
 from .audit_log import AuditLog  # noqa: F401
 from .bookmark import Bookmark  # noqa: F401
@@ -23,10 +24,12 @@ from .message import Message  # noqa: F401
 from .notification import Notification  # noqa: F401
 from .organization import Organization  # noqa: F401
 from .organization_member import OrganizationMember, OrgMemberRole  # noqa: F401
+from .password_reset_token import PasswordResetToken  # noqa: F401
 from .project import Project  # noqa: F401
 from .project_document import ProjectDocument  # noqa: F401
 from .project_view import ProjectView  # noqa: F401
 from .project_member import ProjectMember  # noqa: F401
+from .project_version import ProjectVersion  # noqa: F401
 from .project_skill import ProjectSkill  # noqa: F401
 from .refresh_token import RefreshToken  # noqa: F401
 from .repository import Repository  # noqa: F401
@@ -73,10 +76,12 @@ from .verification_request import VerificationRequest  # noqa: F401
 from .maintenance import MaintenanceWindow
 from .search_analytics import SearchQueryLog, SearchClickLog
 from .feedback import UserFeedback
-
 from .webhook import WebhookDelivery, WebhookDeadLetterQueue, WebhookDeliveryStatus
 from .plugin import Plugin, PluginInstallation, PluginType, PluginStatus
 from .security_event import SecurityEvent, SecurityEventType, SecurityEventSeverity
 from .profile_suggestion import ProfileSuggestionDismissal
 from .request_log import RequestLog  # noqa: F401
 from .background_job import BackgroundJob, JobStatus
+from .badge import Badge, UserBadge  # noqa: F401
+from .centralized_analytics import CentralizedAnalyticsEvent, AnalyticsEventType  # noqa: F401
+

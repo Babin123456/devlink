@@ -21,6 +21,7 @@ export function useProjectFilters() {
     navigate({
       to: "/projects",
       search: (prev: SearchRecord) => ({ ...prev, ...filters, page: 1 }),
+      search: (prev: Record<string, unknown>) => ({ ...prev, ...filters, page: 1 }),
       replace: true,
     });
   };
@@ -40,6 +41,8 @@ export function useProjectFilters() {
           opensource: _opensource,
           ...rest
         } = prev;
+      search: (prev: Record<string, unknown>) => {
+        const { language, experience, tech, remote, paid, opensource, ...rest } = prev;
         return { ...rest, page: 1 };
       },
       replace: true,

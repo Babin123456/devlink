@@ -48,6 +48,7 @@ interface WorkerInfo {
 }
 
 interface JobStats {
+interface AdminJobStats {
   total: number;
   running: number;
   completed: number;
@@ -75,6 +76,32 @@ interface BackgroundJob {
 interface JobsPage {
   jobs: BackgroundJob[];
   total: number;
+  avg_processing_time?: number | null;
+  worker_health?: {
+    status: string;
+    workers?: Record<
+      string,
+      { status: string; active_tasks: number; queued_tasks: number; total_processed: number }
+    >;
+  };
+}
+
+interface AdminJob {
+  id: string;
+  task_name: string;
+  status: string;
+  worker?: string | null;
+  retries: number;
+  processing_time: number | null;
+  created_at: string;
+  payload?: unknown;
+  result?: unknown;
+  error?: unknown;
+}
+
+interface AdminJobsResponse {
+  total: number;
+  jobs: AdminJob[];
 }
 
 function AdminJobsPage() {
@@ -90,6 +117,9 @@ function AdminJobsPage() {
     queryKey: ["admin-job-stats"],
     // api.get resolves to the parsed body, so there is no `.data` to unwrap.
     queryFn: () => api.get<JobStats>("/admin/background-jobs/stats"),
+    queryFn: async () => {
+      return api.get<AdminJobStats>("/admin/background-jobs/stats");
+    },
     refetchInterval: 5000,
   });
 
@@ -99,6 +129,13 @@ function AdminJobsPage() {
     queryFn: () => {
       // The client's option is `query`, not axios' `params`.
       const query: Record<string, string | number> = {
+    queryFn: async () => {
+      const params: {
+        skip: number;
+        limit: number;
+        status?: string;
+        search?: string;
+      } = {
         skip: (page - 1) * limit,
         limit,
       };
@@ -106,6 +143,10 @@ function AdminJobsPage() {
       if (search) query.search = search;
 
       return api.get<JobsPage>("/admin/background-jobs/", { query });
+      if (statusFilter !== "all") params.status = statusFilter;
+      if (search) params.search = search;
+
+      return api.get<AdminJobsResponse>("/admin/background-jobs/", { query: params });
     },
   });
 
@@ -264,14 +305,45 @@ function AdminJobsPage() {
                     <div>
                       <p className="font-medium text-foreground">{info.queued_tasks}</p>
                       <p>Queued</p>
+              {Object.entries(stats.worker_health.workers).map(
+                ([name, info]: [
+                  string,
+                  {
+                    status: string;
+                    active_tasks: number;
+                    queued_tasks: number;
+                    total_processed: number;
+                  },
+                ]) => (
+                  <div
+                    key={name}
+                    className="border border-border rounded-lg p-3 bg-surface/50 space-y-2"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-sm truncate max-w-[200px]" title={name}>
+                        {name}
+                      </span>
+                      <Badge variant={info.status === "active" ? "default" : "secondary"}>
+                        {info.status}
+                      </Badge>
                     </div>
-                    <div>
-                      <p className="font-medium text-foreground">{info.total_processed}</p>
-                      <p>Processed</p>
+                    <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
+                      <div>
+                        <p className="font-medium text-foreground">{info.active_tasks}</p>
+                        <p>Active</p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">{info.queued_tasks}</p>
+                        <p>Queued</p>
+                      </div>
+                      <div>
+                        <p className="font-medium text-foreground">{info.total_processed}</p>
+                        <p>Processed</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
@@ -348,6 +420,7 @@ function AdminJobsPage() {
               </TableHeader>
               <TableBody>
                 {jobsData.jobs.map((job) => (
+                {jobsData.jobs.map((job: AdminJob) => (
                   <>
                     <TableRow key={job.id} className="hover:bg-muted/50 transition-colors">
                       <TableCell>
@@ -412,7 +485,7 @@ function AdminJobsPage() {
                                   Payload Arguments
                                 </h4>
                                 <pre className="bg-surface border border-border rounded p-3 text-xs overflow-x-auto font-mono text-foreground max-h-48">
-                                  {JSON.stringify(job.payload, null, 2)}
+                                  {JSON.stringify(job.payload ?? null, null, 2)}
                                 </pre>
                               </div>
                               <div>
@@ -421,16 +494,21 @@ function AdminJobsPage() {
                                 </h4>
                                 <pre className="bg-surface border border-border rounded p-3 text-xs overflow-x-auto font-mono text-foreground max-h-48">
                                   {job.result ? JSON.stringify(job.result, null, 2) : "None"}
+                                  {job.result !== undefined && job.result !== null
+                                    ? JSON.stringify(job.result, null, 2)
+                                    : "None"}
                                 </pre>
                               </div>
                             </div>
-                            {job.error && (
+                            {job.error !== undefined && job.error !== null && (
                               <div>
                                 <h4 className="font-semibold mb-1 text-xs uppercase tracking-wider text-muted-foreground text-destructive">
                                   Error Traceback
                                 </h4>
                                 <pre className="bg-destructive/5 border border-destructive/20 text-destructive rounded p-3 text-xs overflow-x-auto font-mono max-h-60">
-                                  {job.error}
+                                  {typeof job.error === "string"
+                                    ? job.error
+                                    : JSON.stringify(job.error, null, 2)}
                                 </pre>
                               </div>
                             )}
