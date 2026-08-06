@@ -36,7 +36,7 @@ export interface DashboardSnapshot {
   recent_notifications?: unknown[];
   recent_posts?: unknown[];
   bookmarks?: unknown[];
-  quickActions?: any[];
+  quickActions?: unknown[];
 }
 
 export const analyticsApi = {

@@ -172,13 +172,13 @@ function GraphView() {
         attributionPosition="bottom-right"
       >
         <MiniMap
-          nodeStrokeColor={(n: any) => {
+          nodeStrokeColor={(n: unknown) => {
             if (n.data?.type === "project") return "#3b82f6";
             if (n.data?.type === "user") return "#10b981";
             if (n.data?.type === "skill") return "#f59e0b";
             return "#6366f1";
           }}
-          nodeColor={(n: any) => {
+          nodeColor={(n: unknown) => {
             if (n.data?.type === "project") return "#3b82f6";
             if (n.data?.type === "user") return "#10b981";
             if (n.data?.type === "skill") return "#f59e0b";
