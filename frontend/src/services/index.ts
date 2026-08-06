@@ -27,9 +27,10 @@ import {
 import type {
   BookmarkCollection,
   BookmarkCollectionWithBookmarks,
-  TechStackResponse,
+  Issue,
   IssueCreateInput,
   IssueUpdateInput,
+  TechStackResponse,
 } from "@/api";
 import type { Hackathon } from "@/mocks/seed";
 
@@ -216,6 +217,16 @@ export const issuesService = {
   markAsDuplicate: (projectId: string, issueId: string, duplicateOfId: string) =>
     isBackendConfigured()
       ? issuesApi.markAsDuplicate(projectId, issueId, duplicateOfId)
+      : Promise.reject("Not implemented in mock"),
+
+  estimateDifficulty: (projectId: string, issueId: string) =>
+    isBackendConfigured()
+      ? issuesApi.estimateDifficulty(projectId, issueId)
+      : Promise.reject("Not implemented in mock"),
+
+  overrideDifficulty: (projectId: string, issueId: string, difficulty: Issue["difficulty"]) =>
+    isBackendConfigured()
+      ? issuesApi.overrideDifficulty(projectId, issueId, difficulty)
       : Promise.reject("Not implemented in mock"),
 };
 

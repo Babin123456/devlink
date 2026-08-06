@@ -15,6 +15,12 @@ from app.models.user import User
 from app.schemas.project_audit import (
     PaginatedProjectAuditLogsResponse,
     ProjectAuditLogResponse,
+)
+from app.schemas.project_version import (
+    PaginatedProjectVersionsResponse,
+    ProjectVersionCompareResponse,
+    ProjectVersionResponse,
+)
 from app.schemas.duplicate_detection import (
     DuplicateProjectCheckRequest,
     DuplicateProjectCheckResponse,
@@ -233,6 +239,7 @@ def list_projects(
     paid: bool | None = Query(None),
     opensource: bool | None = Query(None),
     tech: str | None = Query(None),
+    sort_by: str | None = Query("newest", description="Sorting option: newest, oldest, most_active, most_bookmarked, most_applications, recently_updated, ai_match_score"),
     db: Session = Depends(get_database),
 ):
 
@@ -246,6 +253,7 @@ def list_projects(
         paid=paid,
         opensource=opensource,
         tech=tech,
+        sort_by=sort_by,
     )
 
 

@@ -11,7 +11,7 @@ export function useProjectFilters() {
   const setFilters = (filters: Partial<FilterState>) => {
     navigate({
       to: "/projects",
-      search: (prev: any) => ({ ...prev, ...filters, page: 1 }),
+      search: (prev: Record<string, unknown>) => ({ ...prev, ...filters, page: 1 }),
       replace: true,
     });
   };
@@ -19,7 +19,7 @@ export function useProjectFilters() {
   const clearFilters = () => {
     navigate({
       to: "/projects",
-      search: (prev: any) => {
+      search: (prev: Record<string, unknown>) => {
         const { language, experience, tech, remote, paid, opensource, ...rest } = prev;
         return { ...rest, page: 1 };
       },
