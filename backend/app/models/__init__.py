@@ -85,3 +85,4 @@ from .background_job import BackgroundJob, JobStatus
 from .badge import Badge, UserBadge  # noqa: F401
 from .centralized_analytics import CentralizedAnalyticsEvent, AnalyticsEventType  # noqa: F401
 
+from .project_comment import ProjectComment  # noqa: F401
