@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
@@ -29,13 +28,13 @@ function AdminMaintenance() {
 
   const fetchWindows = async () => {
     try {
-      const res = await api.get<any>("/api/maintenance");
-      setWindows(res.data || res);
-    } catch (error: any) {
+      const res = await api.get<unknown>("/api/maintenance");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setWindows(((res as { data?: any })?.data || res) as any);
+    } catch (error: unknown) {
       console.error("Failed to fetch maintenance windows", error);
     }
   };
-
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +49,7 @@ function AdminMaintenance() {
       await api.post("/api/maintenance", payload);
       alert("Maintenance window scheduled");
       fetchWindows();
-    } catch (error: any) {
+    } catch (error: unknown) {
       alert("Failed to schedule maintenance");
       console.error(error);
     } finally {
@@ -63,7 +62,7 @@ function AdminMaintenance() {
     try {
       await api.delete(`/api/maintenance/${id}`);
       fetchWindows();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to delete window", error);
     }
   };
