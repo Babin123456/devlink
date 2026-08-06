@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from app.utils.time import utcnow
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy import func, select
@@ -153,7 +153,7 @@ class NotificationService:
     ) -> Notification:
 
         db_notification.is_read = True
-        db_notification.read_at = datetime.utcnow()
+        db_notification.read_at = utcnow()
 
         db.flush()
         db.refresh(db_notification)
@@ -175,7 +175,7 @@ class NotificationService:
 
         for notification in notifications:
             notification.is_read = True
-            notification.read_at = datetime.utcnow()
+            notification.read_at = utcnow()
 
         db.flush()
 
@@ -248,7 +248,7 @@ class NotificationService:
             select(NotificationPreference).where(NotificationPreference.user_id == user_id)
         )
         if not pref:
-            now = datetime.now(timezone.utc)
+            now = utcnow()
             pref = NotificationPreference(
                 id=uuid.uuid4(),
                 user_id=user_id,
@@ -290,7 +290,7 @@ class NotificationService:
             if hasattr(pref, key) and value is not None:
                 setattr(pref, key, value)
 
-        pref.updated_at = datetime.now(timezone.utc)
+        pref.updated_at = utcnow()
         db.add(pref)
         db.commit()
         db.refresh(pref)
