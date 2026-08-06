@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
@@ -18,10 +17,10 @@ function MaintenancePage() {
     // Try to get maintenance info from local storage or an unauthenticated endpoint
     const checkMaintenance = async () => {
       try {
-        const res = await api.get<any>("/api/maintenance/active");
-        setMaintenance(res.data || res);
-      } catch (e: any) {
-
+        const res = await api.get<unknown>("/api/maintenance/active");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setMaintenance(((res as { data?: any })?.data || res) as any);
+      } catch (e: unknown) {
         // If 404, there is no active maintenance. We could redirect to home.
         const status = e instanceof ApiError ? e.status : undefined;
         if (status === 404) {
