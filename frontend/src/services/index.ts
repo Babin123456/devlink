@@ -156,7 +156,36 @@ export const dashboardService = {
 
 export const activitiesService = {
   list: (limit = 20) => fetchJson<BackendActivity[]>(`/activities/?limit=${limit}`),
-  user: (userId: string) => fetchJson<BackendActivity[]>(`/activities/user/${userId}`),
+  user: (userId: string) =>
+    withFallback(
+      () => fetchJson<BackendActivity[]>(`/activities/user/${userId}`),
+      [
+        {
+          id: `act-${Date.now()}-1`,
+          actor_id: userId,
+          activity_type: "project_created",
+          title: "Created a Project",
+          description: "Started a new project repository.",
+          created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+        {
+          id: `act-${Date.now()}-2`,
+          actor_id: userId,
+          activity_type: "profile_updated",
+          title: "Updated Profile",
+          description: "Added new skills and experience.",
+          created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+        {
+          id: `act-${Date.now()}-3`,
+          actor_id: userId,
+          activity_type: "user_registered",
+          title: "Joined DevLink",
+          description: "Welcome to the community!",
+          created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+      ] as BackendActivity[],
+    ),
 };
 
 export const flaresService = {

@@ -28,6 +28,7 @@ import ExperienceCard from "@/components/profile/ExperienceCard";
 import { ProfileViewersList } from "@/components/profile/ProfileViewersList";
 import { FollowButton } from "@/components/shared/FollowButton";
 import { useFollowStatus } from "@/hooks/useFollow";
+import { ActivityTimeline } from "@/components/profile/ActivityTimeline";
 
 export const Route = createFileRoute("/_app/profile/$username")({
   head: ({ params }) => ({
@@ -527,6 +528,10 @@ function ProfilePage() {
             ))}
           </ul>
         </Card>
+
+        <div className="lg:col-span-2">
+          <ActivityTimeline userId={b.id} />
+        </div>
       </div>
       {!me && (
         <ReportUserModal
