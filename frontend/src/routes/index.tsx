@@ -2,7 +2,7 @@ import React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { APP_LOGO } from "@/lib/logo";
 import { motion } from "framer-motion";
-import { Sparkles, Users2, MessageSquare, Trophy, Github, ArrowRight, Check } from "lucide-react";
+import { Sparkles, Users2, MessageSquare, Trophy, Github, ArrowRight, Check, UserPlus, Compass, Code2, Rocket } from "lucide-react";
 import {
   Sun,
   Moon,
@@ -361,6 +361,65 @@ function Landing() {
         </div>
       </section>
 
+      <section id="how-it-works" className="border-b border-border py-20 bg-gradient-to-b from-background to-surface/30">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              How it works
+            </h2>
+            <p className="mt-4 text-muted-foreground text-[15px]">
+              Form teams, collaborate, and ship products in four simple steps.
+            </p>
+          </div>
+
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 relative">
+            {/* Desktop connecting line */}
+            <div className="hidden lg:block absolute top-[45px] left-[12%] right-[12%] h-0.5 border-t-2 border-dashed border-border/60 z-0" />
+
+            {[
+              {
+                step: "01",
+                icon: UserPlus,
+                title: "Create Profile",
+                desc: "Import repositories from GitHub and choose your skills to build a clean developer portfolio.",
+              },
+              {
+                step: "02",
+                icon: Compass,
+                title: "Discover Builders",
+                desc: "Find collaborators matching your exact timezone, tech stack, interests, and availability.",
+              },
+              {
+                step: "03",
+                icon: Code2,
+                title: "Build Projects",
+                desc: "Establish shared workspaces with real-time WebSocket chat and structured role management.",
+              },
+              {
+                step: "04",
+                icon: Rocket,
+                title: "Ship Together",
+                desc: "Deploy, submit projects to hackathons, and build up your public co-builder reputation.",
+              },
+            ].map((s, idx) => (
+              <div
+                key={s.step}
+                className="relative flex flex-col items-center text-center p-6 rounded-2xl border border-border bg-card shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 group z-10"
+              >
+                {/* Number Badge */}
+                <span className="absolute -top-4 left-6 rounded-full bg-primary px-2.5 py-0.5 text-[11px] font-bold text-primary-foreground shadow-sm">
+                  Step {s.step}
+                </span>
+
+                {/* Icon Container */}
+                <div className="mt-2 flex h-14 w-14 items-center justify-center rounded-xl bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground duration-300">
+                  <s.icon size={24} />
+                </div>
+
+                <h3 className="mt-6 text-[16px] font-bold text-foreground">{s.title}</h3>
+                <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
       <section id="squad-cta" className="border-b border-border bg-gradient-to-b from-background via-surface/10 to-background py-20 relative overflow-hidden">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 relative z-10">
           <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
