@@ -14,6 +14,18 @@ import {
   Compass,
   Code2,
   Rocket,
+  LayoutDashboard,
+  Activity,
+  Star,
+  Bot,
+  User,
+  Mail,
+  Clock,
+  Zap as ZapIcon,
+  Globe,
+  GitBranch,
+  MessageCircle,
+  Send,
 } from "lucide-react";
 import {
   Sun,
@@ -37,6 +49,13 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -90,6 +109,47 @@ function Landing() {
   const [billingCycle, setBillingCycle] = React.useState<"monthly" | "yearly">("yearly");
   const [openFaq, setOpenFaq] = React.useState<number | null>(0);
 
+  const showcaseTabs = [
+    {
+      icon: LayoutDashboard,
+      title: "Dashboard",
+      desc: "Track every project and its progress at a glance.",
+    },
+    {
+      icon: Users2,
+      title: "Builder Profile",
+      desc: "Showcase your skills, stack and contributions.",
+    },
+    {
+      icon: Sparkles,
+      title: "AI Matching",
+      desc: "Get paired with collaborators who fit your project.",
+    },
+    {
+      icon: MessageSquare,
+      title: "Messaging",
+      desc: "Coordinate with your team in real time, in-app.",
+    },
+  ];
+  const [showcaseApi, setShowcaseApi] = React.useState<CarouselApi>();
+  const [activeShowcase, setActiveShowcase] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!showcaseApi) {
+      return;
+    }
+
+    const onSelect = () => setActiveShowcase(showcaseApi.selectedScrollSnap());
+    onSelect();
+    showcaseApi.on("select", onSelect);
+    showcaseApi.on("reInit", onSelect);
+
+    return () => {
+      showcaseApi.off("select", onSelect);
+      showcaseApi.off("reInit", onSelect);
+    };
+  }, [showcaseApi]);
+
   const primaryBtnClass =
     "inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-3 text-[14px] font-semibold text-primary-foreground shadow-[0_4px_12px_rgba(5,183,215,0.25)] transition-all duration-300 hover:bg-primary/95 hover:shadow-[0_6px_20px_rgba(5,183,215,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] cursor-pointer";
   const secondaryBtnClass =
@@ -121,6 +181,9 @@ function Landing() {
             <Link to="/builders" className="hover:text-foreground">
               Builders
             </Link>
+            <a href="#showcase" className="hover:text-foreground">
+              Showcase
+            </a>
             <a href="#pricing" className="hover:text-foreground">
               Pricing
             </a>
@@ -187,6 +250,14 @@ function Landing() {
               >
                 Builders
               </Link>
+
+              <a
+                href="#showcase"
+                className="text-sm text-foreground"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Showcase
+              </a>
 
               <a
                 href="#pricing"
@@ -400,6 +471,292 @@ function Landing() {
               <p className="mt-1 text-[13px] text-muted-foreground">{f.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ===== PRODUCT SHOWCASE SECTION ===== */}
+      <section
+        id="showcase"
+        className="border-b border-border py-20 bg-gradient-to-b from-background to-surface/20"
+      >
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              See DevLink in action
+            </h2>
+            <p className="mt-4 text-muted-foreground text-[15px]">
+              Explore how the platform brings teams together — from project dashboards to real-time
+              collaboration.
+            </p>
+          </div>
+
+          {/* Tab buttons */}
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
+            {showcaseTabs.map((tab, index) => {
+              const Icon = tab.icon;
+              const isActive = activeShowcase === index;
+              return (
+                <button
+                  key={index}
+                  onClick={() => showcaseApi?.scrollTo(index)}
+                  className={cn(
+                    "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-surface text-muted-foreground hover:bg-muted hover:text-foreground border border-border",
+                  )}
+                  aria-current={isActive ? "step" : undefined}
+                >
+                  <Icon size={16} />
+                  <span>{tab.title}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Carousel */}
+          <Carousel
+            setApi={setShowcaseApi}
+            className="w-full"
+            opts={{
+              align: "center",
+              loop: false,
+              skipSnaps: false,
+            }}
+          >
+            <CarouselContent>
+              {/* Slide 1: Dashboard */}
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3 xl:basis-1/3">
+                <div className="p-1 h-full">
+                  <div className="rounded-xl border border-border bg-card p-6 shadow-sm h-full flex flex-col">
+                    <div className="flex items-center gap-2 mb-4">
+                      <LayoutDashboard className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold text-foreground">Dashboard</h3>
+                    </div>
+                    <div className="flex-1 space-y-4">
+                      {/* Mock stats */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-md bg-surface p-3 border border-border/50">
+                          <div className="text-xs text-muted-foreground">Projects</div>
+                          <div className="text-xl font-bold text-foreground">8</div>
+                        </div>
+                        <div className="rounded-md bg-surface p-3 border border-border/50">
+                          <div className="text-xs text-muted-foreground">Teammates</div>
+                          <div className="text-xl font-bold text-foreground">12</div>
+                        </div>
+                      </div>
+                      <div className="rounded-md border border-border/50 p-3 bg-surface/50">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Active tasks</span>
+                          <span className="font-medium">4 / 9</span>
+                        </div>
+                        <div className="mt-2 h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full"
+                            style={{ width: "44%" }}
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Activity className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">Recent activity</span>
+                        </div>
+                        <ul className="text-sm space-y-1.5 text-muted-foreground">
+                          <li className="flex justify-between border-b border-border/30 pb-1">
+                            <span>PR #42 merged</span>
+                            <span className="text-xs">2h ago</span>
+                          </li>
+                          <li className="flex justify-between">
+                            <span>New comment on issue #17</span>
+                            <span className="text-xs">5h ago</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CarouselItem>
+
+              {/* Slide 2: Builder Profile */}
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3 xl:basis-1/3">
+                <div className="p-1 h-full">
+                  <div className="rounded-xl border border-border bg-card p-6 shadow-sm h-full flex flex-col">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Users2 className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold text-foreground">Builder Profile</h3>
+                    </div>
+                    <div className="flex-1 space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary/80 to-primary/30 flex items-center justify-center text-primary-foreground font-bold text-lg">
+                          JD
+                        </div>
+                        <div>
+                          <div className="font-medium text-foreground">Jamie Doe</div>
+                          <div className="text-xs text-muted-foreground">Full-stack Developer</div>
+                        </div>
+                        <div className="ml-auto flex items-center gap-1 text-xs bg-success-soft text-success px-2 py-0.5 rounded-full">
+                          <Clock className="h-3 w-3" /> Available
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {["React", "TypeScript", "Node.js", "GraphQL", "PostgreSQL"].map(
+                          (skill) => (
+                            <span
+                              key={skill}
+                              className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-foreground border border-border/50"
+                            >
+                              {skill}
+                            </span>
+                          ),
+                        )}
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground border-t border-border/50 pt-3">
+                        <span className="flex items-center gap-1">
+                          <Star className="h-3 w-3" /> 4.8
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <GitBranch className="h-3 w-3" /> 32 repos
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Globe className="h-3 w-3" /> UTC-4
+                        </span>
+                      </div>
+                      <div className="rounded-md bg-surface p-3 border border-border/50 text-sm">
+                        <p className="text-muted-foreground">
+                          "Passionate about building inclusive developer tools and mentoring junior
+                          devs."
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CarouselItem>
+
+              {/* Slide 3: AI Matching */}
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3 xl:basis-1/3">
+                <div className="p-1 h-full">
+                  <div className="rounded-xl border border-border bg-card p-6 shadow-sm h-full flex flex-col">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold text-foreground">AI Matching</h3>
+                    </div>
+                    <div className="flex-1 space-y-4">
+                      <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/20 bg-primary-soft/5">
+                        <Bot className="h-5 w-5 text-primary" />
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-foreground">
+                            Matched: Alex Rivera
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span>React • TypeScript</span>
+                            <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+                            <span className="flex items-center gap-1">
+                              <ZapIcon className="h-3 w-3 text-primary" /> 98% match
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Shared interests</span>
+                          <span className="font-medium">Open Source, Hackathons</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Complementary skills</span>
+                          <span className="font-medium">Backend • DevOps</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Availability</span>
+                          <span className="font-medium text-success">Both available</span>
+                        </div>
+                      </div>
+                      <div className="rounded-md bg-surface p-3 border border-border/50 text-xs text-muted-foreground">
+                        <p>
+                          AI suggests forming a team for the upcoming hackathon based on your past
+                          contributions.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CarouselItem>
+
+              {/* Slide 4: Messaging */}
+              <CarouselItem className="md:basis-1/2 lg:basis-1/3 xl:basis-1/3">
+                <div className="p-1 h-full">
+                  <div className="rounded-xl border border-border bg-card p-6 shadow-sm h-full flex flex-col">
+                    <div className="flex items-center gap-2 mb-4">
+                      <MessageSquare className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold text-foreground">Messaging</h3>
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center gap-2 border-b border-border/50 pb-2">
+                        <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center text-xs font-bold text-foreground">
+                          AR
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">Alex Rivera</div>
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <span className="flex h-1.5 w-1.5 rounded-full bg-success" />
+                            Online
+                          </div>
+                        </div>
+                        <div className="ml-auto text-xs text-muted-foreground">2m ago</div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-start">
+                          <div className="max-w-[80%] rounded-lg bg-surface px-3 py-2 text-sm border border-border/50">
+                            Hey! Ready to review the PR?
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <div className="max-w-[80%] rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm">
+                            Yes, just pushed the final fixes.
+                          </div>
+                        </div>
+                        <div className="flex justify-start">
+                          <div className="max-w-[80%] rounded-lg bg-surface px-3 py-2 text-sm border border-border/50">
+                            Great, let's merge after CI passes.
+                          </div>
+                        </div>
+                        <div className="flex justify-start items-center gap-1 text-xs text-muted-foreground">
+                          <span className="flex h-2 w-2 rounded-full bg-muted-foreground/30 animate-pulse" />
+                          Alex is typing...
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2 border-t border-border/50 pt-3">
+                        <input
+                          type="text"
+                          placeholder="Type a message..."
+                          className="flex-1 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary"
+                          disabled
+                        />
+                        <button className="rounded-lg bg-primary px-3 py-1.5 text-primary-foreground text-sm">
+                          <Send className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CarouselItem>
+            </CarouselContent>
+          </Carousel>
+
+          {/* Optional: Carousel dots indicator */}
+          <div className="flex justify-center gap-1.5 mt-6">
+            {showcaseTabs.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => showcaseApi?.scrollTo(index)}
+                className={cn(
+                  "h-2 w-2 rounded-full transition-all duration-300",
+                  activeShowcase === index ? "bg-primary w-6" : "bg-muted-foreground/30",
+                )}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
