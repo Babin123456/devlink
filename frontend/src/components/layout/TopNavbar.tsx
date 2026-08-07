@@ -148,7 +148,6 @@ export function TopNavbar() {
           </button>
           <NotificationCenter />
           <IconButton to="/messages" count={3} ariaLabel="Messages, 3 unread">
-          <IconButton to="/messages" count={3} ariaLabel="Messages">
             <MessageSquare size={16} />
           </IconButton>
         </div>

@@ -130,7 +130,6 @@ function AdminNotificationsPage() {
           <p className="text-muted-foreground">No failed deliveries to display.</p>
         ) : (
           <div className="space-y-4">
-            {failed?.map((notification) => (
             {failed?.map((notification: FailedNotification) => (
               <Card key={notification.id}>
                 <CardContent className="p-4 flex items-center justify-between">

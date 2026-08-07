@@ -12,7 +12,6 @@ interface KeywordCount {
   count: number;
 }
 
-interface SearchAnalytics {
 interface SearchAnalyticsData {
   total_searches: number;
   zero_result_rate_pct: number;
@@ -22,20 +21,13 @@ interface SearchAnalyticsData {
 }
 
 function SearchAnalyticsDashboard() {
-  const [data, setData] = useState<SearchAnalytics | null>(null);
-  top_keywords: { keyword: string; count: number }[];
-}
-
-function SearchAnalyticsDashboard() {
   const [data, setData] = useState<SearchAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        // The client prefixes the base URL and attaches the token, and it
-        // resolves to the parsed body — there is no response envelope.
-        setData(await api.get<SearchAnalytics>("/api/search/analytics?days=30"));
+        setData(await api.get<SearchAnalyticsData>("/api/search/analytics?days=30"));
       } catch (error) {
         console.error("Failed to fetch search analytics", error);
       } finally {
@@ -45,16 +37,6 @@ function SearchAnalyticsDashboard() {
 
     void fetchAnalytics();
   }, []);
-  const fetchAnalytics = async () => {
-    try {
-      // Assuming api wrapper adds the base url and token
-      setData(await api.get<SearchAnalyticsData>("/api/search/analytics?days=30"));
-    } catch (error) {
-      console.error("Failed to fetch search analytics", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) return <div className="p-6">Loading Analytics...</div>;
   if (!data) return <div className="p-6 text-red-500">Failed to load data.</div>;
@@ -99,8 +81,7 @@ function SearchAnalyticsDashboard() {
               </tr>
             </thead>
             <tbody>
-              {data.top_keywords?.map((item, idx) => (
-              {data.top_keywords.map((item: { keyword: string; count: number }, idx: number) => (
+              {data.top_keywords?.map((item: KeywordCount, idx: number) => (
                 <tr key={idx} className="border-b">
                   <td className="p-3 text-gray-500">#{idx + 1}</td>
                   <td className="p-3 font-medium">{item.keyword}</td>
