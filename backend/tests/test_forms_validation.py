@@ -1,9 +1,9 @@
 import pytest
-from pydantic import ValidationError
-from app.schemas.auth import LoginRequest, RegisterRequest, ChangePasswordRequest
-from app.schemas.user import UserUpdate, UserBase
+from app.schemas.auth import ChangePasswordRequest, LoginRequest, RegisterRequest
 from app.schemas.project import ProjectCreate, ProjectStage, ProjectVisibility
+from app.schemas.user import UserBase, UserUpdate
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
 
 # ==============================================================================
@@ -30,10 +30,10 @@ class TestLoginFormValidation:
         assert any(err["loc"][0] == "password" for err in exc_info.value.errors())
 
     def test_login_successful_submission(self):
-        payload = {"email": "user@example.com", "password": "Password123!"}
+        payload = {"email": "user@example.com", "password": "Vermilion-Kestrel97!"}
         req = LoginRequest.model_validate(payload)
         assert req.email == "user@example.com"
-        assert req.password == "Password123!"
+        assert req.password == "Vermilion-Kestrel97!"
 
     def test_login_api_endpoint_validation(self, client: TestClient):
         # Invalid email payload to endpoint returns HTTP 422
@@ -77,7 +77,7 @@ class TestSignupFormValidation:
             "last_name": "Doe",
             "username": "johndoe",
             "email": "johndoe@example.com",
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         }
         req = RegisterRequest.model_validate(payload)
         assert req.first_name == "John"

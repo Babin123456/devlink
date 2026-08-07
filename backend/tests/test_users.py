@@ -1,4 +1,5 @@
 import uuid
+
 from fastapi.testclient import TestClient
 
 
@@ -28,7 +29,7 @@ def test_create_user(client: TestClient):
             "last_name": "User",
             "email": "createuser@example.com",
             "username": "createuser",
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
     assert response.status_code == 201
@@ -44,7 +45,7 @@ def test_create_user_duplicate_email(client: TestClient, register_and_login):
             "last_name": "User",
             "email": "dupem@example.com",
             "username": "dupem2",
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
     assert response.status_code == 400
@@ -60,7 +61,7 @@ def test_create_user_duplicate_username(client: TestClient, register_and_login):
             "last_name": "User",
             "email": "dupusr2@example.com",
             "username": "dupusr",
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
     assert response.status_code == 400

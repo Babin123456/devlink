@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.models.user import User
 from app.models.user_skill import UserSkill
 from app.models.skill import Skill
+from app.schemas.conversation_starter import ConversationStarterSuggestion
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 class ConversationStarterService:
     """
     AI-powered conversation starter suggestions.
-    
+
     Generates context-aware conversation prompts based on user profiles,
     skills, and shared interests.
     """
@@ -28,6 +29,7 @@ class ConversationStarterService:
         """Get OpenAI client."""
         try:
             from openai import OpenAI
+
             return OpenAI(api_key=settings.OPENAI_API_KEY)
         except ImportError:
             logger.warning("openai package not installed")
@@ -80,7 +82,8 @@ class ConversationStarterService:
         current_skills_text = ""
         if current_user_context["skills"]:
             skills_list = [
-                f"{s['name']} ({s['level']})" for s in current_user_context["skills"][:5]
+                f"{s['name']} ({s['level']})"
+                for s in current_user_context["skills"][:5]
             ]
             current_skills_text = f"Your skills: {', '.join(skills_list)}"
 
@@ -109,27 +112,56 @@ Requirements:
 5. Keep each suggestion under 100 characters
 6. Make them feel personal, not generic
 
-Return as JSON array of strings, nothing else. Example:
-["I noticed your experience with FastAPI. Have you worked on any interesting projects recently?", "Your recent project looks interesting. Would you be open to collaborating?"]"""
+Return as a JSON array of objects with a "text" field and a "confidence" field (a number from 0 to 1 indicating how well the starter fits their profile). Nothing else. Example:
+[{{"text": "I noticed your experience with FastAPI. Have you worked on any interesting projects recently?", "confidence": 0.92}}, {{"text": "Your recent project looks interesting. Would you be open to collaborating?", "confidence": 0.85}}]"""
 
         return prompt
+
+    @staticmethod
+    def _parse_suggestions(raw: object) -> Optional[list[ConversationStarterSuggestion]]:
+        """Parse the OpenAI response into suggestions, accepting several shapes."""
+        if not isinstance(raw, list) or not raw:
+            return None
+
+        suggestions: list[ConversationStarterSuggestion] = []
+        for item in raw:
+            if isinstance(item, str):
+                suggestions.append(
+                    ConversationStarterSuggestion(text=item, confidence=0.5)
+                )
+            elif isinstance(item, dict):
+                text = item.get("text")
+                if not isinstance(text, str) or not text.strip():
+                    continue
+                try:
+                    confidence = float(item.get("confidence", 0.5))
+                except (TypeError, ValueError):
+                    confidence = 0.5
+                confidence = max(0.0, min(1.0, confidence))
+                suggestions.append(
+                    ConversationStarterSuggestion(text=text.strip(), confidence=confidence)
+                )
+
+        if len(suggestions) < 3:
+            return None
+        return suggestions[:5]
 
     @staticmethod
     def generate_conversation_starters(
         db: Session,
         current_user_id: str,
         target_user_id: str,
-    ) -> list[str]:
+    ) -> list[ConversationStarterSuggestion]:
         """
         Generate conversation starters for messaging a potential collaborator.
-        
+
         Args:
             db: Database session
             current_user_id: The user who will send the message
             target_user_id: The user they want to message
-            
+
         Returns:
-            List of 3-5 conversation starter suggestions
+            List of 3-5 context-aware conversation starter suggestions
         """
         if not settings.OPENAI_API_KEY:
             logger.warning("OPENAI_API_KEY not configured, returning default starters")
@@ -143,7 +175,9 @@ Return as JSON array of strings, nothing else. Example:
             return ConversationStarterService._get_default_starters()
 
         # Build contexts
-        current_context = ConversationStarterService._build_user_context(db, current_user)
+        current_context = ConversationStarterService._build_user_context(
+            db, current_user
+        )
         target_context = ConversationStarterService._build_user_context(db, target_user)
 
         # Generate using OpenAI
@@ -152,14 +186,16 @@ Return as JSON array of strings, nothing else. Example:
             return ConversationStarterService._get_default_starters()
 
         try:
-            prompt = ConversationStarterService._build_prompt(current_context, target_context)
+            prompt = ConversationStarterService._build_prompt(
+                current_context, target_context
+            )
 
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "system",
-                        "content": "You are a helpful assistant that generates natural conversation starters for developers. Return only a JSON array of strings, no markdown, no explanation.",
+                        "content": "You are a helpful assistant that generates natural conversation starters for developers. Return only a JSON array of objects with 'text' and 'confidence' fields, no markdown, no explanation.",
                     },
                     {
                         "role": "user",
@@ -167,12 +203,11 @@ Return as JSON array of strings, nothing else. Example:
                     },
                 ],
                 temperature=0.8,
-                max_tokens=500,
+                max_tokens=700,
             )
 
             content = response.choices[0].message.content.strip()
 
-            # Parse JSON response
             # Remove markdown code blocks if present
             if content.startswith("```"):
                 content = content.split("\n", 1)[1]
@@ -180,10 +215,10 @@ Return as JSON array of strings, nothing else. Example:
                     content = content[:-3]
                 content = content.strip()
 
-            starters = json.loads(content)
-
-            if isinstance(starters, list) and all(isinstance(s, str) for s in starters):
-                return starters[:5]  # Max 5 suggestions
+            parsed = json.loads(content)
+            suggestions = ConversationStarterService._parse_suggestions(parsed)
+            if suggestions is not None:
+                return suggestions
 
             return ConversationStarterService._get_default_starters()
 
@@ -195,10 +230,19 @@ Return as JSON array of strings, nothing else. Example:
             return ConversationStarterService._get_default_starters()
 
     @staticmethod
-    def _get_default_starters() -> list[str]:
+    def _get_default_starters() -> list[ConversationStarterSuggestion]:
         """Return default conversation starters when AI is unavailable."""
         return [
-            "Hi! I'd love to connect and learn more about your work.",
-            "I noticed we're both working on interesting projects. Would you like to collaborate?",
-            "Your profile caught my eye. What are you currently building?",
+            ConversationStarterSuggestion(
+                text="Hi! I'd love to connect and learn more about your work.",
+                confidence=0.7,
+            ),
+            ConversationStarterSuggestion(
+                text="I noticed we're both working on interesting projects. Would you like to collaborate?",
+                confidence=0.6,
+            ),
+            ConversationStarterSuggestion(
+                text="Your profile caught my eye. What are you currently building?",
+                confidence=0.65,
+            ),
         ]

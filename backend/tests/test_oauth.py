@@ -1,12 +1,7 @@
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
-from fastapi.testclient import TestClient
 from app.models.user import User
+from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
-from app.models.user import User
-from fastapi.testclient import TestClient
 
 
 @pytest.fixture
@@ -18,10 +13,6 @@ def override_github_config(monkeypatch):
 
 
 def test_github_login_success_new_user(client: TestClient, db, override_github_config):
-def test_github_login_success_new_user(
-    client: TestClient, db_session, override_github_config
-    client: TestClient, db, override_github_config
-):
     # Mock token exchange
     mock_post = AsyncMock()
     mock_response = MagicMock()
@@ -54,7 +45,11 @@ def test_github_login_success_new_user(
 
     with patch("httpx.AsyncClient.post", new=mock_post):
         with patch("httpx.AsyncClient.get", new=mock_get):
-            response = client.post("/api/auth/github", json={"code": "test_code_123"})
+            with patch("app.routers.auth.oauth_redis") as mock_redis:
+                mock_redis.get = AsyncMock(return_value="1")
+                mock_redis.delete = AsyncMock(return_value=1)
+                
+                response = client.post("/api/auth/github", json={"code": "test_code_123", "state": "test_state"})
 
             assert response.status_code == 200
             data = response.json()
@@ -63,7 +58,6 @@ def test_github_login_success_new_user(
             assert data["user"]["username"] == "new_octocat"
 
             # Verify DB state
-            user = db_session.query(User).filter_by(email="octocat@example.com").first()
             user = db.query(User).filter(User.email == "octocat@example.com").first()
             assert user is not None
             assert user.github_id == "1234567"
@@ -71,7 +65,6 @@ def test_github_login_success_new_user(
 
 
 def test_github_login_link_existing_account(
-    client: TestClient, db_session, override_github_config
     client: TestClient, db, override_github_config
 ):
     # Pre-create a user with the same email but no github_id
@@ -82,11 +75,9 @@ def test_github_login_link_existing_account(
         last_name="User",
         username="existing_user",
         email="existing@example.com",
-        password_hash=hash_password("Password123!"),
+        password_hash=hash_password("Vermilion-Kestrel97!"),
         is_active=True,
     )
-    db_session.add(existing_user)
-    db_session.commit()
     db.add(existing_user)
     db.commit()
     db.refresh(existing_user)
@@ -121,7 +112,11 @@ def test_github_login_link_existing_account(
 
     with patch("httpx.AsyncClient.post", new=mock_post):
         with patch("httpx.AsyncClient.get", new=mock_get):
-            response = client.post("/api/auth/github", json={"code": "test_code_456"})
+            with patch("app.routers.auth.oauth_redis") as mock_redis:
+                mock_redis.get = AsyncMock(return_value="1")
+                mock_redis.delete = AsyncMock(return_value=1)
+                
+                response = client.post("/api/auth/github", json={"code": "test_code_456", "state": "test_state"})
 
             assert response.status_code == 200
             data = response.json()
@@ -131,8 +126,6 @@ def test_github_login_link_existing_account(
             )  # Keeps original username
 
             # Verify DB state
-            user = (
-                db_session.query(User).filter_by(email="existing@example.com").first()
             db.expire_all()
             user = db.query(User).filter(User.email == "existing@example.com").first()
             assert user.github_id == "987654"
@@ -150,7 +143,11 @@ def test_github_login_invalid_code(client: TestClient, override_github_config):
     mock_post.return_value = mock_response
 
     with patch("httpx.AsyncClient.post", new=mock_post):
-        response = client.post("/api/auth/github", json={"code": "invalid_code"})
+        with patch("app.routers.auth.oauth_redis") as mock_redis:
+            mock_redis.get = AsyncMock(return_value="1")
+            mock_redis.delete = AsyncMock(return_value=1)
+            
+            response = client.post("/api/auth/github", json={"code": "invalid_code", "state": "test_state"})
 
         assert response.status_code == 401
         assert "incorrect or expired" in response.json()["detail"]

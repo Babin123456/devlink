@@ -9,8 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_database
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_database
 from app.models.activity import ActivityType
 from app.models.user import User
 from app.schemas.activity import (
@@ -72,8 +71,8 @@ def get_activity(
     "/",
     response_model=list[ActivityResponse],
 )
-def get_feed(
-    limit: int = Query(50, ge=1, le=100),
+@cached(ttl=60, key_prefix="feed")
+def get_feed(    limit: int = Query(50, ge=1, le=100),
     cursor: datetime | None = Query(
         None, description="Cursor for pagination (created_at timestamp)"
     ),

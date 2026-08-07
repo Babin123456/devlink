@@ -1,5 +1,5 @@
 from __future__ import annotations
-from app.schemas.user import CurrentUser
+
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
@@ -7,23 +7,38 @@ from uuid import UUID
 # pyrefly: ignore [missing-import]
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from app.schemas.user import CurrentUser
+from app.core.validation import NameStr, UsernameStr, ValidEmail
+
 # ==========================================================
 # Register
 # ==========================================================
 
 
 class RegisterRequest(BaseModel):
-    first_name: str = Field(..., min_length=2, max_length=100)
-    last_name: str = Field(..., min_length=2, max_length=100)
+    first_name: NameStr
+    last_name: NameStr
 
-    username: str = Field(..., min_length=3, max_length=50)
+    username: UsernameStr
 
-    email: EmailStr
+    email: ValidEmail
 
     password: str = Field(
         ...,
         min_length=8,
         max_length=128,
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "username": "janedoe",
+                "email": "jane.doe@example.com",
+                "password": "StrongPassword123!"
+            }
+        }
     )
 
 
@@ -33,7 +48,7 @@ class RegisterRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: ValidEmail
 
     password: str = Field(
         ...,
@@ -41,13 +56,28 @@ class LoginRequest(BaseModel):
         max_length=128,
     )
 
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "email": "jane.doe@example.com",
+                "password": "StrongPassword123!"
+            }
+        }
+    )
+
 
 class GitHubLoginRequest(BaseModel):
     code: str
+    state: str = ""
 
 
-class GitHubLoginRequest(BaseModel):  # noqa: F811
+class LinkedInLoginRequest(BaseModel):
     code: str
+    state: str = ""
+
+
+class OAuthStateResponse(BaseModel):
+    state: str
 
 
 # ==========================================================
@@ -81,12 +111,12 @@ class AuthResponse(BaseModel):
     success: bool = True
     message: str
 
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-    user: Optional[UserResponse] = None
-
-    user: CurrentUser
+    access_token: Optional[str] = None
+    refresh_token: Optional[str] = None
+    token_type: Optional[str] = "bearer"
+    mfa_required: bool = False
+    mfa_token: Optional[str] = None
+    user: Optional[CurrentUser] = None
 
 
 # ==========================================================
@@ -98,14 +128,34 @@ class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
 
-# ==========================================================
-# Logout
-# ==========================================================
+class LogoutRequest(BaseModel):
+    refresh_token: Optional[str] = None
 
 
 class LogoutResponse(BaseModel):
     success: bool = True
     message: str = "Successfully logged out."
+
+
+# ==========================================================
+# Sessions & Devices
+# ==========================================================
+
+
+class SessionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    device_name: Optional[str] = None
+    device_type: Optional[str] = None
+    browser: Optional[str] = None
+    operating_system: Optional[str] = None
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    is_current: bool = False
+    created_at: datetime
+    last_used_at: Optional[datetime] = None
+    expires_at: datetime
 
 
 # ==========================================================
@@ -120,6 +170,12 @@ class ForgotPasswordRequest(BaseModel):
 class ForgotPasswordResponse(BaseModel):
     success: bool = True
     message: str
+
+
+class VerifyRecoveryTokenResponse(BaseModel):
+    valid: bool = True
+    message: str
+    email: Optional[str] = None
 
 
 # ==========================================================

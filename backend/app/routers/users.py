@@ -2,10 +2,18 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Query,
+    Request,
+    status,
+    File,
+    UploadFile,
+)
 
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
@@ -20,16 +28,24 @@ from app.schemas.user import (
     UserStats,
     UserUpdate,
     UsernameAvailabilityResponse,
+    ProfileCompletionResponse,
+    PrivacySettings,
+    PrivacySettingsUpdate,
 )
 from app.schemas.user_report import (
     UserReportCreate,
     UserReportResponse,
 )
-from app.models.user_report import UserReport
 from app.core.security import hash_password
 from app.services.user_service import UserService
 from app.core.cache import cached
 from app.utils.validators import validate_username
+from app.utils.uploads import (
+    validate_resume_upload,
+    save_resume_upload,
+    validate_image_upload,
+    save_image_upload,
+)
 
 router = APIRouter(
     tags=["Users"],
@@ -111,22 +127,98 @@ def get_me(
     current_user: User = Depends(get_current_user),
 ):
 
+    if current_user.deleted_at is not None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
     if online_threshold is not None:
         current_user._online_threshold = online_threshold
     return current_user
 
 
 @router.get(
+    "/me/privacy",
+    response_model=PrivacySettings,
+    summary="Get Privacy Settings",
+)
+def get_my_privacy_settings(
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get profile privacy controls for the current user.
+    """
+    return current_user.get_privacy_settings()
+
+
+@router.put(
+    "/me/privacy",
+    response_model=CurrentUser,
+    summary="Update Privacy Settings",
+)
+def update_my_privacy_settings(
+    settings: PrivacySettingsUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    """
+    Update profile privacy controls for email, GitHub, resume, social links, and availability.
+    """
+    return UserService.update_privacy_settings(db, current_user, settings)
+
+
+@router.get(
+    "/me/completion",
+    response_model=ProfileCompletionResponse,
+    summary="Get Current User Profile Completion",
+)
+def get_my_profile_completion(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    """
+    Get profile completion percentage and missing factors for current user.
+    """
+    return UserService.get_profile_completion(db, current_user)
+
+
+@router.get(
+    "/{user_id}/completion",
+    response_model=ProfileCompletionResponse,
+    summary="Get User Profile Completion by ID",
+)
+def get_user_profile_completion(
+    user_id: uuid.UUID,
+    db: Session = Depends(get_database),
+):
+    """
+    Get profile completion percentage and missing factors for a specific user.
+    """
+    user = UserService.get_user(db, user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    return UserService.get_profile_completion(db, user)
+
+
+from app.dependencies import get_database, get_current_user, get_optional_current_user
+from app.services.block_service import BlockService
+
+
+@router.get(
     "/{user_id}",
     response_model=UserResponse,
 )
-@cached(ttl=120, key_prefix="users:get")
 def get_user(
     user_id: uuid.UUID,
     online_threshold: int | None = Query(
         None, description="Online threshold in seconds"
     ),
     db: Session = Depends(get_database),
+    current_user: User | None = Depends(get_optional_current_user),
 ):
 
     user = UserService.get_user(
@@ -139,8 +231,22 @@ def get_user(
             status_code=404,
             detail="User not found",
         )
+
+    # Check private profile and blocking restrictions
+    if user.is_private:
+        if not current_user or (
+            current_user.id != user_id
+            and BlockService.is_blocked(db, user_id, current_user.id)
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to view this private profile.",
+            )
+
     if online_threshold is not None:
         user._online_threshold = online_threshold
+
+    user = UserService.apply_privacy_filters(db, user, current_user)
     return user
 
 
@@ -157,6 +263,7 @@ def list_users(
         None, description="Online threshold in seconds"
     ),
     db: Session = Depends(get_database),
+    current_user: User | None = Depends(get_optional_current_user),
 ):
 
     users = UserService.list_users(
@@ -165,10 +272,14 @@ def list_users(
         limit,
     )
 
-    if online_threshold is not None:
-        for u in users:
-            u._online_threshold = online_threshold
-    return users
+    filtered_users = []
+    for u in users:
+        fu = UserService.apply_privacy_filters(db, u, current_user)
+        if online_threshold is not None:
+            fu._online_threshold = online_threshold
+        filtered_users.append(fu)
+
+    return filtered_users
 
 
 @router.get(
@@ -193,12 +304,35 @@ def update_me(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
 ):
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
 
-    return UserService.update_user(
+    # Extract old values for fields that are being updated
+    old_values = {}
+    for key in user.model_dump(exclude_unset=True).keys():
+        old_values[key] = getattr(current_user, key, None)
+
+    updated_user = UserService.update_user(
         db,
         current_user,
         user,
     )
+
+    new_values = user.model_dump(exclude_unset=True)
+
+    AuditLogService.create_log(
+        db=db,
+        actor_id=updated_user.id,
+        action=AuditAction.PROFILE_UPDATED,
+        entity_type="user",
+        entity_id=str(updated_user.id),
+        target_user_id=updated_user.id,
+        old_values=old_values,
+        new_values=new_values,
+        description="User updated their profile",
+    )
+
+    return updated_user
 
 
 @router.post(
@@ -209,7 +343,7 @@ async def upload_resume(
     request: Request,
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_database),
 ):
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
@@ -221,11 +355,41 @@ async def upload_resume(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     resume_url = save_resume_upload(contents, file.filename, current_user.id)
-    current_user.resume_url = str(request.base_url).rstrip("/") + resume_url
-    db.commit()
-    db.refresh(current_user)
+    full_resume_url = str(request.base_url).rstrip("/") + resume_url
 
-    return current_user
+    return UserService.update_resume_url(db, current_user, full_resume_url)
+
+
+@router.post(
+    "/me/avatar",
+    response_model=UserResponse,
+    summary="Upload and optimize user profile avatar",
+)
+async def upload_avatar(
+    request: Request,
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+
+    contents = await file.read()
+    try:
+        validate_image_upload(file.filename, file.content_type, len(contents))
+        saved = save_image_upload(
+            contents=contents,
+            filename=file.filename,
+            subfolder="avatars",
+            user_id=current_user.id,
+            max_dimensions=(400, 400),
+            thumb_dimensions=(150, 150),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    full_avatar_url = str(request.base_url).rstrip("/") + str(saved["image_url"])
+    return UserService.update_profile_image(db, current_user, full_avatar_url)
 
 
 @router.delete(
@@ -237,9 +401,76 @@ def delete_me(
     db: Session = Depends(get_database),
 ):
 
-    UserService.delete_user(
+    UserService.soft_delete_user(
         db,
         current_user,
+        deleted_by_id=current_user.id,
+    )
+
+
+@router.patch(
+    "/{user_id}/restore",
+    response_model=UserResponse,
+)
+def restore_user(
+    user_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Only admins can restore users",
+        )
+
+    user = UserService.get_user_including_deleted(db, user_id)
+
+    if user is None:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
+
+    if user.deleted_at is None:
+        raise HTTPException(
+            status_code=400,
+            detail="User is not deleted",
+        )
+
+    return UserService.restore_user(
+        db,
+        user,
+    )
+
+
+@router.delete(
+    "/{user_id}/hard",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def hard_delete_user(
+    user_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Only admins can permanently delete users",
+        )
+
+    user = UserService.get_user_including_deleted(db, user_id)
+
+    if user is None:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
+
+    UserService.hard_delete_user(
+        db,
+        user,
     )
 
 
@@ -328,16 +559,5 @@ def report_user(
         raise HTTPException(status_code=404, detail="User not found")
     if current_user.id == target_user.id:
         raise HTTPException(status_code=400, detail="You cannot report yourself")
-    db_report = UserReport(
-        reporter_id=current_user.id,
-        reported_id=target_user.id,
-        reason=report.reason,
-        description=report.description,
-        status="pending",
-    )
 
-    db.add(db_report)
-    db.commit()
-    db.refresh(db_report)
-
-    return db_report
+    return UserService.create_user_report(db, current_user.id, target_user.id, report)

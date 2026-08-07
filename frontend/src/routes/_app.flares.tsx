@@ -5,6 +5,7 @@ import { Card, TagChip, Avatar } from "@/components/shared/primitives";
 import { Markdown } from "@/components/shared/Markdown";
 import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
 import { LoadingButton } from "@/components/shared/LoadingButton";
+import { BookmarkToggleButton } from "@/components/shared/BookmarkToggleButton";
 import { Heart, MessageCircle, Send, Flame } from "lucide-react";
 import { useState, useCallback } from "react";
 import { currentUser, builders } from "@/mocks/seed";
@@ -69,6 +70,7 @@ function FlareCard({ flare }: { flare: Flare }) {
               <button className="inline-flex items-center gap-1 hover:text-primary">
                 <MessageCircle size={12} /> {flare.comments}
               </button>
+              <BookmarkToggleButton targetType="flare" targetId={flare.id} />
             </div>
           </div>
         </div>
@@ -129,16 +131,11 @@ function FlaresPage() {
                 <p className="text-[11px] text-muted-foreground">Markdown supported</p>
                 <LoadingButton
                   disabled={!content.trim()}
-                  onClick={() => {
-                    toast.success("Flare posted");
-                    setContent("");
-                  }}
-                  className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
                   loading={submitting}
                   loadingText="Posting..."
                   onClick={handlePost}
                   size="sm"
-                  className="inline-flex items-center gap-1.5"
+                  className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
                 >
                   <Send size={12} /> Post
                 </LoadingButton>
@@ -148,37 +145,6 @@ function FlaresPage() {
         </Card>
 
         {feed.map((f) => (
-          <Card key={f.id} className="p-4">
-            <div className="flex items-start gap-3">
-              <Avatar
-                src={f.author.avatar}
-                alt={f.author.name}
-                size={40}
-                online={f.author.online}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-[13px] font-semibold text-foreground">{f.author.name}</p>
-                  <p className="text-[12px] text-muted-foreground">
-                    @{f.author.handle} · {f.ago}
-                  </p>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {f.tags.map((t) => (
-                    <TagChip key={t}>#{t}</TagChip>
-                  ))}
-                </div>
-                <div className="mt-3 flex items-center gap-4 text-[12px] text-muted-foreground">
-                  <button className="inline-flex items-center gap-1 hover:text-destructive">
-                    <Heart size={12} /> {f.likes}
-                  </button>
-                  <button className="inline-flex items-center gap-1 hover:text-primary">
-                    <MessageCircle size={12} /> {f.comments}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </Card>
           <FlareCard key={f.id} flare={f} />
         ))}
       </div>

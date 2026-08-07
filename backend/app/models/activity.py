@@ -6,14 +6,16 @@ from enum import Enum
 from typing import Any
 
 from sqlalchemy import (
+    JSON,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
+    Index,
     String,
     Text,
     func,
-    Index,
-    JSON,
+)
+from sqlalchemy import (
+    Enum as SqlEnum,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -29,6 +31,7 @@ class ActivityType(str, Enum):
     PROJECT_UPDATED = "project_updated"
     PROJECT_ARCHIVED = "project_archived"
     PROJECT_MILESTONE = "project_milestone"
+    PROJECT_ANNOUNCEMENT = "project_announcement"
 
     BUILDER_FLARE_CREATED = "builder_flare_created"
 

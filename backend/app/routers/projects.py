@@ -12,6 +12,19 @@ from sqlalchemy.orm import Session
 from app.dependencies import get_database, get_current_user, require_project_permission
 from app.middleware.rate_limit import limiter, PROJECT_LIMIT
 from app.models.user import User
+from app.schemas.project_audit import (
+    PaginatedProjectAuditLogsResponse,
+    ProjectAuditLogResponse,
+)
+from app.schemas.project_version import (
+    PaginatedProjectVersionsResponse,
+    ProjectVersionCompareResponse,
+    ProjectVersionResponse,
+)
+from app.schemas.duplicate_detection import (
+    DuplicateProjectCheckRequest,
+    DuplicateProjectCheckResponse,
+)
 from app.schemas.project import (
     ProjectCreate,
     ProjectResponse,
@@ -49,10 +62,46 @@ def create_project(
             detail="Project slug already exists",
         )
 
-    return ProjectService.create_project(
+    new_project = ProjectService.create_project(
         db=db,
         owner_id=current_user.id,
         project=project,
+    )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.PROJECT_CREATED,
+        entity_type="project",
+        entity_id=str(new_project.id),
+        project_id=new_project.id,
+        new_values=project.model_dump(exclude_unset=True),
+    )
+
+    return new_project
+
+
+@router.post(
+    "/check-duplicate",
+    response_model=DuplicateProjectCheckResponse,
+    summary="Check AI-based duplicate projects",
+    description="Compare project title, description, and tags against existing projects using semantic embedding and token similarity.",
+)
+def check_duplicate_project(
+    req: DuplicateProjectCheckRequest,
+    db: Session = Depends(get_database),
+) -> DuplicateProjectCheckResponse:
+    from app.services.duplicate_detection_service import DuplicateDetectionService
+    return DuplicateDetectionService.find_duplicate_projects(
+        db,
+        title=req.title,
+        description=req.description,
+        tags=req.tags,
+        threshold=req.similarity_threshold,
+        limit=req.limit,
     )
 
 
@@ -72,14 +121,44 @@ def check_project_similarity(
     )
 
 
+from app.dependencies import (
+    get_database,
+    get_current_user,
+    get_optional_current_user,
+    require_project_permission,
+)
+from app.schemas.project_analytics import ProjectAnalyticsResponse
+from app.services.project_analytics_service import ProjectAnalyticsService
+
+
+@router.get(
+    "/{project_id}/analytics",
+    response_model=ProjectAnalyticsResponse,
+    summary="Get Project View Analytics",
+)
+def get_project_analytics(
+    project_id: uuid.UUID,
+    days: int = Query(
+        30, ge=1, le=365, description="Number of days for daily views breakdown"
+    ),
+    db: Session = Depends(get_database),
+):
+    """
+    Get project view analytics including total views, unique viewers, and daily views.
+    """
+    return ProjectAnalyticsService.get_analytics(db, project_id, days=days)
+
+
 @router.get(
     "/{project_id}",
     response_model=ProjectResponse,
 )
 @cached(ttl=60, key_prefix="projects:get")
 def get_project(
+    request: Request,
     project_id: uuid.UUID,
     db: Session = Depends(get_database),
+    current_user: User | None = Depends(get_optional_current_user),
 ):
 
     project = ProjectService.get_project(
@@ -93,9 +172,16 @@ def get_project(
             detail="Project not found",
         )
 
-    ProjectService.increment_views(
-        db,
-        project,
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    viewer_id = current_user.id if current_user else None
+
+    ProjectAnalyticsService.record_view(
+        db=db,
+        project_id=project_id,
+        viewer_id=viewer_id,
+        ip_address=ip_address,
+        user_agent=user_agent,
     )
 
     return project
@@ -107,8 +193,10 @@ def get_project(
 )
 @cached(ttl=60, key_prefix="projects:slug")
 def get_project_by_slug(
+    request: Request,
     slug: str,
     db: Session = Depends(get_database),
+    current_user: User | None = Depends(get_optional_current_user),
 ):
 
     project = ProjectService.get_by_slug(
@@ -122,9 +210,16 @@ def get_project_by_slug(
             detail="Project not found",
         )
 
-    ProjectService.increment_views(
-        db,
-        project,
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    viewer_id = current_user.id if current_user else None
+
+    ProjectAnalyticsService.record_view(
+        db=db,
+        project_id=project.id,
+        viewer_id=viewer_id,
+        ip_address=ip_address,
+        user_agent=user_agent,
     )
 
     return project
@@ -138,13 +233,27 @@ def get_project_by_slug(
 def list_projects(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
+    language: str | None = Query(None),
+    experience: str | None = Query(None),
+    remote: bool | None = Query(None),
+    paid: bool | None = Query(None),
+    opensource: bool | None = Query(None),
+    tech: str | None = Query(None),
+    sort_by: str | None = Query("newest", description="Sorting option: newest, oldest, most_active, most_bookmarked, most_applications, recently_updated, ai_match_score"),
     db: Session = Depends(get_database),
 ):
 
     return ProjectService.list_projects(
         db,
-        skip,
-        limit,
+        skip=skip,
+        limit=limit,
+        language=language,
+        experience=experience,
+        remote=remote,
+        paid=paid,
+        opensource=opensource,
+        tech=tech,
+        sort_by=sort_by,
     )
 
 
@@ -187,10 +296,109 @@ def update_project(
             detail="Project not found",
         )
 
-    return ProjectService.update_project(
+    old_values = {}
+    new_values = project.model_dump(exclude_unset=True)
+    for key in new_values.keys():
+        val = getattr(db_project, key, None)
+        old_values[key] = str(val) if hasattr(val, "value") else val
+
+    updated_project = ProjectService.update_project(
         db,
         db_project,
         project,
+    )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+    from enum import Enum
+
+    # 1. Title update event
+    if "title" in new_values and old_values.get("title") != new_values["title"]:
+        AuditLogService.create_log(
+            db=db,
+            actor_id=current_user.id,
+            action=AuditAction.PROJECT_TITLE_UPDATED,
+            entity_type="project",
+            entity_id=str(updated_project.id),
+            project_id=updated_project.id,
+            old_values={"title": old_values.get("title")},
+            new_values={"title": new_values["title"]},
+        )
+
+    # 2. Description update event
+    if "description" in new_values and old_values.get("description") != new_values["description"]:
+        AuditLogService.create_log(
+            db=db,
+            actor_id=current_user.id,
+            action=AuditAction.PROJECT_DESCRIPTION_UPDATED,
+            entity_type="project",
+            entity_id=str(updated_project.id),
+            project_id=updated_project.id,
+            old_values={"description": old_values.get("description")},
+            new_values={"description": new_values["description"]},
+        )
+
+    # 3. Status/Stage change event
+    status_keys = {"stage", "visibility", "is_published", "hiring"}
+    if any(k in new_values for k in status_keys):
+        changed_old = {k: str(old_values[k]) if isinstance(old_values.get(k), Enum) else old_values.get(k) for k in status_keys if k in new_values}
+        changed_new = {k: str(new_values[k]) if isinstance(new_values.get(k), Enum) else new_values.get(k) for k in status_keys if k in new_values}
+        AuditLogService.create_log(
+            db=db,
+            actor_id=current_user.id,
+            action=AuditAction.PROJECT_STATUS_CHANGED,
+            entity_type="project",
+            entity_id=str(updated_project.id),
+            project_id=updated_project.id,
+            old_values=changed_old,
+            new_values=changed_new,
+        )
+
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.PROJECT_UPDATED,
+        entity_type="project",
+        entity_id=str(updated_project.id),
+        project_id=updated_project.id,
+        old_values=old_values,
+        new_values=new_values,
+    )
+
+    return updated_project
+
+
+@router.get(
+    "/{project_id}/audit-trail",
+    response_model=PaginatedProjectAuditLogsResponse,
+    summary="Get Project Audit Trail",
+    description="Retrieve paginated audit trail history of project events (creations, title/description updates, member changes, status changes, and archiving).",
+)
+def get_project_audit_trail(
+    project_id: uuid.UUID,
+    event_type: Optional[str] = Query(None, description="Filter by event type substring"),
+    user_id: Optional[uuid.UUID] = Query(None, description="Filter by actor or target user ID"),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_database),
+    current_user: User = Depends(require_project_permission("project:read")),
+) -> PaginatedProjectAuditLogsResponse:
+    from app.services.audit_log_service import AuditLogService
+    result = AuditLogService.search_project_audit_logs(
+        db,
+        project_id=project_id,
+        user_id=user_id,
+        event_type=event_type,
+        page=page,
+        limit=limit,
+    )
+    items = [ProjectAuditLogResponse.model_validate(log) for log in result["items"]]
+    return PaginatedProjectAuditLogsResponse(
+        items=items,
+        total=result["total"],
+        page=result["page"],
+        limit=result["limit"],
+        pages=result["pages"],
     )
 
 
@@ -217,10 +425,24 @@ def archive_project(
             detail="Project not found",
         )
 
-    return ProjectService.archive_project(
+    archived_project = ProjectService.archive_project(
         db,
         project,
     )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.PROJECT_ARCHIVED,
+        entity_type="project",
+        entity_id=str(archived_project.id),
+        project_id=archived_project.id,
+    )
+
+    return archived_project
 
 
 @router.patch(
@@ -246,10 +468,24 @@ def restore_project(
             detail="Project not found",
         )
 
-    return ProjectService.restore_project(
+    restored_project = ProjectService.restore_project(
         db,
         project,
     )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.PROJECT_RESTORED,
+        entity_type="project",
+        entity_id=str(restored_project.id),
+        project_id=restored_project.id,
+    )
+
+    return restored_project
 
 
 @router.patch(
@@ -385,15 +621,29 @@ def delete_project(
             detail="Project not found",
         )
 
-    ProjectService.delete_project(
+    ProjectService.soft_delete_project(
         db,
         project,
+        deleted_by_id=current_user.id,
+    )
+
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.PROJECT_DELETED,
+        entity_type="project",
+        entity_id=str(project_id),
+        project_id=project_id,
     )
 
 
 @router.post(
     "/{project_id}/invite/{user_id}",
     status_code=status.HTTP_201_CREATED,
+    response_model=dict,
 )
 def invite_user(
     project_id: uuid.UUID,
@@ -416,8 +666,6 @@ def invite_user(
         )
 
     from app.models.project_member import ProjectMember, MemberRole
-
-    # pyrefly: ignore [missing-import]
     from sqlalchemy import and_, select
 
     existing_member = db.scalar(
@@ -463,4 +711,110 @@ def invite_user(
         notification=notification_data,
     )
 
+    from app.services.audit_log_service import AuditLogService
+    from app.models.audit_log import AuditAction
+
+    AuditLogService.create_log(
+        db=db,
+        actor_id=current_user.id,
+        action=AuditAction.INVITATION_SENT,
+        entity_type="project",
+        entity_id=str(project_id),
+        project_id=project_id,
+        target_user_id=user_id,
+    )
+
     return {"message": "User invited successfully"}
+
+
+@router.delete(
+    "/{project_id}/soft",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def soft_delete_project(
+    project_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    project = ProjectService.get_project(db, project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found",
+        )
+
+    if project.owner_id != current_user.id and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Permission denied",
+        )
+
+    ProjectService.soft_delete_project(
+        db,
+        project,
+        deleted_by_id=current_user.id,
+    )
+
+
+@router.patch(
+    "/{project_id}/restore-soft-delete",
+    response_model=ProjectResponse,
+)
+def restore_project_soft_delete(
+    project_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    project = ProjectService.get_project_including_deleted(db, project_id)
+
+    if project is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found",
+        )
+
+    if project.deleted_at is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Project is not deleted",
+        )
+
+    if project.owner_id != current_user.id and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Permission denied",
+        )
+
+    return ProjectService.restore_soft_deleted_project(
+        db,
+        project,
+    )
+
+
+@router.delete(
+    "/{project_id}/hard",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def hard_delete_project(
+    project_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=403,
+            detail="Only admins can permanently delete projects",
+        )
+
+    project = ProjectService.get_project_including_deleted(db, project_id)
+
+    if project is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found",
+        )
+
+    ProjectService.hard_delete_project(
+        db,
+        project,
+    )

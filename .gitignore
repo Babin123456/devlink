@@ -1,0 +1,39 @@
+# Dependencies
+node_modules
+node_modules/
+frontend/node_modules/
+
+# Python virtual environments
+.venv/
+backend/.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Node locks & build artifacts
+dist/
+dist-ssr/
+.output/
+.nitro/
+.tanstack/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.production
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Runtime artifacts
+backend/logs/
+
+backend/logs/devlink.log

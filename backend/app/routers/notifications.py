@@ -8,8 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_database
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_database
 from app.models.user import User
 from app.schemas.notification import (
     NotificationCreate,
@@ -207,3 +206,46 @@ def delete_notification(
         db,
         notification,
     )
+
+
+from app.schemas.notification import (
+    NotificationPreferenceResponse,
+    NotificationPreferenceUpdate,
+)
+
+
+@router.get(
+    "/preferences",
+    response_model=NotificationPreferenceResponse,
+    summary="Get Notification Preferences",
+    description="Retrieve current user's notification preferences across messages, team invitations, project updates, mentions, system announcements, and email settings.",
+)
+def get_preferences(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+) -> NotificationPreferenceResponse:
+    pref = NotificationService.get_preferences(db, user_id=current_user.id)
+    return NotificationPreferenceResponse.model_validate(pref)
+
+
+@router.put(
+    "/preferences",
+    response_model=NotificationPreferenceResponse,
+    summary="Update Notification Preferences (PUT)",
+    description="Update current user's notification settings for all channels and categories.",
+)
+@router.patch(
+    "/preferences",
+    response_model=NotificationPreferenceResponse,
+    summary="Update Notification Preferences (PATCH)",
+    description="Partially update current user's notification settings.",
+)
+def update_preferences(
+    prefs: NotificationPreferenceUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+) -> NotificationPreferenceResponse:
+    pref = NotificationService.update_preferences(
+        db, user_id=current_user.id, update_in=prefs
+    )
+    return NotificationPreferenceResponse.model_validate(pref)

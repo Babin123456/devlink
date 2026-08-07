@@ -4,35 +4,95 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-# pyrefly: ignore [missing-import]
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+
 from app.models.project import ProjectStage, ProjectVisibility
+
+# ==========================================================
+# Base Project Schema
+# ==========================================================
 
 
 class ProjectBase(BaseModel):
-    title: str
-    slug: str
-    tagline: Optional[str] = None
-    description: str
+    title: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+    )
+
+    slug: Optional[str] = Field(
+        default=None,
+        max_length=200,
+    )
+
+    tagline: Optional[str] = Field(
+        default=None,
+        max_length=255,
+    )
+
+    description: str = Field(
+        ...,
+        min_length=1,
+    )
+
     stage: ProjectStage = ProjectStage.IDEA
     visibility: ProjectVisibility = ProjectVisibility.PUBLIC
+
     tech_stack: Optional[str] = None
-    tags: Optional[list[str]] = None
+    requirements: Optional[str] = None
+
     repository_url: Optional[str] = None
     website_url: Optional[str] = None
     demo_url: Optional[str] = None
+
     team_size: int = 1
     max_team_size: int = 5
     hiring: bool = True
+
     logo_url: Optional[str] = None
     banner_url: Optional[str] = None
+
+    language: Optional[str] = None
+    experience_level: Optional[str] = None
+    is_remote: bool = False
+    is_paid: bool = False
+    is_opensource: bool = False
 
     scheduled_publish_at: Optional[datetime] = None
     is_published: bool = True
 
 
+# ==========================================================
+# Create Project
+# ==========================================================
+
+
 class ProjectCreate(ProjectBase):
-    pass
+    allow_duplicate: bool = Field(
+        default=False,
+        description="Manual override flag to allow project creation even if a potential duplicate is detected",
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "title": "DevLink",
+                "tagline": "The ultimate developer collaboration platform.",
+                "description": "DevLink connects developers to open source projects, hackathons, and networking opportunities.",
+                "stage": "MVP",
+                "visibility": "PUBLIC",
+                "hiring": True,
+                "is_opensource": True,
+                "repository_url": "https://github.com/nensii21/devlink",
+                "tech_stack": "React, FastAPI, PostgreSQL"
+            }
+        }
+    )
+
+
+# ==========================================================
+# Update Project
+# ==========================================================
 
 
 class ProjectUpdate(BaseModel):
@@ -43,7 +103,7 @@ class ProjectUpdate(BaseModel):
     stage: Optional[ProjectStage] = None
     visibility: Optional[ProjectVisibility] = None
     tech_stack: Optional[str] = None
-    tags: Optional[list[str]] = None
+    requirements: Optional[str] = None
     repository_url: Optional[str] = None
     website_url: Optional[str] = None
     demo_url: Optional[str] = None
@@ -53,8 +113,30 @@ class ProjectUpdate(BaseModel):
     logo_url: Optional[str] = None
     banner_url: Optional[str] = None
 
+    language: Optional[str] = None
+    experience_level: Optional[str] = None
+    is_remote: Optional[bool] = None
+    is_paid: Optional[bool] = None
+    is_opensource: Optional[bool] = None
+
     scheduled_publish_at: Optional[datetime] = None
     is_published: Optional[bool] = None
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "title": "DevLink Beta",
+                "hiring": False,
+                "stage": "BETA",
+                "team_size": 3,
+            }
+        }
+    )
+
+
+# ==========================================================
+# Project Response
+# ==========================================================
 
 
 class SimilarProjectWarning(BaseModel):
@@ -83,15 +165,25 @@ class ProjectResponse(ProjectBase):
     id: uuid.UUID
     owner_id: uuid.UUID
 
-    stars: int
-    views: int
-    applications_count: int
+    stars: int = 0
+    views: int = 0
+    applications_count: int = 0
 
-    is_featured: bool
-    is_archived: bool
-
-    scheduled_publish_at: Optional[datetime]
-    is_published: bool
+    is_featured: bool = False
+    is_archived: bool = False
 
     created_at: datetime
     updated_at: datetime
+
+    deleted_at: Optional[datetime] = None
+    deleted_by_id: Optional[uuid.UUID] = None
+    scheduled_publish_at: Optional[datetime] = None
+    is_published: bool = True
+
+
+class ProjectDraftCreate(ProjectBase):
+    pass
+
+
+class ProjectDraftUpdate(ProjectUpdate):
+    pass

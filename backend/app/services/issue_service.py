@@ -1,18 +1,22 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.issue import DuplicateSuggestion, Issue, IssueStatus
 from app.schemas.issue import (
     DuplicateCheckRequest,
     DuplicateCheckResponse,
+    DuplicateSuggestionResponse,
     IssueCreate,
+    IssueResponse,
     IssueUpdate,
 )
 from app.services.duplicate_detection_service import DuplicateDetectionService
+from app.services.issue_difficulty_service import IssueDifficultyService
 
 
 class IssueService:
@@ -28,8 +32,16 @@ class IssueService:
         issue: IssueCreate,
     ) -> Issue:
         """
-        Create a new issue and generate its embedding for future duplicate detection.
+        Create a new issue, estimate its difficulty, and generate its
+        embedding for future duplicate detection.
         """
+        # Run AI difficulty estimation
+        difficulty_result = IssueDifficultyService.estimate_difficulty(
+            title=issue.title,
+            description=issue.description,
+            labels=issue.labels,
+        )
+
         # Generate embedding for the issue text
         embedding_text = f"{issue.title}\n\n{issue.description}"
         embedding = DuplicateDetectionService.generate_embedding(embedding_text)
@@ -41,6 +53,9 @@ class IssueService:
             description=issue.description,
             priority=issue.priority,
             labels=issue.labels,
+            difficulty=difficulty_result.difficulty,
+            difficulty_confidence=difficulty_result.confidence,
+            difficulty_manual_override=False,
             embedding=(
                 DuplicateDetectionService.embedding_to_json(embedding)
                 if embedding
@@ -123,7 +138,11 @@ class IssueService:
         request: DuplicateCheckRequest,
     ) -> DuplicateCheckResponse:
         """
-        Check for duplicate issues in a project using AI embeddings.
+        Check for duplicate issues in a project.
+
+        Uses AI embeddings when available and falls back to keyword
+        similarity otherwise. Results are returned transiently and are
+        never persisted to the database.
 
         Args:
             db: Database session
@@ -133,58 +152,48 @@ class IssueService:
         Returns:
             DuplicateCheckResponse with suggestions and metadata
         """
-        # Generate embedding for the new issue text
         embedding_text = f"{request.title}\n\n{request.description}"
         embedding = DuplicateDetectionService.generate_embedding(embedding_text)
 
-        if not embedding:
-            # If embedding generation fails, return empty results
-            return DuplicateCheckResponse(
-                has_duplicates=False,
-                suggestions=[],
-                checked_count=0,
-                threshold=request.threshold,
-            )
-
-        # Find similar issues
+        # Find similar issues (embedding similarity with keyword fallback)
         similar_issues = DuplicateDetectionService.find_duplicates(
             db=db,
-            project_id=str(project_id),
+            project_id=project_id,
             embedding=embedding,
+            text=embedding_text,
             threshold=request.threshold,
             limit=5,
         )
 
-        # Create suggestion records
-        suggestions = []
+        checked_count = (
+            db.scalar(
+                select(func.count())
+                .select_from(Issue)
+                .where(Issue.project_id == project_id)
+            )
+            or 0
+        )
+
+        # Build transient suggestion responses
+        now = datetime.now(timezone.utc)
+        suggestions: list[DuplicateSuggestionResponse] = []
         for result in similar_issues:
-            # Check if suggestion already exists
-            existing = db.scalar(
-                select(DuplicateSuggestion).where(
-                    DuplicateSuggestion.source_issue_id == uuid.uuid4(),  # placeholder
-                    DuplicateSuggestion.duplicate_issue_id == result["issue_id"],
+            issue = result["issue"]
+            suggestions.append(
+                DuplicateSuggestionResponse(
+                    id=uuid.uuid4(),
+                    source_issue_id=uuid.uuid4(),
+                    duplicate_issue_id=issue.id,
+                    similarity_score=result["similarity_score"],
+                    created_at=now,
+                    issue=IssueResponse.model_validate(issue),
                 )
             )
-
-            if not existing:
-                suggestion = DuplicateSuggestion(
-                    source_issue_id=uuid.uuid4(),  # temporary ID for the check
-                    duplicate_issue_id=result["issue_id"],
-                    similarity_score=result["similarity_score"],
-                )
-                db.add(suggestion)
-                suggestions.append(suggestion)
-
-        db.flush()
-
-        # Load issue details for suggestions
-        for suggestion in suggestions:
-            db.refresh(suggestion)
 
         return DuplicateCheckResponse(
             has_duplicates=len(suggestions) > 0,
             suggestions=suggestions,
-            checked_count=len(similar_issues),
+            checked_count=checked_count,
             threshold=request.threshold,
         )
 
@@ -196,6 +205,7 @@ class IssueService:
         """Get duplicate suggestions for a specific issue."""
         stmt = (
             select(DuplicateSuggestion)
+            .options(selectinload(DuplicateSuggestion.duplicate_issue))
             .where(
                 DuplicateSuggestion.source_issue_id == issue_id,
             )
@@ -215,6 +225,24 @@ class IssueService:
             raise ValueError("Issue not found")
 
         db_issue.status = IssueStatus.DUPLICATE
+        db_issue.is_duplicate_checked = True
+
+        # Persist the relationship so it can be surfaced later
+        existing = db.scalar(
+            select(DuplicateSuggestion).where(
+                DuplicateSuggestion.source_issue_id == issue_id,
+                DuplicateSuggestion.duplicate_issue_id == duplicate_of_id,
+            )
+        )
+        if not existing:
+            db.add(
+                DuplicateSuggestion(
+                    source_issue_id=issue_id,
+                    duplicate_issue_id=duplicate_of_id,
+                    similarity_score=1.0,
+                )
+            )
+
         db.flush()
         db.refresh(db_issue)
 

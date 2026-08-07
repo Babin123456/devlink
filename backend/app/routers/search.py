@@ -1,86 +1,217 @@
+from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
 
-from app.database.session import get_db
-from app.dependencies import get_database
-from app.models.user import User
-from app.models.project import Project
-from app.models.skill import Skill
-from app.schemas.search import (
-    SearchAutocompleteResponse,
-    SearchSuggestionUser,
-    SearchSuggestionProject,
-    SearchSuggestionSkill,
+from app.dependencies import get_database, get_current_user_optional, get_current_user
+from app.schemas.search import SearchAutocompleteResponse
+from app.schemas.search_index import (
+    SearchIndexedResponse,
+    SearchAnalyticsMetric,
+    SearchBenchmarkReport,
 )
+from app.services.search_service import SearchService
+from app.services.search_index_service import SearchIndexService
+from app.services.search_analytics_service import SearchAnalyticsService
+from app.dependencies import get_current_user, get_optional_current_user
+from app.models.user import User, UserRole
+import time
+import uuid
+from pydantic import BaseModel
+from fastapi import HTTPException
 
 router = APIRouter()
 
-@router.get("/autocomplete", response_model=SearchAutocompleteResponse, summary="Global search autocomplete")
+
+@router.get("", summary="Full multi-category search")
+def full_search(
+    q: str = Query("", max_length=200),
+    category: Optional[str] = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_database),
+    user: Optional[User] = Depends(get_optional_current_user),
+):
+    """Full-text paginated search across Users, Projects, Organizations, Skills, and Tags."""
+    start_time = time.time()
+
+    results = SearchService.search(
+        db=db,
+        q=q,
+        category=category,
+        page=page,
+        limit=limit,
+    )
+
+    latency_ms = (time.time() - start_time) * 1000
+
+    # Calculate total results returned in this page
+    total_results = 0
+    if category:
+        # results is a dictionary with a single key for the category
+        for v in results.values():
+            total_results += len(v)
+    else:
+        for k, v in results.items():
+            if isinstance(v, list):
+                total_results += len(v)
+
+    if q.strip():
+        # Log the search asynchronously ideally, but we do it synchronously here
+        SearchAnalyticsService.log_search(
+            db=db,
+            query=q,
+            results_count=total_results,
+            latency_ms=latency_ms,
+            user_id=user.id if user else None,
+            filters={"category": category} if category else None,
+        )
+
+    return results
+
+
+@router.get(
+    "/autocomplete",
+    response_model=SearchAutocompleteResponse,
+    summary="Global search autocomplete",
+)
 def autocomplete(
     q: str = Query("", min_length=0, max_length=100),
     db: Session = Depends(get_database),
 ):
-    if not q or not q.strip():
-        return SearchAutocompleteResponse(users=[], projects=[], skills=[])
-        
-    query_str = f"%{q.strip()}%"
+    """Lightweight autocomplete endpoint returning top matches per category."""
+    return SearchService.autocomplete(db=db, q=q)
 
-    # Search Users
-    users = db.query(User).filter(
-        or_(
-            User.username.ilike(query_str),
-            User.first_name.ilike(query_str),
-            User.last_name.ilike(query_str),
-            User.role.ilike(query_str),
-        )
-    ).limit(3).all()
-    
-    # Format Users (name combination)
-    formatted_users = [
-        SearchSuggestionUser(
-            id=u.id,
-            name=f"{u.first_name} {u.last_name}".strip(),
-            username=u.username,
-            role=u.role,
-            profile_image=u.profile_image
-        )
-        for u in users
-    ]
 
-    # Search Projects
-    projects = db.query(Project).filter(
-        or_(
-            Project.title.ilike(query_str),
-            Project.tagline.ilike(query_str),
-            Project.description.ilike(query_str),
-        )
-    ).limit(3).all()
-    
-    formatted_projects = [
-        SearchSuggestionProject(
-            id=p.id,
-            title=p.title,
-            icon=p.logo_url or "🚀"  # Fallback to emoji or logo_url
-        )
-        for p in projects
-    ]
+@router.get(
+    "/suggestions",
+    response_model=List[str],
+    summary="Global search suggestions",
+)
+def suggestions(
+    q: str = Query("", min_length=0, max_length=100),
+    limit: int = Query(8, ge=1, le=50),
+    db: Session = Depends(get_database),
+):
+    """Returns a flat list of matching query suggestion strings."""
+    return SearchService.suggestions(db=db, q=q, limit=limit)
 
-    # Search Skills
-    skills = db.query(Skill).filter(
-        Skill.name.ilike(query_str)
-    ).limit(3).all()
-    
-    formatted_skills = [
-        SearchSuggestionSkill(
-            id=s.id,
-            name=s.name,
-        )
-        for s in skills
-    ]
 
-    return SearchAutocompleteResponse(
-        users=formatted_users,
-        projects=formatted_projects,
-        skills=formatted_skills,
+# ---------------------------------------------------------------------
+# Optimized Inverted Search Index Endpoints (#647)
+# ---------------------------------------------------------------------
+
+
+@router.get(
+    "/indexed",
+    response_model=SearchIndexedResponse,
+    summary="Optimized global index search",
+)
+def search_indexed(
+    q: str = Query("", max_length=200, description="Search query string"),
+    category: Optional[str] = Query(
+        None,
+        description="Resource category: developers, projects, organizations, discussions, skills, technologies",
+    ),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_database),
+):
+    """Executes high-performance tokenized search across inverted index with weighted relevance ranking."""
+    return SearchIndexService.execute_search(
+        db=db,
+        query=q,
+        category=category,
+        limit=limit,
+        offset=offset,
     )
+
+
+@router.post(
+    "/index/reindex",
+    summary="Reindex global search resources",
+)
+def reindex_search_resources(
+    db: Session = Depends(get_database),
+):
+    """Rebuilds the inverted search index across developers, projects, organizations, discussions, skills, and technologies."""
+    return SearchIndexService.reindex_all(db)
+
+
+class TrackClickRequest(BaseModel):
+    query: str
+    clicked_entity_type: str
+    clicked_entity_id: uuid.UUID
+
+
+@router.post(
+    "/track-click",
+    summary="Track a click from search results",
+)
+def track_click(
+    request: TrackClickRequest,
+    db: Session = Depends(get_database),
+    user: Optional[User] = Depends(get_optional_current_user),
+):
+    """Track which entity a user clicked from their search results."""
+    # Find the most recent search query for this user/session with this query string
+    from sqlalchemy import select
+    from app.models.search_analytics import SearchQueryLog
+
+    stmt = select(SearchQueryLog).where(SearchQueryLog.query == request.query)
+    if user:
+        stmt = stmt.where(SearchQueryLog.user_id == user.id)
+
+    stmt = stmt.order_by(SearchQueryLog.created_at.desc()).limit(1)
+
+    log = db.scalar(stmt)
+    if not log:
+        return {"status": "ignored"}
+
+    SearchAnalyticsService.log_click(
+        db=db,
+        search_query_id=log.id,
+        clicked_entity_type=request.clicked_entity_type,
+        clicked_entity_id=request.clicked_entity_id,
+        user_id=user.id if user else None,
+    )
+    return {"status": "success"}
+
+
+@router.get(
+    "/analytics",
+    response_model=SearchAnalyticsMetric,
+    summary="Get search analytics & latency metrics",
+)
+def get_search_analytics():
+    """Returns search query latency metrics, top search terms, zero-result counts, and category distribution."""
+    return SearchIndexService.get_analytics()
+
+
+@router.get(
+    "/benchmark",
+    response_model=SearchBenchmarkReport,
+    summary="Run search index performance benchmark",
+)
+def run_search_benchmark(
+    q: str = Query("dev", description="Query to benchmark"),
+    iterations: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_database),
+):
+    """Benchmarks query execution latency comparing Inverted Index search vs Naive SQL ILIKE search."""
+    return SearchIndexService.run_benchmark(db=db, query=q, iterations=iterations)
+
+
+@router.get(
+    "/analytics",
+    summary="Get search analytics dashboard metrics",
+)
+def get_analytics_dashboard(
+    days: int = Query(30, ge=1, le=365),
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    if getattr(current_user, "role", None) != UserRole.ADMIN and not getattr(current_user, "is_admin", False):
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    return SearchAnalyticsService.get_dashboard_metrics(db, days=days)
+

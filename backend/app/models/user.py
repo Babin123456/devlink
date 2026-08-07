@@ -3,19 +3,38 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import (
     Boolean,
     DateTime,
+    ForeignKey,
     String,
     Text,
     JSON,
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from enum import Enum
 from app.database.base import Base
+
+class UserRole(str, Enum):
+    """Application-level user role."""
+    USER = "user"
+    ADMIN = "admin"
+    DEVELOPER = "developer"
+    MEMBER = "member"
+    VIEWER = "viewer"
+    MODERATOR = "moderator"
+
+
+class UserRole(str, Enum):
+    USER = "user"
+    DEVELOPER = "developer"
+    ADMIN = "admin"
+
 
 
 class User(Base):
@@ -65,9 +84,9 @@ class User(Base):
         nullable=False,
     )
 
-    password_hash: Mapped[str] = mapped_column(
+    password_hash: Mapped[str | None] = mapped_column(
         String(255),
-        nullable=False,
+        nullable=True,
     )
 
     # ------------------------------------------------------------------
@@ -75,9 +94,9 @@ class User(Base):
     # ------------------------------------------------------------------
 
     badges: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
+        ARRAY(String).with_variant(JSON, "sqlite"),
         default=list,
-        server_default="{}",
+        server_default="[]",
         nullable=False,
     )
 
@@ -172,6 +191,38 @@ class User(Base):
         nullable=False,
     )
 
+    is_private: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    privacy_settings: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
+        default=lambda: {
+            "email": "private",
+            "github": "public",
+            "resume": "public",
+            "social_links": "public",
+            "availability": "public",
+        },
+    )
+
+    def get_privacy_settings(self) -> dict:
+        defaults = {
+            "email": "private",
+            "github": "public",
+            "resume": "public",
+            "social_links": "public",
+            "availability": "public",
+        }
+        if not self.privacy_settings:
+            return defaults
+        res = dict(defaults)
+        res.update(self.privacy_settings)
+        return res
+
     # ------------------------------------------------------------------
     # Authentication
     # ------------------------------------------------------------------
@@ -196,6 +247,43 @@ class User(Base):
         nullable=False,
     )
 
+    # ------------------------------------------------------------------
+    # Multi-Factor Authentication (MFA)
+    # ------------------------------------------------------------------
+
+    mfa_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    mfa_secret: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+
+    mfa_backup_codes: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    # System-level RBAC role (issue #357).
+    # Controls platform-wide permissions independent of org/project membership.
+    # Values: admin, maintainer, organization_owner, project_owner, contributor, user
+    system_role: Mapped[str] = mapped_column(
+        String(50),
+        default="user",
+        nullable=False,
+        index=True,
+    )
+
+    verification_status: Mapped[str] = mapped_column(
+        String(20), default="unverified", nullable=False
+    )
+    verified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
     email_verified_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
@@ -209,14 +297,12 @@ class User(Base):
     last_seen: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
-    DateTime(timezone=True),
-    nullable=True,
     )
 
     last_active_at: Mapped[datetime | None] = mapped_column(
-    DateTime(timezone=True),
-    default=datetime.utcnow,
-    nullable=True,
+        DateTime(timezone=True),
+        default=datetime.utcnow,
+        nullable=True,
     )
     # ------------------------------------------------------------------
     # OAuth
@@ -232,6 +318,42 @@ class User(Base):
         String(100),
         nullable=True,
         unique=True,
+    )
+
+    linkedin_id: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        unique=True,
+    )
+
+    gitlab_id: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        unique=True,
+    )
+
+    # ------------------------------------------------------------------
+    # Soft Delete
+    # ------------------------------------------------------------------
+
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
+    )
+
+    deleted_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+        index=True,
+    )
+
+    deleted_by: Mapped[User | None] = relationship(
+        "User",
+        foreign_keys=[deleted_by_id],
+        remote_side="User.id",
     )
 
     # ------------------------------------------------------------------

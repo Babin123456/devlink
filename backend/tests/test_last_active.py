@@ -1,10 +1,10 @@
+from datetime import datetime, timedelta, timezone
+
+import app.core.security
 import pytest
-from datetime import datetime, timezone, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-
-import app.core.security
 
 
 class MockPwdContext:
@@ -21,32 +21,8 @@ from app.database.base import Base  # noqa: E402
 from app.dependencies import get_database  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models.user import User  # noqa: E402
-from app.schemas.user import UserResponse, CurrentUser  # noqa: E402
 from app.schemas.auth import CurrentUserResponse  # noqa: E402
-
-engine = create_engine(
-    "sqlite:///:memory:",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-@pytest.fixture(autouse=True)
-def setup_db():
-    app.dependency_overrides[get_database] = override_get_db
-    Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
-    app.dependency_overrides.clear()
+from app.schemas.user import CurrentUser, UserResponse  # noqa: E402
 
 
 @pytest.fixture()

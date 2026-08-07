@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import uuid
 
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.core.cache import cached
 from app.models.activity import ActivityType
 from app.models.project import Project
-from app.schemas.project import ProjectCreate, ProjectUpdate
-from app.services.activity_service import ActivityService
-from app.core.cache import cached
 from app.schemas.project import (
     ProjectCreate,
     ProjectDraftCreate,
@@ -18,6 +18,7 @@ from app.schemas.project import (
     ProjectUpdate,
     SimilarProjectWarning,
 )
+from app.services.activity_service import ActivityService
 
 
 class ProjectService:
@@ -31,6 +32,29 @@ class ProjectService:
         owner_id: uuid.UUID,
         project: ProjectCreate,
     ) -> Project:
+        # AI-based duplicate project detection check (#608)
+        allow_dup = getattr(project, "allow_duplicate", False)
+        if not allow_dup:
+            from app.services.duplicate_detection_service import DuplicateDetectionService
+            dup_res = DuplicateDetectionService.find_duplicate_projects(
+                db,
+                title=project.title,
+                description=project.description,
+                threshold=0.80,
+                limit=3,
+            )
+            if dup_res.has_duplicates:
+                top_match = dup_res.suggested_projects[0]
+                from fastapi import HTTPException, status
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "message": f"Potential duplicate project detected: '{top_match.title}' ({top_match.confidence_score}% match).",
+                        "max_similarity_score": dup_res.max_similarity_score,
+                        "suggested_projects": [p.model_dump() for p in dup_res.suggested_projects],
+                        "manual_override_instruction": "Pass 'allow_duplicate': true in request payload to bypass this check.",
+                    },
+                )
 
         db_project = Project(
             owner_id=owner_id,
@@ -56,7 +80,7 @@ class ProjectService:
         db.refresh(db_project)
 
         # Create ProjectMember record for owner
-        from app.models.project_member import ProjectMember, MemberRole
+        from app.models.project_member import MemberRole, ProjectMember
 
         member = ProjectMember(
             project_id=db_project.id,
@@ -72,7 +96,8 @@ class ProjectService:
             activity_type=ActivityType.PROJECT_CREATED,
             title="Created project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="folder-plus",
             color="primary",
         )
@@ -86,7 +111,28 @@ class ProjectService:
         project_id: uuid.UUID,
     ) -> Project | None:
 
-        return db.get(Project, project_id)
+        stmt = (
+            select(Project)
+            .options(selectinload(Project.owner))
+            .where(
+                Project.id == project_id,
+                Project.deleted_at.is_(None),
+            )
+        )
+        return db.scalar(stmt)
+
+    @staticmethod
+    def get_project_including_deleted(
+        db: Session,
+        project_id: uuid.UUID,
+    ) -> Project | None:
+        """Retrieve a project regardless of soft-delete status (admin use)."""
+        stmt = (
+            select(Project)
+            .options(selectinload(Project.owner))
+            .where(Project.id == project_id)
+        )
+        return db.scalar(stmt)
 
     @staticmethod
     @cached(ttl=300, key_prefix="proj")
@@ -98,7 +144,10 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.slug == slug)
+            .where(
+                Project.slug == slug,
+                Project.deleted_at.is_(None),
+            )
         )
         return db.scalar(stmt)
 
@@ -108,15 +157,67 @@ class ProjectService:
         db: Session,
         skip: int = 0,
         limit: int = 20,
+        language: str | None = None,
+        experience: str | None = None,
+        remote: bool | None = None,
+        paid: bool | None = None,
+        opensource: bool | None = None,
+        tech: str | None = None,
+        sort_by: str | None = "newest",
     ) -> list[Project]:
 
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.is_published.is_(True))
-            .offset(skip)
-            .limit(limit)
+            .where(
+                Project.deleted_at.is_(None),
+                Project.is_published.is_(True),
+            )
         )
+
+        if language:
+            lang_list = [l.strip() for l in language.split(",") if l.strip()]
+            if lang_list:
+                stmt = stmt.where(Project.language.in_(lang_list))
+        if experience:
+            exp_list = [e.strip() for e in experience.split(",") if e.strip()]
+            if exp_list:
+                stmt = stmt.where(Project.experience.in_(exp_list))
+        if remote is not None:
+            stmt = stmt.where(Project.is_remote == remote)
+        if paid is not None:
+            stmt = stmt.where(Project.is_paid == paid)
+        if opensource is not None:
+            stmt = stmt.where(Project.is_open_source == opensource)
+        if tech:
+            tech_list = [t.strip() for t in tech.split(",") if t.strip()]
+            if tech_list:
+                from sqlalchemy import or_
+                stmt = stmt.where(or_(*[Project.tech_stack.ilike(f"%{t}%") for t in tech_list]))
+
+        # Apply sorting logic
+        from sqlalchemy import desc, asc
+        if sort_by == "oldest":
+            stmt = stmt.order_by(asc(Project.created_at))
+        elif sort_by in ("recently_updated", "most_active"):
+            stmt = stmt.order_by(desc(Project.updated_at))
+        elif sort_by == "most_bookmarked":
+            if hasattr(Project, "bookmarks_count"):
+                stmt = stmt.order_by(desc(Project.bookmarks_count))
+            else:
+                stmt = stmt.order_by(desc(Project.created_at))
+        elif sort_by == "most_applications":
+            if hasattr(Project, "applications_count"):
+                stmt = stmt.order_by(desc(Project.applications_count))
+            else:
+                stmt = stmt.order_by(desc(Project.created_at))
+        elif sort_by == "ai_match_score":
+            stmt = stmt.order_by(desc(Project.updated_at), desc(Project.created_at))
+        else:
+            # Default "newest"
+            stmt = stmt.order_by(desc(Project.created_at))
+
+        stmt = stmt.offset(skip).limit(limit)
 
         return list(db.scalars(stmt))
 
@@ -130,7 +231,10 @@ class ProjectService:
         stmt = (
             select(Project)
             .options(selectinload(Project.owner))
-            .where(Project.owner_id == owner_id)
+            .where(
+                Project.owner_id == owner_id,
+                Project.deleted_at.is_(None),
+            )
         )
 
         return list(db.scalars(stmt))
@@ -163,7 +267,8 @@ class ProjectService:
             activity_type=ActivityType.PROJECT_UPDATED,
             title="Updated project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="pencil",
             color="info",
         )
@@ -187,7 +292,8 @@ class ProjectService:
             activity_type=ActivityType.PROJECT_ARCHIVED,
             title="Archived project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="archive",
             color="warning",
         )
@@ -255,9 +361,10 @@ class ProjectService:
         project_id: uuid.UUID,
     ) -> ProjectStatsResponse:
         from sqlalchemy import func, select
+
         from app.models.application import Application
         from app.models.bookmark import Bookmark
-        from app.models.project_member import ProjectMember, MemberRole
+        from app.models.project_member import MemberRole, ProjectMember
 
         project = db.get(Project, project_id)
         assert project is not None
@@ -288,7 +395,10 @@ class ProjectService:
             db.scalar(
                 select(func.count())
                 .select_from(Bookmark)
-                .where(Bookmark.project_id == project_id)
+                .where(
+                    Bookmark.target_type == "project",
+                    Bookmark.target_id == project_id,
+                )
             )
             or 0
         )
@@ -301,47 +411,74 @@ class ProjectService:
             bookmark_count=bookmark_count,
         )
 
+    @staticmethod
+    def find_similar_projects(
+        db: Session,
+        title: str,
+        description: str,
+        title_threshold: float = 0.75,
+        description_threshold: float = 0.65,
+    ) -> list[SimilarProjectWarning]:
+        from difflib import SequenceMatcher
 
-@staticmethod
-def find_similar_projects(
-    db: Session,
-    title: str,
-    description: str,
-    title_threshold: float = 0.75,
-    description_threshold: float = 0.65,
-) -> list[SimilarProjectWarning]:
-    from difflib import SequenceMatcher
+        candidates = list(
+            db.scalars(select(Project).where(Project.is_archived.is_(False)))
+        )
 
-    candidates = list(db.scalars(select(Project).where(Project.is_archived.is_(False))))
+        results = []
+        title_lower = title.lower()
+        desc_lower = description.lower()
 
-    results = []
-    title_lower = title.lower()
-    desc_lower = description.lower()
+        for project in candidates:
+            title_sim = SequenceMatcher(
+                None, title_lower, project.title.lower()
+            ).ratio()
+            desc_sim = SequenceMatcher(
+                None, desc_lower, project.description.lower()
+            ).ratio()
 
-    for project in candidates:
-        title_sim = SequenceMatcher(None, title_lower, project.title.lower()).ratio()
-        desc_sim = SequenceMatcher(
-            None, desc_lower, project.description.lower()
-        ).ratio()
-
-        if title_sim >= title_threshold or desc_sim >= description_threshold:
-            results.append(
-                SimilarProjectWarning(
-                    id=project.id,
-                    title=project.title,
-                    slug=project.slug,
-                    title_similarity=round(title_sim, 2),
-                    description_similarity=round(desc_sim, 2),
+            if title_sim >= title_threshold or desc_sim >= description_threshold:
+                results.append(
+                    SimilarProjectWarning(
+                        id=project.id,
+                        title=project.title,
+                        slug=project.slug,
+                        title_similarity=round(title_sim, 2),
+                        description_similarity=round(desc_sim, 2),
+                    )
                 )
-            )
 
-    return results
+        return results
 
     @staticmethod
-    def delete_project(
+    def soft_delete_project(
+        db: Session,
+        db_project: Project,
+        deleted_by_id: uuid.UUID,
+    ) -> None:
+        """Mark a project as deleted without removing the row."""
+        db_project.deleted_at = func.now()
+        db_project.deleted_by_id = deleted_by_id
+        db.commit()
+
+    @staticmethod
+    def restore_soft_deleted_project(
+        db: Session,
+        db_project: Project,
+    ) -> Project:
+        """Restore a soft-deleted project."""
+        db_project.deleted_at = None
+        db_project.deleted_by_id = None
+        db.commit()
+        db.refresh(db_project)
+        return db_project
+
+    @staticmethod
+    def hard_delete_project(
         db: Session,
         db_project: Project,
     ) -> None:
+        """Permanently remove a project from the database (admin only)."""
         from app.models.project_member import ProjectMember
 
         # Explicitly delete member rows first to avoid SQLAlchemy FK nullification
@@ -456,7 +593,8 @@ def find_similar_projects(
             activity_type=ActivityType.PROJECT_CREATED,
             title="Published project",
             description=db_project.title,
-            project_id=db_project.id,
+            target_id=db_project.id,
+            target_type="project",
             icon="folder-plus",
             color="primary",
         )

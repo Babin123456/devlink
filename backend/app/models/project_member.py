@@ -7,10 +7,12 @@ from enum import Enum
 from sqlalchemy import (
     Boolean,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
     UniqueConstraint,
     func,
+)
+from sqlalchemy import (
+    Enum as SqlEnum,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -23,6 +25,9 @@ class MemberRole(str, Enum):
     CO_OWNER = "co_owner"
     ADMIN = "admin"
     MAINTAINER = "maintainer"
+    CONTRIBUTOR = "contributor"
+    REVIEWER = "reviewer"
+    VIEWER = "viewer"
     MEMBER = "member"
 
 

@@ -1,0 +1,37 @@
+name: Conflict Markers
+
+# Catches the failure mode where a conflict is "resolved" by committing the
+# markers themselves. It has happened twice, and both times it left main
+# unbuildable on both the backend and the frontend for several days.
+#
+# This deliberately does not use pre-commit: contributors are not required to
+# install the hooks, and the whole point is that the check is unskippable.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  conflict-markers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail if any tracked file contains conflict markers
+        run: |
+          # Anchored to the start of a line and requiring the trailing space or
+          # end-of-line that Git actually writes, so ordinary content such as a
+          # Markdown diff block or a "<<<<<<<" ASCII banner does not trip it.
+          #
+          # git grep only looks at tracked files, which keeps node_modules and
+          # build output out of the picture without an exclude list.
+          if git grep -nIE '^(<{7}|={7}|>{7})( |$)' -- . ':(exclude).github/workflows/conflict-markers.yml'; then
+            echo
+            echo "::error::Conflict markers found in the files listed above."
+            echo "Resolve the conflict properly and remove the markers before merging."
+            exit 1
+          fi
+
+          echo "No conflict markers found."

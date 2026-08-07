@@ -1,0 +1,207 @@
+// @ts-nocheck
+import {
+  Bell,
+  MessageSquare,
+  Plus,
+  Search,
+  Sparkles,
+  Menu,
+  Moon,
+  Sun,
+  Building2,
+  Rss,
+  PanelLeftClose,
+  PanelLeftOpen,
+  BadgeCheck,
+  Loader2,
+} from "lucide-react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { useSidebar } from "@/hooks/useSidebar";
+import { Avatar } from "@/components/shared/primitives";
+
+import { currentUser, builders, projects, flares } from "@/mocks/seed";
+import { useTheme } from "@/hooks/useTheme";
+import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@/hooks/useDebounce";
+import { searchService } from "@/services";
+import { GlobalSearchModal } from "@/components/search/GlobalSearchModal";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+export function TopNavbar() {
+  const { isDark, toggleTheme } = useTheme();
+  const { toggleMobile, toggleSidebar, isCollapsed } = useSidebar();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Global Cmd+K / Ctrl+K hotkey
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  return (
+    <>
+      <header className="sticky top-0 z-20 flex h-[72px] items-center gap-3 border-b border-border bg-surface/80 px-4 backdrop-blur">
+        {/* Hamburger: visible on tablet only (md to lg). Mobile uses BottomNavigation instead. */}
+        <button
+          onClick={toggleMobile}
+          aria-label="Open navigation menu"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-border text-muted-foreground hover:bg-muted md:grid lg:hidden hidden"
+        >
+          <Menu size={16} />
+        </button>
+
+        <button
+          onClick={toggleSidebar}
+          aria-label="Toggle sidebar"
+          className="hidden lg:grid h-9 w-9 shrink-0 place-items-center rounded-md border border-border text-muted-foreground hover:bg-muted"
+        >
+          {isCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+        </button>
+
+        <div className="relative min-w-0 flex-1 max-w-xl">
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(true)}
+            className="flex w-full items-center justify-between rounded-md border border-border bg-surface py-[7px] pl-3 pr-3 text-[13px] text-muted-foreground hover:border-primary/50 transition-colors cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-2 truncate">
+              <Search size={14} className="shrink-0 text-muted-foreground" />
+              <span className="truncate">
+                Search developers, projects, posts, messages, hackathons, repos...
+              </span>
+            </div>
+            <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-mono font-semibold text-muted-foreground shrink-0">
+              <span className="text-[11px]">⌘</span>K
+            </kbd>
+          </button>
+        </div>
+
+        <div className="hidden items-center gap-2 md:flex">
+          <button className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-[7px] text-[13px] font-medium text-foreground transition-colors hover:bg-muted">
+            <Sparkles size={14} className="text-primary" /> AI Assistant
+          </button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-2.5 py-[7px] text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 cursor-pointer">
+                <Plus size={14} /> Create
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[180px]">
+              <DropdownMenuItem asChild>
+                <Link to="/projects" search={{ create: true }}>
+                  New Project
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/flares">
+                  New Flare
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => {
+                  navigator.clipboard.writeText("https://devlink.com/invite/builder");
+                  toast.success("Invitation link copied to clipboard!");
+                }}
+                className="cursor-pointer"
+              >
+                Invite Builder
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/organizations">
+                  Organization
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/hackathons" search={{ create: true }}>
+                  Hackathon
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            className="grid h-9 w-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          <NotificationCenter />
+          <IconButton to="/messages" count={3} ariaLabel="Messages, 3 unread">
+            <MessageSquare size={16} />
+          </IconButton>
+        </div>
+
+        <Link
+          to="/profile/$username"
+          params={{ username: currentUser.handle }}
+          className="ml-1 flex items-center gap-2 rounded-md p-1 hover:bg-muted"
+        >
+          <Avatar
+            src={currentUser.avatar}
+            alt={currentUser.name}
+            name={currentUser.name}
+            size={32}
+          />
+          <div className="hidden text-left sm:block">
+            <p className="text-[12px] font-semibold leading-tight text-foreground flex items-center gap-1">
+              {currentUser.name}
+              {currentUser.verified && (
+                <BadgeCheck className="text-primary h-3 w-3" aria-label="Verified User" />
+              )}
+            </p>
+            <p className="text-[11px] leading-tight text-muted-foreground">View Profile</p>
+          </div>
+        </Link>
+      </header>
+      <GlobalSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </>
+  );
+}
+
+function IconButton({
+  children,
+  count,
+  to,
+  ariaLabel,
+}: {
+  children: React.ReactNode;
+  count?: number;
+  to: string;
+  ariaLabel: string;
+}) {
+  return (
+    <Link
+      to={to}
+      aria-label={ariaLabel}
+      className="relative grid h-9 w-9 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+    >
+      {children}
+      {count !== undefined && count > 0 && (
+        <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-[16px] place-items-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+          {count}
+        </span>
+      )}
+    </Link>
+  );
+}

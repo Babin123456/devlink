@@ -28,7 +28,7 @@ export function BioCard({
   onFieldChange,
 }: BioCardProps) {
   const hasContent = [headline, bio, location, timezone].some((value) => Boolean(value));
-  const bioLength = (editable ? formValues?.bio : (bio ?? "")).length;
+  const bioLength = (editable ? (formValues?.bio ?? "") : (bio ?? "")).length;
 
   if (editable) {
     return (

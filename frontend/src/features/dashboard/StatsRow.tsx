@@ -1,59 +1,90 @@
 import { Card } from "@/components/shared/primitives";
-import { Folder, Mail, MessageCircle, Share2, Users2, type LucideIcon } from "lucide-react";
+import { Folder, Users2, MessageSquare, Sparkles, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { stats } from "@/mocks/seed";
-import { cn } from "@/lib/utils";
 
-const iconMap: Record<string, LucideIcon> = {
-  folder: Folder,
-  users: Users2,
-  message: MessageCircle,
-  mail: Mail,
-  share: Share2,
-};
-
-const tintClass: Record<string, string> = {
-  info: "bg-blue-500/10 text-blue-500",
-  primary: "bg-cyan-500/10 text-cyan-500",
-  warning: "bg-amber-500/10 text-amber-500",
-  success: "bg-emerald-500/10 text-emerald-500",
-};
-
-// Render the 5 primary metrics matching the dashboard screenshot
-const primaryStats = stats.slice(0, 5);
+const statsData = [
+  {
+    key: "active-projects",
+    value: "2",
+    label: "Active Projects",
+    trend: "+ 20% from last week",
+    positive: true,
+    icon: Folder,
+    iconColor: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+  },
+  {
+    key: "team-members",
+    value: "24",
+    label: "Team Members",
+    trend: "+ 8% from last week",
+    positive: true,
+    icon: Users2,
+    iconColor: "text-emerald-500",
+    bgColor: "bg-emerald-500/10",
+  },
+  {
+    key: "unread-messages",
+    value: "3",
+    label: "Unread Messages",
+    trend: "- 25% from last week",
+    positive: false,
+    icon: MessageSquare,
+    iconColor: "text-violet-500",
+    bgColor: "bg-violet-500/10",
+  },
+  {
+    key: "ai-score",
+    value: "85",
+    label: "AI Score",
+    trend: "+ 15% from last week",
+    positive: true,
+    icon: Sparkles,
+    iconColor: "text-amber-500",
+    bgColor: "bg-amber-500/10",
+  },
+];
 
 export function StatsRow() {
   return (
-    <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5">
-      {primaryStats.map((s, i) => {
-        const Icon = iconMap[s.icon] ?? Folder;
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {statsData.map((s, i) => {
+        const Icon = s.icon;
         return (
           <motion.div
             key={s.key}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.03, duration: 0.25, ease: "easeOut" }}
-            whileHover={{ y: -2 }}
+            transition={{ delay: i * 0.03, duration: 0.2 }}
+            className="h-full"
           >
-            <Card
-              interactive
-              className="flex items-center gap-3.5 rounded-2xl p-4 transition-all duration-200 hover:border-primary/40 hover:shadow-card"
-            >
-              <span
-                className={cn(
-                  "grid h-11 w-11 shrink-0 place-items-center rounded-xl font-bold transition-transform duration-200",
-                  tintClass[s.tint] ?? tintClass.primary,
-                )}
-              >
-                <Icon size={20} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-xl font-extrabold tracking-tight text-foreground leading-none">
-                  {s.value}
-                </p>
-                <p className="mt-1 truncate text-[11px] font-bold tracking-wider text-muted-foreground uppercase leading-none">
-                  {s.label}
-                </p>
+            <Card className="flex flex-col h-full gap-3.5 rounded-2xl p-5 border-border/60 bg-card shadow-xs">
+              <div className="flex items-center gap-4">
+                {/* Left Side: Circular Icon container */}
+                <div className={`flex items-center justify-center h-12 w-12 rounded-xl shrink-0 ${s.bgColor} ${s.iconColor}`}>
+                  <Icon size={20} />
+                </div>
+                {/* Right Side: Stack of value and label */}
+                <div className="min-w-0 flex-1">
+                  <p className="text-2xl font-bold tracking-tight text-foreground leading-none">
+                    {s.value}
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-muted-foreground truncate">
+                    {s.label}
+                  </p>
+                </div>
+              </div>
+
+              {/* Bottom: Trend indicator */}
+              <div className="flex items-center gap-1.5 pt-1.5 border-t border-border/40">
+                <span className={`inline-flex items-center text-[11px] font-semibold ${s.positive ? "text-success" : "text-destructive"}`}>
+                  {s.positive ? (
+                    <ArrowUpRight size={14} className="mr-0.5" />
+                  ) : (
+                    <ArrowDownRight size={14} className="mr-0.5" />
+                  )}
+                  {s.trend}
+                </span>
               </div>
             </Card>
           </motion.div>

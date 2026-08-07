@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy import func, select
@@ -14,68 +14,12 @@ from app.schemas.notification import (
     NotificationCreate,
     NotificationUpdate,
 )
-
+from app.core.cache import cached
 
 class NotificationService:
     """
     Business logic for notifications.
     """
-
-    @staticmethod
-    def create_notification(
-        db: Session,
-        recipient_id: uuid.UUID,
-        sender_id: uuid.UUID | None,
-        notification: NotificationCreate,
-    ) -> Notification:
-
-        # Check for existing unread duplicate notification
-        stmt = select(Notification).where(
-            Notification.recipient_id == recipient_id,
-            Notification.type == notification.type,
-            Notification.is_read.is_(False),
-        )
-        if sender_id is not None:
-            stmt = stmt.where(Notification.sender_id == sender_id)
-        if notification.project_id is not None:
-            stmt = stmt.where(Notification.project_id == notification.project_id)
-        if notification.conversation_id is not None:
-            stmt = stmt.where(
-                Notification.conversation_id == notification.conversation_id
-            )
-        if notification.application_id is not None:
-            stmt = stmt.where(
-                Notification.application_id == notification.application_id
-            )
-
-        existing = db.scalars(stmt).first()
-        if existing:
-            existing.message = notification.message
-            existing.title = notification.title
-            existing.created_at = datetime.utcnow()
-            db.flush()
-            db.refresh(existing)
-            return existing
-
-        db_notification = Notification(
-            recipient_id=recipient_id,
-            sender_id=sender_id,
-            type=notification.type,
-            title=notification.title,
-            message=notification.message,
-            action_url=notification.action_url,
-            image_url=notification.image_url,
-            project_id=notification.project_id,
-            conversation_id=notification.conversation_id,
-            message_id=notification.message_id,
-            application_id=notification.application_id,
-        )
-
-        db.add(db_notification)
-        db.flush()
-        db.refresh(db_notification)
-
-        return db_notification
 
     @staticmethod
     def notify(
@@ -91,29 +35,60 @@ class NotificationService:
         conversation_id=None,
         message_id=None,
         application_id=None,
+        channels=None,
+        priority=None,
     ):
         if sender_id is not None and recipient_id == sender_id:
             return None
 
-        notification = NotificationCreate(
-            recipient_id=recipient_id,
-            type=type,
-            title=title,
-            message=message,
-            action_url=action_url,
-            image_url=image_url,
-            project_id=project_id,
-            conversation_id=conversation_id,
-            message_id=message_id,
-            application_id=application_id,
-        )
+        from app.services.notifications import dispatcher
+        from app.models.notification import NotificationType, NotificationPriority
 
-        return NotificationService.create_notification(
+        if not isinstance(type, NotificationType):
+            try:
+                type = NotificationType(type)
+            except ValueError:
+                pass
+
+        if not priority:
+            priority = NotificationPriority.NORMAL
+
+        metadata_info = {
+            "project_id": str(project_id) if project_id else None,
+            "conversation_id": str(conversation_id) if conversation_id else None,
+            "message_id": str(message_id) if message_id else None,
+            "application_id": str(application_id) if application_id else None,
+        }
+
+        return dispatcher.dispatch(
             db=db,
             recipient_id=recipient_id,
             sender_id=sender_id,
-            notification=notification,
+            notification_type=type,
+            title=title,
+            message=message,
+            channels=channels,
+            priority=priority,
+            metadata_info=metadata_info,
+            action_url=action_url,
+            image_url=image_url,
         )
+
+    @staticmethod
+    def create_notification(
+        db: Session,
+        recipient_id: uuid.UUID,
+        sender_id: uuid.UUID | None,
+        notification: NotificationCreate,
+    ) -> Notification:
+        db_notification = Notification(
+            sender_id=sender_id,
+            **notification.model_dump()
+        )
+        db.add(db_notification)
+        db.flush()
+        db.refresh(db_notification)
+        return db_notification
 
     @staticmethod
     def get_notification(
@@ -155,11 +130,11 @@ class NotificationService:
         return list(db.scalars(stmt))
 
     @staticmethod
+    @cached(ttl=30, key_prefix="notifications:unread_count")
     def unread_count(
         db: Session,
         recipient_id: uuid.UUID,
     ) -> int:
-
         stmt = (
             select(func.count())
             .select_from(Notification)
@@ -229,3 +204,94 @@ class NotificationService:
 
         db.delete(db_notification)
         db.flush()
+
+    @staticmethod
+    def enqueue(
+        db: Session,
+        recipient_id,
+        sender_id,
+        type,
+        title,
+        message,
+        action_url=None,
+        image_url=None,
+        project_id=None,
+        conversation_id=None,
+        message_id=None,
+        application_id=None,
+    ):
+        from app.tasks.notification_tasks import send_notification_task
+
+        payload = {
+            "recipient_id": str(recipient_id) if recipient_id else None,
+            "sender_id": str(sender_id) if sender_id else None,
+            "type": type.value if hasattr(type, "value") else type,
+            "title": title,
+            "message": message,
+            "action_url": action_url,
+            "image_url": image_url,
+            "project_id": str(project_id) if project_id else None,
+            "conversation_id": str(conversation_id) if conversation_id else None,
+            "message_id": str(message_id) if message_id else None,
+            "application_id": str(application_id) if application_id else None,
+        }
+
+        send_notification_task.delay(payload)
+
+    @staticmethod
+    def get_preferences(
+        db: Session,
+        user_id: uuid.UUID,
+    ):
+        from app.models.notification import NotificationPreference
+        pref = db.scalar(
+            select(NotificationPreference).where(NotificationPreference.user_id == user_id)
+        )
+        if not pref:
+            now = datetime.now(timezone.utc)
+            pref = NotificationPreference(
+                id=uuid.uuid4(),
+                user_id=user_id,
+                email_enabled=True,
+                websocket_enabled=True,
+                database_enabled=True,
+                messages=True,
+                team_invitations=True,
+                project_updates=True,
+                mentions=True,
+                system_announcements=True,
+                email_messages=True,
+                email_team_invitations=True,
+                email_project_updates=True,
+                email_mentions=True,
+                email_system_announcements=True,
+                invitations=True,
+                role_changes=True,
+                marketing_emails=False,
+                system_alerts=True,
+                updated_at=now,
+            )
+            db.add(pref)
+            db.commit()
+            db.refresh(pref)
+        return pref
+
+    @staticmethod
+    def update_preferences(
+        db: Session,
+        user_id: uuid.UUID,
+        update_in: Any,
+    ):
+        from app.models.notification import NotificationPreference
+        pref = NotificationService.get_preferences(db, user_id)
+        data = update_in.model_dump(exclude_unset=True)
+
+        for key, value in data.items():
+            if hasattr(pref, key) and value is not None:
+                setattr(pref, key, value)
+
+        pref.updated_at = datetime.now(timezone.utc)
+        db.add(pref)
+        db.commit()
+        db.refresh(pref)
+        return pref

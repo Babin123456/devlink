@@ -19,14 +19,35 @@ const FILTERS: FilterGroup[] = [
     types: ["project_created", "project_updated", "project_archived", "project_milestone"],
   },
   {
+    id: "teams",
+    label: "Teams",
+    types: ["team_invitation"],
+  },
+  {
+    id: "followers",
+    label: "Followers",
+    types: ["followed_user"],
+  },
+  {
+    id: "discussions",
+    label: "Discussions",
+    types: ["discussion_created", "comment_created"],
+  },
+  {
+    id: "ai_recommendations",
+    label: "AI Recommendations",
+    types: [],
+  },
+  {
     id: "applications",
     label: "Applications",
     types: ["application_submitted", "application_accepted", "application_rejected"],
   },
-  { id: "followers", label: "Followers", types: ["followed_user"] },
-  { id: "discussions", label: "Discussions", types: ["discussion_created", "comment_created"] },
-  { id: "invitations", label: "Invitations", types: ["team_invitation"] },
-  { id: "profile", label: "Profile Updates", types: ["profile_updated", "user_registered"] },
+  {
+    id: "profile",
+    label: "Profile Updates",
+    types: ["profile_updated", "user_registered"],
+  },
 ];
 
 const PAGE_SIZE = 20;

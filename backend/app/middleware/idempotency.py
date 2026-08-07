@@ -2,9 +2,10 @@ import json
 import logging
 from typing import Callable
 
+import redis
 from fastapi import Request, Response
 from fastapi.routing import APIRoute
-import redis
+from jose import JWTError, jwt
 
 from app.core.config import settings
 
@@ -16,6 +17,23 @@ try:
 except Exception as e:
     logger.error(f"Failed to connect to Redis for idempotency: {e}")
     redis_client = None
+
+
+def _extract_user_id(request: Request) -> str:
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        try:
+            payload = jwt.decode(
+                auth_header[7:],
+                settings.SECRET_KEY,
+                algorithms=[settings.JWT_ALGORITHM],
+            )
+            sub = payload.get("sub")
+            if sub:
+                return str(sub)
+        except JWTError:
+            pass
+    return "anonymous"
 
 
 class IdempotentRoute(APIRoute):
@@ -41,10 +59,7 @@ class IdempotentRoute(APIRoute):
                 )
                 return await original_route_handler(request)
 
-            # Ensure uniqueness by user if auth exists, otherwise just key
-            user_id = "anonymous"
-            if "Authorization" in request.headers:
-                user_id = "authenticated"
+            user_id = _extract_user_id(request)
 
             cache_key = f"idempotent:{user_id}:{idempotency_key}"
 
@@ -88,15 +103,29 @@ class IdempotentRoute(APIRoute):
 
                 # Only cache successful or client-error responses, not 500s
                 if hasattr(response, "body") and response.status_code < 500:
+                    body_bytes = getattr(response, "body", b"")
+                    body_str = (
+                        body_bytes.decode("utf-8")
+                        if isinstance(body_bytes, bytes)
+                        else str(body_bytes)
+                    )
                     cache_payload = {
                         "status_code": response.status_code,
                         "headers": dict(response.headers),
-                        "body": response.body.decode("utf-8"),
-                        "media_type": response.media_type,
+                        "body": body_str,
+                        "media_type": getattr(
+                            response, "media_type", "application/json"
+                        ),
                     }
                     redis_client.setex(
                         cache_key, 86400, json.dumps(cache_payload)
                     )  # cache for 24 hours
+                    return Response(
+                        content=body_bytes,
+                        status_code=response.status_code,
+                        headers=dict(response.headers),
+                        media_type=getattr(response, "media_type", "application/json"),
+                    )
             finally:
                 redis_client.delete(lock_key)
 

@@ -1,12 +1,11 @@
-
 # Security Policy
 
 ## Supported Versions
 
-| Version | Supported |
-| -------- | --------- |
-| Latest   | ✅ |
-| Older Releases | ❌ |
+| Version        | Supported |
+| -------------- | --------- |
+| Latest         | ✅        |
+| Older Releases | ❌        |
 
 ---
 
@@ -56,4 +55,3 @@ This policy applies to:
 ---
 
 Thank you for helping keep DevLink secure.
-
