@@ -206,9 +206,7 @@ export function FilterDrawer({
     if (type === "range") {
       const min = section.min ?? 0;
       const max = section.max ?? 100;
-      const step = section.step ?? 1;
       const val = asNumber(draftValues[section.id], min);
-      const val = (draftValues[section.id] as number) ?? min;
 
       return (
         <div className="mt-2 space-y-2">
