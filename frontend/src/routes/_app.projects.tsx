@@ -41,6 +41,7 @@ export const projectSearchSchema = z.object({
   remote: z.boolean().optional(),
   paid: z.boolean().optional(),
   opensource: z.boolean().optional(),
+  create: z.boolean().optional(),
 });
 
 /**
@@ -99,10 +100,26 @@ function ProjectsPage() {
   >("all");
   const [showFilters, setShowFilters] = useState(false);
   const [recentProjectIds, setRecentProjectIds] = useState<string[]>([]);
+  const search = Route.useSearch();
 
   useEffect(() => {
     setRecentProjectIds(getRecentlyViewedProjectIds());
   }, []);
+
+  useEffect(() => {
+    if (search.create) {
+      setCreateOpen(true);
+      // Remove query param to keep the URL clean
+      navigate({
+        search: (prev) => {
+          const next = { ...prev };
+          delete next.create;
+          return next;
+        },
+        replace: true,
+      });
+    }
+  }, [search.create]);
 
   const { data = [], isLoading } = useQuery({
     queryKey: [

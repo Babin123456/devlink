@@ -27,6 +27,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/useDebounce";
 import { searchService } from "@/services";
 import { GlobalSearchModal } from "@/components/search/GlobalSearchModal";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 export function TopNavbar() {
   const { isDark, toggleTheme } = useTheme();
@@ -88,9 +95,45 @@ export function TopNavbar() {
           <button className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-[7px] text-[13px] font-medium text-foreground transition-colors hover:bg-muted">
             <Sparkles size={14} className="text-primary" /> AI Assistant
           </button>
-          <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-2.5 py-[7px] text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90">
-            <Plus size={14} /> Create
-          </button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-2.5 py-[7px] text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 cursor-pointer">
+                <Plus size={14} /> Create
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[180px]">
+              <DropdownMenuItem asChild>
+                <Link to="/projects" search={{ create: true }}>
+                  New Project
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/flares">
+                  New Flare
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => {
+                  navigator.clipboard.writeText("https://devlink.com/invite/builder");
+                  toast.success("Invitation link copied to clipboard!");
+                }}
+                className="cursor-pointer"
+              >
+                Invite Builder
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/organizations">
+                  Organization
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/hackathons" search={{ create: true }}>
+                  Hackathon
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="flex items-center gap-1">
