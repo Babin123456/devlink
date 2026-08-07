@@ -5,14 +5,12 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import pytest
 from sqlalchemy.orm import Session
 
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
-from app.schemas.session import SessionResponse, RevokeSessionResponse
 from app.services.refresh_token_service import RefreshTokenService
 
 
