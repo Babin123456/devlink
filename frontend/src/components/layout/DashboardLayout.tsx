@@ -7,16 +7,18 @@ import { RightPanel } from "./RightPanel";
 import { BottomNavigation } from "./BottomNavigation";
 import { FAB } from "./FAB";
 import { SectionErrorBoundary } from "@/components/errors/SectionErrorBoundary";
+import { cn } from "@/lib/utils";
 
 export function DashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isDashboard = pathname.endsWith("/dashboard") || pathname === "/";
 
   return (
     <div
-      className="grid h-screen w-full bg-background overflow-hidden
-      grid-cols-1 
-      md:grid-cols-[max-content_1fr] 
-      xl:grid-cols-[max-content_1fr_max-content]"
+      className={cn(
+        "grid h-screen w-full bg-background overflow-hidden grid-cols-1 md:grid-cols-[max-content_1fr]",
+        isDashboard ? "" : "xl:grid-cols-[max-content_1fr_max-content]"
+      )}
     >
       {/* ─── Desktop & Tablet Sidebar ─────────────────────────────── */}
       <Sidebar />
@@ -61,9 +63,11 @@ export function DashboardLayout() {
       </div>
 
       {/* ─── Desktop Right Activity Panel ─────────────────────────── */}
-      <SectionErrorBoundary sectionName="Right Activity Panel">
-        <RightPanel />
-      </SectionErrorBoundary>
+      {!isDashboard && (
+        <SectionErrorBoundary sectionName="Right Activity Panel">
+          <RightPanel />
+        </SectionErrorBoundary>
+      )}
 
       {/* ─── Mobile-only: Bottom Navigation & FAB ─────────────────── */}
       <BottomNavigation />
