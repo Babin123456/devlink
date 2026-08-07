@@ -39,6 +39,11 @@
       "name": "Projects",
       "url": "/projects",
       "description": "Browse and manage projects"
+    },
+    {
+      "name": "Feed",
+      "url": "/feed",
+      "description": "Explore community activities and updates"
     }
   ]
 }
