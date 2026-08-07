@@ -174,7 +174,6 @@ export function FilterDrawer({
           <input
             type="text"
             value={asText(draftValues[section.id])}
-            value={(draftValues[section.id] as string) || ""}
             onChange={(e) => handleTextChange(section.id, e.target.value)}
             placeholder={section.placeholder || `Search ${section.title.toLowerCase()}...`}
             className="w-full rounded-md border border-border bg-surface py-1.5 pl-8 pr-3 text-[13px] text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
@@ -188,7 +187,6 @@ export function FilterDrawer({
       return (
         <select
           value={asText(draftValues[section.id])}
-          value={(draftValues[section.id] as string) || ""}
           onChange={(e) => handleTextChange(section.id, e.target.value)}
           className="mt-2 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-[13px] text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           aria-label={section.title}
@@ -208,7 +206,6 @@ export function FilterDrawer({
       const max = section.max ?? 100;
       const step = section.step ?? 1;
       const val = asNumber(draftValues[section.id], min);
-      const val = (draftValues[section.id] as number) ?? min;
 
       return (
         <div className="mt-2 space-y-2">

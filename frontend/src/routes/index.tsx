@@ -420,6 +420,84 @@ function Landing() {
                 <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">{s.desc}</p>
               </div>
             ))}
+      <section id="squad-cta" className="border-b border-border bg-gradient-to-b from-background via-surface/10 to-background py-20 relative overflow-hidden">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 relative z-10">
+          <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
+            {/* Visual element representing team matching / builder profiles */}
+            <div className="lg:col-span-6 relative flex justify-center">
+              {/* Decorative gradient glowing orb behind the card */}
+              <div className="absolute inset-0 -m-6 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
+              
+              <div className="w-full max-w-md rounded-2xl border border-border bg-surface shadow-xl p-6 relative overflow-hidden">
+                <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-2.5 w-2.5 rounded-full bg-success animate-pulse" />
+                    <span className="text-[12px] font-medium text-muted-foreground">Match found nearby</span>
+                  </div>
+                  <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-[11px] font-bold text-primary">
+                    98% Match
+                  </span>
+                </div>
+                
+                <div className="flex gap-4 items-start">
+                  <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-primary to-primary/60 flex items-center justify-center font-bold text-primary-foreground text-lg shadow-sm">
+                    AR
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-foreground text-[16px]">Alex Rivera</h4>
+                      <span className="text-[12px] text-muted-foreground">Active 2h ago</span>
+                    </div>
+                    <p className="text-[13px] text-muted-foreground mt-0.5">Full Stack Developer</p>
+                    
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {["React", "TypeScript", "FastAPI", "WebSockets"].map((skill) => (
+                        <span key={skill} className="rounded bg-muted px-2 py-0.5 text-[11px] font-medium text-foreground border border-border/50">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 bg-background rounded-xl p-3 border border-border/40 relative">
+                  <div className="absolute top-3 left-3 h-1.5 w-1.5 rounded-full bg-primary" />
+                  <p className="text-[12px] italic text-muted-foreground pl-4">
+                    "Looking for a frontend lead to join our team for the next web-jam. We're building a real-time developer portfolio builder."
+                  </p>
+                </div>
+
+                <div className="mt-5 flex gap-2">
+                  <Link to="/auth" className="flex-1 rounded-lg bg-primary/10 border border-primary/20 text-primary py-2 text-[12px] font-semibold hover:bg-primary/20 transition-all cursor-pointer text-center">
+                    View Profile
+                  </Link>
+                  <Link to="/auth" className="flex-1 rounded-lg bg-primary text-primary-foreground py-2 text-[12px] font-semibold hover:opacity-90 transition-all cursor-pointer text-center flex items-center justify-center gap-1">
+                    <MessageSquare size={12} /> Let's Connect
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Content element */}
+            <div className="lg:col-span-6 flex flex-col justify-center text-center lg:text-left">
+              <span className="inline-flex w-fit mx-auto lg:mx-0 items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-[12px] font-semibold text-primary mb-4">
+                <Users2 size={12} /> Team Formation
+              </span>
+              <h2 className="text-[30px] font-bold leading-tight tracking-tight text-foreground sm:text-[40px]">
+                Connect with the <span className="text-primary">perfect squad</span>.
+              </h2>
+              <p className="mt-4 text-[15px] text-muted-foreground leading-relaxed">
+                Stop looking for teammates in scattered Discord servers. DevLink's matching engine pairs you with builders who complement your skillset, match your vibe, and are ready to ship.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+                <Link to="/auth" className={primaryBtnClass}>
+                  Find teammates <ArrowRight size={16} />
+                </Link>
+                <Link to="/builders" className={secondaryBtnClass}>
+                  Browse all builders
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -550,16 +628,16 @@ function Landing() {
 
                 <Link
                   to="/auth"
-                  className={`mb-8 inline-flex w-full items-center justify-center rounded-xl px-6 py-4 text-[16px] font-bold transition-all duration-200 group ${
+                  className={`mb-8 inline-flex w-full items-center justify-center rounded-xl px-6 py-4 text-[16px] font-bold transition-all duration-300 active:scale-[0.98] group cursor-pointer ${
                     p.featured
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-lg hover:-translate-y-0.5"
-                      : "border border-border bg-background text-foreground hover:bg-muted hover:border-foreground/20"
+                      ? "bg-primary text-primary-foreground shadow-[0_4px_12px_rgba(5,183,215,0.25)] hover:bg-primary/95 hover:shadow-[0_6px_20px_rgba(5,183,215,0.4)] hover:-translate-y-0.5"
+                      : "border border-border bg-surface text-foreground hover:bg-muted hover:border-foreground/10 hover:-translate-y-0.5"
                   }`}
                 >
                   {p.cta}
                   <ArrowRight
                     size={18}
-                    className={`ml-2 transition-transform duration-200 ${p.featured ? "group-hover:translate-x-1" : ""}`}
+                    className="ml-2 transition-transform duration-200 group-hover:translate-x-1"
                   />
                 </Link>
 
@@ -719,6 +797,26 @@ function Landing() {
               </AccordionItem>
             ))}
           </Accordion>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-20 relative overflow-hidden bg-gradient-to-b from-background to-surface">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(5,183,215,0.06),transparent_70%)] pointer-events-none" />
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center relative z-10">
+          <h2 className="text-[32px] font-bold leading-tight tracking-tight text-foreground sm:text-[44px]">
+            Ready to build the <span className="text-primary">future</span>?
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-[16px] text-muted-foreground leading-relaxed">
+            Join thousands of developers, designers, and product builders matching, collaborating, and shipping together on DevLink.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link to="/auth" className={primaryBtnClass}>
+              Get started for free <ArrowRight size={16} />
+            </Link>
+            <Link to="/auth" className={secondaryBtnClass}>
+              <Github size={16} /> Continue with GitHub
+            </Link>
+          </div>
         </div>
       </section>
 

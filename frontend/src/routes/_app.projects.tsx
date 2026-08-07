@@ -356,17 +356,6 @@ function ProjectsPage() {
             opensource: booleanToChoice(filters.opensource),
           }}
           onApply={(newValues) => {
-            setFilters({
-              language: toStringList(newValues.language),
-              experience: toStringList(newValues.experience),
-              remote: choiceToBoolean(newValues.remote),
-              paid: choiceToBoolean(newValues.paid),
-              opensource: choiceToBoolean(newValues.opensource),
-            remote: filters.remote === undefined ? "" : String(filters.remote),
-            paid: filters.paid === undefined ? "" : String(filters.paid),
-            opensource: filters.opensource === undefined ? "" : String(filters.opensource),
-          }}
-          onApply={(newValues) => {
             const boolOrUndefined = (v: unknown): boolean | undefined =>
               v === "" || v === undefined ? undefined : v === "true";
             const stringOrUndefined = (v: unknown): string | undefined =>
