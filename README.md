@@ -155,7 +155,7 @@ M
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 DevLink follows a client-server architecture where the React frontend communicates with the FastAPI backend through REST APIs and WebSockets. The backend stores persistent data in PostgreSQL while Redis is used for caching and Pub/Sub to support real-time communication.
 
