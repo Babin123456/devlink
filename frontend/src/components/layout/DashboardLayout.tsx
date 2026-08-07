@@ -5,7 +5,7 @@ import { MobileSidebar } from "./MobileSidebar";
 import { TopNavbar } from "./TopNavbar";
 import { RightPanel } from "./RightPanel";
 import { BottomNavigation } from "./BottomNavigation";
-import { FAB } from "./FAB";
+import { AnnouncementBanner } from "@/components/shared/AnnouncementBanner";
 import { SectionErrorBoundary } from "@/components/errors/SectionErrorBoundary";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +28,7 @@ export function DashboardLayout() {
 
       {/* ─── Main content column ──────────────────────────────────── */}
       <div className="flex min-w-0 flex-col relative h-screen overflow-hidden">
+        <AnnouncementBanner />
         <TopNavbar />
 
         <main
