@@ -19,6 +19,12 @@ import {
 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useTheme } from "@/hooks/useTheme";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -42,8 +48,40 @@ export const Route = createFileRoute("/")({
 function Landing() {
   const { isDark, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const faqs = [
+    {
+      question: "Is DevLink free to use?",
+      answer:
+        "Yes. You can start using DevLink for free to discover builders, create projects, and collaborate with your team.",
+    },
+    {
+      question: "How does AI matching work?",
+      answer:
+        "Our AI recommends collaborators by analyzing skills, interests, project history, and availability to help you build balanced teams.",
+    },
+    {
+      question: "Can I invite my team?",
+      answer:
+        "Yes. You can collaborate with teammates, manage projects together, and communicate in one shared workspace.",
+    },
+    {
+      question: "Which authentication methods are supported?",
+      answer:
+        "You can sign in securely using GitHub, with support for additional authentication methods as the platform grows.",
+    },
+    {
+      question: "How is my data protected?",
+      answer:
+        "Your account data is handled securely, and privacy is a priority. Sensitive information is protected using industry-standard security practices.",
+    },
+  ];
   const [billingCycle, setBillingCycle] = React.useState<"monthly" | "yearly">("yearly");
   const [openFaq, setOpenFaq] = React.useState<number | null>(0);
+
+  const primaryBtnClass =
+    "inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-3 text-[14px] font-semibold text-primary-foreground shadow-[0_4px_12px_rgba(5,183,215,0.25)] transition-all duration-300 hover:bg-primary/95 hover:shadow-[0_6px_20px_rgba(5,183,215,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] cursor-pointer";
+  const secondaryBtnClass =
+    "inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-surface px-5 py-3 text-[14px] font-medium text-foreground transition-all duration-300 hover:bg-muted hover:border-foreground/10 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] cursor-pointer";
 
   React.useEffect(() => {
     if (mobileMenuOpen) {
@@ -166,36 +204,123 @@ function Landing() {
         )}
       </AnimatePresence>
 
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-24 text-center">
+      <section className="border-b border-border bg-gradient-to-b from-background to-surface/20">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-16">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
+            className="grid gap-12 lg:grid-cols-12 lg:items-center"
           >
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-[12px] font-medium text-muted-foreground">
-              <Sparkles size={12} className="text-primary" /> AI-powered team matching · in beta
-            </span>
-            <h1 className="mx-auto mt-6 max-w-3xl text-[36px] font-bold leading-tight tracking-tight text-foreground sm:text-[52px]">
-              Where builders connect, <span className="text-primary">collaborate</span> and ship.
-            </h1>
-            <p className="mx-auto mt-4 max-w-xl text-[15px] text-muted-foreground">
-              Match with teammates by skills and vibe, run projects with real-time messaging, and
-              enter hackathons together — all in one clean workspace.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                to="/auth"
-                className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-[14px] font-semibold text-primary-foreground hover:opacity-90"
-              >
-                Start free <ArrowRight size={14} />
-              </Link>
-              <Link
-                to="/auth"
-                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-4 py-2 text-[14px] font-medium text-foreground hover:bg-muted"
-              >
-                <Github size={14} /> Continue with GitHub
-              </Link>
+            {/* Left Column: Heading, description, CTA, Trust indicators */}
+            <div className="lg:col-span-6 flex flex-col justify-center text-center lg:text-left">
+              <span className="inline-flex w-fit mx-auto lg:mx-0 items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-[12px] font-medium text-muted-foreground mb-6">
+                <Sparkles size={12} className="text-primary" /> AI-powered team matching · in beta
+              </span>
+              <h1 className="text-[36px] font-extrabold leading-tight tracking-tight text-foreground sm:text-[48px] lg:text-[50px]">
+                Where builders connect, <span className="text-primary">collaborate</span> and ship.
+              </h1>
+              <p className="mt-4 text-[15px] text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0">
+                Match with teammates by skills and vibe, run projects with real-time messaging, and
+                enter hackathons together — all in one clean workspace.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
+                <Link to="/auth" className={primaryBtnClass}>
+                  Start free <ArrowRight size={15} />
+                </Link>
+                <Link to="/auth" className={secondaryBtnClass}>
+                  <Github size={15} /> Continue with GitHub
+                </Link>
+              </div>
+              
+              {/* Trust Indicators */}
+              <div className="mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-2 text-[12px] text-muted-foreground font-medium border-t border-border/40 pt-4">
+                <span className="flex items-center gap-1">
+                  <Check size={14} className="text-success" /> Free for hobbyists
+                </span>
+                <span className="flex items-center gap-1">
+                  <Check size={14} className="text-success" /> No credit card required
+                </span>
+                <span className="flex items-center gap-1">
+                  <Check size={14} className="text-success" /> 10k+ developers
+                </span>
+              </div>
+            </div>
+
+            {/* Right Column: Dashboard preview (above the fold) */}
+            <div className="lg:col-span-6 relative w-full flex justify-center lg:justify-end">
+              {/* Decorative background glow behind preview */}
+              <div className="absolute inset-0 -m-8 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+              
+              <div className="w-full max-w-lg rounded-2xl border border-border bg-surface shadow-2xl overflow-hidden relative">
+                {/* Mock Window Header */}
+                <div className="bg-muted/50 border-b border-border px-4 py-3 flex items-center justify-between">
+                  <div className="flex gap-1.5">
+                    <span className="h-3 w-3 rounded-full bg-[#ff5f56]" />
+                    <span className="h-3 w-3 rounded-full bg-[#ffbd2e]" />
+                    <span className="h-3 w-3 rounded-full bg-[#27c93f]" />
+                  </div>
+                  <span className="text-[11px] font-medium text-muted-foreground tracking-tight select-none">app.devlink.com</span>
+                  <div className="w-12" /> {/* Spacing spacer */}
+                </div>
+                
+                {/* Mock Window Body */}
+                <div className="flex h-[320px] bg-background text-[13px] text-foreground relative">
+                  {/* Mock Sidebar */}
+                  <div className="w-[50px] border-r border-border bg-surface flex flex-col items-center py-4 gap-5 shrink-0">
+                    <img src={APP_LOGO} alt="" className="h-6 w-6 rounded-md" />
+                    <div className="flex flex-col gap-4 items-center w-full mt-2">
+                      <span className="h-8 w-8 rounded-lg bg-primary-soft text-primary flex items-center justify-center"><Users2 size={16} /></span>
+                      <span className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-muted flex items-center justify-center"><MessageSquare size={16} /></span>
+                      <span className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-muted flex items-center justify-center"><Trophy size={16} /></span>
+                      <span className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-muted flex items-center justify-center"><Sparkles size={16} /></span>
+                    </div>
+                  </div>
+                  
+                  {/* Mock Main Content Area */}
+                  <div className="flex-1 p-4 flex flex-col gap-4 overflow-hidden relative">
+                    <div className="flex items-center justify-between border-b border-border pb-2">
+                      <h4 className="font-bold text-foreground text-[14px]">Workspace Dashboard</h4>
+                      <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-medium">Dev Mode</span>
+                    </div>
+                    
+                    {/* Mock Active Project Card */}
+                    <div className="rounded-xl border border-border bg-surface p-3 shadow-sm flex flex-col gap-2 shrink-0">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-foreground">Project: EduGrade-System</span>
+                        <span className="text-[10px] bg-success-soft text-success px-2 py-0.5 rounded-full font-bold">Active</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-1">
+                        <span>Frontend Phase</span>
+                        <span>85% Completed</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full" style={{ width: '85%' }} />
+                      </div>
+                      <div className="flex gap-1.5 mt-1">
+                        <span className="h-5 w-5 rounded-full bg-primary-soft text-primary text-[10px] font-bold flex items-center justify-center border border-border">AR</span>
+                        <span className="h-5 w-5 rounded-full bg-secondary text-foreground text-[10px] font-bold flex items-center justify-center border border-border">PM</span>
+                        <span className="h-5 w-5 rounded-full border border-dashed border-border text-muted-foreground text-[10px] font-bold flex items-center justify-center border border-border">+</span>
+                      </div>
+                    </div>
+                    
+                    {/* Mock AI Match Popup */}
+                    <div className="rounded-xl border border-primary/20 bg-primary-soft/10 p-3 flex flex-col gap-1 shadow-sm shrink-0">
+                      <span className="text-[10px] font-bold text-primary tracking-wider uppercase">AI Match Recommendation</span>
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-foreground">Alex Rivera (React Lead)</span>
+                        <span className="text-[11px] font-bold text-success bg-success-soft/20 px-2 py-0.5 rounded-full">98% Match</span>
+                      </div>
+                    </div>
+                    
+                    {/* Mock Floating Message Bubble */}
+                    <div className="absolute bottom-4 right-4 bg-primary text-primary-foreground rounded-xl px-3 py-2 shadow-lg flex flex-col max-w-[200px] border border-primary/20 animate-bounce-slow">
+                      <span className="text-[10px] opacity-75 font-semibold">Alex Rivera</span>
+                      <span className="text-[11px] leading-tight mt-0.5">"Hey! Let's team up for the next hackathon?"</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -503,6 +628,34 @@ function Landing() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="border-b border-border bg-background">
+        <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+          <div className="text-center">
+            <h2 className="text-[28px] font-bold tracking-tight text-foreground">
+              Frequently Asked Questions
+            </h2>
+            <p className="mt-2 text-[14px] text-muted-foreground">
+              Everything you need to know about DevLink.
+            </p>
+          </div>
+
+          <Accordion
+            type="single"
+            collapsible
+            className="mt-10 w-full rounded-md border border-border bg-card px-4"
+          >
+            {faqs.map((faq, index) => (
+              <AccordionItem key={index} value={`item-${index}`}>
+                <AccordionTrigger>{faq.question}</AccordionTrigger>
+                <AccordionContent>
+                  <p className="text-sm text-muted-foreground">{faq.answer}</p>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 

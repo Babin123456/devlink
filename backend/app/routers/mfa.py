@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_database, get_current_user
+from app.middleware.rate_limit import limiter, MFA_LIMIT
 from app.models.user import User
 from app.schemas.mfa import (
     MFASetupResponse,
@@ -27,7 +28,9 @@ router = APIRouter(
     response_model=MFAStatusResponse,
     summary="Get MFA status for current user",
 )
+@limiter.limit(MFA_LIMIT)
 def get_mfa_status(
+    request: Request,
     current_user: User = Depends(get_current_user),
 ):
     return MFAStatusResponse(mfa_enabled=current_user.mfa_enabled)
@@ -38,7 +41,9 @@ def get_mfa_status(
     response_model=MFASetupResponse,
     summary="Generate TOTP setup secret and QR code URI",
 )
+@limiter.limit(MFA_LIMIT)
 def setup_mfa(
+    request: Request,
     current_user: User = Depends(get_current_user),
 ):
     if current_user.mfa_enabled:
@@ -54,7 +59,9 @@ def setup_mfa(
     response_model=MFAEnableResponse,
     summary="Verify TOTP code and enable MFA",
 )
+@limiter.limit(MFA_LIMIT)
 def enable_mfa(
+    request: Request,
     payload: MFAEnableRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
@@ -72,7 +79,9 @@ def enable_mfa(
     "/disable",
     summary="Disable MFA",
 )
+@limiter.limit(MFA_LIMIT)
 def disable_mfa(
+    request: Request,
     payload: MFADisableRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
@@ -86,7 +95,9 @@ def disable_mfa(
     response_model=MFARecoveryCodesResponse,
     summary="Regenerate single-use recovery codes",
 )
+@limiter.limit(MFA_LIMIT)
 def regenerate_recovery_codes(
+    request: Request,
     payload: MFARecoveryCodesRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
@@ -103,6 +114,7 @@ def regenerate_recovery_codes(
     "/verify-login",
     summary="Complete 2FA login using TOTP code or recovery code",
 )
+@limiter.limit(MFA_LIMIT)
 def verify_mfa_login(
     payload: MFAVerifyLoginRequest,
     request: Request,
