@@ -41,8 +41,6 @@ export function useProjectFilters() {
           opensource: _opensource,
           ...rest
         } = prev;
-      search: (prev: Record<string, unknown>) => {
-        const { language, experience, tech, remote, paid, opensource, ...rest } = prev;
         return { ...rest, page: 1 };
       },
       replace: true,

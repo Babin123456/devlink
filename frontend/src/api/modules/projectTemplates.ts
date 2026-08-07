@@ -68,26 +68,22 @@ export const projectTemplatesApi = {
     skip?: number;
     limit?: number;
   }): Promise<ProjectTemplateListResponse> => {
-    const res = await api.get<ProjectTemplateListResponse>("/api/templates", { params });
-    return res.data;
+    return api.get<ProjectTemplateListResponse>("/api/templates", { query: params });
   },
 
   getTemplate: async (templateId: string): Promise<ProjectTemplate> => {
-    const res = await api.get<ProjectTemplate>(`/api/templates/${templateId}`);
-    return res.data;
+    return api.get<ProjectTemplate>(`/api/templates/${templateId}`);
   },
 
   createTemplate: async (data: ProjectTemplateCreateInput): Promise<ProjectTemplate> => {
-    const res = await api.post<ProjectTemplate>("/api/templates", data);
-    return res.data;
+    return api.post<ProjectTemplate>("/api/templates", data);
   },
 
   updateTemplate: async (
     templateId: string,
     data: ProjectTemplateUpdateInput
   ): Promise<ProjectTemplate> => {
-    const res = await api.patch<ProjectTemplate>(`/api/templates/${templateId}`, data);
-    return res.data;
+    return api.patch<ProjectTemplate>(`/api/templates/${templateId}`, data);
   },
 
   deleteTemplate: async (templateId: string): Promise<void> => {
@@ -97,20 +93,18 @@ export const projectTemplatesApi = {
   toggleFavorite: async (
     templateId: string
   ): Promise<{ success: boolean; is_favorited: boolean; stars_count: number }> => {
-    const res = await api.post<{ success: boolean; is_favorited: boolean; stars_count: number }>(
+    return api.post<{ success: boolean; is_favorited: boolean; stars_count: number }>(
       `/api/templates/${templateId}/favorite`
     );
-    return res.data;
   },
 
   cloneTemplate: async (
     templateId: string,
     data?: ProjectTemplateCloneInput
   ): Promise<{ id: string; title: string; slug: string }> => {
-    const res = await api.post<{ id: string; title: string; slug: string }>(
+    return api.post<{ id: string; title: string; slug: string }>(
       `/api/templates/${templateId}/clone`,
       data
     );
-    return res.data;
   },
 };
