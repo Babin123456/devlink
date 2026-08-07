@@ -104,12 +104,52 @@ function Thread() {
     });
   }, [conversationId]);
 
+  // Load draft on conversation open
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDraft = async () => {
+      try {
+        const res = await fetch(`/api/messages/drafts/${conversationId}`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const draftData = await res.json();
+          if (isMounted && draftData && draftData.content) {
+            setText(draftData.content);
+          }
+        }
+      } catch {
+        // ignore errors
+      }
+    };
+    fetchDraft();
+    return () => {
+      isMounted = false;
+    };
+  }, [conversationId]);
+
+  // Auto-save draft on debounced text change
+  const draftTimerRef = useRef<NodeJS.Timeout | null>(null);
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setText(e.target.value);
+      const val = e.target.value;
+      setText(val);
       notifyTyping();
+
+      if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+      draftTimerRef.current = setTimeout(() => {
+        fetch("/api/messages/drafts/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            conversation_id: conversationId,
+            content: val,
+          }),
+        }).catch(() => {});
+      }, 500);
     },
-    [notifyTyping],
+    [conversationId, notifyTyping],
   );
 
   // Clear typing on unmount.
@@ -123,6 +163,7 @@ function Thread() {
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (!text.trim() || submitting) return;
+      if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
       setSubmitting(true);
       clearTyping();
       try {
@@ -131,6 +172,12 @@ function Thread() {
         setText("");
         // Notify others via WS
         broadcastMessage(text);
+
+        // Delete draft from backend explicitly
+        fetch(`/api/messages/drafts/${conversationId}`, {
+          method: "DELETE",
+          credentials: "include",
+        }).catch(() => {});
 
         // Invalidate queries to reload thread and conversations
         queryClient.invalidateQueries({ queryKey: ["thread", conversationId] });
@@ -143,6 +190,7 @@ function Thread() {
     },
     [text, submitting, clearTyping, conversationId, broadcastMessage, queryClient],
   );
+
 
   return (
     <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
