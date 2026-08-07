@@ -29,10 +29,17 @@ export function EducationCard({ education = [] }: EducationCardProps) {
       ) : (
         <div className="mt-4 space-y-3">
           {education.map((entry) => (
-            <div key={`${entry.school}-${entry.years ?? "unknown"}`} className="rounded-lg border border-border/70 bg-background/70 p-3">
+            <div
+              key={`${entry.school}-${entry.years ?? "unknown"}`}
+              className="rounded-lg border border-border/70 bg-background/70 p-3"
+            >
               <p className="text-sm font-semibold text-foreground">{entry.school}</p>
-              {entry.degree ? <p className="mt-1 text-sm text-muted-foreground">{entry.degree}</p> : null}
-              {entry.years ? <p className="mt-1 text-xs text-muted-foreground">{entry.years}</p> : null}
+              {entry.degree ? (
+                <p className="mt-1 text-sm text-muted-foreground">{entry.degree}</p>
+              ) : null}
+              {entry.years ? (
+                <p className="mt-1 text-xs text-muted-foreground">{entry.years}</p>
+              ) : null}
             </div>
           ))}
         </div>
