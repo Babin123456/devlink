@@ -513,9 +513,11 @@ from app.routers import (
     verification,
     websockets,
     graph,
+    skill_matrix,
 )
 
 # Router inclusions
+app.include_router(skill_matrix.router, prefix="/api", tags=["Skill Matrix"])
 
 
 app.include_router(media.router, prefix="/api", tags=["Media"])
