@@ -16,16 +16,14 @@ function AdminNotificationsPage() {
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['admin-notification-stats'],
     queryFn: async () => {
-      const res = await api.get('/admin/notifications/stats');
-      return res.data;
+      return api.get<any>('/admin/notifications/stats');
     },
   });
 
   const { data: failed, isLoading: failedLoading } = useQuery({
     queryKey: ['admin-notification-failed'],
     queryFn: async () => {
-      const res = await api.get('/admin/notifications/failed');
-      return res.data;
+      return api.get<any>('/admin/notifications/failed');
     },
   });
 

@@ -6,8 +6,16 @@ export const Route = createFileRoute('/_app/admin/maintenance')({
   component: AdminMaintenance,
 });
 
+interface MaintenanceWindow {
+  id: string;
+  start_time: string;
+  end_time: string;
+  message: string;
+  is_active: boolean;
+}
+
 function AdminMaintenance() {
-  const [windows, setWindows] = useState([]);
+  const [windows, setWindows] = useState<MaintenanceWindow[]>([]);
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [message, setMessage] = useState('The system is undergoing scheduled maintenance.');
@@ -20,14 +28,14 @@ function AdminMaintenance() {
 
   const fetchWindows = async () => {
     try {
-      const res = await api.get('/api/maintenance');
-      setWindows(res.data);
+      const res = await api.get<any>('/api/maintenance');
+      setWindows(Array.isArray(res) ? res : res.data || []);
     } catch (error) {
       console.error('Failed to fetch maintenance windows', error);
     }
   };
 
-  const handleCreate = async (e) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
@@ -48,7 +56,7 @@ function AdminMaintenance() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string | number) => {
     if (!confirm('Are you sure you want to delete this maintenance window?')) return;
     try {
       await api.delete(`/api/maintenance/${id}`);

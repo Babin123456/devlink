@@ -5,7 +5,22 @@ import { Card, TagChip, SectionHeader } from "@/components/shared/primitives";
 import { Star, GitFork, Users2, Plus, Search } from "lucide-react";
 import { useState } from "react";
 
+import { z } from "zod";
+
+export const projectSearchSchema = z.object({
+  page: z.number().catch(1).optional(),
+  q: z.string().optional(),
+  language: z.array(z.string()).optional(),
+  experience: z.array(z.string()).optional(),
+  remote: z.boolean().optional(),
+  paid: z.boolean().optional(),
+  opensource: z.boolean().optional(),
+  tech: z.array(z.string()).optional(),
+  create: z.boolean().optional(),
+});
+
 export const Route = createFileRoute("/_app/projects")({
+  validateSearch: (search) => projectSearchSchema.parse(search),
   head: () => ({
     meta: [
       { title: "Projects — DevLink" },
@@ -17,12 +32,12 @@ export const Route = createFileRoute("/_app/projects")({
 
 function ProjectsPage() {
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<"all" | "active" | "planning" | "shipped">("all");
+  const [filter, setFilter] = useState<string>("all");
   const { data = [], isLoading } = useQuery({ queryKey: ["projects"], queryFn: projectsService.list });
 
   const filtered = data.filter(
     (p) =>
-      (filter === "all" || p.status === filter) &&
+      (filter === "all" || (p.status as string) === filter) &&
       (q === "" || p.name.toLowerCase().includes(q.toLowerCase())),
   );
 
@@ -115,8 +130,8 @@ function ProjectsPage() {
                     <GitFork size={12} /> {p.forks}
                   </span>
                   <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
-                    p.status === "active" ? "bg-success/10 text-success" :
-                    p.status === "planning" ? "bg-warning/10 text-warning" :
+                    (p.status as string) === "recruiting" || (p.status as string) === "active" ? "bg-success/10 text-success" :
+                    (p.status as string) === "in-progress" || (p.status as string) === "planning" ? "bg-warning/10 text-warning" :
                     "bg-muted text-muted-foreground"
                   }`}>{p.status}</span>
                 </div>

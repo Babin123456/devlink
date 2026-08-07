@@ -17,8 +17,8 @@ function SearchAnalyticsDashboard() {
   const fetchAnalytics = async () => {
     try {
       // Assuming api wrapper adds the base url and token
-      const res = await api.get('/api/search/analytics?days=30');
-      setData(res.data);
+      const res = await api.get<any>('/api/search/analytics?days=30');
+      setData(res.data || res);
     } catch (error) {
       console.error('Failed to fetch search analytics', error);
     } finally {

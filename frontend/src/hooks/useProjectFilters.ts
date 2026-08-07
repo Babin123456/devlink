@@ -21,7 +21,6 @@ export function useProjectFilters() {
     navigate({
       to: "/projects",
       search: (prev: SearchRecord) => ({ ...prev, ...filters, page: 1 }),
-      search: (prev: Record<string, unknown>) => ({ ...prev, ...filters, page: 1 }),
       replace: true,
     });
   };
