@@ -256,14 +256,12 @@ function RootComponent() {
                 walk the sidebar and header on every single navigation. */}
             <SkipLink />
             <OfflineBanner />
-            <Outlet />
+            <AnimatePresence mode="wait" initial={false}>
+              <Outlet key={location.pathname} />
+            </AnimatePresence>
             <Toaster position="top-right" richColors />
           </ThemeProvider>
         </AnnouncerProvider>
-        <AnimatePresence mode="wait" initial={false}>
-          <Outlet key={location.pathname} />
-        </AnimatePresence>
-        <Toaster position="top-right" richColors />
       </I18nProvider>
     </QueryClientProvider>
   );

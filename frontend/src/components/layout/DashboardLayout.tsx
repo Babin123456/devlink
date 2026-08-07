@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 export function DashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isDashboard = pathname === "/dashboard" || pathname === "/_app/dashboard";
+  const isDashboard = pathname.endsWith("/dashboard") || pathname === "/";
 
   return (
     <div
