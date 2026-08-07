@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 export interface OAuthProviderItem {
   provider: string;
-  is_linked: booleanean;
+  is_linked: boolean;
   provider_user_id?: string | null;
 }
 

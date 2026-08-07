@@ -48,14 +48,14 @@ export function ProjectVersionHistory({
   const { data: versionsData, isLoading } = useQuery({
     queryKey: ["project-versions", projectId],
     queryFn: async () => {
-      const res: unknown = await api.get(`/api/projects/${projectId}/versions`);
+      const res: any = await api.get(`/api/projects/${projectId}/versions`);
       return res.data || res;
     },
   });
 
   const compareMutation = useMutation({
     mutationFn: async (v1: number) => {
-      const res: unknown = await api.get(
+      const res: any = await api.get(
         `/api/projects/${projectId}/versions/compare?v1=${v1}&v2=current`,
       );
       return res.data || res;
@@ -74,7 +74,7 @@ export function ProjectVersionHistory({
 
   const restoreMutation = useMutation({
     mutationFn: async (v1: number) => {
-      const res: unknown = await api.post(`/api/projects/${projectId}/versions/${v1}/restore`);
+      const res: any = await api.post(`/api/projects/${projectId}/versions/${v1}/restore`);
       return res.data || res;
     },
 

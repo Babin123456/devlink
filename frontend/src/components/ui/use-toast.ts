@@ -7,7 +7,6 @@ export interface ToastProps {
   id?: string;
   title?: React.ReactNode;
   description?: React.ReactNode | (() => React.ReactNode);
-  description?: React.ReactNode;
   variant?: "default" | "destructive" | "success" | "warning" | "info";
   type?: ToastType;
   duration?: number;
