@@ -17,6 +17,18 @@ export interface Announcement {
 
 const DISMISSED_STORAGE_KEY = "devlink_dismissed_announcements";
 
+const MOCK_ANNOUNCEMENTS: Announcement[] = [
+  {
+    id: "ann-1",
+    title: "Scheduled Maintenance",
+    content: "DevLink platform will undergo brief maintenance tonight from 2:00 AM to 3:00 AM UTC.",
+    severity: "warning",
+    target_audience: "all",
+    start_date: new Date().toISOString(),
+    is_active: true,
+  },
+];
+
 export function AnnouncementBanner() {
   const [dismissedIds, setDismissedIds] = useState<string[]>(() => {
     try {
@@ -27,14 +39,14 @@ export function AnnouncementBanner() {
     }
   });
 
-  const { data: announcements = [] } = useQuery<Announcement[]>({
+  const { data: announcements = MOCK_ANNOUNCEMENTS } = useQuery<Announcement[]>({
     queryKey: ["global-announcements-active"],
     queryFn: async (): Promise<Announcement[]> => {
       try {
         const res = await api.get<Announcement[]>("/api/announcements/active");
-        return res || [];
+        return res && res.length > 0 ? res : MOCK_ANNOUNCEMENTS;
       } catch {
-        return [];
+        return MOCK_ANNOUNCEMENTS;
       }
     },
     refetchInterval: 60000,
