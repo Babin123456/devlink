@@ -54,21 +54,24 @@ def format_error_response(
     code: str,
     message: str,
     details: Any = None,
+    request: Request | None = None,
 ) -> Dict[str, Any]:
     """
     Build standardized JSON response payload.
     """
+    request_id = getattr(request.state, "request_id", None) if request else None
+    request_id = request_id or get_request_id() or "unknown"
+
     error_dict: Dict[str, Any] = {
         "error_code": code,
         "message": message,
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "request_id": get_request_id() or "unknown",
+        "request_id": request_id,
     }
     if details is not None:
         error_dict["details"] = details
 
     return {"error": error_dict}
-
 
 async def http_exception_handler(
     request: Request,
@@ -158,6 +161,7 @@ async def global_exception_handler(
     payload = format_error_response(
         code="INTERNAL_SERVER_ERROR",
         message="An unexpected internal server error occurred.",
+        request=request,
     )
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
