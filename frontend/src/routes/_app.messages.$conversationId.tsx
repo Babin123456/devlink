@@ -119,66 +119,12 @@ function Thread() {
     }).catch(() => {});
   }, [conversationId]);
 
-  // Load draft on conversation open
-  useEffect(() => {
-    let isMounted = true;
-    const fetchDraft = async () => {
-      try {
-        const res = await fetch(`/api/messages/drafts/${conversationId}`, {
-          credentials: "include",
-        });
-        if (res.ok) {
-          const draftData = await res.json();
-          if (isMounted && draftData && draftData.content) {
-            setText(draftData.content);
-          }
-        }
-      } catch {
-        // ignore errors
-      }
-    };
-    fetchDraft();
-    return () => {
-      isMounted = false;
-    };
-  }, [conversationId]);
-
-  // Auto-save draft on debounced text change
-  const [draftStatus, setDraftStatus] = useState<"saving" | "saved" | null>(null);
-  const draftTimerRef = useRef<NodeJS.Timeout | null>(null);
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const val = e.target.value;
-      setText(val);
+      setText(e.target.value);
       notifyTyping();
-
-      if (!val.trim()) {
-        setDraftStatus(null);
-        if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
-        fetch(`/api/messages/drafts/${conversationId}`, {
-          method: "DELETE",
-          credentials: "include",
-        }).catch(() => {});
-        return;
-      }
-
-      setDraftStatus("saving");
-      if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
-      draftTimerRef.current = setTimeout(() => {
-        fetch("/api/messages/drafts/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            conversation_id: conversationId,
-            content: val,
-          }),
-        })
-          .then(() => setDraftStatus("saved"))
-          .catch(() => setDraftStatus(null));
-      }, 500);
     },
-    [conversationId, notifyTyping],
+    [notifyTyping],
   );
 
   useEffect(() => {
@@ -285,8 +231,6 @@ function Thread() {
   const handleSend = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!text.trim() || submitting) return;
-      if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
       if ((!text.trim() && !attachment) || submitting) return;
       setSubmitting(true);
       clearTyping();
@@ -296,13 +240,6 @@ function Thread() {
         setAttachment(null);
         broadcastMessage(text || `Shared an attachment: ${attachment?.name}`);
 
-        // Delete draft from backend explicitly
-        fetch(`/api/messages/drafts/${conversationId}`, {
-          method: "DELETE",
-          credentials: "include",
-        }).catch(() => {});
-
-        // Invalidate queries to reload thread and conversations
         queryClient.invalidateQueries({ queryKey: ["thread", conversationId] });
         queryClient.invalidateQueries({ queryKey: ["conversations"] });
       } catch (err) {
@@ -329,14 +266,13 @@ function Thread() {
         </div>
       </div>
 
-      <div className="flex-1 space-y-2 overflow-y-auto p-4">
+      <div className="flex-1 space-y-3 overflow-y-auto p-4">
         {data.length === 0 && (
           <div className="space-y-4">
             <p className="text-center text-[12px] text-muted-foreground">
               No messages yet — say hello 👋
             </p>
 
-            {/* Conversation Starters Section */}
             {!starters && !startersMutation.isPending && !startersError && (
               <button
                 onClick={() => startersMutation.mutate()}
@@ -358,14 +294,6 @@ function Thread() {
             {startersError && (
               <div className="space-y-2">
                 <p className="text-center text-[12px] text-destructive">{startersError}</p>
-        <div className="flex-1 space-y-3 overflow-y-auto p-4">
-          {data.length === 0 && (
-            <div className="space-y-4">
-              <p className="text-center text-[12px] text-muted-foreground">
-                No messages yet — say hello 👋
-              </p>
-
-              {!starters && !startersMutation.isPending && !startersError && (
                 <button
                   onClick={() => {
                     setStartersError(null);
@@ -400,156 +328,106 @@ function Thread() {
             )}
           </div>
         )}
+
         {data.map((m) => (
           <div key={m.id} className={cn("flex", m.from === "me" ? "justify-end" : "justify-start")}>
-                </div>
-              )}
-
-              {starters && (
-                <div className="space-y-2">
-                  <p className="text-center text-[11px] text-muted-foreground">
-                    Suggestions for {starters.target_user_name}
-                  </p>
-                  {starters.suggestions.map((suggestion, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setText(suggestion.text)}
-                      className="flex w-full items-center justify-between gap-2 rounded-md border border-border bg-surface px-3 py-2 text-left text-[13px] text-foreground hover:bg-muted/50"
-                    >
-                      <span>{suggestion.text}</span>
-                      <span className="shrink-0 rounded-sm bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                        {Math.round(suggestion.confidence * 100)}%
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {data.map((m) => (
             <div
               className={cn(
-                "max-w-[75%] rounded-md px-3 py-2 text-[13px]",
+                "max-w-[75%] rounded-md px-3 py-2 text-[13px] space-y-2",
                 m.from === "me"
                   ? "bg-primary text-primary-foreground"
                   : "border border-border bg-surface text-foreground",
               )}
             >
-              <p>{m.text}</p>
+              {/* Clickable Image Attachment */}
+              {m.attachment_url && m.type === "image" && (
+                <div className="rounded overflow-hidden max-w-sm border border-black/5 bg-black/5">
+                  <a href={m.attachment_url} target="_blank" rel="noopener noreferrer">
+                    <img
+                      src={m.attachment_url}
+                      alt={m.attachment_name || "Shared image"}
+                      className="max-h-60 object-contain hover:opacity-90 transition-opacity"
+                    />
+                  </a>
+                </div>
+              )}
+
+              {/* Specialized File Attachment Card */}
+              {m.attachment_url && m.type === "file" && (
+                <div
+                  className={cn(
+                    "flex items-center gap-3 p-2 rounded-md border text-xs min-w-[200px]",
+                    m.from === "me"
+                      ? "bg-primary-dark/20 border-primary-foreground/10"
+                      : "bg-muted/30 border-border",
+                  )}
+                >
+                  <div className="p-2 bg-primary/10 rounded text-primary shrink-0">
+                    {(() => {
+                      const name = m.attachment_name?.toLowerCase() || "";
+                      if (
+                        name.endsWith(".zip") ||
+                        name.endsWith(".tar") ||
+                        name.endsWith(".rar") ||
+                        name.endsWith(".gz")
+                      ) {
+                        return <FileArchive size={18} />;
+                      }
+                      if (name.endsWith(".pdf")) {
+                        return <FileText size={18} />;
+                      }
+                      if (
+                        name.endsWith(".json") ||
+                        name.endsWith(".js") ||
+                        name.endsWith(".ts") ||
+                        name.endsWith(".py") ||
+                        name.endsWith(".html") ||
+                        name.endsWith(".css") ||
+                        name.endsWith(".go")
+                      ) {
+                        return <Code size={18} />;
+                      }
+                      return <File size={18} />;
+                    })()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">{m.attachment_name}</p>
+                    <p
+                      className={cn(
+                        "text-[10px]",
+                        m.from === "me" ? "text-primary-foreground/75" : "text-muted-foreground",
+                      )}
+                    >
+                      {m.attachment_size ? formatFileSize(m.attachment_size) : "Unknown size"}
+                    </p>
+                  </div>
+                  <a
+                    href={m.attachment_url}
+                    download={m.attachment_name}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1.5 hover:bg-black/10 rounded text-inherit transition-colors"
+                    title="Download file"
+                  >
+                    <Download size={14} />
+                  </a>
+                </div>
+              )}
+
+              {m.text && <p className="whitespace-pre-wrap">{m.text}</p>}
+
               <p
                 className={cn(
-                  "mt-1 text-[10px]",
+                  "mt-1 text-[10px] text-right",
                   m.from === "me" ? "text-primary-foreground/70" : "text-muted-foreground",
                 )}
               >
                 {m.at}
               </p>
-                  "max-w-[75%] rounded-md px-3 py-2 text-[13px] space-y-2",
-                  m.from === "me"
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-border bg-surface text-foreground",
-                )}
-              >
-                {/* Clickable Image Attachment */}
-                {m.attachment_url && m.type === "image" && (
-                  <div className="rounded overflow-hidden max-w-sm border border-black/5 bg-black/5">
-                    <a href={m.attachment_url} target="_blank" rel="noopener noreferrer">
-                      <img
-                        src={m.attachment_url}
-                        alt={m.attachment_name || "Shared image"}
-                        className="max-h-60 object-contain hover:opacity-90 transition-opacity"
-                      />
-                    </a>
-                  </div>
-                )}
-
-                {/* Specialized File Attachment Card */}
-                {m.attachment_url && m.type === "file" && (
-                  <div
-                    className={cn(
-                      "flex items-center gap-3 p-2 rounded-md border text-xs min-w-[200px]",
-                      m.from === "me"
-                        ? "bg-primary-dark/20 border-primary-foreground/10"
-                        : "bg-muted/30 border-border",
-                    )}
-                  >
-                    <div className="p-2 bg-primary/10 rounded text-primary shrink-0">
-                      {(() => {
-                        const name = m.attachment_name?.toLowerCase() || "";
-                        if (
-                          name.endsWith(".zip") ||
-                          name.endsWith(".tar") ||
-                          name.endsWith(".rar") ||
-                          name.endsWith(".gz")
-                        ) {
-                          return <FileArchive size={18} />;
-                        }
-                        if (name.endsWith(".pdf")) {
-                          return <FileText size={18} />;
-                        }
-                        if (
-                          name.endsWith(".json") ||
-                          name.endsWith(".js") ||
-                          name.endsWith(".ts") ||
-                          name.endsWith(".py") ||
-                          name.endsWith(".html") ||
-                          name.endsWith(".css") ||
-                          name.endsWith(".go")
-                        ) {
-                          return <Code size={18} />;
-                        }
-                        return <File size={18} />;
-                      })()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium truncate">{m.attachment_name}</p>
-                      <p
-                        className={cn(
-                          "text-[10px]",
-                          m.from === "me" ? "text-primary-foreground/75" : "text-muted-foreground",
-                        )}
-                      >
-                        {m.attachment_size ? formatFileSize(m.attachment_size) : "Unknown size"}
-                      </p>
-                    </div>
-                    <a
-                      href={m.attachment_url}
-                      download={m.attachment_name}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1.5 hover:bg-black/10 rounded text-inherit transition-colors"
-                      title="Download file"
-                    >
-                      <Download size={14} />
-                    </a>
-                  </div>
-                )}
-
-                {m.text && <p className="whitespace-pre-wrap">{m.text}</p>}
-
-                <p
-                  className={cn(
-                    "mt-1 text-[10px] text-right",
-                    m.from === "me" ? "text-primary-foreground/70" : "text-muted-foreground",
-                  )}
-                >
-                  {m.at}
-                </p>
-              </div>
-            </div>
-          ))}
-
-          {themTyping && (
-            <div className="flex justify-start">
-              <div className="max-w-[75%] rounded-md border border-border bg-surface px-3 py-2">
-                <TypingIndicator />
-              </div>
             </div>
           </div>
         ))}
 
-        {/* Typing indicator — shown when the other participant is typing. */}
         {themTyping && (
           <div className="flex justify-start">
             <div className="max-w-[75%] rounded-md border border-border bg-surface px-3 py-2">
@@ -559,116 +437,86 @@ function Thread() {
         )}
       </div>
 
-      {/* Inline typing label above the input for extra visibility. */}
       {themTyping && (
         <div className="px-4 pt-1">
           <TypingIndicator label={`${conv.with.name} is typing`} />
         </div>
       )}
 
-      {text.trim().length > 0 && (
-        <div className="flex items-center justify-between border-t border-border bg-muted/40 px-4 py-1.5 text-[11px] text-muted-foreground">
-          <span className="flex items-center gap-1.5 font-medium text-primary">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            {draftStatus === "saving" ? "Saving draft..." : "Draft auto-saved"}
+      {/* Uploading progress bar */}
+      {uploading && (
+        <div className="px-4 py-2 bg-muted/30 border-t border-border flex items-center justify-between gap-4">
+          <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <Clock size={12} className="animate-spin text-primary" /> Uploading file...
           </span>
-          <span className="text-[10px] opacity-75">Saved to server</span>
+          <div className="flex-1 max-w-xs h-1.5 bg-primary/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+          <span className="text-xs font-semibold text-primary">{uploadProgress}%</span>
+        </div>
+      )}
+
+      {/* Attachment preview banner */}
+      {attachment && (
+        <div className="px-4 py-2 bg-muted/40 border-t border-border flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-primary/10 rounded text-primary">
+              {attachment.type === "image" ? <Image size={14} /> : <File size={14} />}
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-foreground truncate max-w-[200px] sm:max-w-md">
+                {attachment.name}
+              </p>
+              <p className="text-[10px] text-muted-foreground">{formatFileSize(attachment.size)}</p>
+            </div>
+          </div>
+          <button
+            onClick={clearAttachment}
+            className="p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted transition-colors"
+          >
+            <X size={14} />
+          </button>
         </div>
       )}
 
       <form onSubmit={handleSend} className="flex items-center gap-2 border-t border-border p-3">
         <input
+          type="file"
+          id="chat-file-upload"
+          className="hidden"
+          onChange={handleFileChange}
+          disabled={uploading}
+          accept=".png,.jpg,.jpeg,.webp,.gif,.pdf,.zip,.tar,.gz,.rar,.json,.js,.ts,.py,.go,.cpp,.cs,.html,.css,.docx,.doc,.txt,.xlsx,.xls,.pptx,.ppt"
+        />
+        <button
+          type="button"
+          onClick={() => document.getElementById("chat-file-upload")?.click()}
+          disabled={uploading || submitting}
+          className="p-2 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md transition-colors"
+          title="Attach file (Image, PDF, ZIP, code, doc)"
+        >
+          <Paperclip size={16} />
+        </button>
+
+        <input
           value={text}
           onChange={handleInputChange}
-          placeholder="Type a message…"
+          placeholder={attachment ? "Add a message or hit send..." : "Type a message…"}
           className="min-w-0 flex-1 rounded-md border border-border bg-surface px-3 py-2 text-[13px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
         <LoadingButton
           type="submit"
           loading={submitting}
           loadingText=""
-          disabled={!text.trim()}
+          disabled={(!text.trim() && !attachment) || uploading}
           className="inline-flex items-center gap-1"
         >
           <Send size={14} /> Send
         </LoadingButton>
       </form>
     </Card>
-        {/* Uploading progress bar */}
-        {uploading && (
-          <div className="px-4 py-2 bg-muted/30 border-t border-border flex items-center justify-between gap-4">
-            <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-              <Clock size={12} className="animate-spin text-primary" /> Uploading file...
-            </span>
-            <div className="flex-1 max-w-xs h-1.5 bg-primary/10 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary transition-all duration-300"
-                style={{ width: `${uploadProgress}%` }}
-              />
-            </div>
-            <span className="text-xs font-semibold text-primary">{uploadProgress}%</span>
-          </div>
-        )}
-
-        {/* Attachment preview banner */}
-        {attachment && (
-          <div className="px-4 py-2 bg-muted/40 border-t border-border flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-primary/10 rounded text-primary">
-                {attachment.type === "image" ? <Image size={14} /> : <File size={14} />}
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-foreground truncate max-w-[200px] sm:max-w-md">
-                  {attachment.name}
-                </p>
-                <p className="text-[10px] text-muted-foreground">{formatFileSize(attachment.size)}</p>
-              </div>
-            </div>
-            <button
-              onClick={clearAttachment}
-              className="p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted transition-colors"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        )}
-
-        <form onSubmit={handleSend} className="flex items-center gap-2 border-t border-border p-3">
-          <input
-            type="file"
-            id="chat-file-upload"
-            className="hidden"
-            onChange={handleFileChange}
-            disabled={uploading}
-            accept=".png,.jpg,.jpeg,.webp,.gif,.pdf,.zip,.tar,.gz,.rar,.json,.js,.ts,.py,.go,.cpp,.cs,.html,.css,.docx,.doc,.txt,.xlsx,.xls,.pptx,.ppt"
-          />
-          <button
-            type="button"
-            onClick={() => document.getElementById("chat-file-upload")?.click()}
-            disabled={uploading || submitting}
-            className="p-2 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md transition-colors"
-            title="Attach file (Image, PDF, ZIP, code, doc)"
-          >
-            <Paperclip size={16} />
-          </button>
-
-          <input
-            value={text}
-            onChange={handleInputChange}
-            placeholder={attachment ? "Add a message or hit send..." : "Type a message…"}
-            className="min-w-0 flex-1 rounded-md border border-border bg-surface px-3 py-2 text-[13px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
-          <LoadingButton
-            type="submit"
-            loading={submitting}
-            loadingText=""
-            disabled={(!text.trim() && !attachment) || uploading}
-            className="inline-flex items-center gap-1"
-          >
-            <Send size={14} /> Send
-          </LoadingButton>
-        </form>
-      </Card>
-    </div>
   );
 }
