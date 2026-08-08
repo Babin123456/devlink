@@ -128,6 +128,11 @@ export interface Message {
   from: ID;
   text: string;
   at: string;
+  type?: string;
+  attachment_url?: string;
+  attachment_name?: string;
+  attachment_size?: number;
+  mime_type?: string;
 }
 export interface Notification {
   id: ID;

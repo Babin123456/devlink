@@ -200,19 +200,63 @@ export const flaresService = {
 
 export const messagesService = {
   conversations: () => withFallback(() => messagesApi.conversations(), seed.conversations),
-  thread: (id: string) => withFallback(() => messagesApi.thread(id), seed.messages[id] ?? []),
-  send: (conversationId: string, text: string) =>
+  thread: async (id: string) => {
+    let currentUser: any = null;
+    if (isBackendConfigured()) {
+      try {
+        currentUser = await authApi.me();
+      } catch (_) {}
+    }
+    return withFallback(
+      async () => {
+        const msgs = await messagesApi.thread(id);
+        return msgs.map((m: any) => ({
+          id: m.id,
+          from: m.sender_id === currentUser?.id ? "me" : m.sender_id,
+          text: m.content ?? "",
+          at: m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
+          type: m.type,
+          attachment_url: m.attachment_url,
+          attachment_name: m.attachment_name,
+          attachment_size: m.attachment_size,
+          mime_type: m.mime_type,
+        }));
+      },
+      seed.messages[id] ?? [],
+    );
+  },
+  send: (
+    conversationId: string,
+    text: string,
+    attachment?: {
+      url: string;
+      name: string;
+      size: number;
+      mime_type: string;
+      type: string;
+    },
+  ) =>
     withFallback(
       () =>
         messagesApi.send({
           conversation_id: conversationId,
-          message: text,
+          content: text,
+          type: attachment?.type || "text",
+          attachment_url: attachment?.url,
+          attachment_name: attachment?.name,
+          attachment_size: attachment?.size,
+          mime_type: attachment?.mime_type,
         }),
       {
         id: `msg-${Date.now()}`,
         from: "me",
         text,
-        at: new Date().toLocaleTimeString(),
+        at: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: attachment?.type || "text",
+        attachment_url: attachment?.url,
+        attachment_name: attachment?.name,
+        attachment_size: attachment?.size,
+        mime_type: attachment?.mime_type,
       },
     ),
 };
