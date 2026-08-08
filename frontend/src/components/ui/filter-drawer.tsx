@@ -26,6 +26,42 @@ export interface FilterOption {
   count?: number;
 }
 
+/**
+ * What a single section can hold.
+ *
+ * `multi` sections store a string array, `single`/`select`/`search` store a
+ * string, and `range` stores a number. This was previously typed as `unknown`,
+ * which pushed the burden onto every render branch below — each of which then
+ * handed an `unknown` straight to a DOM input and failed to compile.
+ */
+export type FilterValue = string | number | string[] | undefined;
+
+export type FilterValues = Record<string, FilterValue>;
+
+/** Narrow a stored value for a text input or a chip comparison. */
+function asText(value: FilterValue): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  return "";
+}
+
+/** Narrow a stored value for a multi-select section. */
+function asList(value: FilterValue): string[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string" && value !== "") return [value];
+  return [];
+}
+
+/** Narrow a stored value for a range input, falling back to the minimum. */
+function asNumber(value: FilterValue, fallback: number): number {
+  if (typeof value === "number") return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    if (!Number.isNaN(parsed)) return parsed;
+  }
+  return fallback;
+}
+
 export interface FilterSection {
   id: string;
   title: string;
@@ -49,9 +85,9 @@ export interface FilterDrawerProps {
   /** Configurable filter sections list */
   sections: FilterSection[];
   /** Current state of filter values keyed by section ID */
-  values: Record<string, unknown>;
+  values: FilterValues;
   /** Callback fired when user clicks Apply Filters */
-  onApply: (newValues: Record<string, unknown>) => void;
+  onApply: (newValues: FilterValues) => void;
   /** Callback fired when user clicks Reset Filters */
   onReset: () => void;
   /** Number of active filters to display in badge */
@@ -76,7 +112,7 @@ export function FilterDrawer({
   className,
 }: FilterDrawerProps) {
   const isMobile = useIsMobile();
-  const [draftValues, setDraftValues] = React.useState<Record<string, unknown>>(values);
+  const [draftValues, setDraftValues] = React.useState<FilterValues>(values);
 
   // Sync draft state with values when drawer opens
   React.useEffect(() => {
@@ -99,7 +135,7 @@ export function FilterDrawer({
   const handleOptionToggle = (sectionId: string, optionValue: string, isMulti = true) => {
     setDraftValues((prev) => {
       if (isMulti) {
-        const current = (prev[sectionId] as string[]) || [];
+        const current = asList(prev[sectionId]);
         const exists = current.includes(optionValue);
         const updated = exists
           ? current.filter((v) => v !== optionValue)
@@ -137,7 +173,7 @@ export function FilterDrawer({
           />
           <input
             type="text"
-            value={(draftValues[section.id] as string) || ""}
+            value={asText(draftValues[section.id])}
             onChange={(e) => handleTextChange(section.id, e.target.value)}
             placeholder={section.placeholder || `Search ${section.title.toLowerCase()}...`}
             className="w-full rounded-md border border-border bg-surface py-1.5 pl-8 pr-3 text-[13px] text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
@@ -150,7 +186,7 @@ export function FilterDrawer({
     if (type === "select") {
       return (
         <select
-          value={(draftValues[section.id] as string) || ""}
+          value={asText(draftValues[section.id])}
           onChange={(e) => handleTextChange(section.id, e.target.value)}
           className="mt-2 w-full rounded-md border border-border bg-surface px-3 py-1.5 text-[13px] text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           aria-label={section.title}
@@ -169,7 +205,7 @@ export function FilterDrawer({
       const min = section.min ?? 0;
       const max = section.max ?? 100;
       const step = section.step ?? 1;
-      const val = (draftValues[section.id] as number) ?? min;
+      const val = asNumber(draftValues[section.id], min);
 
       return (
         <div className="mt-2 space-y-2">
@@ -194,16 +230,15 @@ export function FilterDrawer({
 
     // Default multi or single checkbox/radio chip buttons
     const isMulti = type === "multi";
-    const selectedValues = isMulti
-      ? (draftValues[section.id] as string[]) || []
-      : draftValues[section.id];
+    const selectedList = asList(draftValues[section.id]);
+    const selectedText = asText(draftValues[section.id]);
 
     return (
       <div className="mt-2 flex flex-wrap gap-2">
         {section.options?.map((option) => {
           const isSelected = isMulti
-            ? (selectedValues as string[]).includes(option.value)
-            : selectedValues === option.value;
+            ? selectedList.includes(option.value)
+            : selectedText === option.value;
 
           return (
             <button
