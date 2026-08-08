@@ -27,6 +27,9 @@ from app.middleware.rate_limit import (
     limiter,
     AUTH_LIMIT,
     LOGIN_LIMIT,
+    REGISTER_LIMIT,
+    PASSWORD_RESET_LIMIT,
+    VERIFY_EMAIL_LIMIT,
 )
 from app.dependencies import get_database
 from app.schemas.auth import (
@@ -66,7 +69,7 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
 )
-@limiter.limit(AUTH_LIMIT)
+@limiter.limit(REGISTER_LIMIT)
 def register(
     request: Request,
     payload: RegisterRequest,
@@ -93,7 +96,7 @@ def register(
     response_model=AuthResponse,
     summary="Login",
 )
-@limiter.limit(AUTH_LIMIT)
+@limiter.limit(LOGIN_LIMIT)
 def login(
     request: Request,
     payload: LoginRequest,
@@ -712,7 +715,7 @@ def change_password(
     response_model=ForgotPasswordResponse,
     summary="Forgot Password",
 )
-@limiter.limit(AUTH_LIMIT)
+@limiter.limit(PASSWORD_RESET_LIMIT)
 def forgot_password(
     request: Request,
     payload: ForgotPasswordRequest,
@@ -735,7 +738,7 @@ def forgot_password(
     summary="Verify Recovery Token Status",
     description="Validates a password recovery token without consuming it.",
 )
-@limiter.limit(AUTH_LIMIT)
+@limiter.limit(PASSWORD_RESET_LIMIT)
 def verify_recovery_token(
     request: Request,
     token: str = Query(..., description="Recovery token string"),
@@ -755,7 +758,7 @@ def verify_recovery_token(
     response_model=SuccessResponse,
     summary="Reset Password",
 )
-@limiter.limit(AUTH_LIMIT)
+@limiter.limit(PASSWORD_RESET_LIMIT)
 def reset_password(
     request: Request,
     payload: ResetPasswordRequest,
@@ -782,7 +785,7 @@ def reset_password(
     response_model=VerifyEmailResponse,
     summary="Verify Email",
 )
-@limiter.limit(AUTH_LIMIT)
+@limiter.limit(VERIFY_EMAIL_LIMIT)
 def verify_email(
     request: Request,
     payload: VerifyEmailRequest,
@@ -817,7 +820,7 @@ def verify_email(
     response_model=SuccessResponse,
     summary="Resend Verification Email",
 )
-@limiter.limit(AUTH_LIMIT)
+@limiter.limit(VERIFY_EMAIL_LIMIT)
 def resend_verification(
     request: Request,
     payload: ResendVerificationEmailRequest,

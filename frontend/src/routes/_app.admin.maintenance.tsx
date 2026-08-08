@@ -22,19 +22,17 @@ function AdminMaintenance() {
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchWindows();
-  }, []);
-
   const fetchWindows = async () => {
     try {
-      const res = await api.get<unknown>("/api/maintenance");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setWindows(((res as { data?: any })?.data || res) as any);
-    } catch (error: unknown) {
+      setWindows(await api.get<MaintenanceWindow[]>("/api/maintenance"));
+    } catch (error) {
       console.error("Failed to fetch maintenance windows", error);
     }
   };
+
+  useEffect(() => {
+    void fetchWindows();
+  }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,8 +46,8 @@ function AdminMaintenance() {
       };
       await api.post("/api/maintenance", payload);
       alert("Maintenance window scheduled");
-      fetchWindows();
-    } catch (error: unknown) {
+      void fetchWindows();
+    } catch (error) {
       alert("Failed to schedule maintenance");
       console.error(error);
     } finally {
@@ -57,12 +55,12 @@ function AdminMaintenance() {
     }
   };
 
-  const handleDelete = async (id: string | number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this maintenance window?")) return;
     try {
       await api.delete(`/api/maintenance/${id}`);
-      fetchWindows();
-    } catch (error: unknown) {
+      void fetchWindows();
+    } catch (error) {
       console.error("Failed to delete window", error);
     }
   };

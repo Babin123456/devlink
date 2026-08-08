@@ -10,6 +10,21 @@ export const Route = createFileRoute("/_app/admin/notifications")({
   component: AdminNotificationsPage,
 });
 
+interface NotificationDeliveryStats {
+  total: number;
+  pending: number;
+  sent: number;
+  failed: number;
+}
+
+interface FailedNotification {
+  id: string;
+  title: string;
+  message: string;
+  channel: string;
+  recipient_id: string;
+}
+
 function AdminNotificationsPage() {
   const queryClient = useQueryClient();
 
@@ -23,21 +38,15 @@ function AdminNotificationsPage() {
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["admin-notification-stats"],
-    queryFn: async () => {
-      return api.get<{
-        total: number;
-        pending: number;
-        sent: number;
-        failed: number;
-      }>("/admin/notifications/stats");
-    },
+    // The API client already resolves to the parsed body. Reading `.data` off
+    // it handed React Query `undefined`, so every tile rendered its `|| 0`
+    // fallback no matter what the server said.
+    queryFn: () => api.get<NotificationDeliveryStats>("/admin/notifications/stats"),
   });
 
   const { data: failed, isLoading: failedLoading } = useQuery({
     queryKey: ["admin-notification-failed"],
-    queryFn: async () => {
-      return api.get<FailedNotification[]>("/admin/notifications/failed");
-    },
+    queryFn: () => api.get<FailedNotification[]>("/admin/notifications/failed"),
   });
 
   const retryMutation = useMutation({

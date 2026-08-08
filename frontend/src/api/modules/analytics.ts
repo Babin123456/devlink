@@ -29,6 +29,7 @@ export interface DashboardSnapshot {
   builder_requests?: unknown[];
   invite_requests?: unknown[];
   deadlines?: unknown[];
+  quickActions?: unknown[];
   trending_projects?: unknown[];
   suggested_builders?: unknown[];
   recommendations?: unknown[];
