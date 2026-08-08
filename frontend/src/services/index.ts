@@ -32,7 +32,7 @@ import type {
   IssueUpdateInput,
   TechStackResponse,
 } from "@/api";
-import type { Hackathon } from "@/mocks/seed";
+import type { Hackathon, Flare } from "@/mocks/seed";
 
 const delay = 120;
 const mock = <T>(v: T): Promise<T> => new Promise((r) => setTimeout(() => r(v), delay));
@@ -153,7 +153,49 @@ export const activitiesService = {
 };
 
 export const flaresService = {
-  list: () => withFallback(() => postsApi.list(), seed.flares),
+  list: () =>
+    withFallback(
+      () => postsApi.list(),
+      seed.flares.filter((f) => !f.status || f.status === "published"),
+    ),
+  drafts: () =>
+    withFallback(
+      () => postsApi.drafts(),
+      seed.flares.filter((f) => f.status === "draft" || f.status === "scheduled"),
+    ),
+  create: (body: { content: string; tags?: string[]; status?: string; publish_at?: string }) =>
+    withFallback(
+      () => postsApi.create(body),
+      {
+        id: `mock-${Date.now()}`,
+        author: {
+          ...seed.builders[0],
+          name: seed.currentUser.name,
+          handle: seed.currentUser.handle,
+          avatar: seed.currentUser.avatar,
+        },
+        content: body.content,
+        tags: body.tags ?? [],
+        likes: 0,
+        comments: 0,
+        ago: "just now",
+        status: body.status ?? "published",
+        publish_at: body.publish_at,
+      } as unknown as Flare,
+    ),
+  update: (id: string, body: Partial<Flare & { status?: string; publish_at?: string }>) =>
+    withFallback(
+      () => postsApi.update(id, body),
+      {
+        id,
+        ...body,
+      } as unknown as Flare,
+    ),
+  remove: (id: string) =>
+    withFallback(
+      () => postsApi.remove(id),
+      undefined,
+    ),
 };
 
 export const messagesService = {

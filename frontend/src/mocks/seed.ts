@@ -113,6 +113,8 @@ export interface Flare {
   likes: number;
   comments: number;
   ago: string;
+  status?: string;
+  publish_at?: string;
 }
 export interface Conversation {
   id: ID;
