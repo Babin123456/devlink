@@ -7,8 +7,6 @@ export const Route = createFileRoute("/_app/admin/maintenance")({
   component: AdminMaintenance,
 });
 
-interface MaintenanceWindowRow {
-  id: string | number;
 interface MaintenanceWindow {
   id: string;
   start_time: string;
@@ -18,7 +16,6 @@ interface MaintenanceWindow {
 }
 
 function AdminMaintenance() {
-  const [windows, setWindows] = useState<MaintenanceWindowRow[]>([]);
   const [windows, setWindows] = useState<MaintenanceWindow[]>([]);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -28,19 +25,14 @@ function AdminMaintenance() {
 
   const fetchWindows = async () => {
     try {
-      // The API client resolves to the parsed body, not an axios response.
-      setWindows(await api.get<MaintenanceWindowRow[]>("/api/maintenance"));
+      setWindows(await api.get<MaintenanceWindow[]>("/api/maintenance"));
     } catch (error) {
-      const res = await api.get<any>("/api/maintenance");
-      setWindows(res.data || res);
-    } catch (error: any) {
       console.error("Failed to fetch maintenance windows", error);
     }
   };
 
   useEffect(() => {
     void fetchWindows();
-    // fetchWindows closes over nothing that changes between renders.
   }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -57,8 +49,6 @@ function AdminMaintenance() {
       alert("Maintenance window scheduled");
       void fetchWindows();
     } catch (error) {
-      fetchWindows();
-    } catch (error: any) {
       alert("Failed to schedule maintenance");
       console.error(error);
     } finally {
@@ -66,14 +56,12 @@ function AdminMaintenance() {
     }
   };
 
-  const handleDelete = async (id: string | number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this maintenance window?")) return;
     try {
       await api.delete(`/api/maintenance/${id}`);
       void fetchWindows();
     } catch (error) {
-      fetchWindows();
-    } catch (error: any) {
       console.error("Failed to delete window", error);
     }
   };
