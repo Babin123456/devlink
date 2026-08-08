@@ -129,6 +129,7 @@ function Thread() {
   }, [conversationId]);
 
   // Auto-save draft on debounced text change
+  const [draftStatus, setDraftStatus] = useState<"saving" | "saved" | null>(null);
   const draftTimerRef = useRef<NodeJS.Timeout | null>(null);
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,6 +137,17 @@ function Thread() {
       setText(val);
       notifyTyping();
 
+      if (!val.trim()) {
+        setDraftStatus(null);
+        if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
+        fetch(`/api/messages/drafts/${conversationId}`, {
+          method: "DELETE",
+          credentials: "include",
+        }).catch(() => {});
+        return;
+      }
+
+      setDraftStatus("saving");
       if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
       draftTimerRef.current = setTimeout(() => {
         fetch("/api/messages/drafts/", {
@@ -146,7 +158,9 @@ function Thread() {
             conversation_id: conversationId,
             content: val,
           }),
-        }).catch(() => {});
+        })
+          .then(() => setDraftStatus("saved"))
+          .catch(() => setDraftStatus(null));
       }, 500);
     },
     [conversationId, notifyTyping],
@@ -190,7 +204,6 @@ function Thread() {
     },
     [text, submitting, clearTyping, conversationId, broadcastMessage, queryClient],
   );
-
 
   return (
     <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
@@ -339,6 +352,16 @@ function Thread() {
         {themTyping && (
           <div className="px-4 pt-1">
             <TypingIndicator label={`${conv.with.name} is typing`} />
+          </div>
+        )}
+
+        {text.trim().length > 0 && (
+          <div className="flex items-center justify-between border-t border-border bg-muted/40 px-4 py-1.5 text-[11px] text-muted-foreground">
+            <span className="flex items-center gap-1.5 font-medium text-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              {draftStatus === "saving" ? "Saving draft..." : "Draft auto-saved"}
+            </span>
+            <span className="text-[10px] opacity-75">Saved to server</span>
           </div>
         )}
 
