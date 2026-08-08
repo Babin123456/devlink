@@ -206,6 +206,69 @@ class NotificationService:
         db.flush()
 
     @staticmethod
+    def track_click(
+        db: Session,
+        db_notification: Notification,
+    ) -> Notification:
+        db_notification.clicked_at = datetime.utcnow()
+        if not db_notification.is_read:
+            db_notification.is_read = True
+            db_notification.read_at = datetime.utcnow()
+        db.flush()
+        db.refresh(db_notification)
+        return db_notification
+
+    @staticmethod
+    def track_delivered(
+        db: Session,
+        db_notification: Notification,
+    ) -> Notification:
+        db_notification.delivered_at = datetime.utcnow()
+        from app.models.notification import NotificationStatus
+        db_notification.status = NotificationStatus.SENT
+        db.flush()
+        db.refresh(db_notification)
+        return db_notification
+
+    @staticmethod
+    def get_delivery_analytics(db: Session) -> dict:
+        total_sent = db.scalar(
+            select(func.count(Notification.id)).where(Notification.sent_at.isnot(None))
+        ) or 0
+        total_delivered = db.scalar(
+            select(func.count(Notification.id)).where(Notification.delivered_at.isnot(None))
+        ) or 0
+        total_read = db.scalar(
+            select(func.count(Notification.id)).where(Notification.read_at.isnot(None))
+        ) or 0
+        total_clicked = db.scalar(
+            select(func.count(Notification.id)).where(Notification.clicked_at.isnot(None))
+        ) or 0
+        from app.models.notification import NotificationStatus
+        total_failed = db.scalar(
+            select(func.count(Notification.id)).where(Notification.status == NotificationStatus.FAILED)
+        ) or 0
+
+        delivery_rate = (total_delivered / total_sent * 100) if total_sent > 0 else 0.0
+        read_rate = (total_read / total_delivered * 100) if total_delivered > 0 else 0.0
+        click_rate = (total_clicked / total_read * 100) if total_read > 0 else 0.0
+
+        return {
+            "metrics": {
+                "sent": total_sent,
+                "delivered": total_delivered,
+                "read": total_read,
+                "clicked": total_clicked,
+                "failed": total_failed,
+            },
+            "rates": {
+                "delivery_rate_pct": round(delivery_rate, 2),
+                "read_rate_pct": round(read_rate, 2),
+                "click_rate_pct": round(click_rate, 2),
+            },
+        }
+
+    @staticmethod
     def enqueue(
         db: Session,
         recipient_id,

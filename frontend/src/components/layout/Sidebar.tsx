@@ -125,6 +125,11 @@ export const SIDEBAR_SECTIONS: SidebarSectionProps[] = [
     label: "Account",
     items: [
       {
+        label: "Profile Analytics",
+        to: "/profile-analytics",
+        icon: <BarChart3 size={16} strokeWidth={2} />,
+      },
+      {
         label: "Settings",
         to: "/settings",
         icon: <Settings size={16} strokeWidth={2} />,
