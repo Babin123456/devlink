@@ -73,6 +73,7 @@ from app.routers import (
     media,
     maintenance,
     message_drafts,
+    global_announcements,
     posts,
 )
 
@@ -528,6 +529,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 from app.routers import mfa
 
 app.include_router(mfa.router, prefix="/api")
+app.include_router(global_announcements.router, prefix="/api", tags=["Global Announcements"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
 app.include_router(export.router, prefix="/api/users", tags=["Export"])
