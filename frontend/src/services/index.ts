@@ -164,65 +164,78 @@ export const flaresService = {
       seed.flares.filter((f) => f.status === "draft" || f.status === "scheduled"),
     ),
   create: (body: { content: string; tags?: string[]; status?: string; publish_at?: string }) =>
-    withFallback(
-      () => postsApi.create(body),
-      {
-        id: `mock-${Date.now()}`,
-        author: {
-          ...seed.builders[0],
-          name: seed.currentUser.name,
-          handle: seed.currentUser.handle,
-          avatar: seed.currentUser.avatar,
-        },
-        content: body.content,
-        tags: body.tags ?? [],
-        likes: 0,
-        comments: 0,
-        ago: "just now",
-        status: body.status ?? "published",
-        publish_at: body.publish_at,
-      } as unknown as Flare,
-    ),
+    withFallback(() => postsApi.create(body), {
+      id: `mock-${Date.now()}`,
+      author: {
+        ...seed.builders[0],
+        name: seed.currentUser.name,
+        handle: seed.currentUser.handle,
+        avatar: seed.currentUser.avatar,
+      },
+      content: body.content,
+      tags: body.tags ?? [],
+      likes: 0,
+      comments: 0,
+      ago: "just now",
+      status: body.status ?? "published",
+      publish_at: body.publish_at,
+    } as unknown as Flare),
   update: (id: string, body: Partial<Flare & { status?: string; publish_at?: string }>) =>
-    withFallback(
-      () => postsApi.update(id, body),
-      {
-        id,
-        ...body,
-      } as unknown as Flare,
-    ),
+    withFallback(() => postsApi.update(id, body), {
+      id,
+      ...body,
+    } as unknown as Flare),
   remove: (id: string) =>
-    withFallback(
-      () => postsApi.remove(id),
-      undefined,
-    ),
+    withFallback<void>(async () => {
+      await postsApi.remove(id);
+    }, undefined),
 };
 
 export const messagesService = {
   conversations: () => withFallback(() => messagesApi.conversations(), seed.conversations),
   thread: async (id: string) => {
-    let currentUser: any = null;
+    let currentUser: { id?: string } | null = null;
     if (isBackendConfigured()) {
       try {
-        currentUser = await authApi.me();
-      } catch (_) {}
+        const u = (await authApi.me()) as unknown as { id?: string };
+        currentUser = { id: u.id };
+      } catch {
+        // Ignored
+      }
     }
     return withFallback(
       async () => {
         const msgs = await messagesApi.thread(id);
-        return msgs.map((m: any) => ({
-          id: m.id,
-          from: m.sender_id === currentUser?.id ? "me" : m.sender_id,
-          text: m.content ?? "",
-          at: m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "",
-          type: m.type,
-          attachment_url: m.attachment_url,
-          attachment_name: m.attachment_name,
-          attachment_size: m.attachment_size,
-          mime_type: m.mime_type,
-        }));
+        return msgs.map(
+          (m: {
+            id: string;
+            sender_id?: string;
+            content?: string;
+            created_at?: string;
+            type?: "text" | "image" | "file";
+            attachment_url?: string;
+            attachment_name?: string;
+            attachment_size?: number;
+            mime_type?: string;
+          }) => ({
+            id: m.id,
+            from: m.sender_id === currentUser?.id ? "me" : m.sender_id,
+            text: m.content ?? "",
+            at: m.created_at
+              ? new Date(m.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "",
+            type: m.type as "text" | "image" | "file",
+            attachment_url: m.attachment_url,
+            attachment_name: m.attachment_name,
+            attachment_size: m.attachment_size,
+            mime_type: m.mime_type,
+          }),
+        );
       },
-      seed.messages[id] ?? [],
+      (seed.messages[id] as unknown as Message[]) ?? [],
     );
   },
   send: (
@@ -251,7 +264,7 @@ export const messagesService = {
         id: `msg-${Date.now()}`,
         from: "me",
         text,
-        at: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        at: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         type: attachment?.type || "text",
         attachment_url: attachment?.url,
         attachment_name: attachment?.name,
@@ -434,7 +447,7 @@ export const userService = {
         handle: u.username,
         avatar: u.profile_image ?? u.avatar ?? seed.currentUser.avatar,
         premium: (u as unknown as { premium?: boolean }).premium ?? false,
-        verified: (u as any).is_verified ?? false,
+        verified: (u as unknown as { is_verified?: boolean }).is_verified ?? false,
       };
     }, seed.currentUser),
 };
