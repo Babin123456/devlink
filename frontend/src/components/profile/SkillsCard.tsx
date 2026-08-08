@@ -26,15 +26,6 @@ function normalizeLevel(level?: string): (typeof levelOrder)[number] {
   return match ?? "Intermediate";
 }
 
-export function SkillsCard({
-  skills,
-  editable = false,
-  formValues = [],
-  skillErrors = {},
-  onSkillChange,
-  onAddSkill,
-  onRemoveSkill,
-}: SkillsCardProps) {
 const SKILL_CATEGORIES = [
   "Languages",
   "Frameworks",
@@ -58,9 +49,7 @@ export function SkillsCard({
 
   const groupedByCategory = categoriesList.map((cat) => ({
     category: cat,
-    items: skills.filter(
-      (s) => (s.category || "Languages").toLowerCase() === cat.toLowerCase(),
-    ),
+    items: skills.filter((s) => (s.category || "Languages").toLowerCase() === cat.toLowerCase()),
   }));
 
   if (editable) {
@@ -73,7 +62,9 @@ export function SkillsCard({
             </div>
             <div>
               <h2 className="text-sm font-semibold text-foreground">Developer Skill Matrix</h2>
-              <p className="text-xs text-muted-foreground">Manage your skills across 7 core technical categories</p>
+              <p className="text-xs text-muted-foreground">
+                Manage your skills across 7 core technical categories
+              </p>
             </div>
           </div>
           <button
@@ -87,7 +78,9 @@ export function SkillsCard({
 
         <div className="mt-4 space-y-3">
           {formValues.length === 0 ? (
-            <p className="text-xs text-muted-foreground italic">No skills added. Click "Add Skill" to build your matrix.</p>
+            <p className="text-xs text-muted-foreground italic">
+              No skills added. Click "Add Skill" to build your matrix.
+            </p>
           ) : null}
           {formValues.map((skill, index) => (
             <div
@@ -182,7 +175,9 @@ export function SkillsCard({
           </div>
           <div>
             <h2 className="text-sm font-semibold text-foreground">Developer Skill Matrix</h2>
-            <p className="text-xs text-muted-foreground">Categorized technical expertise and proficiency</p>
+            <p className="text-xs text-muted-foreground">
+              Categorized technical expertise and proficiency
+            </p>
           </div>
         </div>
       </div>
@@ -226,6 +221,5 @@ export function SkillsCard({
     </Card>
   );
 }
-
 
 export default SkillsCard;
