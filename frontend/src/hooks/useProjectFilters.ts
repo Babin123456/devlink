@@ -29,8 +29,6 @@ export function useProjectFilters() {
     navigate({
       to: "/projects",
       search: (prev: SearchRecord) => {
-        // Drop every filter key, keep anything else the URL was carrying, and
-        // send the user back to the first page of unfiltered results.
         const {
           language: _language,
           experience: _experience,
