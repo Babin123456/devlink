@@ -14,7 +14,8 @@ Usage:
     python -m scripts.seed_database --reset
     python -m scripts.seed_database --dry-run
 
-Every demo account uses the same password, printed at the end of a run.
+Every demo account uses the same password, the ``DEMO_PASSWORD`` constant
+below. It is deliberately not echoed at the end of a run.
 
 Two properties worth relying on:
 
