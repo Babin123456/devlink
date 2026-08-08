@@ -241,6 +241,13 @@ class User(Base):
         index=True,
     )
 
+    premium: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        index=True,
+    )
+
     is_superuser: Mapped[bool] = mapped_column(
         Boolean,
         default=False,

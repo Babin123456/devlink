@@ -176,6 +176,7 @@ class UserResponse(UserBase):
 
     is_active: bool
     is_verified: bool
+    premium: bool = False
     is_superuser: bool
 
     last_seen: Optional[datetime] = Field(

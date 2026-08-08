@@ -59,6 +59,8 @@ class SearchResultUser(BaseModel):
     headline: Optional[str] = None
     profile_image: Optional[str] = None
     location: Optional[str] = None
+    is_verified: bool = False
+    premium: bool = False
 
 
 class SearchResultProject(BaseModel):

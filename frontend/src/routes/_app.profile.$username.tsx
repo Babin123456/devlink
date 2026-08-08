@@ -236,13 +236,13 @@ function ProfilePage() {
       )}
 
       {/* Profile Card with Cover Banner & Avatar */}
-      <Card className="overflow-hidden p-0">
+      <Card className={cn("overflow-hidden p-0", b.premium && "border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.08)]")}>
         {/* Cover Banner */}
         <div className="group relative h-44 w-full overflow-hidden bg-muted">
           {bannerUrl ? (
             <img src={bannerUrl} alt="Profile banner" className="h-full w-full object-cover" />
           ) : (
-            <div className="h-full w-full bg-gradient-to-r from-primary/30 to-purple-500/30" />
+            <div className={cn("h-full w-full bg-gradient-to-r", b.premium ? "from-amber-600/40 via-amber-500/20 to-purple-600/30" : "from-primary/30 to-purple-500/30")} />
           )}
 
           {me && (
@@ -265,6 +265,7 @@ function ProfilePage() {
               size="2xl"
               status={b.online}
               verified={b.verified}
+              premium={b.premium}
               editable={me}
               onImageUpload={(url) => {
                 setAvatarUrl(url);
@@ -276,7 +277,14 @@ function ProfilePage() {
               <h1 className="text-[22px] font-bold text-foreground flex items-center gap-2">
                 {b.name}
                 {b.verified && (
-                  <BadgeCheck className="text-primary h-6 w-6" aria-label="Verified User" />
+                  b.premium ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <BadgeCheck className="text-amber-500 fill-amber-500/10 h-6 w-6 animate-pulse" aria-label="Premium Verified User" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 border border-amber-500/30 text-amber-500 px-2 py-0.5 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.2)] animate-pulse">PRO VERIFIED</span>
+                    </span>
+                  ) : (
+                    <BadgeCheck className="text-primary h-6 w-6" aria-label="Verified User" />
+                  )
                 )}
               </h1>
               <p className="text-[13px] text-muted-foreground">

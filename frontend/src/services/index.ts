@@ -348,6 +348,7 @@ export const userService = {
         handle: u.username,
         avatar: u.profile_image ?? u.avatar ?? seed.currentUser.avatar,
         premium: (u as unknown as { premium?: boolean }).premium ?? false,
+        verified: (u as any).is_verified ?? false,
       };
     }, seed.currentUser),
 };
