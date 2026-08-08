@@ -29,9 +29,9 @@ export function AnnouncementBanner() {
 
   const { data: announcements = [] } = useQuery<Announcement[]>({
     queryKey: ["global-announcements-active"],
-    queryFn: async () => {
+    queryFn: async (): Promise<Announcement[]> => {
       try {
-        const res = await api.get("/api/announcements/active");
+        const res = await api.get<Announcement[]>("/api/announcements/active");
         return res || [];
       } catch {
         return [];
@@ -40,9 +40,7 @@ export function AnnouncementBanner() {
     refetchInterval: 60000,
   });
 
-  const activeAnnouncements = announcements.filter(
-    (item) => !dismissedIds.includes(item.id),
-  );
+  const activeAnnouncements = announcements.filter((item) => !dismissedIds.includes(item.id));
 
   const handleDismiss = (id: string) => {
     const updated = [...dismissedIds, id];
@@ -70,8 +68,8 @@ export function AnnouncementBanner() {
               isCritical
                 ? "bg-destructive text-destructive-foreground"
                 : isWarning
-                ? "bg-amber-500 text-white dark:bg-amber-600"
-                : "bg-primary text-primary-foreground",
+                  ? "bg-amber-500 text-white dark:bg-amber-600"
+                  : "bg-primary text-primary-foreground",
             )}
           >
             <div className="flex items-center gap-2.5 flex-1 min-w-0 pr-2">

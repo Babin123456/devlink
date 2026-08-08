@@ -10,8 +10,9 @@ def test_admin_announcement_crud(client, register_and_login, db):
     from app.models.user import User, UserRole
     admin_id, token = register_and_login("admin_ann@example.com", "admin_ann")
 
+    import uuid
     # Set user role to admin in db
-    user = db.get(User, admin_id)
+    user = db.get(User, uuid.UUID(str(admin_id)))
     user.role = UserRole.ADMIN
     db.commit()
 

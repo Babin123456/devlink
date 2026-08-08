@@ -72,7 +72,6 @@ from app.routers import (
     saved_searches,
     media,
     maintenance,
-    skill_matrix,
     global_announcements,
 )
 
@@ -509,9 +508,25 @@ from app.routers import (
     repositories,
     repository_quality,
     saved_searches,
+    search,
+    skills,
+    users,
+    verification,
+    websockets,
+    graph,
 )
 
-app.include_router(skill_matrix.router, prefix="/api", tags=["Skill Matrix"])
+# Router inclusions
+
+
+app.include_router(media.router, prefix="/api", tags=["Media"])
+from app.routers import link_previews
+
+app.include_router(link_previews.router, prefix="/api", tags=["Link Previews"])
+app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+from app.routers import mfa
+
+app.include_router(mfa.router, prefix="/api")
 app.include_router(global_announcements.router, prefix="/api", tags=["Global Announcements"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
