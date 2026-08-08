@@ -41,6 +41,7 @@ export const projectSearchSchema = z.object({
   remote: z.boolean().optional(),
   paid: z.boolean().optional(),
   opensource: z.boolean().optional(),
+  create: z.boolean().optional(),
 });
 
 /**
@@ -99,10 +100,26 @@ function ProjectsPage() {
   >("all");
   const [showFilters, setShowFilters] = useState(false);
   const [recentProjectIds, setRecentProjectIds] = useState<string[]>([]);
+  const search = Route.useSearch();
 
   useEffect(() => {
     setRecentProjectIds(getRecentlyViewedProjectIds());
   }, []);
+
+  useEffect(() => {
+    if (search.create) {
+      setCreateOpen(true);
+      // Remove query param to keep the URL clean
+      navigate({
+        search: (prev) => {
+          const next = { ...prev };
+          delete next.create;
+          return next;
+        },
+        replace: true,
+      });
+    }
+  }, [search.create]);
 
   const { data = [], isLoading } = useQuery({
     queryKey: [
@@ -337,17 +354,6 @@ function ProjectsPage() {
             remote: booleanToChoice(filters.remote),
             paid: booleanToChoice(filters.paid),
             opensource: booleanToChoice(filters.opensource),
-          }}
-          onApply={(newValues) => {
-            setFilters({
-              language: toStringList(newValues.language),
-              experience: toStringList(newValues.experience),
-              remote: choiceToBoolean(newValues.remote),
-              paid: choiceToBoolean(newValues.paid),
-              opensource: choiceToBoolean(newValues.opensource),
-            remote: filters.remote === undefined ? "" : String(filters.remote),
-            paid: filters.paid === undefined ? "" : String(filters.paid),
-            opensource: filters.opensource === undefined ? "" : String(filters.opensource),
           }}
           onApply={(newValues) => {
             const boolOrUndefined = (v: unknown): boolean | undefined =>
