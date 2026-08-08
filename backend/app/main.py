@@ -73,6 +73,7 @@ from app.routers import (
     media,
     maintenance,
     message_drafts,
+    posts,
 )
 
 
@@ -660,6 +661,7 @@ app.include_router(
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
 app.include_router(centralized_analytics.router, prefix="/api", tags=["Centralized Analytics"])
+app.include_router(posts.router, prefix="/api/posts", tags=["Posts"])
 
 from app.routers import background_jobs
 
