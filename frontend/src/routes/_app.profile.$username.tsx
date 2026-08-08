@@ -20,9 +20,11 @@ import {
   RotateCw,
   BadgeCheck,
   Camera,
+  TrendingUp,
 } from "lucide-react";
 import { copyText } from "@/lib/clipboard";
 import { ReportUserModal } from "@/components/shared/ReportUserModal";
+import { analyticsApi } from "@/api/modules/analytics";
 import SkillsCard from "@/components/profile/SkillsCard";
 import ExperienceCard from "@/components/profile/ExperienceCard";
 import { ProfileViewersList } from "@/components/profile/ProfileViewersList";
@@ -328,6 +330,15 @@ function ProfilePage() {
                   Contact Developer
                 </button>
               )}
+              {me && (
+                <Link
+                  to="/profile-analytics"
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                >
+                  <TrendingUp size={16} />
+                  Profile Analytics
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -513,16 +524,29 @@ function ProfilePage() {
           <p className="text-[13px] font-semibold text-foreground">Projects</p>
           <ul className="mt-3 divide-y divide-border">
             {projects.slice(0, 4).map((p) => (
-              <li key={p.id} className="flex items-center gap-3 py-2">
-                <span className="grid h-8 w-8 place-items-center rounded-md bg-muted text-lg">
-                  {p.icon}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-semibold text-foreground">{p.name}</p>
-                  <p className="truncate text-[11px] text-muted-foreground">
-                    {p.stack.join(" · ")}
-                  </p>
-                </div>
+              <li key={p.id} className="py-2">
+                <Link
+                  to="/projects/$projectId"
+                  params={{ projectId: p.id }}
+                  onClick={() => {
+                    if (b.id) {
+                      analyticsApi.trackClick("project", b.id, p.id).catch(() => {});
+                    }
+                  }}
+                  className="flex items-center gap-3 hover:bg-muted/50 p-1.5 rounded-lg transition-colors w-full text-left"
+                >
+                  <span className="grid h-8 w-8 place-items-center rounded-md bg-muted text-lg shrink-0">
+                    {p.icon}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-semibold text-foreground hover:text-primary transition-colors">
+                      {p.name}
+                    </p>
+                    <p className="truncate text-[11px] text-muted-foreground">
+                      {p.stack.join(" · ")}
+                    </p>
+                  </div>
+                </Link>
               </li>
             ))}
           </ul>
