@@ -26,7 +26,10 @@ function NotificationSettingsPage() {
     // api.get resolves to the parsed body; there is no `.data` envelope, and
     // unwrapping one meant the form always rendered its defaults instead of
     // the user's saved settings.
-    queryFn: () => api.get<NotificationPreferences>("/api/notifications/preferences"),
+    queryFn: async () => {
+      const res = await api.get("/api/notifications/preferences");
+      return res;
+    },
   });
 
   const [formData, setFormData] = useState({
