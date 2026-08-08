@@ -28,6 +28,7 @@ import { analyticsApi } from "@/api/modules/analytics";
 import SkillsCard from "@/components/profile/SkillsCard";
 import ExperienceCard from "@/components/profile/ExperienceCard";
 import { ProfileViewersList } from "@/components/profile/ProfileViewersList";
+import { ProfileCompletionChecklist } from "@/components/profile/ProfileCompletionChecklist";
 import { FollowButton } from "@/components/shared/FollowButton";
 import { useFollowStatus } from "@/hooks/useFollow";
 
@@ -233,6 +234,22 @@ function ProfilePage() {
             </Link>
           </div>
         </Card>
+      )}
+
+      {me && (
+        <ProfileCompletionChecklist
+          userProfile={{
+            avatar: avatarUrl,
+            banner: bannerUrl,
+            bio: b.bio,
+            skills: b.profileSkills?.map((s) => s.name) ?? b.skills,
+            experience: b.experienceLevel || b.role || b.company,
+            education: b.headline,
+            githubUrl: b.githubUrl,
+            portfolioUrl: b.portfolioUrl,
+            projects: projects.length,
+          }}
+        />
       )}
 
       {/* Profile Card with Cover Banner & Avatar */}

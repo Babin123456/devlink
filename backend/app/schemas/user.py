@@ -265,3 +265,15 @@ class ProfileCompletionResponse(BaseModel):
         ...,
         description="List of missing profile factors",
     )
+    completed_factors: list[str] = Field(
+        default_factory=list,
+        description="List of completed profile factors",
+    )
+    reward_unlocked: bool = Field(
+        default=False,
+        description="Whether the profile completion reward is unlocked",
+    )
+    reward_badge: Optional[str] = Field(
+        default=None,
+        description="Badge awarded for 100% profile completion",
+    )
