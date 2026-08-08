@@ -84,4 +84,5 @@ from .request_log import RequestLog  # noqa: F401
 from .background_job import BackgroundJob, JobStatus
 from .badge import Badge, UserBadge  # noqa: F401
 from .centralized_analytics import CentralizedAnalyticsEvent, AnalyticsEventType  # noqa: F401
+from .post import Post  # noqa: F401
 
