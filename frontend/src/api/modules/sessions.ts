@@ -23,22 +23,18 @@ export interface RevokeSessionResponse {
 
 export const sessionsApi = {
   getSessions: async (): Promise<UserSession[]> => {
-    const res = await api.get<UserSession[]>("/api/auth/sessions");
-    return res.data;
+    return api.get<UserSession[]>("/api/auth/sessions");
   },
 
   revokeSession: async (sessionId: string): Promise<RevokeSessionResponse> => {
-    const res = await api.delete<RevokeSessionResponse>(`/api/auth/sessions/${sessionId}`);
-    return res.data;
+    return api.delete<RevokeSessionResponse>(`/api/auth/sessions/${sessionId}`);
   },
 
   revokeOtherSessions: async (): Promise<RevokeSessionResponse> => {
-    const res = await api.post<RevokeSessionResponse>("/api/auth/sessions/revoke-others");
-    return res.data;
+    return api.post<RevokeSessionResponse>("/api/auth/sessions/revoke-others");
   },
 
   revokeAllSessions: async (): Promise<RevokeSessionResponse> => {
-    const res = await api.delete<RevokeSessionResponse>("/api/auth/sessions");
-    return res.data;
+    return api.delete<RevokeSessionResponse>("/api/auth/sessions");
   },
 };
