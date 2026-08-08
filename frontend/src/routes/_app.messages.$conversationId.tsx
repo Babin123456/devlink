@@ -206,183 +206,150 @@ function Thread() {
   );
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-      <Card className="hidden lg:block lg:h-[calc(100vh-8rem)] lg:overflow-y-auto">
-        <div className="border-b border-border px-4 py-3">
-          <p className="text-[14px] font-semibold text-foreground">Conversations</p>
+    <Card className="flex flex-col lg:h-[calc(100vh-8rem)]">
+      <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+        <Link to="/messages" className="lg:hidden">
+          <ArrowLeft size={16} className="text-muted-foreground" />
+        </Link>
+        <Avatar src={conv.with.avatar} alt={conv.with.name} size={36} online={conv.with.online} />
+        <div>
+          <p className="text-[13px] font-semibold text-foreground">{conv.with.name}</p>
+          <p className="text-[11px] text-muted-foreground">
+            {conv.with.online ? "Online" : "Offline"}
+          </p>
         </div>
-        <ul className="divide-y divide-border">
-          {conversations.map((c) => (
-            <li key={c.id}>
-              <Link
-                to="/messages/$conversationId"
-                params={{ conversationId: c.id }}
-                className={cn(
-                  "flex items-center gap-3 px-4 py-3 hover:bg-muted/50",
-                  c.id === conversationId && "bg-muted/50",
-                )}
-              >
-                <Avatar src={c.with.avatar} alt={c.with.name} size={36} online={c.with.online} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-semibold text-foreground">
-                    {c.with.name}
-                  </p>
-                  <p className="truncate text-[12px] text-muted-foreground">{c.preview}</p>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </Card>
+      </div>
 
-      <Card className="flex flex-col lg:h-[calc(100vh-8rem)]">
-        <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-          <Link to="/messages" className="lg:hidden">
-            <ArrowLeft size={16} className="text-muted-foreground" />
-          </Link>
-          <Avatar src={conv.with.avatar} alt={conv.with.name} size={36} online={conv.with.online} />
-          <div>
-            <p className="text-[13px] font-semibold text-foreground">{conv.with.name}</p>
-            <p className="text-[11px] text-muted-foreground">
-              {conv.with.online ? "Online" : "Offline"}
+      <div className="flex-1 space-y-2 overflow-y-auto p-4">
+        {data.length === 0 && (
+          <div className="space-y-4">
+            <p className="text-center text-[12px] text-muted-foreground">
+              No messages yet — say hello 👋
             </p>
-          </div>
-        </div>
 
-        <div className="flex-1 space-y-2 overflow-y-auto p-4">
-          {data.length === 0 && (
-            <div className="space-y-4">
-              <p className="text-center text-[12px] text-muted-foreground">
-                No messages yet — say hello 👋
-              </p>
+            {/* Conversation Starters Section */}
+            {!starters && !startersMutation.isPending && !startersError && (
+              <button
+                onClick={() => startersMutation.mutate()}
+                className="mx-auto flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-[12px] text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              >
+                <Sparkles size={14} />
+                Get conversation starters
+              </button>
+            )}
 
-              {/* Conversation Starters Section */}
-              {!starters && !startersMutation.isPending && !startersError && (
+            {startersMutation.isPending && (
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-3/4" />
+              </div>
+            )}
+
+            {startersError && (
+              <div className="space-y-2">
+                <p className="text-center text-[12px] text-destructive">{startersError}</p>
                 <button
-                  onClick={() => startersMutation.mutate()}
+                  onClick={() => {
+                    setStartersError(null);
+                    startersMutation.mutate();
+                  }}
                   className="mx-auto flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-[12px] text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                 >
                   <Sparkles size={14} />
-                  Get conversation starters
+                  Try again
                 </button>
-              )}
+              </div>
+            )}
 
-              {startersMutation.isPending && (
-                <div className="space-y-2">
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-full" />
-                  <Skeleton className="h-10 w-3/4" />
-                </div>
-              )}
-
-              {startersError && (
-                <div className="space-y-2">
-                  <p className="text-center text-[12px] text-destructive">{startersError}</p>
+            {starters && (
+              <div className="space-y-2">
+                <p className="text-center text-[11px] text-muted-foreground">
+                  Suggestions for {starters.target_user_name}
+                </p>
+                {starters.suggestions.map((suggestion, i) => (
                   <button
-                    onClick={() => {
-                      setStartersError(null);
-                      startersMutation.mutate();
-                    }}
-                    className="mx-auto flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2 text-[12px] text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                    key={i}
+                    onClick={() => setText(suggestion.text)}
+                    className="flex w-full items-center justify-between gap-2 rounded-md border border-border bg-surface px-3 py-2 text-left text-[13px] text-foreground hover:bg-muted/50"
                   >
-                    <Sparkles size={14} />
-                    Try again
+                    <span>{suggestion.text}</span>
+                    <span className="shrink-0 rounded-sm bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                      {Math.round(suggestion.confidence * 100)}%
+                    </span>
                   </button>
-                </div>
-              )}
-
-              {starters && (
-                <div className="space-y-2">
-                  <p className="text-center text-[11px] text-muted-foreground">
-                    Suggestions for {starters.target_user_name}
-                  </p>
-                  {starters.suggestions.map((suggestion, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setText(suggestion.text)}
-                      className="flex w-full items-center justify-between gap-2 rounded-md border border-border bg-surface px-3 py-2 text-left text-[13px] text-foreground hover:bg-muted/50"
-                    >
-                      <span>{suggestion.text}</span>
-                      <span className="shrink-0 rounded-sm bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                        {Math.round(suggestion.confidence * 100)}%
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-          {data.map((m) => (
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        {data.map((m) => (
+          <div key={m.id} className={cn("flex", m.from === "me" ? "justify-end" : "justify-start")}>
             <div
-              key={m.id}
-              className={cn("flex", m.from === "me" ? "justify-end" : "justify-start")}
+              className={cn(
+                "max-w-[75%] rounded-md px-3 py-2 text-[13px]",
+                m.from === "me"
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-surface text-foreground",
+              )}
             >
-              <div
+              <p>{m.text}</p>
+              <p
                 className={cn(
-                  "max-w-[75%] rounded-md px-3 py-2 text-[13px]",
-                  m.from === "me"
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-border bg-surface text-foreground",
+                  "mt-1 text-[10px]",
+                  m.from === "me" ? "text-primary-foreground/70" : "text-muted-foreground",
                 )}
               >
-                <p>{m.text}</p>
-                <p
-                  className={cn(
-                    "mt-1 text-[10px]",
-                    m.from === "me" ? "text-primary-foreground/70" : "text-muted-foreground",
-                  )}
-                >
-                  {m.at}
-                </p>
-              </div>
+                {m.at}
+              </p>
             </div>
-          ))}
+          </div>
+        ))}
 
-          {/* Typing indicator — shown when the other participant is typing. */}
-          {themTyping && (
-            <div className="flex justify-start">
-              <div className="max-w-[75%] rounded-md border border-border bg-surface px-3 py-2">
-                <TypingIndicator />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Inline typing label above the input for extra visibility. */}
+        {/* Typing indicator — shown when the other participant is typing. */}
         {themTyping && (
-          <div className="px-4 pt-1">
-            <TypingIndicator label={`${conv.with.name} is typing`} />
+          <div className="flex justify-start">
+            <div className="max-w-[75%] rounded-md border border-border bg-surface px-3 py-2">
+              <TypingIndicator />
+            </div>
           </div>
         )}
+      </div>
 
-        {text.trim().length > 0 && (
-          <div className="flex items-center justify-between border-t border-border bg-muted/40 px-4 py-1.5 text-[11px] text-muted-foreground">
-            <span className="flex items-center gap-1.5 font-medium text-primary">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              {draftStatus === "saving" ? "Saving draft..." : "Draft auto-saved"}
-            </span>
-            <span className="text-[10px] opacity-75">Saved to server</span>
-          </div>
-        )}
+      {/* Inline typing label above the input for extra visibility. */}
+      {themTyping && (
+        <div className="px-4 pt-1">
+          <TypingIndicator label={`${conv.with.name} is typing`} />
+        </div>
+      )}
 
-        <form onSubmit={handleSend} className="flex items-center gap-2 border-t border-border p-3">
-          <input
-            value={text}
-            onChange={handleInputChange}
-            placeholder="Type a message…"
-            className="min-w-0 flex-1 rounded-md border border-border bg-surface px-3 py-2 text-[13px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
-          <LoadingButton
-            type="submit"
-            loading={submitting}
-            loadingText=""
-            disabled={!text.trim()}
-            className="inline-flex items-center gap-1"
-          >
-            <Send size={14} /> Send
-          </LoadingButton>
-        </form>
-      </Card>
-    </div>
+      {text.trim().length > 0 && (
+        <div className="flex items-center justify-between border-t border-border bg-muted/40 px-4 py-1.5 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1.5 font-medium text-primary">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            {draftStatus === "saving" ? "Saving draft..." : "Draft auto-saved"}
+          </span>
+          <span className="text-[10px] opacity-75">Saved to server</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSend} className="flex items-center gap-2 border-t border-border p-3">
+        <input
+          value={text}
+          onChange={handleInputChange}
+          placeholder="Type a message…"
+          className="min-w-0 flex-1 rounded-md border border-border bg-surface px-3 py-2 text-[13px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+        />
+        <LoadingButton
+          type="submit"
+          loading={submitting}
+          loadingText=""
+          disabled={!text.trim()}
+          className="inline-flex items-center gap-1"
+        >
+          <Send size={14} /> Send
+        </LoadingButton>
+      </form>
+    </Card>
   );
 }
