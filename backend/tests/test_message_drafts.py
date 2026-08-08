@@ -1,10 +1,16 @@
 import pytest
 import uuid
 
-def test_message_draft_lifecycle(client, register_and_login):
-    _, token = register_and_login("draft_user@example.com", "draft_user")
+def test_message_draft_lifecycle(client, register_and_login, db):
+    user_id, token = register_and_login("draft_user@example.com", "draft_user")
     headers = {"Authorization": f"Bearer {token}"}
-    conv_id = str(uuid.uuid4())
+
+    from app.models.conversation import Conversation
+    conv = Conversation(title="Test Draft Conversation", created_by=uuid.UUID(str(user_id)))
+    db.add(conv)
+    db.commit()
+    db.refresh(conv)
+    conv_id = str(conv.id)
 
     # 1. Check no draft exists initially
     res = client.get(f"/api/messages/drafts/{conv_id}", headers=headers)
