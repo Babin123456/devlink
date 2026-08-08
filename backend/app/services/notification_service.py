@@ -210,10 +210,10 @@ class NotificationService:
         db: Session,
         db_notification: Notification,
     ) -> Notification:
-        db_notification.clicked_at = datetime.utcnow()
+        db_notification.clicked_at = utcnow()
         if not db_notification.is_read:
             db_notification.is_read = True
-            db_notification.read_at = datetime.utcnow()
+            db_notification.read_at = utcnow()
         db.flush()
         db.refresh(db_notification)
         return db_notification
@@ -223,7 +223,7 @@ class NotificationService:
         db: Session,
         db_notification: Notification,
     ) -> Notification:
-        db_notification.delivered_at = datetime.utcnow()
+        db_notification.delivered_at = utcnow()
         from app.models.notification import NotificationStatus
         db_notification.status = NotificationStatus.SENT
         db.flush()
