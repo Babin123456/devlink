@@ -72,6 +72,7 @@ from app.routers import (
     saved_searches,
     media,
     maintenance,
+    message_drafts,
     global_announcements,
     posts,
 )
@@ -555,6 +556,7 @@ app.include_router(calendar_router.router, prefix="/api", tags=["Calendar"])
 app.include_router(analytics.router, prefix="/api", tags=["Analytics"])
 app.include_router(builder_flares.router, prefix="/api/flare", tags=["Builder's Flare"])
 app.include_router(messages.router, prefix="/api/messages", tags=["Messages"])
+app.include_router(message_drafts.router, prefix="/api", tags=["Message Drafts"])
 app.include_router(
     notifications.router, prefix="/api/notifications", tags=["Notifications"]
 )
