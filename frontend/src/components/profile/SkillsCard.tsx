@@ -167,14 +167,14 @@ export function SkillsCard({
   }
 
   return (
-    <Card className="p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="rounded-full bg-primary/10 p-2 text-primary">
-            <Sparkles size={16} />
+    <Card className="p-5 w-full">
+      <div className="flex items-center justify-between pb-3 border-b border-border">
+        <div className="flex items-center gap-2.5">
+          <div className="rounded-lg bg-primary/10 p-2 text-primary">
+            <Sparkles size={18} />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-foreground">Developer Skill Matrix</h2>
+            <h2 className="text-base font-semibold text-foreground">Developer Skill Matrix</h2>
             <p className="text-xs text-muted-foreground">
               Categorized technical expertise and proficiency
             </p>
@@ -182,35 +182,35 @@ export function SkillsCard({
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
         {groupedByCategory.map(({ category, items }) => (
           <div
             key={category}
-            className="rounded-lg border border-border/80 bg-card/50 p-3 flex flex-col justify-between"
+            className="rounded-lg border border-border bg-muted/20 p-3.5 flex flex-col justify-between space-y-2 hover:border-primary/30 transition-colors"
           >
             <div>
-              <div className="flex items-center justify-between mb-2 pb-1 border-b border-border/50">
+              <div className="flex items-center justify-between mb-2 pb-1 border-b border-border/40">
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
                   {category}
                 </span>
-                <span className="text-[10px] text-muted-foreground font-mono">
+                <span className="text-[10px] text-muted-foreground font-medium rounded bg-muted px-1.5 py-0.5">
                   {items.length} {items.length === 1 ? "skill" : "skills"}
                 </span>
               </div>
               {items.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground/60 italic py-1">No skills added</p>
+                <p className="text-xs text-muted-foreground/60 italic py-1">No skills added</p>
               ) : (
-                <div className="flex flex-wrap gap-1.5 mt-1">
+                <div className="flex flex-wrap gap-1.5 pt-1">
                   {items.map((skill) => (
-                    <TagChip
+                    <span
                       key={`${category}-${skill.name}`}
-                      className="rounded-md px-2 py-0.5 text-[11px] font-medium border border-border/60 bg-muted/40 text-foreground"
+                      className="inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2.5 py-1 text-xs font-medium text-foreground shadow-sm"
                     >
                       <span>{skill.name}</span>
-                      <span className="ml-1 opacity-70 text-[10px]">
-                        ({skill.level || "Intermediate"})
+                      <span className="text-[10px] font-normal text-muted-foreground bg-muted/60 px-1 py-0.2 rounded">
+                        {skill.level || "Intermediate"}
                       </span>
-                    </TagChip>
+                    </span>
                   ))}
                 </div>
               )}
