@@ -7,7 +7,6 @@
 // switch to the real endpoints automatically.
 
 import * as seed from "@/mocks/seed";
-import type { Message } from "@/mocks/seed";
 import { hackathonStore } from "@/mocks/hackathonStore";
 import {
   isBackendConfigured,
@@ -240,20 +239,6 @@ export const messagesService = {
         // Ignored
       }
     }
-    return withFallback(async () => {
-      const msgs = await messagesApi.thread(id);
-      return msgs.map(
-        (m: {
-          id: string;
-          sender_id?: string;
-          content?: string;
-          created_at?: string;
-          type?: string;
-          attachment_url?: string;
-          attachment_name?: string;
-          attachment_size?: number;
-          mime_type?: string;
-        }) => ({
     return withFallback(
       async () => {
         const msgs = await messagesApi.thread(id);
@@ -272,9 +257,10 @@ export const messagesService = {
           attachment_name: m.attachment_name,
           attachment_size: m.attachment_size,
           mime_type: m.mime_type,
-        }),
-      );
-    }, seed.messages[id] ?? []);
+        }));
+      },
+      seed.messages[id] ?? [],
+    );
   },
   send: (
     conversationId: string,
