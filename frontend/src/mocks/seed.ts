@@ -39,6 +39,7 @@ export interface Builder {
   lastActiveAt: string | null;
   publicEmail?: string;
   verified?: boolean;
+  premium?: boolean;
   pinnedProjects?: string[];
   contributions?: number;
   followers?: number;
@@ -113,6 +114,8 @@ export interface Flare {
   likes: number;
   comments: number;
   ago: string;
+  status?: string;
+  publish_at?: string;
 }
 export interface Conversation {
   id: ID;
@@ -126,6 +129,11 @@ export interface Message {
   from: ID;
   text: string;
   at: string;
+  type?: string;
+  attachment_url?: string;
+  attachment_name?: string;
+  attachment_size?: number;
+  mime_type?: string;
 }
 export interface Notification {
   id: ID;

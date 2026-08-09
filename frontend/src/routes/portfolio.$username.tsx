@@ -1,4 +1,5 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { analyticsApi } from "@/api/modules/analytics";
 import React, { useState, useEffect } from "react";
 import {
   MapPin,
@@ -25,7 +26,13 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { toast } from "sonner";
-import { builders, currentUser, projects as allProjects, flares as allFlares } from "@/mocks/seed";
+import {
+  builders,
+  currentUser,
+  projects as allProjects,
+  flares as allFlares,
+  type Builder,
+} from "@/mocks/seed";
 
 export const Route = createFileRoute("/portfolio/$username")({
   head: ({ params }) => ({
@@ -106,7 +113,7 @@ function PortfolioPage() {
   const me = username === currentUser.handle;
 
   // Find builder details
-  const b =
+  const b: Builder | null =
     builders.find((x) => x.handle === username) ||
     (me
       ? {
@@ -119,6 +126,9 @@ function PortfolioPage() {
           yearsExp: 3,
           matchScore: 96,
           skills: ["React", "Next.js", "TypeScript", "Node.js", "Python", "TailwindCSS"],
+          badges: [],
+          interests: [],
+          lastActiveAt: null,
           online: true,
           bio: "Product engineer. Ships fast, sleeps sometimes. Love crafting delightful UX.",
         }
@@ -312,9 +322,14 @@ function PortfolioPage() {
             <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">{b.bio}</p>
             <div className="flex justify-center md:justify-start items-center gap-2 pt-2">
               <a
-                href="https://github.com"
+                href={b.githubUrl || "https://github.com"}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() => {
+                  if (b.id) {
+                    analyticsApi.trackClick("repository", b.id).catch(() => {});
+                  }
+                }}
                 className="p-2 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors"
               >
                 <Github size={16} />
@@ -588,9 +603,14 @@ function PortfolioPage() {
           </div>
           <div className="flex justify-center md:justify-start items-center gap-3 pt-2 font-sans text-xs">
             <a
-              href="https://github.com"
+              href={b.githubUrl || "https://github.com"}
               target="_blank"
               rel="noreferrer"
+              onClick={() => {
+                if (b.id) {
+                  analyticsApi.trackClick("repository", b.id).catch(() => {});
+                }
+              }}
               className="flex items-center gap-1 text-stone-600 hover:text-stone-950 hover:underline"
             >
               <Github size={14} /> GitHub

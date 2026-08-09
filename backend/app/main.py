@@ -72,6 +72,7 @@ from app.routers import (
     saved_searches,
     media,
     maintenance,
+    posts,
 )
 
 
@@ -299,7 +300,7 @@ async def custom_offline_docs():
 
         <div class="section">
             <h2>🚀 Image Optimization Endpoints</h2>
-            
+
             <div class="endpoint">
                 <span class="method post">POST</span>
                 <span class="path">/api/v1/users/me/avatar</span>
@@ -370,7 +371,9 @@ app.add_middleware(SlowAPIMiddleware)
 # ------------------------------------------------------------------
 # Security Middleware
 # ------------------------------------------------------------------
+from app.middleware.request_id import RequestIDMiddleware
 
+app.add_middleware(RequestIDMiddleware)
 app.add_middleware(StructuredLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 
@@ -658,11 +661,13 @@ app.include_router(
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
 app.include_router(centralized_analytics.router, prefix="/api", tags=["Centralized Analytics"])
+app.include_router(posts.router, prefix="/api/posts", tags=["Posts"])
+
+from app.routers import project_templates
+app.include_router(project_templates.router, prefix="/api", tags=["Project Templates Marketplace"])
 
 from app.routers import background_jobs
-
 app.include_router(background_jobs.router, prefix="/api")
-
 
 from app.routers import badges
 app.include_router(badges.router, prefix="/api", tags=["Badges"])
