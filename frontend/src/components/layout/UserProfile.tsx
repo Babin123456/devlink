@@ -4,6 +4,7 @@ import { Avatar } from "@/components/shared/primitives";
 import { cn } from "@/lib/utils";
 import { currentUser } from "@/mocks/seed";
 import { useSidebar } from "@/hooks/useSidebar";
+import { cn } from "@/lib/utils";
 
 interface UserProfileProps {
   /** When true, renders compact avatar-only view regardless of sidebar state */
@@ -59,7 +60,9 @@ export function UserProfile({ forceCollapsed }: UserProfileProps) {
               <BadgeCheck
                 className={cn(
                   "h-3.5 w-3.5 shrink-0",
-                  currentUser.premium ? "text-amber-500 fill-amber-500/10 animate-pulse" : "text-primary"
+                  currentUser.premium
+                    ? "text-amber-500 fill-amber-500/10 animate-pulse"
+                    : "text-primary",
                 )}
                 aria-label={currentUser.premium ? "Premium Verified User" : "Verified User"}
               />
