@@ -4,7 +4,6 @@ import { Avatar } from "@/components/shared/primitives";
 import { cn } from "@/lib/utils";
 import { currentUser } from "@/mocks/seed";
 import { useSidebar } from "@/hooks/useSidebar";
-import { cn } from "@/lib/utils";
 
 interface UserProfileProps {
   /** When true, renders compact avatar-only view regardless of sidebar state */
