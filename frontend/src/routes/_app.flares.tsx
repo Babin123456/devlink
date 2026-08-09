@@ -180,69 +180,6 @@ function FlaresPage() {
   const [editingPost, setEditingPost] = useState<Flare | null>(null);
   const [editContent, setEditContent] = useState("");
 
-  return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-      <div className="space-y-4">
-        <PostComposer
-          placeholder="Share an update, a tip, or ask the community…"
-          onPost={async (content, attachments) => {
-            try {
-              await new Promise((r) => setTimeout(r, 600));
-              const newFlare: Flare = {
-                id: `local-${Date.now()}`,
-                author: {
-                  ...builders[0],
-                  name: currentUser.name,
-                  handle: currentUser.handle,
-                  avatar: currentUser.avatar,
-                },
-                content: content || (attachments.length > 0 ? `Shared ${attachments.length} attachment(s)` : ""),
-                tags: Array.from(new Set(content.match(/#(\w+)/g)?.map((t) => t.slice(1)) ?? [])),
-                likes: 0,
-                comments: 0,
-                ago: "just now",
-              };
-              setLocalFlares((prev) => [newFlare, ...prev]);
-              toast.success("Flare posted");
-            } catch (e) {
-              console.error(e);
-            }
-          }}
-        />
-        {feed.map((f) => (
-          <FlareCard key={f.id} flare={f} />
-        ))}
-  const handlePost = async (status: "published" | "draft") => {
-    if (!content.trim() || submitting) return;
-    setSubmitting(true);
-    try {
-      const tags = Array.from(new Set(content.match(/#(\w+)/g)?.map((t) => t.slice(1)) ?? []));
-      await flaresService.create({
-        content,
-        tags,
-        status: isScheduling ? "scheduled" : status,
-        publish_at: isScheduling && publishAt ? publishAt : undefined,
-      });
-
-      toast.success(
-        isScheduling
-          ? "Flare scheduled successfully"
-          : status === "draft"
-            ? "Saved as draft"
-            : "Flare posted",
-      );
-      setContent("");
-      setIsScheduling(false);
-      setPublishAt("");
-      refetchFeed();
-      refetchDrafts();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to create flare");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const handlePublishNow = async (id: string) => {
     try {
       await flaresService.update(id, { status: "published", publish_at: undefined });
@@ -290,62 +227,19 @@ function FlaresPage() {
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
       <div className="space-y-4">
         {/* Compose Card */}
-        <Card className="p-4 border-primary/10 bg-gradient-to-b from-card to-card/95 shadow-sm">
-          <div className="flex items-start gap-3">
-            <Avatar src={currentUser.avatar} alt={currentUser.name} size={40} />
-            <div className="min-w-0 flex-1">
-              <MarkdownEditor
-                value={content}
-                onChange={setContent}
-                placeholder="Share an update, a tip, or ask the community…"
-                rows={3}
-              />
-              <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-3">
-                <div className="flex items-center gap-3">
-                  <label className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={isScheduling}
-                      onChange={(e) => setIsScheduling(e.target.checked)}
-                      className="rounded border-border bg-muted text-primary focus:ring-primary/20"
-                    />
-                    Publish later
-                  </label>
-                  {isScheduling && (
-                    <input
-                      type="datetime-local"
-                      value={publishAt}
-                      onChange={(e) => setPublishAt(e.target.value)}
-                      className="rounded border border-border bg-surface px-2 py-1 text-[11px] text-foreground outline-none focus:border-primary"
-                    />
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {!isScheduling && (
-                    <button
-                      disabled={!content.trim() || submitting}
-                      onClick={() => handlePost("draft")}
-                      className="rounded-md border border-border bg-surface px-3 py-1.5 text-[12px] font-semibold text-foreground hover:bg-muted transition-colors disabled:opacity-50"
-                    >
-                      Save Draft
-                    </button>
-                  )}
-                  <LoadingButton
-                    disabled={!content.trim() || (isScheduling && !publishAt) || submitting}
-                    loading={submitting}
-                    loadingText={isScheduling ? "Scheduling..." : "Posting..."}
-                    onClick={() => handlePost("published")}
-                    size="sm"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12px] font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50"
-                  >
-                    <Send size={12} /> {isScheduling ? "Schedule" : "Post"}
-                  </LoadingButton>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
+        <PostComposer
+          placeholder="Share an update, a tip, or ask the community…"
+          onPost={async (newContent) => {
+            try {
+              const tags = Array.from(new Set(newContent.match(/#(\w+)/g)?.map((t) => t.slice(1)) ?? []));
+              await flaresService.create({ content: newContent, tags });
+              toast.success("Flare posted");
+              refetchFeed();
+            } catch (err: any) {
+              toast.error(err.message || "Failed to create flare");
+            }
+          }}
+        />
 
         {/* Tab Navigation */}
         <div className="flex border-b border-border">
@@ -379,7 +273,12 @@ function FlaresPage() {
             <p className="text-[12px] font-semibold text-amber-500 mb-2 flex items-center gap-1">
               <Edit size={12} /> Editing Draft
             </p>
-            <MarkdownEditor value={editContent} onChange={setEditContent} rows={3} />
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              rows={3}
+              className="w-full rounded-md border border-border bg-background p-2 text-sm text-foreground outline-none focus:border-primary"
+            />
             <div className="mt-3 flex items-center justify-end gap-2">
               <button
                 onClick={() => setEditingPost(null)}

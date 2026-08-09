@@ -224,10 +224,6 @@ function Landing() {
                   : "hover:text-foreground text-muted-foreground"
               }
             >
-            <a href="#showcase" className="hover:text-foreground">
-              Showcase
-            </a>
-            <a href="#pricing" className="hover:text-foreground">
               Pricing
             </a>
           </nav>
