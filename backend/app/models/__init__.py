@@ -27,6 +27,7 @@ from .organization_member import OrganizationMember, OrgMemberRole  # noqa: F401
 from .password_reset_token import PasswordResetToken  # noqa: F401
 from .project import Project  # noqa: F401
 from .project_document import ProjectDocument  # noqa: F401
+from .project_template import ProjectTemplate, ProjectTemplateFavorite  # noqa: F401
 from .project_view import ProjectView  # noqa: F401
 from .project_member import ProjectMember  # noqa: F401
 from .project_version import ProjectVersion  # noqa: F401
@@ -88,3 +89,4 @@ from .centralized_analytics import CentralizedAnalyticsEvent, AnalyticsEventType
 from .global_announcement import GlobalAnnouncement, AnnouncementSeverity, TargetAudience  # noqa: F401
 from .post import Post  # noqa: F401
 
+from .project_comment import ProjectComment  # noqa: F401

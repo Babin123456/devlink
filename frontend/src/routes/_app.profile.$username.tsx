@@ -31,6 +31,7 @@ import { ProfileViewersList } from "@/components/profile/ProfileViewersList";
 import { ProfileCompletionChecklist } from "@/components/profile/ProfileCompletionChecklist";
 import { FollowButton } from "@/components/shared/FollowButton";
 import { useFollowStatus } from "@/hooks/useFollow";
+import { ActivityTimeline } from "@/components/profile/ActivityTimeline";
 
 export const Route = createFileRoute("/_app/profile/$username")({
   head: ({ params }) => ({
@@ -241,6 +242,7 @@ function ProfilePage() {
           userProfile={{
             avatar: avatarUrl,
             banner: bannerUrl || undefined,
+            banner: bannerUrl ?? undefined,
             bio: b.bio,
             skills: b.profileSkills?.map((s) => s.name) ?? b.skills,
             experience: b.experienceLevel || b.role || b.company,
@@ -561,6 +563,17 @@ function ProfilePage() {
           )}
         </div>
 
+        <div className="flex flex-col gap-4 lg:col-span-2">
+          <Card className="p-4">
+            <p className="text-[13px] font-semibold text-foreground">Projects</p>
+            <ul className="mt-3 divide-y divide-border">
+              {projects.slice(0, 4).map((p) => (
+                <li key={p.id} className="flex items-center gap-3 py-2">
+                  <span className="grid h-8 w-8 place-items-center rounded-md bg-muted text-lg">
+                    {p.icon}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-semibold text-foreground">{p.name}</p>
         <Card className="p-4 lg:col-span-2">
           <p className="text-[13px] font-semibold text-foreground">Projects</p>
           <ul className="mt-3 divide-y divide-border">
@@ -587,6 +600,13 @@ function ProfilePage() {
                       {p.stack.join(" · ")}
                     </p>
                   </div>
+                </li>
+              ))}
+            </ul>
+          </Card>
+
+          <ActivityTimeline userId={b.id} />
+        </div>
                 </Link>
               </li>
             ))}

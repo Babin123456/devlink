@@ -27,7 +27,13 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { toast } from "sonner";
-import { builders, currentUser, projects as allProjects, flares as allFlares } from "@/mocks/seed";
+import {
+  builders,
+  currentUser,
+  projects as allProjects,
+  flares as allFlares,
+  type Builder,
+} from "@/mocks/seed";
 
 export const Route = createFileRoute("/portfolio/$username")({
   head: ({ params }) => ({
@@ -108,7 +114,7 @@ function PortfolioPage() {
   const me = username === currentUser.handle;
 
   // Find builder details
-  const b =
+  const b: Builder | null =
     builders.find((x) => x.handle === username) ||
     (me
       ? {
@@ -121,6 +127,9 @@ function PortfolioPage() {
           yearsExp: 3,
           matchScore: 96,
           skills: ["React", "Next.js", "TypeScript", "Node.js", "Python", "TailwindCSS"],
+          badges: [],
+          interests: [],
+          lastActiveAt: null,
           online: true,
           bio: "Product engineer. Ships fast, sleeps sometimes. Love crafting delightful UX.",
         }

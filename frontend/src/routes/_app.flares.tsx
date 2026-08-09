@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { flaresService } from "@/services";
 import { Card, TagChip, Avatar } from "@/components/shared/primitives";
 import { Markdown } from "@/components/shared/Markdown";
-import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
-import { LoadingButton } from "@/components/shared/LoadingButton";
+import { PostComposer } from "@/components/shared/PostComposer/PostComposer";
 import { BookmarkToggleButton } from "@/components/shared/BookmarkToggleButton";
 import {
   Heart,
@@ -159,6 +158,8 @@ function FlareCard({
 }
 
 function FlaresPage() {
+  const { data = [] } = useQuery({ queryKey: ["flares"], queryFn: flaresService.list });
+  const [localFlares, setLocalFlares] = useState<Flare[]>([]);
   const { data: feedPosts = [], refetch: refetchFeed } = useQuery({
     queryKey: ["flares"],
     queryFn: flaresService.list,
@@ -179,6 +180,38 @@ function FlaresPage() {
   const [editingPost, setEditingPost] = useState<Flare | null>(null);
   const [editContent, setEditContent] = useState("");
 
+  return (
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="space-y-4">
+        <PostComposer
+          placeholder="Share an update, a tip, or ask the community…"
+          onPost={async (content, attachments) => {
+            try {
+              await new Promise((r) => setTimeout(r, 600));
+              const newFlare: Flare = {
+                id: `local-${Date.now()}`,
+                author: {
+                  ...builders[0],
+                  name: currentUser.name,
+                  handle: currentUser.handle,
+                  avatar: currentUser.avatar,
+                },
+                content: content || (attachments.length > 0 ? `Shared ${attachments.length} attachment(s)` : ""),
+                tags: Array.from(new Set(content.match(/#(\w+)/g)?.map((t) => t.slice(1)) ?? [])),
+                likes: 0,
+                comments: 0,
+                ago: "just now",
+              };
+              setLocalFlares((prev) => [newFlare, ...prev]);
+              toast.success("Flare posted");
+            } catch (e) {
+              console.error(e);
+            }
+          }}
+        />
+        {feed.map((f) => (
+          <FlareCard key={f.id} flare={f} />
+        ))}
   const handlePost = async (status: "published" | "draft") => {
     if (!content.trim() || submitting) return;
     setSubmitting(true);

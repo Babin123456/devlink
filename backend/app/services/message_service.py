@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 import uuid
-from datetime import datetime
+from app.utils.time import utcnow
 from typing import Dict, Tuple
 
 # pyrefly: ignore [missing-import]
@@ -168,7 +168,7 @@ class MessageService:
             setattr(db_message, key, value)
 
         db_message.is_edited = True
-        db_message.edited_at = datetime.utcnow()
+        db_message.edited_at = utcnow()
 
         db.flush()
         db.refresh(db_message)
@@ -182,7 +182,7 @@ class MessageService:
     ) -> Message:
 
         db_message.is_deleted = True
-        db_message.deleted_at = datetime.utcnow()
+        db_message.deleted_at = utcnow()
         db_message.content = "[Message deleted]"
 
         db.flush()
