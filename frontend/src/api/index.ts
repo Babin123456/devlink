@@ -95,6 +95,8 @@ export type {
   RoleGap,
   RiskAlert,
 } from "./modules/projectInsights";
+export { sessionsApi } from "./modules/sessions";
+export type { UserSession, RevokeSessionResponse } from "./modules/sessions";
 export { projectTemplatesApi } from "./modules/projectTemplates";
 export type {
   ProjectTemplate,
