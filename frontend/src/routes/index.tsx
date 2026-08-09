@@ -108,6 +108,34 @@ function Landing() {
   ];
   const [billingCycle, setBillingCycle] = React.useState<"monthly" | "yearly">("yearly");
   const [openFaq, setOpenFaq] = React.useState<number | null>(0);
+  const [activeSection, setActiveSection] = React.useState("features");
+
+  React.useEffect(() => {
+    document.documentElement.style.scrollBehavior = "smooth";
+
+    const sections = ["features", "pricing"];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { threshold: 0.5 },
+    );
+
+    sections.forEach((id) => {
+      const section = document.getElementById(id);
+      if (section) observer.observe(section);
+    });
+
+    return () => {
+      observer.disconnect();
+      document.documentElement.style.scrollBehavior = "";
+    };
+  }, []);
 
   const showcaseTabs = [
     {
@@ -175,12 +203,27 @@ function Landing() {
             <span className="text-[20px] font-bold tracking-tight text-foreground">DevLink</span>
           </Link>
           <nav className="ml-6 hidden items-center gap-5 text-[13px] font-medium text-muted-foreground md:flex">
-            <a href="#features" className="hover:text-foreground">
+            <a
+              href="#features"
+              className={
+                activeSection === "features"
+                  ? "text-foreground font-semibold"
+                  : "hover:text-foreground text-muted-foreground"
+              }
+            >
               Features
             </a>
             <Link to="/builders" className="hover:text-foreground">
               Builders
             </Link>
+            <a
+              href="#pricing"
+              className={
+                activeSection === "pricing"
+                  ? "text-foreground font-semibold"
+                  : "hover:text-foreground text-muted-foreground"
+              }
+            >
             <a href="#showcase" className="hover:text-foreground">
               Showcase
             </a>
@@ -237,7 +280,11 @@ function Landing() {
             <div className="flex flex-col px-4 py-4 space-y-3">
               <a
                 href="#features"
-                className="text-sm text-foreground"
+                className={
+                  activeSection === "features"
+                    ? "text-sm font-semibold text-foreground"
+                    : "text-sm text-muted-foreground"
+                }
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Features
@@ -261,7 +308,11 @@ function Landing() {
 
               <a
                 href="#pricing"
-                className="text-sm text-foreground"
+                className={
+                  activeSection === "pricing"
+                    ? "text-sm font-semibold text-foreground"
+                    : "text-sm text-muted-foreground"
+                }
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Pricing
