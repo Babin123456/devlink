@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/hooks/useSidebar";
 import { SidebarItem, type SidebarItemProps } from "./SidebarItem";
@@ -12,17 +12,34 @@ export interface SidebarSectionProps {
   forceCollapsed?: boolean;
 }
 
+function getStoredOpenState(label: string): boolean {
+  if (typeof window === "undefined") return true;
+  const stored = localStorage.getItem(`sidebar-section-open:${label}`);
+  return stored === null ? true : stored === "true";
+}
+
 export function SidebarSection({ label, items, forceCollapsed }: SidebarSectionProps) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(() => getStoredOpenState(label));
   const { isCollapsed } = useSidebar();
   const collapsed = forceCollapsed ?? isCollapsed;
+  const prefersReducedMotion = useReducedMotion();
+
+  const toggle = () => {
+    setOpen((v) => {
+      const next = !v;
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`sidebar-section-open:${label}`, String(next));
+      }
+      return next;
+    });
+  };
 
   if (collapsed) {
     return (
-      <div className="mt-4 first:mt-2 relative">
+      <div className="mt-3 first:mt-2 relative">
         {/* Tiny divider between sections when collapsed */}
         <span className="block mx-3 mb-2 h-px bg-border/60" aria-hidden="true" />
-        <ul className="space-y-1">
+        <ul className="space-y-0.5">
           {items.map((item) => (
             <SidebarItem key={item.label} {...item} forceCollapsed />
           ))}
@@ -32,10 +49,10 @@ export function SidebarSection({ label, items, forceCollapsed }: SidebarSectionP
   }
 
   return (
-    <div className="mt-4 first:mt-2">
+    <div className="mt-3 first:mt-2">
       <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+        onClick={toggle}
+        className="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground transition-colors duration-150 hover:bg-sidebar-accent/60 hover:text-foreground"
         aria-expanded={open}
       >
         {label}
@@ -47,9 +64,9 @@ export function SidebarSection({ label, items, forceCollapsed }: SidebarSectionP
       <AnimatePresence initial={false}>
         {open && (
           <motion.ul
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            initial={prefersReducedMotion ? undefined : { height: 0, opacity: 0 }}
+            animate={prefersReducedMotion ? undefined : { height: "auto", opacity: 1 }}
+            exit={prefersReducedMotion ? undefined : { height: 0, opacity: 0 }}
             className="overflow-hidden space-y-0.5"
           >
             {items.map((item) => (

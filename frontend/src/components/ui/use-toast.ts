@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as React from "react";
 import { toast as sonnerToast, ExternalToast } from "sonner";
 
@@ -8,7 +7,6 @@ export interface ToastProps {
   id?: string;
   title?: React.ReactNode;
   description?: React.ReactNode | (() => React.ReactNode);
-  description?: React.ReactNode;
   variant?: "default" | "destructive" | "success" | "warning" | "info";
   type?: ToastType;
   duration?: number;
@@ -20,7 +18,24 @@ export interface ToastProps {
   onAutoClose?: () => void;
 }
 
-export type ToastOptions = Omit<ToastProps, "title" | "description"> & ExternalToast;
+/**
+ * Sonner options we are happy to forward untouched.
+ *
+ * The keys removed here are the ones this module already models with its own,
+ * narrower shape. Intersecting the whole of `ExternalToast` (as this used to)
+ * produced an `action` of type `{ label; onClick } & ReactNode`, which nothing
+ * can satisfy — so every `toast.success(...)` call failed to type-check.
+ */
+type SonnerPassthrough = Omit<
+  ExternalToast,
+  "id" | "description" | "duration" | "action" | "onDismiss" | "onAutoClose"
+>;
+
+/** Everything `toast()` accepts: our own props plus the sonner passthrough. */
+export type ToastInput = ToastProps & SonnerPassthrough;
+
+/** What the `toast.success` / `.error` / … helpers take after the title. */
+export type ToastOptions = Omit<ToastInput, "title">;
 
 interface ToastState {
   toasts: ToastProps[];
@@ -115,7 +130,7 @@ export function toast({
   duration = 4000,
   action,
   ...props
-}: ToastProps) {
+}: ToastInput) {
   const id = props.id || genId();
 
   const effectiveType: ToastType = type || (variant === "destructive" ? "error" : variant);

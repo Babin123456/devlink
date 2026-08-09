@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   Bell,
   MessageSquare,
@@ -22,11 +21,19 @@ import { Avatar } from "@/components/shared/primitives";
 import { currentUser, builders, projects, flares } from "@/mocks/seed";
 import { useTheme } from "@/hooks/useTheme";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
+import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/useDebounce";
 import { searchService } from "@/services";
 import { GlobalSearchModal } from "@/components/search/GlobalSearchModal";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 export function TopNavbar() {
   const { isDark, toggleTheme } = useTheme();
@@ -88,9 +95,41 @@ export function TopNavbar() {
           <button className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-[7px] text-[13px] font-medium text-foreground transition-colors hover:bg-muted">
             <Sparkles size={14} className="text-primary" /> AI Assistant
           </button>
-          <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-2.5 py-[7px] text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90">
-            <Plus size={14} /> Create
-          </button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="inline-flex items-center gap-1.5 rounded-md bg-primary px-2.5 py-[7px] text-[13px] font-semibold text-primary-foreground transition-opacity hover:opacity-90 cursor-pointer">
+                <Plus size={14} /> Create
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[180px]">
+              <DropdownMenuItem asChild>
+                <Link to="/projects" search={{ create: true }}>
+                  New Project
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/flares">New Flare</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => {
+                  navigator.clipboard.writeText("https://devlink.com/invite/builder");
+                  toast.success("Invitation link copied to clipboard!");
+                }}
+                className="cursor-pointer"
+              >
+                Invite Builder
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/organizations">Organization</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/hackathons" search={{ create: true }}>
+                  Hackathon
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="flex items-center gap-1">
@@ -104,7 +143,7 @@ export function TopNavbar() {
             {isDark ? <Sun size={16} /> : <Moon size={16} />}
           </button>
           <NotificationCenter />
-          <IconButton to="/messages" count={3} ariaLabel="Messages">
+          <IconButton to="/messages" count={3} ariaLabel="Messages, 3 unread">
             <MessageSquare size={16} />
           </IconButton>
         </div>
@@ -124,7 +163,15 @@ export function TopNavbar() {
             <p className="text-[12px] font-semibold leading-tight text-foreground flex items-center gap-1">
               {currentUser.name}
               {currentUser.verified && (
-                <BadgeCheck className="text-primary h-3 w-3" aria-label="Verified User" />
+                <BadgeCheck
+                  className={cn(
+                    "h-3 w-3 shrink-0",
+                    currentUser.premium
+                      ? "text-amber-500 fill-amber-500/10 animate-pulse"
+                      : "text-primary",
+                  )}
+                  aria-label={currentUser.premium ? "Premium Verified User" : "Verified User"}
+                />
               )}
             </p>
             <p className="text-[11px] leading-tight text-muted-foreground">View Profile</p>

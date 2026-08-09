@@ -30,13 +30,21 @@ export function SidebarItem({ label, to, icon, badge, forceCollapsed }: SidebarI
           aria-label={label}
           aria-current={active ? "page" : undefined}
           className={cn(
-            "relative mt-0.5 flex h-11 w-full items-center justify-center rounded-md transition-colors outline-none",
+            "relative flex h-10 w-full items-center justify-center rounded-md outline-none",
+            "transition-colors duration-150",
             "focus-visible:ring-2 focus-visible:ring-primary",
             active
               ? "bg-primary-soft text-primary"
               : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
           )}
         >
+          {/* Active rail indicator, inset within the item so it survives clipped/animated ancestors */}
+          {active && (
+            <span
+              className="absolute left-1 top-1/2 z-10 h-5 w-[3px] -translate-y-1/2 rounded-full bg-primary"
+              aria-hidden="true"
+            />
+          )}
           <span className={cn("shrink-0", active ? "text-primary" : "text-muted-foreground")}>
             {icon}
           </span>
@@ -60,13 +68,21 @@ export function SidebarItem({ label, to, icon, badge, forceCollapsed }: SidebarI
         onClick={closeMobile}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "mt-0.5 flex items-center gap-3 rounded-md px-3 py-2 text-[13px] font-medium transition-colors outline-none",
+          "relative flex items-center gap-2.5 rounded-md py-1.5 pl-4 pr-3 text-[13px] font-medium outline-none",
+          "transition-colors duration-150",
           "focus-visible:ring-2 focus-visible:ring-primary",
           active
             ? "bg-primary-soft font-semibold text-primary"
             : "text-foreground/80 hover:bg-sidebar-accent hover:text-foreground focus:bg-sidebar-accent",
         )}
       >
+        {/* Active rail indicator, inset within the item so it survives clipped/animated ancestors */}
+        {active && (
+          <span
+            className="absolute left-1 top-1/2 z-10 h-5 w-[3px] -translate-y-1/2 rounded-full bg-primary"
+            aria-hidden="true"
+          />
+        )}
         <span className={cn("shrink-0", active ? "text-primary" : "text-muted-foreground")}>
           {icon}
         </span>
