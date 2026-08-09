@@ -72,6 +72,9 @@ from app.routers import (
     saved_searches,
     media,
     maintenance,
+    message_drafts,
+    global_announcements,
+    posts,
 )
 
 
@@ -299,7 +302,7 @@ async def custom_offline_docs():
 
         <div class="section">
             <h2>🚀 Image Optimization Endpoints</h2>
-            
+
             <div class="endpoint">
                 <span class="method post">POST</span>
                 <span class="path">/api/v1/users/me/avatar</span>
@@ -370,7 +373,9 @@ app.add_middleware(SlowAPIMiddleware)
 # ------------------------------------------------------------------
 # Security Middleware
 # ------------------------------------------------------------------
+from app.middleware.request_id import RequestIDMiddleware
 
+app.add_middleware(RequestIDMiddleware)
 app.add_middleware(StructuredLoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 
@@ -513,9 +518,11 @@ from app.routers import (
     verification,
     websockets,
     graph,
+    skill_matrix,
 )
 
 # Router inclusions
+app.include_router(skill_matrix.router, prefix="/api", tags=["Skill Matrix"])
 
 
 app.include_router(media.router, prefix="/api", tags=["Media"])
@@ -526,6 +533,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 from app.routers import mfa
 
 app.include_router(mfa.router, prefix="/api")
+app.include_router(global_announcements.router, prefix="/api", tags=["Global Announcements"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
 app.include_router(export.router, prefix="/api/users", tags=["Export"])
@@ -550,6 +558,7 @@ app.include_router(calendar_router.router, prefix="/api", tags=["Calendar"])
 app.include_router(analytics.router, prefix="/api", tags=["Analytics"])
 app.include_router(builder_flares.router, prefix="/api/flare", tags=["Builder's Flare"])
 app.include_router(messages.router, prefix="/api/messages", tags=["Messages"])
+app.include_router(message_drafts.router, prefix="/api", tags=["Message Drafts"])
 app.include_router(
     notifications.router, prefix="/api/notifications", tags=["Notifications"]
 )
@@ -658,11 +667,13 @@ app.include_router(
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
 app.include_router(centralized_analytics.router, prefix="/api", tags=["Centralized Analytics"])
+app.include_router(posts.router, prefix="/api/posts", tags=["Posts"])
+
+from app.routers import project_templates
+app.include_router(project_templates.router, prefix="/api", tags=["Project Templates Marketplace"])
 
 from app.routers import background_jobs
-
 app.include_router(background_jobs.router, prefix="/api")
-
 
 from app.routers import badges
 app.include_router(badges.router, prefix="/api", tags=["Badges"])
