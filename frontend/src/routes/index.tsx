@@ -108,6 +108,34 @@ function Landing() {
   ];
   const [billingCycle, setBillingCycle] = React.useState<"monthly" | "yearly">("yearly");
   const [openFaq, setOpenFaq] = React.useState<number | null>(0);
+  const [activeSection, setActiveSection] = React.useState("features");
+
+  React.useEffect(() => {
+    document.documentElement.style.scrollBehavior = "smooth";
+
+    const sections = ["features", "pricing"];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { threshold: 0.5 },
+    );
+
+    sections.forEach((id) => {
+      const section = document.getElementById(id);
+      if (section) observer.observe(section);
+    });
+
+    return () => {
+      observer.disconnect();
+      document.documentElement.style.scrollBehavior = "";
+    };
+  }, []);
 
   const showcaseTabs = [
     {
@@ -175,16 +203,37 @@ function Landing() {
             <span className="text-[20px] font-bold tracking-tight text-foreground">DevLink</span>
           </Link>
           <nav className="ml-6 hidden items-center gap-5 text-[13px] font-medium text-muted-foreground md:flex">
-            <a href="#features" className="hover:text-foreground">
+            <a
+              href="#features"
+              className={
+                activeSection === "features"
+                  ? "text-foreground font-semibold"
+                  : "hover:text-foreground text-muted-foreground"
+              }
+            >
               Features
             </a>
             <Link to="/builders" className="hover:text-foreground">
               Builders
             </Link>
-            <a href="#showcase" className="hover:text-foreground">
+            <a
+              href="#showcase"
+              className={
+                activeSection === "showcase"
+                  ? "text-foreground font-semibold"
+                  : "hover:text-foreground text-muted-foreground"
+              }
+            >
               Showcase
             </a>
-            <a href="#pricing" className="hover:text-foreground">
+            <a
+              href="#pricing"
+              className={
+                activeSection === "pricing"
+                  ? "text-foreground font-semibold"
+                  : "hover:text-foreground text-muted-foreground"
+              }
+            >
               Pricing
             </a>
           </nav>
@@ -237,7 +286,11 @@ function Landing() {
             <div className="flex flex-col px-4 py-4 space-y-3">
               <a
                 href="#features"
-                className="text-sm text-foreground"
+                className={
+                  activeSection === "features"
+                    ? "text-sm font-semibold text-foreground"
+                    : "text-sm text-muted-foreground"
+                }
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Features
@@ -261,7 +314,11 @@ function Landing() {
 
               <a
                 href="#pricing"
-                className="text-sm text-foreground"
+                className={
+                  activeSection === "pricing"
+                    ? "text-sm font-semibold text-foreground"
+                    : "text-sm text-muted-foreground"
+                }
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Pricing
@@ -471,6 +528,54 @@ function Landing() {
               <p className="mt-1 text-[13px] text-muted-foreground">{f.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ===== AI FEATURES SECTION ===== */}
+      <section id="ai-features" className="border-b border-border py-16 bg-gradient-to-b from-background to-surface/10">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">AI Features</h2>
+            <p className="mt-4 text-muted-foreground text-[15px]">Powerful AI tools to speed up collaboration, streamline triage, and enrich profiles.</p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              {
+                icon: Bot,
+                title: "AI Builder Matching",
+                desc: "Match with collaborators by skills, availability and contribution history.",
+              },
+              {
+                icon: User,
+                title: "AI Profile Summary",
+                desc: "Auto-generate a concise professional summary from your repos and activity.",
+              },
+              {
+                icon: Clock,
+                title: "Issue Difficulty Estimator",
+                desc: "Estimate issue effort and time-to-complete to prioritize backlog planning.",
+              },
+              {
+                icon: MessageCircle,
+                title: "AI Tag Generator",
+                desc: "Automatically suggest tags and labels for issues and projects for better discoverability.",
+              },
+              {
+                icon: ArrowUpRight,
+                title: "AI Recommendations",
+                desc: "Personalized suggestions for projects, teammates and next steps.",
+              },
+            ].map((f) => (
+              <div key={f.title} className="rounded-md border border-border bg-card p-5 flex flex-col items-start">
+                <span className="grid h-10 w-10 place-items-center rounded-md bg-primary-soft text-primary">
+                  <f.icon size={18} />
+                </span>
+                <p className="mt-3 text-[15px] font-semibold text-foreground">{f.title}</p>
+                <p className="mt-1 text-[13px] text-muted-foreground">{f.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

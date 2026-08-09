@@ -217,6 +217,15 @@ export const builders: Builder[] = [
     yearsExp: 3,
     matchScore: 92,
     skills: ["React", "Next.js", "TypeScript"],
+    profileSkills: [
+      { name: "TypeScript", level: "Expert", category: "Languages", yearsOfExperience: 4 },
+      { name: "React", level: "Expert", category: "Frameworks", yearsOfExperience: 4 },
+      { name: "Next.js", level: "Advanced", category: "Frameworks", yearsOfExperience: 3 },
+      { name: "PostgreSQL", level: "Intermediate", category: "Databases", yearsOfExperience: 2 },
+      { name: "AWS", level: "Intermediate", category: "Cloud", yearsOfExperience: 2 },
+      { name: "Docker", level: "Advanced", category: "DevOps", yearsOfExperience: 3 },
+      { name: "Tailwind CSS", level: "Expert", category: "Design", yearsOfExperience: 4 },
+    ],
     badges: ["Top Contributor", "Social Butterfly"],
     online: true,
     bio: "Loves accessible UIs and design systems.",
@@ -850,6 +859,15 @@ export const currentUser = {
   avatar: AV("Nancy"),
   premium: true,
   verified: true,
+  profileSkills: [
+    { name: "TypeScript", level: "Expert", category: "Languages", yearsOfExperience: 4 },
+    { name: "React", level: "Expert", category: "Frameworks", yearsOfExperience: 4 },
+    { name: "Python", level: "Advanced", category: "Languages", yearsOfExperience: 3 },
+    { name: "FastAPI", level: "Advanced", category: "Frameworks", yearsOfExperience: 3 },
+    { name: "PostgreSQL", level: "Intermediate", category: "Databases", yearsOfExperience: 2 },
+    { name: "AWS", level: "Intermediate", category: "Cloud", yearsOfExperience: 2 },
+    { name: "Docker", level: "Advanced", category: "DevOps", yearsOfExperience: 3 },
+  ],
 };
 
 export const stats = [
@@ -864,3 +882,17 @@ export const stats = [
   { key: "hackathons", label: "Hackathons", value: 4, icon: "trophy", tint: "warning" },
   { key: "ai", label: "AI Match Score", value: "96%", icon: "sparkles", tint: "primary" },
 ] as const;
+
+export interface QuickAction {
+  id: ID;
+  iconName: string;
+  label: string;
+  to: string;
+}
+
+export const quickActions: QuickAction[] = [
+  { id: "qa1", iconName: "FolderPlus", label: "Continue current project", to: "/projects/p1" },
+  { id: "qa2", iconName: "Users2", label: "Review applications", to: "/projects" },
+  { id: "qa3", iconName: "Flame", label: "Publish flare", to: "/flares" },
+  { id: "qa4", iconName: "UserPlus", label: "Invite recommended builder", to: "/builders" },
+];

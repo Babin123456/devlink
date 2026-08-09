@@ -26,7 +26,13 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { toast } from "sonner";
-import { builders, currentUser, projects as allProjects, flares as allFlares, Builder } from "@/mocks/seed";
+import {
+  builders,
+  currentUser,
+  projects as allProjects,
+  flares as allFlares,
+  type Builder,
+} from "@/mocks/seed";
 
 export const Route = createFileRoute("/portfolio/$username")({
   head: ({ params }) => ({
@@ -106,7 +112,9 @@ function PortfolioPage() {
   const { username } = Route.useParams();
   const me = username === currentUser.handle;
 
-  const foundBuilder = builders.find((x) => x.handle === username) ||
+  // Find builder details
+  const b: Builder | null =
+    builders.find((x) => x.handle === username) ||
     (me
       ? {
           id: "me",
@@ -118,13 +126,15 @@ function PortfolioPage() {
           yearsExp: 3,
           matchScore: 96,
           skills: ["React", "Next.js", "TypeScript", "Node.js", "Python", "TailwindCSS"],
+          badges: [],
+          interests: [],
+          lastActiveAt: null,
           online: true,
           bio: "Product engineer. Ships fast, sleeps sometimes. Love crafting delightful UX.",
         }
       : null);
 
-  if (!foundBuilder) throw notFound();
-  const b = foundBuilder as Builder;
+  if (!b) throw notFound();
 
   // Get matching projects and flares
   const userProjects = allProjects.filter((p) => p.owner === b.name || p.owner === b.handle);
@@ -312,7 +322,7 @@ function PortfolioPage() {
             <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">{b.bio}</p>
             <div className="flex justify-center md:justify-start items-center gap-2 pt-2">
               <a
-                href={b.githubUrl || "https://github.com"}
+                href={(b as Builder).githubUrl || "https://github.com"}
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => {
@@ -593,7 +603,7 @@ function PortfolioPage() {
           </div>
           <div className="flex justify-center md:justify-start items-center gap-3 pt-2 font-sans text-xs">
             <a
-              href={b.githubUrl || "https://github.com"}
+              href={(b as Builder).githubUrl || "https://github.com"}
               target="_blank"
               rel="noreferrer"
               onClick={() => {
