@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { LogOut, BadgeCheck } from "lucide-react";
 import { Avatar } from "@/components/shared/primitives";
+import { cn } from "@/lib/utils";
 import { currentUser } from "@/mocks/seed";
 import { useSidebar } from "@/hooks/useSidebar";
 
@@ -55,13 +56,19 @@ export function UserProfile({ forceCollapsed }: UserProfileProps) {
           <p className="truncate text-[13px] font-semibold text-foreground flex items-center gap-1">
             {currentUser.name}
             {currentUser.verified && (
-              <BadgeCheck className="text-primary h-3.5 w-3.5" aria-label="Verified User" />
+              <BadgeCheck
+                className={cn(
+                  "h-3.5 w-3.5 shrink-0",
+                  currentUser.premium ? "text-amber-500 fill-amber-500/10 animate-pulse" : "text-primary"
+                )}
+                aria-label={currentUser.premium ? "Premium Verified User" : "Verified User"}
+              />
             )}
           </p>
           <p className="truncate text-[12px] text-muted-foreground">@{currentUser.handle}</p>
         </div>
         {currentUser.premium && (
-          <span className="rounded-md bg-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+          <span className="rounded-md bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-amber-500 animate-pulse">
             PRO
           </span>
         )}

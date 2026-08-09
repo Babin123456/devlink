@@ -39,6 +39,7 @@ export interface Builder {
   lastActiveAt: string | null;
   publicEmail?: string;
   verified?: boolean;
+  premium?: boolean;
   pinnedProjects?: string[];
   contributions?: number;
   followers?: number;
@@ -113,6 +114,8 @@ export interface Flare {
   likes: number;
   comments: number;
   ago: string;
+  status?: string;
+  publish_at?: string;
 }
 export interface Conversation {
   id: ID;
@@ -126,6 +129,11 @@ export interface Message {
   from: ID;
   text: string;
   at: string;
+  type?: string;
+  attachment_url?: string;
+  attachment_name?: string;
+  attachment_size?: number;
+  mime_type?: string;
 }
 export interface Notification {
   id: ID;
@@ -856,3 +864,17 @@ export const stats = [
   { key: "hackathons", label: "Hackathons", value: 4, icon: "trophy", tint: "warning" },
   { key: "ai", label: "AI Match Score", value: "96%", icon: "sparkles", tint: "primary" },
 ] as const;
+
+export interface QuickAction {
+  id: ID;
+  iconName: string;
+  label: string;
+  to: string;
+}
+
+export const quickActions: QuickAction[] = [
+  { id: "qa1", iconName: "FolderPlus", label: "Continue current project", to: "/projects/p1" },
+  { id: "qa2", iconName: "Users2", label: "Review applications", to: "/projects" },
+  { id: "qa3", iconName: "Flame", label: "Publish flare", to: "/flares" },
+  { id: "qa4", iconName: "UserPlus", label: "Invite recommended builder", to: "/builders" },
+];
