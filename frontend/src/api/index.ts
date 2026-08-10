@@ -34,6 +34,12 @@ export type {
   SEARCH_CATEGORIES,
 } from "./modules/search";
 export { activitiesApi } from "./modules/activities";
+export { pinnedProjectsApi, MAX_PINNED_PROJECTS } from "./modules/pinnedProjects";
+export type {
+  PinnedProject,
+  PinnedProjectList,
+  PinnedProjectSummary,
+} from "./modules/pinnedProjects";
 export { collectionsApi } from "./modules/collections";
 export { recommendationsApi, fallbackTechStack } from "./modules/recommendations";
 export type { TechStackRecommendation, TechStackResponse } from "./modules/recommendations";

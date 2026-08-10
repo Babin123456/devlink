@@ -40,7 +40,6 @@ export interface Builder {
   publicEmail?: string;
   verified?: boolean;
   premium?: boolean;
-  pinnedProjects?: string[];
   contributions?: number;
   followers?: number;
   following?: number;
@@ -237,7 +236,6 @@ export const builders: Builder[] = [
     followers: 238,
     following: 124,
     language: ["English", "Hindi"],
-    pinnedProjects: ["AI Chatbot", "DevOps Dashboard"],
     experience: [
       {
         company: "Google",

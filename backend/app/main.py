@@ -537,6 +537,9 @@ app.include_router(global_announcements.router, prefix="/api", tags=["Global Ann
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
 app.include_router(export.router, prefix="/api/users", tags=["Export"])
+from app.routers import pinned_projects
+
+app.include_router(pinned_projects.router, prefix="/api", tags=["Pinned Projects"])
 from app.routers import feedback
 
 app.include_router(feedback.router, prefix="/api/feedback", tags=["Feedback"])

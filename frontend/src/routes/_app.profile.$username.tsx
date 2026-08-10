@@ -32,6 +32,7 @@ import { ProfileCompletionChecklist } from "@/components/profile/ProfileCompleti
 import { FollowButton } from "@/components/shared/FollowButton";
 import { useFollowStatus } from "@/hooks/useFollow";
 import { ActivityTimeline } from "@/components/profile/ActivityTimeline";
+import { PinnedProjectsCard } from "@/components/profile/PinnedProjectsCard";
 
 export const Route = createFileRoute("/_app/profile/$username")({
   head: ({ params }) => ({
@@ -536,16 +537,7 @@ function ProfilePage() {
           <SkillsCard skills={b.profileSkills ?? []} />
           <ExperienceCard role={b.role} company={b.company} experienceLevel={b.experienceLevel} />
 
-          {b.pinnedProjects?.length ? (
-            <Card className="p-4">
-              <p className="text-[13px] font-semibold text-foreground">Pinned Projects</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {b.pinnedProjects.map((project) => (
-                  <TagChip key={project}>{project}</TagChip>
-                ))}
-              </div>
-            </Card>
-          ) : null}
+          <PinnedProjectsCard username={b.handle} isOwnProfile={me} />
 
           {b.badges && b.badges.length > 0 && (
             <Card className="p-4">
