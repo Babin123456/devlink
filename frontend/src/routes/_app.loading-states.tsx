@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { createFileRoute } from '@tanstack/react-router';
-import { LoadingLibraryShowcase } from '../components/ui/loading/LoadingLibraryShowcase';
+import { LoadingLibraryShowcase } from '@/components/ui/loading/LoadingLibraryShowcase';
 
 export const Route = createFileRoute('/_app/loading-states')({
   component: LoadingStatesPage,
