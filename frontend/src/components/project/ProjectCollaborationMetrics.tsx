@@ -34,7 +34,7 @@ export const ProjectCollaborationMetrics: React.FC<Props> = ({ projectId }) => {
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
       setError(errorObj?.message || 'Failed to load collaboration metrics.');
-    } fontally {
+    } finally {
       setLoading(false);
     }
   };
