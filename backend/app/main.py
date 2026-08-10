@@ -692,6 +692,10 @@ app.include_router(feature_flags.router, prefix="/api", tags=["Feature Flags"])
 from app.routers import reputation
 app.include_router(reputation.router, prefix="/api", tags=["User Reputation System"])
 
+from app.routers import project_collaboration_metrics
+app.include_router(project_collaboration_metrics.router, prefix="/api", tags=["Project Collaboration Metrics"])
+
+
 
 
 # The generated OpenAPI document only lists the responses each handler declares
