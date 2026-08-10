@@ -34,6 +34,13 @@ export type {
   SEARCH_CATEGORIES,
 } from "./modules/search";
 export { activitiesApi } from "./modules/activities";
+export { activityHeatmapApi } from "./modules/activityHeatmap";
+export type {
+  ActivityHeatmap,
+  ActivityTypeCount,
+  HeatmapDay,
+  StreakSummary,
+} from "./modules/activityHeatmap";
 export { collectionsApi } from "./modules/collections";
 export { recommendationsApi, fallbackTechStack } from "./modules/recommendations";
 export type { TechStackRecommendation, TechStackResponse } from "./modules/recommendations";
