@@ -26,6 +26,7 @@ import { Route as AppProfileAnalyticsRouteImport } from './routes/_app.profile-a
 import { Route as AppOrganizationsRouteImport } from './routes/_app.organizations'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMessagesRouteImport } from './routes/_app.messages'
+import { Route as AppLeaderboardRouteImport } from './routes/_app.leaderboard'
 import { Route as AppHackathonsRouteImport } from './routes/_app.hackathons'
 import { Route as AppGraphRouteImport } from './routes/_app.graph'
 import { Route as AppFlaresRouteImport } from './routes/_app.flares'
@@ -135,6 +136,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
 const AppMessagesRoute = AppMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLeaderboardRoute = AppLeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppHackathonsRoute = AppHackathonsRouteImport.update({
@@ -290,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/flares': typeof AppFlaresRoute
   '/graph': typeof AppGraphRoute
   '/hackathons': typeof AppHackathonsRouteWithChildren
+  '/leaderboard': typeof AppLeaderboardRoute
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
   '/organizations': typeof AppOrganizationsRouteWithChildren
@@ -334,6 +341,7 @@ export interface FileRoutesByTo {
   '/flares': typeof AppFlaresRoute
   '/graph': typeof AppGraphRoute
   '/hackathons': typeof AppHackathonsRouteWithChildren
+  '/leaderboard': typeof AppLeaderboardRoute
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
   '/profile-analytics': typeof AppProfileAnalyticsRoute
@@ -379,6 +387,7 @@ export interface FileRoutesById {
   '/_app/flares': typeof AppFlaresRoute
   '/_app/graph': typeof AppGraphRoute
   '/_app/hackathons': typeof AppHackathonsRouteWithChildren
+  '/_app/leaderboard': typeof AppLeaderboardRoute
   '/_app/messages': typeof AppMessagesRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/organizations': typeof AppOrganizationsRouteWithChildren
@@ -425,6 +434,7 @@ export interface FileRouteTypes {
     | '/flares'
     | '/graph'
     | '/hackathons'
+    | '/leaderboard'
     | '/messages'
     | '/notifications'
     | '/organizations'
@@ -469,6 +479,7 @@ export interface FileRouteTypes {
     | '/flares'
     | '/graph'
     | '/hackathons'
+    | '/leaderboard'
     | '/messages'
     | '/notifications'
     | '/profile-analytics'
@@ -513,6 +524,7 @@ export interface FileRouteTypes {
     | '/_app/flares'
     | '/_app/graph'
     | '/_app/hackathons'
+    | '/_app/leaderboard'
     | '/_app/messages'
     | '/_app/notifications'
     | '/_app/organizations'
@@ -671,6 +683,13 @@ declare module '@tanstack/react-router' {
       path: '/messages'
       fullPath: '/messages'
       preLoaderRoute: typeof AppMessagesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/leaderboard': {
+      id: '/_app/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof AppLeaderboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/hackathons': {
@@ -977,6 +996,7 @@ interface AppRouteChildren {
   AppFlaresRoute: typeof AppFlaresRoute
   AppGraphRoute: typeof AppGraphRoute
   AppHackathonsRoute: typeof AppHackathonsRouteWithChildren
+  AppLeaderboardRoute: typeof AppLeaderboardRoute
   AppMessagesRoute: typeof AppMessagesRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppOrganizationsRoute: typeof AppOrganizationsRouteWithChildren
@@ -1000,6 +1020,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFlaresRoute: AppFlaresRoute,
   AppGraphRoute: AppGraphRoute,
   AppHackathonsRoute: AppHackathonsRouteWithChildren,
+  AppLeaderboardRoute: AppLeaderboardRoute,
   AppMessagesRoute: AppMessagesRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,
   AppOrganizationsRoute: AppOrganizationsRouteWithChildren,

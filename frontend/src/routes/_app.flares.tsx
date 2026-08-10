@@ -237,6 +237,19 @@ function FlaresPage() {
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
       <div className="space-y-4">
+        {/* Compose Card */}
+        <PostComposer
+          placeholder="Share an update, a tip, or ask the community…"
+          onPost={async (newContent) => {
+            try {
+              const tags = Array.from(new Set(newContent.match(/#(\w+)/g)?.map((t) => t.slice(1)) ?? []));
+              await flaresService.create({ content: newContent, tags });
+              toast.success("Flare posted");
+              refetchFeed();
+            } catch (err: any) {
+              toast.error(err.message || "Failed to create flare");
+            }
+          }}
         <PostComposer
           placeholder="Share an update, a tip, or ask the community…"
           onPost={handlePost}
@@ -274,7 +287,12 @@ function FlaresPage() {
             <p className="text-[12px] font-semibold text-amber-500 mb-2 flex items-center gap-1">
               <Edit size={12} /> Editing Draft
             </p>
-            <MarkdownEditor value={editContent} onChange={setEditContent} rows={3} />
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              rows={3}
+              className="w-full rounded-md border border-border bg-background p-2 text-sm text-foreground outline-none focus:border-primary"
+            />
             <div className="mt-3 flex items-center justify-end gap-2">
               <button
                 onClick={() => setEditingPost(null)}

@@ -243,6 +243,7 @@ function ProfilePage() {
         <ProfileCompletionChecklist
           userProfile={{
             avatar: avatarUrl,
+            banner: bannerUrl ?? undefined,
             banner: bannerUrl || undefined,
             bio: b.bio,
             skills: b.profileSkills?.map((s) => s.name) ?? b.skills,
@@ -621,6 +622,7 @@ function ProfilePage() {
           title="Upload Cover Banner"
         />
       )}
+    </div>
     </div>
   );
 }

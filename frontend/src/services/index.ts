@@ -7,7 +7,6 @@
 // switch to the real endpoints automatically.
 
 import * as seed from "@/mocks/seed";
-import type { Message } from "@/mocks/seed";
 import { hackathonStore } from "@/mocks/hackathonStore";
 import {
   isBackendConfigured,
@@ -243,6 +242,22 @@ export const messagesService = {
     return withFallback(
       async () => {
         const msgs = await messagesApi.thread(id);
+        return msgs.map((m: any): Message => ({
+          id: m.id,
+          from: m.sender_id === currentUser?.id ? "me" : (m.sender_id ?? "me"),
+          text: m.content ?? "",
+          at: m.created_at
+            ? new Date(m.created_at).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "",
+          type: m.type ?? "text",
+          attachment_url: m.attachment_url,
+          attachment_name: m.attachment_name,
+          attachment_size: m.attachment_size,
+          mime_type: m.mime_type,
+        }));
         return msgs.map(
           (m: {
             id: string;
