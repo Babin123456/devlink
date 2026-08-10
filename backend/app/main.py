@@ -692,6 +692,10 @@ app.include_router(feature_flags.router, prefix="/api", tags=["Feature Flags"])
 from app.routers import reputation
 app.include_router(reputation.router, prefix="/api", tags=["User Reputation System"])
 
+from app.routers import email_templates
+app.include_router(email_templates.router, prefix="/api", tags=["Email Notification Templates"])
+
+
 
 
 # The generated OpenAPI document only lists the responses each handler declares
