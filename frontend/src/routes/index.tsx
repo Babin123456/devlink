@@ -217,6 +217,16 @@ function Landing() {
               Builders
             </Link>
             <a
+              href="#showcase"
+              className={
+                activeSection === "showcase"
+                  ? "text-foreground font-semibold"
+                  : "hover:text-foreground text-muted-foreground"
+              }
+            >
+              Showcase
+            </a>
+            <a
               href="#pricing"
               className={
                 activeSection === "pricing"

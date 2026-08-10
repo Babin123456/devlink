@@ -4,6 +4,7 @@ import { flaresService } from "@/services";
 import { Card, TagChip, Avatar } from "@/components/shared/primitives";
 import { Markdown } from "@/components/shared/Markdown";
 import { PostComposer } from "@/components/shared/PostComposer/PostComposer";
+import { MarkdownEditor } from "@/components/shared/MarkdownEditor";
 import { BookmarkToggleButton } from "@/components/shared/BookmarkToggleButton";
 import {
   Heart,
@@ -158,8 +159,6 @@ function FlareCard({
 }
 
 function FlaresPage() {
-  const { data = [] } = useQuery({ queryKey: ["flares"], queryFn: flaresService.list });
-  const [localFlares, setLocalFlares] = useState<Flare[]>([]);
   const { data: feedPosts = [], refetch: refetchFeed } = useQuery({
     queryKey: ["flares"],
     queryFn: flaresService.list,
@@ -171,14 +170,26 @@ function FlaresPage() {
   });
 
   const [activeTab, setActiveTab] = useState<"feed" | "drafts">("feed");
-  const [content, setContent] = useState("");
-  const [isScheduling, setIsScheduling] = useState(false);
-  const [publishAt, setPublishAt] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  // Edit draft states
   const [editingPost, setEditingPost] = useState<Flare | null>(null);
   const [editContent, setEditContent] = useState("");
+
+  const handlePost = async (content: string, attachments: any[]) => {
+    try {
+      const tags = Array.from(new Set(content.match(/#(\w+)/g)?.map((t) => t.slice(1)) ?? []));
+      await flaresService.create({
+        content: content || (attachments.length > 0 ? `Shared ${attachments.length} attachment(s)` : ""),
+        tags,
+        status: "published",
+      });
+
+      toast.success("Flare posted");
+      refetchFeed();
+      refetchDrafts();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create flare");
+      throw err;
+    }
+  };
 
   const handlePublishNow = async (id: string) => {
     try {
@@ -229,16 +240,7 @@ function FlaresPage() {
         {/* Compose Card */}
         <PostComposer
           placeholder="Share an update, a tip, or ask the community…"
-          onPost={async (newContent) => {
-            try {
-              const tags = Array.from(new Set(newContent.match(/#(\w+)/g)?.map((t) => t.slice(1)) ?? []));
-              await flaresService.create({ content: newContent, tags });
-              toast.success("Flare posted");
-              refetchFeed();
-            } catch (err: any) {
-              toast.error(err.message || "Failed to create flare");
-            }
-          }}
+          onPost={handlePost}
         />
 
         {/* Tab Navigation */}
