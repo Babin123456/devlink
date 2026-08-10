@@ -536,6 +536,9 @@ app.include_router(mfa.router, prefix="/api")
 app.include_router(global_announcements.router, prefix="/api", tags=["Global Announcements"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
+from app.routers import testimonials
+
+app.include_router(testimonials.router, prefix="/api", tags=["Testimonials"])
 app.include_router(export.router, prefix="/api/users", tags=["Export"])
 from app.routers import feedback
 

@@ -91,3 +91,8 @@ from .global_announcement import GlobalAnnouncement, AnnouncementSeverity, Targe
 from .post import Post  # noqa: F401
 
 from .project_comment import ProjectComment  # noqa: F401
+from .testimonial import (  # noqa: F401
+    Testimonial,
+    TestimonialRelationship,
+    TestimonialStatus,
+)
