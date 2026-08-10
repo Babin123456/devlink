@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { createFileRoute } from '@tanstack/react-router';
-import { TeamActivityTimeline } from '../../../components/team/TeamActivityTimeline';
+import { TeamActivityTimeline } from '@/components/team/TeamActivityTimeline';
 
 export const Route = createFileRoute('/_app/projects/$projectId/activity')({
   component: ProjectActivityPage,
