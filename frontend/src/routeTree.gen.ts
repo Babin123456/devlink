@@ -27,6 +27,7 @@ import { Route as AppOrganizationsRouteImport } from './routes/_app.organization
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMessagesRouteImport } from './routes/_app.messages'
 import { Route as AppLeaderboardRouteImport } from './routes/_app.leaderboard'
+import { Route as AppInsightsRouteImport } from './routes/_app.insights'
 import { Route as AppHackathonsRouteImport } from './routes/_app.hackathons'
 import { Route as AppGraphRouteImport } from './routes/_app.graph'
 import { Route as AppFlaresRouteImport } from './routes/_app.flares'
@@ -141,6 +142,11 @@ const AppMessagesRoute = AppMessagesRouteImport.update({
 const AppLeaderboardRoute = AppLeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInsightsRoute = AppInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
   getParentRoute: () => AppRoute,
 } as any)
 const AppHackathonsRoute = AppHackathonsRouteImport.update({
@@ -296,6 +302,7 @@ export interface FileRoutesByFullPath {
   '/flares': typeof AppFlaresRoute
   '/graph': typeof AppGraphRoute
   '/hackathons': typeof AppHackathonsRouteWithChildren
+  '/insights': typeof AppInsightsRoute
   '/leaderboard': typeof AppLeaderboardRoute
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
@@ -341,6 +348,7 @@ export interface FileRoutesByTo {
   '/flares': typeof AppFlaresRoute
   '/graph': typeof AppGraphRoute
   '/hackathons': typeof AppHackathonsRouteWithChildren
+  '/insights': typeof AppInsightsRoute
   '/leaderboard': typeof AppLeaderboardRoute
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
@@ -387,6 +395,7 @@ export interface FileRoutesById {
   '/_app/flares': typeof AppFlaresRoute
   '/_app/graph': typeof AppGraphRoute
   '/_app/hackathons': typeof AppHackathonsRouteWithChildren
+  '/_app/insights': typeof AppInsightsRoute
   '/_app/leaderboard': typeof AppLeaderboardRoute
   '/_app/messages': typeof AppMessagesRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
@@ -434,6 +443,7 @@ export interface FileRouteTypes {
     | '/flares'
     | '/graph'
     | '/hackathons'
+    | '/insights'
     | '/leaderboard'
     | '/messages'
     | '/notifications'
@@ -479,6 +489,7 @@ export interface FileRouteTypes {
     | '/flares'
     | '/graph'
     | '/hackathons'
+    | '/insights'
     | '/leaderboard'
     | '/messages'
     | '/notifications'
@@ -524,6 +535,7 @@ export interface FileRouteTypes {
     | '/_app/flares'
     | '/_app/graph'
     | '/_app/hackathons'
+    | '/_app/insights'
     | '/_app/leaderboard'
     | '/_app/messages'
     | '/_app/notifications'
@@ -690,6 +702,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof AppLeaderboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/insights': {
+      id: '/_app/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof AppInsightsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/hackathons': {
@@ -996,6 +1015,7 @@ interface AppRouteChildren {
   AppFlaresRoute: typeof AppFlaresRoute
   AppGraphRoute: typeof AppGraphRoute
   AppHackathonsRoute: typeof AppHackathonsRouteWithChildren
+  AppInsightsRoute: typeof AppInsightsRoute
   AppLeaderboardRoute: typeof AppLeaderboardRoute
   AppMessagesRoute: typeof AppMessagesRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
@@ -1020,6 +1040,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFlaresRoute: AppFlaresRoute,
   AppGraphRoute: AppGraphRoute,
   AppHackathonsRoute: AppHackathonsRouteWithChildren,
+  AppInsightsRoute: AppInsightsRoute,
   AppLeaderboardRoute: AppLeaderboardRoute,
   AppMessagesRoute: AppMessagesRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,
