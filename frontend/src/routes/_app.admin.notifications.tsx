@@ -1,31 +1,42 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, CheckCircle, Clock, XCircle, RefreshCw } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "@/lib/api";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, CheckCircle, Clock, XCircle, RefreshCw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-export const Route = createFileRoute('/_app/admin/notifications')({
+export const Route = createFileRoute("/_app/admin/notifications")({
   component: AdminNotificationsPage,
 });
 
 function AdminNotificationsPage() {
   const queryClient = useQueryClient();
 
+  interface FailedNotification {
+    id: string;
+    title: string;
+    message: string;
+    channel: string;
+    recipient_id: string;
+  }
+
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['admin-notification-stats'],
+    queryKey: ["admin-notification-stats"],
     queryFn: async () => {
-      const res = await api.get('/admin/notifications/stats');
-      return res.data;
+      return api.get<{
+        total: number;
+        pending: number;
+        sent: number;
+        failed: number;
+      }>("/admin/notifications/stats");
     },
   });
 
   const { data: failed, isLoading: failedLoading } = useQuery({
-    queryKey: ['admin-notification-failed'],
+    queryKey: ["admin-notification-failed"],
     queryFn: async () => {
-      const res = await api.get('/admin/notifications/failed');
-      return res.data;
+      return api.get<FailedNotification[]>("/admin/notifications/failed");
     },
   });
 
@@ -34,8 +45,8 @@ function AdminNotificationsPage() {
       await api.post(`/admin/notifications/${id}/retry`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-notification-stats'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-notification-failed'] });
+      queryClient.invalidateQueries({ queryKey: ["admin-notification-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-notification-failed"] });
     },
   });
 
@@ -45,7 +56,9 @@ function AdminNotificationsPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Notification Delivery Stats</h2>
-        <p className="text-muted-foreground">Monitor the global delivery metrics for unified notifications.</p>
+        <p className="text-muted-foreground">
+          Monitor the global delivery metrics for unified notifications.
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -96,7 +109,7 @@ function AdminNotificationsPage() {
           <p className="text-muted-foreground">No failed deliveries to display.</p>
         ) : (
           <div className="space-y-4">
-            {failed?.map((notification: any) => (
+            {failed?.map((notification: FailedNotification) => (
               <Card key={notification.id}>
                 <CardContent className="p-4 flex items-center justify-between">
                   <div>
@@ -106,10 +119,12 @@ function AdminNotificationsPage() {
                       <Badge variant="outline">{notification.channel}</Badge>
                     </h4>
                     <p className="text-sm text-muted-foreground">{notification.message}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Recipient: {notification.recipient_id}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Recipient: {notification.recipient_id}
+                    </p>
                   </div>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     disabled={retryMutation.isPending}
                     onClick={() => retryMutation.mutate(notification.id)}

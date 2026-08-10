@@ -85,6 +85,7 @@ def setup_db():
     from app.main import app
 
     app.dependency_overrides[get_database] = override_get_db
+    import app.models
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
@@ -112,7 +113,7 @@ def register_and_login(client: TestClient):
     """
 
     def _register_and_login_func(
-        email: str, username: str, password: str = "Passw0rd!"
+        email: str, username: str, password: str = "Vermilion-Kestrel97!"
     ) -> tuple[str, str]:
         # Register
         client.post(

@@ -29,6 +29,8 @@ class AuditAction(str, Enum):
     REGISTER = "register"
     PASSWORD_CHANGED = "password_changed"
     PASSWORD_RESET = "password_reset"
+    PASSWORD_RESET_REQUESTED = "password_reset_requested"
+    PASSWORD_RESET_COMPLETED = "password_reset_completed"
     EMAIL_CHANGED = "email_changed"
 
     # User Profile
@@ -52,9 +54,18 @@ class AuditAction(str, Enum):
     # Project
     PROJECT_CREATED = "project_created"
     PROJECT_UPDATED = "project_updated"
+    PROJECT_TITLE_UPDATED = "project_title_updated"
+    PROJECT_DESCRIPTION_UPDATED = "project_description_updated"
+    PROJECT_STATUS_CHANGED = "project_status_changed"
+    PROJECT_MEMBER_ADDED = "project_member_added"
+    PROJECT_MEMBER_REMOVED = "project_member_removed"
+    PROJECT_MEMBER_ROLE_UPDATED = "project_member_role_updated"
+    PROJECT_OWNERSHIP_TRANSFERRED = "project_ownership_transferred"
     PROJECT_ARCHIVED = "project_archived"
     PROJECT_RESTORED = "project_restored"
     PROJECT_DELETED = "project_deleted"
+    PROJECT_VERSION_CREATED = "project_version_created"
+    PROJECT_VERSION_RESTORED = "project_version_restored"
 
     # Invitations
     INVITATION_SENT = "invitation_sent"
@@ -86,6 +97,8 @@ class AuditAction(str, Enum):
     ROLE_UPDATED = "role_updated"
     API_KEY_CREATED = "api_key_created"
     API_KEY_REVOKED = "api_key_revoked"
+    API_KEY_REGENERATED = "api_key_regenerated"
+    API_KEY_UPDATED = "api_key_updated"
 
     # Security
     FAILED_LOGIN = "failed_login"

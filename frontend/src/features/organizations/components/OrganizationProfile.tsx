@@ -20,9 +20,9 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({
   organizationData,
   orgId,
 }) => {
-  const [activeTab, setActiveTab] = useState<"about" | "team" | "projects" | "hiring" | "tokens" | "audit">(
-    "about",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "about" | "team" | "projects" | "hiring" | "tokens" | "audit"
+  >("about");
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">

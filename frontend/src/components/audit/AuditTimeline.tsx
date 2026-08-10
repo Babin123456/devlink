@@ -30,7 +30,8 @@ export function AuditTimeline({ entityType, entityId }: AuditTimelineProps) {
   }, [entityType, entityId]);
 
   if (loading) return <div className="text-sm text-muted-foreground">Loading timeline...</div>;
-  if (logs.length === 0) return <div className="text-sm text-muted-foreground">No audit history found.</div>;
+  if (logs.length === 0)
+    return <div className="text-sm text-muted-foreground">No audit history found.</div>;
 
   return (
     <div className="flex flex-col space-y-4">
@@ -41,12 +42,14 @@ export function AuditTimeline({ entityType, entityId }: AuditTimelineProps) {
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-sm">{log.action.replace(/_/g, " ").toUpperCase()}</span>
-              <span className="text-xs text-muted-foreground">{format(new Date(log.created_at), "MMM d, yyyy HH:mm")}</span>
+              <span className="font-semibold text-sm">
+                {log.action.replace(/_/g, " ").toUpperCase()}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {format(new Date(log.created_at), "MMM d, yyyy HH:mm")}
+              </span>
             </div>
-            <p className="text-sm text-muted-foreground mt-1">
-              By User {log.actor_id || "System"}
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">By User {log.actor_id || "System"}</p>
           </div>
         </div>
       ))}

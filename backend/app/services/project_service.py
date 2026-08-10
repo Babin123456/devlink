@@ -32,6 +32,29 @@ class ProjectService:
         owner_id: uuid.UUID,
         project: ProjectCreate,
     ) -> Project:
+        # AI-based duplicate project detection check (#608)
+        allow_dup = getattr(project, "allow_duplicate", False)
+        if not allow_dup:
+            from app.services.duplicate_detection_service import DuplicateDetectionService
+            dup_res = DuplicateDetectionService.find_duplicate_projects(
+                db,
+                title=project.title,
+                description=project.description,
+                threshold=0.80,
+                limit=3,
+            )
+            if dup_res.has_duplicates:
+                top_match = dup_res.suggested_projects[0]
+                from fastapi import HTTPException, status
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "message": f"Potential duplicate project detected: '{top_match.title}' ({top_match.confidence_score}% match).",
+                        "max_similarity_score": dup_res.max_similarity_score,
+                        "suggested_projects": [p.model_dump() for p in dup_res.suggested_projects],
+                        "manual_override_instruction": "Pass 'allow_duplicate': true in request payload to bypass this check.",
+                    },
+                )
 
         db_project = Project(
             owner_id=owner_id,
@@ -140,6 +163,7 @@ class ProjectService:
         paid: bool | None = None,
         opensource: bool | None = None,
         tech: str | None = None,
+        sort_by: str | None = "newest",
     ) -> list[Project]:
 
         stmt = (
@@ -149,8 +173,6 @@ class ProjectService:
                 Project.deleted_at.is_(None),
                 Project.is_published.is_(True),
             )
-            .offset(skip)
-            .limit(limit)
         )
 
         if language:
@@ -172,6 +194,28 @@ class ProjectService:
             if tech_list:
                 from sqlalchemy import or_
                 stmt = stmt.where(or_(*[Project.tech_stack.ilike(f"%{t}%") for t in tech_list]))
+
+        # Apply sorting logic
+        from sqlalchemy import desc, asc
+        if sort_by == "oldest":
+            stmt = stmt.order_by(asc(Project.created_at))
+        elif sort_by in ("recently_updated", "most_active"):
+            stmt = stmt.order_by(desc(Project.updated_at))
+        elif sort_by == "most_bookmarked":
+            if hasattr(Project, "bookmarks_count"):
+                stmt = stmt.order_by(desc(Project.bookmarks_count))
+            else:
+                stmt = stmt.order_by(desc(Project.created_at))
+        elif sort_by == "most_applications":
+            if hasattr(Project, "applications_count"):
+                stmt = stmt.order_by(desc(Project.applications_count))
+            else:
+                stmt = stmt.order_by(desc(Project.created_at))
+        elif sort_by == "ai_match_score":
+            stmt = stmt.order_by(desc(Project.updated_at), desc(Project.created_at))
+        else:
+            # Default "newest"
+            stmt = stmt.order_by(desc(Project.created_at))
 
         stmt = stmt.offset(skip).limit(limit)
 
@@ -351,7 +395,10 @@ class ProjectService:
             db.scalar(
                 select(func.count())
                 .select_from(Bookmark)
-                .where(Bookmark.project_id == project_id)
+                .where(
+                    Bookmark.target_type == "project",
+                    Bookmark.target_id == project_id,
+                )
             )
             or 0
         )

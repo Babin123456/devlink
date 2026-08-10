@@ -25,7 +25,9 @@
 - [Screenshots](#screenshots)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
+- [Architecture Overview](#architecture-overview)
 - [Getting Started](#getting-started)
+- [Troubleshooting Guide](#troubleshooting-guide)
 - [Environment Variables](#environment-variables)
 - [Available Scripts](#available-scripts)
 - [Project Structure](#project-structure)
@@ -45,7 +47,7 @@ DevLink is an open-source developer collaboration platform. Developers can creat
 > **Status:** Active development. Open to contributors. See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
 **Documentation:**
-[Architecture](docs/architecture.md) · [API Reference](docs/api.md) · [Development Setup](docs/development.md) · [Deployment Guide](docs/deployment.md) · [Coding Standards](docs/coding-standards.md) · [WebSockets](docs/WEBSOCKETS.md)
+[Architecture](docs/architecture.md) · [API Reference](docs/api.md) · [Authentication Guide](docs/authentication.md) · [Development Setup](docs/development.md) · [Deployment Guide](docs/deployment.md) · [Coding Standards](docs/coding-standards.md) · [WebSockets](docs/WEBSOCKETS.md)
 
 ---
 
@@ -153,6 +155,37 @@ M
 
 ---
 
+## Architecture Overview
+
+DevLink follows a client-server architecture where the React frontend communicates with the FastAPI backend through REST APIs and WebSockets. The backend stores persistent data in PostgreSQL while Redis is used for caching and Pub/Sub to support real-time communication.
+
+```mermaid
+flowchart LR
+    User[User]
+    Frontend[React Frontend]
+    Backend[FastAPI Backend]
+    DB[(PostgreSQL)]
+    Redis[(Redis)]
+    WS[WebSocket]
+
+    User --> Frontend
+    Frontend -->|REST API| Backend
+    Backend --> DB
+    Backend --> Redis
+    Backend <-->|WebSocket| WS
+    WS --> Frontend
+```
+
+### Request Flow
+
+1. Users interact with the React frontend.
+2. The frontend sends HTTP requests to the FastAPI backend.
+3. FastAPI processes business logic and reads/writes data in PostgreSQL.
+4. Redis provides caching and Pub/Sub for faster responses and real-time events.
+5. WebSockets deliver live notifications, messaging, and activity updates back to connected clients.
+
+---
+
 ## Getting Started
 
 > 📖 **Complete Setup & Troubleshooting Guide**: See our detailed [Environment Setup Guide](docs/environment-setup.md) for required software, environment variables, step-by-step onboarding, and common errors resolution matrix.
@@ -209,6 +242,168 @@ npm run dev
 ### DevContainers
 
 Open in VS Code and run **Remote-Containers: Reopen in Container**, or launch in [GitHub Codespaces](https://codespaces.new/nensii21/devlink). Dependencies and port forwarding are configured automatically via `.devcontainer/`.
+
+---
+
+## Troubleshooting Guide
+
+If you encounter issues while setting up DevLink locally, refer to the solutions below.
+
+### Docker containers fail to start
+
+**Symptoms**
+- `docker-compose` exits with errors.
+- Containers stop immediately after starting.
+
+**Possible Cause**
+- Docker Desktop is not running.
+- Existing containers or port conflicts.
+
+**Solution**
+```bash
+docker-compose down
+docker-compose -f docker-compose.dev.yml up --build
+```
+
+Verify Docker Desktop is running and ensure the required ports are available.
+
+---
+
+### PostgreSQL or Redis connection errors
+
+**Symptoms**
+- Backend cannot connect to the database.
+- Redis connection refused.
+
+**Possible Cause**
+- PostgreSQL or Redis service is not running.
+- Incorrect `DATABASE_URL` or `REDIS_URL`.
+
+**Solution**
+- Start PostgreSQL and Redis.
+- Verify the values in `backend/.env`.
+- Restart the backend server.
+
+---
+
+### Missing environment variables
+
+**Symptoms**
+- Application fails during startup.
+- Configuration or authentication errors.
+
+**Solution**
+- Copy `.env.example` to `.env`.
+- Fill in all required variables before starting the application.
+
+---
+
+### Python virtual environment issues
+
+**Symptoms**
+- `ModuleNotFoundError`
+- Missing Python packages
+
+**Solution**
+```bash
+python -m venv venv
+
+# Linux/macOS
+source venv/bin/activate
+
+# Windows
+venv\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+---
+
+### npm install dependency conflicts
+
+**Symptoms**
+- Installation fails with dependency resolution errors.
+
+**Solution**
+**Linux/macOS**
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+**Windows (PowerShell)**
+
+```powershell
+Remove-Item -Recurse -Force node_modules
+Remove-Item package-lock.json
+npm install
+```
+
+---
+
+### Port conflicts
+
+DevLink uses these default ports:
+
+| Service | Port |
+|---------|------|
+| Frontend | 5173 |
+| Backend | 8000 |
+| PostgreSQL | 5432 |
+| Redis | 6379 |
+
+**Linux/macOS**
+
+```bash
+lsof -i :8000
+```
+
+**Windows**
+
+```powershell
+netstat -ano | findstr :8000
+```
+
+Check whether another application is already using them.
+
+---
+
+### Alembic migration errors
+
+**Symptoms**
+- Database migration fails.
+
+**Solution**
+```bash
+alembic upgrade head
+```
+
+Ensure PostgreSQL is running and `DATABASE_URL` is correct.
+
+---
+
+### CORS configuration issues
+
+**Symptoms**
+- Browser blocks API requests.
+
+**Solution**
+- Verify the `CORS_ORIGINS` variable in `backend/.env`.
+- Restart the backend after updating the configuration.
+
+---
+
+### Frontend cannot connect to Backend API
+
+**Symptoms**
+- Network errors in the browser.
+- API requests fail.
+
+**Solution**
+- Confirm the backend server is running.
+- Verify `VITE_API_URL` in `frontend/.env`.
+- Ensure the backend is accessible at `http://localhost:8000`.
 
 ---
 

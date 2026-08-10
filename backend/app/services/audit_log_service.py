@@ -52,6 +52,28 @@ class AuditLogService:
         error_message: str | None = None,
     ) -> AuditLog:
 
+        def _sanitize_json(d: dict | None) -> dict | None:
+            if not d:
+                return d
+            import json
+            # A quick way to stringify complex objects like UUID or HttpUrl
+            res = {}
+            for k, v in d.items():
+                if isinstance(v, (int, float, bool, str, type(None))):
+                    res[k] = v
+                elif isinstance(v, dict):
+                    res[k] = _sanitize_json(v)
+                elif isinstance(v, list):
+                    res[k] = [
+                        _sanitize_json(i) if isinstance(i, dict) else (
+                            str(i) if not isinstance(i, (int, float, bool, str, type(None))) else i
+                        ) for i in v
+                    ]
+                else:
+                    res[k] = str(v)
+            return res
+
+
         resolved_ip = ip_address or audit_ip_address.get()
         resolved_ua = user_agent or audit_user_agent.get()
         resolved_method = request_method or audit_request_method.get()
@@ -65,9 +87,9 @@ class AuditLogService:
             target_user_id=target_user_id,
             project_id=project_id,
             organization_id=organization_id,
-            old_values=old_values,
-            new_values=new_values,
-            metadata_info=metadata_info,
+            old_values=_sanitize_json(old_values),
+            new_values=_sanitize_json(new_values),
+            metadata_info=_sanitize_json(metadata_info),
             description=description,
             ip_address=resolved_ip,
             user_agent=resolved_ua,
@@ -268,6 +290,56 @@ class AuditLogService:
         total_count = db.scalar(count_stmt) or 0
 
         # Pagination
+        offset = (page - 1) * limit
+        paginated_stmt = (
+            stmt.order_by(AuditLog.created_at.desc()).offset(offset).limit(limit)
+        )
+
+        items = list(db.scalars(paginated_stmt))
+        pages = (total_count + limit - 1) // limit if limit > 0 else 1
+
+        return {
+            "items": items,
+            "total": total_count,
+            "page": page,
+            "limit": limit,
+            "pages": pages,
+        }
+
+    @staticmethod
+    def search_project_audit_logs(
+        db: Session,
+        project_id: uuid.UUID,
+        user_id: uuid.UUID | None = None,
+        event_type: str | None = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        page: int = 1,
+        limit: int = 20,
+    ) -> dict:
+        stmt = select(AuditLog).where(AuditLog.project_id == project_id)
+
+        if user_id:
+            stmt = stmt.where(
+                or_(
+                    AuditLog.actor_id == user_id,
+                    AuditLog.target_user_id == user_id,
+                )
+            )
+
+        if event_type:
+            event_clean = event_type.strip().lower()
+            stmt = stmt.where(func.lower(AuditLog.action).contains(event_clean))
+
+        if start_date:
+            stmt = stmt.where(AuditLog.created_at >= start_date)
+
+        if end_date:
+            stmt = stmt.where(AuditLog.created_at <= end_date)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_count = db.scalar(count_stmt) or 0
+
         offset = (page - 1) * limit
         paginated_stmt = (
             stmt.order_by(AuditLog.created_at.desc()).offset(offset).limit(limit)

@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { toast as sonnerToast, ExternalToast } from "sonner";
 
@@ -7,7 +6,7 @@ export type ToastType = "success" | "error" | "warning" | "info" | "default" | "
 export interface ToastProps {
   id?: string;
   title?: React.ReactNode;
-  description?: React.ReactNode;
+  description?: React.ReactNode | (() => React.ReactNode);
   variant?: "default" | "destructive" | "success" | "warning" | "info";
   type?: ToastType;
   duration?: number;
@@ -19,7 +18,24 @@ export interface ToastProps {
   onAutoClose?: () => void;
 }
 
-export type ToastOptions = Omit<ToastProps, "title" | "description"> & ExternalToast;
+/**
+ * Sonner options we are happy to forward untouched.
+ *
+ * The keys removed here are the ones this module already models with its own,
+ * narrower shape. Intersecting the whole of `ExternalToast` (as this used to)
+ * produced an `action` of type `{ label; onClick } & ReactNode`, which nothing
+ * can satisfy — so every `toast.success(...)` call failed to type-check.
+ */
+type SonnerPassthrough = Omit<
+  ExternalToast,
+  "id" | "description" | "duration" | "action" | "onDismiss" | "onAutoClose"
+>;
+
+/** Everything `toast()` accepts: our own props plus the sonner passthrough. */
+export type ToastInput = ToastProps & SonnerPassthrough;
+
+/** What the `toast.success` / `.error` / … helpers take after the title. */
+export type ToastOptions = Omit<ToastInput, "title">;
 
 interface ToastState {
   toasts: ToastProps[];
@@ -53,7 +69,7 @@ function dispatch(action: ActionType) {
       break;
     case "UPDATE_TOAST":
       memoryState.toasts = memoryState.toasts.map((t) =>
-        t.id === action.toast.id ? { ...t, ...action.toast } : t
+        t.id === action.toast.id ? { ...t, ...action.toast } : t,
       );
       break;
     case "DISMISS_TOAST": {
@@ -72,7 +88,7 @@ function dispatch(action: ActionType) {
           ? {
               ...t,
             }
-          : t
+          : t,
       );
       break;
     }
@@ -114,7 +130,7 @@ export function toast({
   duration = 4000,
   action,
   ...props
-}: ToastProps) {
+}: ToastInput) {
   const id = props.id || genId();
 
   const effectiveType: ToastType = type || (variant === "destructive" ? "error" : variant);
@@ -176,16 +192,16 @@ export function toast({
 }
 
 toast.success = (title: React.ReactNode, options?: ToastOptions) =>
-  toast({ title, type: "success", variant: "success", ...options });
+  toast({ title, type: "success", variant: "success", ...options } as ToastProps);
 
 toast.error = (title: React.ReactNode, options?: ToastOptions) =>
-  toast({ title, type: "error", variant: "destructive", ...options });
+  toast({ title, type: "error", variant: "destructive", ...options } as ToastProps);
 
 toast.warning = (title: React.ReactNode, options?: ToastOptions) =>
-  toast({ title, type: "warning", variant: "warning", ...options });
+  toast({ title, type: "warning", variant: "warning", ...options } as ToastProps);
 
 toast.info = (title: React.ReactNode, options?: ToastOptions) =>
-  toast({ title, type: "info", variant: "info", ...options });
+  toast({ title, type: "info", variant: "info", ...options } as ToastProps);
 
 toast.dismiss = (toastId?: string) => {
   sonnerToast.dismiss(toastId);

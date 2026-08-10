@@ -20,14 +20,22 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from enum import Enum
 from app.database.base import Base
 
+
 class UserRole(str, Enum):
     """Application-level user role."""
+
     USER = "user"
     ADMIN = "admin"
     DEVELOPER = "developer"
     MEMBER = "member"
     VIEWER = "viewer"
     MODERATOR = "moderator"
+
+
+class UserRole(str, Enum):
+    USER = "user"
+    DEVELOPER = "developer"
+    ADMIN = "admin"
 
 
 class User(Base):
@@ -89,7 +97,20 @@ class User(Base):
     badges: Mapped[list[str]] = mapped_column(
         ARRAY(String).with_variant(JSON, "sqlite"),
         default=list,
-        server_default="[]",
+        # '{}' is the empty-array literal for a Postgres text[]. This said
+        # '[]', which Postgres rejects outright:
+        #
+        #     psycopg.errors.InvalidTextRepresentation:
+        #     malformed array literal: "[]"
+        #
+        # so Base.metadata.create_all() could not build the schema on Postgres
+        # at all. It went unnoticed because the tests create_all against
+        # SQLite, where this column is JSON and '[]' is valid.
+        #
+        # The migration that adds the column (1a2b3c4d5e6f) already uses '{}',
+        # so this aligns the model with the schema that actually exists rather
+        # than changing it.
+        server_default="{}",
         nullable=False,
     )
 
@@ -234,10 +255,37 @@ class User(Base):
         index=True,
     )
 
+    premium: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        index=True,
+    )
+
     is_superuser: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
         nullable=False,
+    )
+
+    # ------------------------------------------------------------------
+    # Multi-Factor Authentication (MFA)
+    # ------------------------------------------------------------------
+
+    mfa_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    mfa_secret: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+
+    mfa_backup_codes: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
     )
 
     # System-level RBAC role (issue #357).

@@ -12,11 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export type TimelineEventType =
-  | "project_created"
-  | "recruitment_started"
-  | "members_joined"
-  | "milestone_completed"
-  | "archived";
+  "project_created" | "recruitment_started" | "members_joined" | "milestone_completed" | "archived";
 
 export interface TimelineEvent {
   id: string;
@@ -151,7 +147,7 @@ export function ProjectTimeline({
                     ? config.bgColor
                     : event.status === "in_progress"
                       ? "border-primary bg-primary/10 text-primary animate-pulse"
-                      : "border-border bg-muted text-muted-foreground"
+                      : "border-border bg-muted text-muted-foreground",
                 )}
                 aria-hidden="true"
               >

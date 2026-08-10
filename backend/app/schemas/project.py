@@ -39,6 +39,7 @@ class ProjectBase(BaseModel):
     visibility: ProjectVisibility = ProjectVisibility.PUBLIC
 
     tech_stack: Optional[str] = None
+    requirements: Optional[str] = None
 
     repository_url: Optional[str] = None
     website_url: Optional[str] = None
@@ -67,6 +68,11 @@ class ProjectBase(BaseModel):
 
 
 class ProjectCreate(ProjectBase):
+    allow_duplicate: bool = Field(
+        default=False,
+        description="Manual override flag to allow project creation even if a potential duplicate is detected",
+    )
+
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
@@ -97,6 +103,7 @@ class ProjectUpdate(BaseModel):
     stage: Optional[ProjectStage] = None
     visibility: Optional[ProjectVisibility] = None
     tech_stack: Optional[str] = None
+    requirements: Optional[str] = None
     repository_url: Optional[str] = None
     website_url: Optional[str] = None
     demo_url: Optional[str] = None

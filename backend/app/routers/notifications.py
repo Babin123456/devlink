@@ -208,44 +208,84 @@ def delete_notification(
     )
 
 
-from pydantic import BaseModel
+from app.schemas.notification import (
+    NotificationPreferenceResponse,
+    NotificationPreferenceUpdate,
+)
 
 
-class NotificationPreferenceUpdate(BaseModel):
-    email_enabled: bool | None = None
-    websocket_enabled: bool | None = None
-    database_enabled: bool | None = None
-    project_updates: bool | None = None
-    invitations: bool | None = None
-    role_changes: bool | None = None
-    marketing_emails: bool | None = None
-    system_alerts: bool | None = None
-
-
-@router.get("/preferences")
+@router.get(
+    "/preferences",
+    response_model=NotificationPreferenceResponse,
+    summary="Get Notification Preferences",
+    description="Retrieve current user's notification preferences across messages, team invitations, project updates, mentions, system announcements, and email settings.",
+)
 def get_preferences(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
-):
-    from app.services.notifications import dispatcher
+) -> NotificationPreferenceResponse:
+    pref = NotificationService.get_preferences(db, user_id=current_user.id)
+    return NotificationPreferenceResponse.model_validate(pref)
 
-    return dispatcher._get_user_preferences(db, current_user.id)
 
-
-@router.put("/preferences")
+@router.put(
+    "/preferences",
+    response_model=NotificationPreferenceResponse,
+    summary="Update Notification Preferences (PUT)",
+    description="Update current user's notification settings for all channels and categories.",
+)
+@router.patch(
+    "/preferences",
+    response_model=NotificationPreferenceResponse,
+    summary="Update Notification Preferences (PATCH)",
+    description="Partially update current user's notification settings.",
+)
 def update_preferences(
     prefs: NotificationPreferenceUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
+) -> NotificationPreferenceResponse:
+    pref = NotificationService.update_preferences(
+        db, user_id=current_user.id, update_in=prefs
+    )
+    return NotificationPreferenceResponse.model_validate(pref)
+
+
+@router.post(
+    "/{notification_id}/click",
+    response_model=NotificationResponse,
+    summary="Track notification click interaction",
+)
+def track_click(
+    notification_id: uuid.UUID,
+    db: Session = Depends(get_database),
 ):
-    from app.services.notifications import dispatcher
+    notification = NotificationService.get_notification(db, notification_id)
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return NotificationService.track_click(db, notification)
 
-    db_prefs = dispatcher._get_user_preferences(db, current_user.id)
 
-    update_data = prefs.model_dump(exclude_unset=True)
-    for k, v in update_data.items():
-        setattr(db_prefs, k, v)
+@router.post(
+    "/{notification_id}/delivered",
+    response_model=NotificationResponse,
+    summary="Track notification delivery status",
+)
+def track_delivered(
+    notification_id: uuid.UUID,
+    db: Session = Depends(get_database),
+):
+    notification = NotificationService.get_notification(db, notification_id)
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return NotificationService.track_delivered(db, notification)
 
-    db.commit()
-    db.refresh(db_prefs)
-    return db_prefs
+
+@router.get(
+    "/analytics/delivery",
+    summary="Get notification delivery and interaction analytics dashboard responses",
+)
+def get_delivery_analytics(
+    db: Session = Depends(get_database),
+):
+    return NotificationService.get_delivery_analytics(db)

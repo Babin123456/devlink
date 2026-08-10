@@ -17,10 +17,12 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PortfolioUsernameRouteImport } from './routes/portfolio.$username'
+import { Route as AppTemplatesRouteImport } from './routes/_app.templates'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppSearchRouteImport } from './routes/_app.search'
 import { Route as AppRepositoryQualityRouteImport } from './routes/_app.repository-quality'
 import { Route as AppProjectsRouteImport } from './routes/_app.projects'
+import { Route as AppProfileAnalyticsRouteImport } from './routes/_app.profile-analytics'
 import { Route as AppOrganizationsRouteImport } from './routes/_app.organizations'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMessagesRouteImport } from './routes/_app.messages'
@@ -45,7 +47,10 @@ import { Route as AppBuildersBuilderIdRouteImport } from './routes/_app.builders
 import { Route as AppAdminSearchAnalyticsRouteImport } from './routes/_app.admin.search-analytics'
 import { Route as AppAdminNotificationsRouteImport } from './routes/_app.admin.notifications'
 import { Route as AppAdminMaintenanceRouteImport } from './routes/_app.admin.maintenance'
+import { Route as AppAdminJobsRouteImport } from './routes/_app.admin.jobs'
+import { Route as AppAdminCommunityStatsRouteImport } from './routes/_app.admin.community-stats'
 import { Route as AppAdminAuditLogsRouteImport } from './routes/_app.admin.audit-logs'
+import { Route as AppAdminApiRequestAnalyticsRouteImport } from './routes/_app.admin.api-request-analytics'
 import { Route as AppProjectsProjectIdIssuesRouteImport } from './routes/_app.projects.$projectId.issues'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -87,6 +92,11 @@ const PortfolioUsernameRoute = PortfolioUsernameRouteImport.update({
   path: '/portfolio/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppTemplatesRoute = AppTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -105,6 +115,11 @@ const AppRepositoryQualityRoute = AppRepositoryQualityRouteImport.update({
 const AppProjectsRoute = AppProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileAnalyticsRoute = AppProfileAnalyticsRouteImport.update({
+  id: '/profile-analytics',
+  path: '/profile-analytics',
   getParentRoute: () => AppRoute,
 } as any)
 const AppOrganizationsRoute = AppOrganizationsRouteImport.update({
@@ -230,11 +245,27 @@ const AppAdminMaintenanceRoute = AppAdminMaintenanceRouteImport.update({
   path: '/maintenance',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminJobsRoute = AppAdminJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => AppAdminRoute,
+} as any)
+const AppAdminCommunityStatsRoute = AppAdminCommunityStatsRouteImport.update({
+  id: '/community-stats',
+  path: '/community-stats',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 const AppAdminAuditLogsRoute = AppAdminAuditLogsRouteImport.update({
   id: '/audit-logs',
   path: '/audit-logs',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminApiRequestAnalyticsRoute =
+  AppAdminApiRequestAnalyticsRouteImport.update({
+    id: '/api-request-analytics',
+    path: '/api-request-analytics',
+    getParentRoute: () => AppAdminRoute,
+  } as any)
 const AppProjectsProjectIdIssuesRoute =
   AppProjectsProjectIdIssuesRouteImport.update({
     id: '/issues',
@@ -262,12 +293,17 @@ export interface FileRoutesByFullPath {
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
   '/organizations': typeof AppOrganizationsRouteWithChildren
+  '/profile-analytics': typeof AppProfileAnalyticsRoute
   '/projects': typeof AppProjectsRouteWithChildren
   '/repository-quality': typeof AppRepositoryQualityRoute
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRouteWithChildren
+  '/templates': typeof AppTemplatesRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
+  '/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/admin/community-stats': typeof AppAdminCommunityStatsRoute
+  '/admin/jobs': typeof AppAdminJobsRoute
   '/admin/maintenance': typeof AppAdminMaintenanceRoute
   '/admin/notifications': typeof AppAdminNotificationsRoute
   '/admin/search-analytics': typeof AppAdminSearchAnalyticsRoute
@@ -300,12 +336,17 @@ export interface FileRoutesByTo {
   '/hackathons': typeof AppHackathonsRouteWithChildren
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
+  '/profile-analytics': typeof AppProfileAnalyticsRoute
   '/projects': typeof AppProjectsRouteWithChildren
   '/repository-quality': typeof AppRepositoryQualityRoute
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRouteWithChildren
+  '/templates': typeof AppTemplatesRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
+  '/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/admin/community-stats': typeof AppAdminCommunityStatsRoute
+  '/admin/jobs': typeof AppAdminJobsRoute
   '/admin/maintenance': typeof AppAdminMaintenanceRoute
   '/admin/notifications': typeof AppAdminNotificationsRoute
   '/admin/search-analytics': typeof AppAdminSearchAnalyticsRoute
@@ -341,12 +382,17 @@ export interface FileRoutesById {
   '/_app/messages': typeof AppMessagesRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/organizations': typeof AppOrganizationsRouteWithChildren
+  '/_app/profile-analytics': typeof AppProfileAnalyticsRoute
   '/_app/projects': typeof AppProjectsRouteWithChildren
   '/_app/repository-quality': typeof AppRepositoryQualityRoute
   '/_app/search': typeof AppSearchRoute
   '/_app/settings': typeof AppSettingsRouteWithChildren
+  '/_app/templates': typeof AppTemplatesRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
+  '/_app/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/_app/admin/audit-logs': typeof AppAdminAuditLogsRoute
+  '/_app/admin/community-stats': typeof AppAdminCommunityStatsRoute
+  '/_app/admin/jobs': typeof AppAdminJobsRoute
   '/_app/admin/maintenance': typeof AppAdminMaintenanceRoute
   '/_app/admin/notifications': typeof AppAdminNotificationsRoute
   '/_app/admin/search-analytics': typeof AppAdminSearchAnalyticsRoute
@@ -382,12 +428,17 @@ export interface FileRouteTypes {
     | '/messages'
     | '/notifications'
     | '/organizations'
+    | '/profile-analytics'
     | '/projects'
     | '/repository-quality'
     | '/search'
     | '/settings'
+    | '/templates'
     | '/portfolio/$username'
+    | '/admin/api-request-analytics'
     | '/admin/audit-logs'
+    | '/admin/community-stats'
+    | '/admin/jobs'
     | '/admin/maintenance'
     | '/admin/notifications'
     | '/admin/search-analytics'
@@ -420,12 +471,17 @@ export interface FileRouteTypes {
     | '/hackathons'
     | '/messages'
     | '/notifications'
+    | '/profile-analytics'
     | '/projects'
     | '/repository-quality'
     | '/search'
     | '/settings'
+    | '/templates'
     | '/portfolio/$username'
+    | '/admin/api-request-analytics'
     | '/admin/audit-logs'
+    | '/admin/community-stats'
+    | '/admin/jobs'
     | '/admin/maintenance'
     | '/admin/notifications'
     | '/admin/search-analytics'
@@ -460,12 +516,17 @@ export interface FileRouteTypes {
     | '/_app/messages'
     | '/_app/notifications'
     | '/_app/organizations'
+    | '/_app/profile-analytics'
     | '/_app/projects'
     | '/_app/repository-quality'
     | '/_app/search'
     | '/_app/settings'
+    | '/_app/templates'
     | '/portfolio/$username'
+    | '/_app/admin/api-request-analytics'
     | '/_app/admin/audit-logs'
+    | '/_app/admin/community-stats'
+    | '/_app/admin/jobs'
     | '/_app/admin/maintenance'
     | '/_app/admin/notifications'
     | '/_app/admin/search-analytics'
@@ -549,6 +610,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortfolioUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/templates': {
+      id: '/_app/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof AppTemplatesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/settings': {
       id: '/_app/settings'
       path: '/settings'
@@ -575,6 +643,13 @@ declare module '@tanstack/react-router' {
       path: '/projects'
       fullPath: '/projects'
       preLoaderRoute: typeof AppProjectsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/profile-analytics': {
+      id: '/_app/profile-analytics'
+      path: '/profile-analytics'
+      fullPath: '/profile-analytics'
+      preLoaderRoute: typeof AppProfileAnalyticsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/organizations': {
@@ -745,11 +820,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminMaintenanceRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/jobs': {
+      id: '/_app/admin/jobs'
+      path: '/jobs'
+      fullPath: '/admin/jobs'
+      preLoaderRoute: typeof AppAdminJobsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/community-stats': {
+      id: '/_app/admin/community-stats'
+      path: '/community-stats'
+      fullPath: '/admin/community-stats'
+      preLoaderRoute: typeof AppAdminCommunityStatsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
     '/_app/admin/audit-logs': {
       id: '/_app/admin/audit-logs'
       path: '/audit-logs'
       fullPath: '/admin/audit-logs'
       preLoaderRoute: typeof AppAdminAuditLogsRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
+    '/_app/admin/api-request-analytics': {
+      id: '/_app/admin/api-request-analytics'
+      path: '/api-request-analytics'
+      fullPath: '/admin/api-request-analytics'
+      preLoaderRoute: typeof AppAdminApiRequestAnalyticsRouteImport
       parentRoute: typeof AppAdminRoute
     }
     '/_app/projects/$projectId/issues': {
@@ -763,14 +859,20 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppAdminRouteChildren {
+  AppAdminApiRequestAnalyticsRoute: typeof AppAdminApiRequestAnalyticsRoute
   AppAdminAuditLogsRoute: typeof AppAdminAuditLogsRoute
+  AppAdminCommunityStatsRoute: typeof AppAdminCommunityStatsRoute
+  AppAdminJobsRoute: typeof AppAdminJobsRoute
   AppAdminMaintenanceRoute: typeof AppAdminMaintenanceRoute
   AppAdminNotificationsRoute: typeof AppAdminNotificationsRoute
   AppAdminSearchAnalyticsRoute: typeof AppAdminSearchAnalyticsRoute
 }
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminApiRequestAnalyticsRoute: AppAdminApiRequestAnalyticsRoute,
   AppAdminAuditLogsRoute: AppAdminAuditLogsRoute,
+  AppAdminCommunityStatsRoute: AppAdminCommunityStatsRoute,
+  AppAdminJobsRoute: AppAdminJobsRoute,
   AppAdminMaintenanceRoute: AppAdminMaintenanceRoute,
   AppAdminNotificationsRoute: AppAdminNotificationsRoute,
   AppAdminSearchAnalyticsRoute: AppAdminSearchAnalyticsRoute,
@@ -878,10 +980,12 @@ interface AppRouteChildren {
   AppMessagesRoute: typeof AppMessagesRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppOrganizationsRoute: typeof AppOrganizationsRouteWithChildren
+  AppProfileAnalyticsRoute: typeof AppProfileAnalyticsRoute
   AppProjectsRoute: typeof AppProjectsRouteWithChildren
   AppRepositoryQualityRoute: typeof AppRepositoryQualityRoute
   AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRouteWithChildren
+  AppTemplatesRoute: typeof AppTemplatesRoute
   AppProfileUsernameRoute: typeof AppProfileUsernameRoute
 }
 
@@ -899,10 +1003,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppMessagesRoute: AppMessagesRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,
   AppOrganizationsRoute: AppOrganizationsRouteWithChildren,
+  AppProfileAnalyticsRoute: AppProfileAnalyticsRoute,
   AppProjectsRoute: AppProjectsRouteWithChildren,
   AppRepositoryQualityRoute: AppRepositoryQualityRoute,
   AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRouteWithChildren,
+  AppTemplatesRoute: AppTemplatesRoute,
   AppProfileUsernameRoute: AppProfileUsernameRoute,
 }
 

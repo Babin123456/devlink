@@ -49,11 +49,12 @@ function buildUrl(path: string, query?: RequestOptions["query"]): string {
 let refreshInFlight: Promise<string | null> | null = null;
 
 // Session Correlation ID for distributed tracing
-let sessionCorrelationId = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('x-correlation-id') : null;
+let sessionCorrelationId =
+  typeof sessionStorage !== "undefined" ? sessionStorage.getItem("x-correlation-id") : null;
 if (!sessionCorrelationId) {
-  sessionCorrelationId = `corr_${crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '') : Math.random().toString(36).slice(2)}`;
-  if (typeof sessionStorage !== 'undefined') {
-    sessionStorage.setItem('x-correlation-id', sessionCorrelationId);
+  sessionCorrelationId = `corr_${crypto.randomUUID ? crypto.randomUUID().replace(/-/g, "") : Math.random().toString(36).slice(2)}`;
+  if (typeof sessionStorage !== "undefined") {
+    sessionStorage.setItem("x-correlation-id", sessionCorrelationId);
   }
 }
 
@@ -116,8 +117,10 @@ async function coreFetch(path: string, opts: RequestOptions, attempt = 0): Promi
 
   // Structured Logging Headers
   finalHeaders.set("X-Correlation-ID", sessionCorrelationId!);
-  finalHeaders.set("X-Request-ID", `req_${crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '') : Math.random().toString(36).slice(2)}`);
-
+  finalHeaders.set(
+    "X-Request-ID",
+    `req_${crypto.randomUUID ? crypto.randomUUID().replace(/-/g, "") : Math.random().toString(36).slice(2)}`,
+  );
 
   const init: RequestInit = {
     ...rest,
@@ -199,12 +202,16 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
   const res = await coreFetch(path, opts);
   const payload = await parseBody(res);
   if (!res.ok) {
+    const errorObj = typeof payload === "object" && payload && "error" in payload
+      ? (payload as any).error
+      : payload;
+
     const message =
+      (errorObj && typeof errorObj === "object" && "message" in errorObj
+        ? String(errorObj.message)
+        : null) ??
       (typeof payload === "object" && payload && "detail" in payload
         ? String((payload as { detail: unknown }).detail)
-        : null) ??
-      (typeof payload === "object" && payload && "message" in payload
-        ? String((payload as { message: unknown }).message)
         : null) ??
       res.statusText ??
       `Request failed (${res.status})`;

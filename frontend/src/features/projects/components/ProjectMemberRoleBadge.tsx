@@ -1,7 +1,8 @@
 import React from "react";
 import { Crown, Shield, Code, CheckCircle, Eye, User } from "lucide-react";
 
-export type ProjectRole = "owner" | "co_owner" | "admin" | "maintainer" | "contributor" | "reviewer" | "viewer" | "member";
+export type ProjectRole =
+  "owner" | "co_owner" | "admin" | "maintainer" | "contributor" | "reviewer" | "viewer" | "member";
 
 interface ProjectMemberRoleBadgeProps {
   role: ProjectRole | string;

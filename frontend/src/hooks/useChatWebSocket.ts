@@ -7,7 +7,11 @@ export interface ChatWebSocketEvent {
   content?: string;
 }
 
-export function useChatWebSocket(conversationId: string, currentUserId: string, onNewMessage: (msg: any) => void) {
+export function useChatWebSocket(
+  conversationId: string,
+  currentUserId: string,
+  onNewMessage: (msg: unknown) => void,
+) {
   const [isConnected, setIsConnected] = useState(false);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const wsRef = useRef<WebSocket | null>(null);
@@ -35,20 +39,20 @@ export function useChatWebSocket(conversationId: string, currentUserId: string, 
       ws.onmessage = (evt) => {
         try {
           const msg = JSON.parse(evt.data);
-          
+
           if (msg.type === "chat.message.new" && msg.conversation_id === conversationId) {
             onNewMessage(msg);
           } else if (msg.type === "chat.typing" && msg.conversation_id === conversationId) {
             if (msg.user_id !== currentUserId) {
-              setTypingUsers(prev => {
+              setTypingUsers((prev) => {
                 const newSet = new Set(prev);
                 newSet.add(msg.user_id);
                 return newSet;
               });
-              
+
               // Clear typing indicator after 3 seconds
               setTimeout(() => {
-                setTypingUsers(prev => {
+                setTypingUsers((prev) => {
                   const newSet = new Set(prev);
                   newSet.delete(msg.user_id);
                   return newSet;
@@ -66,7 +70,13 @@ export function useChatWebSocket(conversationId: string, currentUserId: string, 
       };
 
       return () => {
-        ws.send(JSON.stringify({ type: "chat.leave", conversation_id: conversationId }));
+        if (ws.readyState === WebSocket.OPEN) {
+          try {
+            ws.send(JSON.stringify({ type: "chat.leave", conversation_id: conversationId }));
+          } catch {
+            // Ignore send errors during cleanup
+          }
+        }
         ws.close();
       };
     } catch {
@@ -74,17 +84,20 @@ export function useChatWebSocket(conversationId: string, currentUserId: string, 
     }
   }, [conversationId, currentUserId, onNewMessage]);
 
-  const broadcastMessage = useCallback((content: string) => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(
-        JSON.stringify({
-          type: "chat.message",
-          conversation_id: conversationId,
-          content,
-        })
-      );
-    }
-  }, [conversationId]);
+  const broadcastMessage = useCallback(
+    (content: string) => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(
+          JSON.stringify({
+            type: "chat.message",
+            conversation_id: conversationId,
+            content,
+          }),
+        );
+      }
+    },
+    [conversationId],
+  );
 
   const broadcastTyping = useCallback(() => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -92,7 +105,7 @@ export function useChatWebSocket(conversationId: string, currentUserId: string, 
         JSON.stringify({
           type: "chat.typing",
           conversation_id: conversationId,
-        })
+        }),
       );
     }
   }, [conversationId]);

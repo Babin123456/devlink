@@ -34,7 +34,7 @@ describe("EmailVerificationBanner Component (#592)", () => {
         isVerified={false}
         userEmail="test@example.com"
         onResendVerification={handleResend}
-      />
+      />,
     );
 
     const resendBtn = screen.getByRole("button", { name: /Resend Verification Email/i });

@@ -10,8 +10,13 @@ import {
 } from "@tanstack/react-router";
 import { AnimatePresence } from "framer-motion";
 import { useEffect, useRef, type ReactNode } from "react";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { I18nProvider } from "@/context/I18nContext";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { AnnouncerProvider } from "@/components/a11y/Announcer";
+import { SkipLink } from "@/components/a11y/SkipLink";
+import { applyServiceWorkerUpdate, registerServiceWorker } from "@/lib/pwa";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -76,6 +81,17 @@ function NotFoundComponent() {
   );
 }
 
+/**
+ * The root route's errorComponent and notFoundComponent replace RootComponent
+ * rather than rendering inside it, so anything they show sits outside the
+ * providers. The error pages call useTranslation(), so they need their own
+ * I18nProvider — without it an API 401 would surface as a provider error
+ * instead of the sign-in page.
+ */
+function OutsideRootProviders({ children }: { children: ReactNode }) {
+  return <I18nProvider>{children}</I18nProvider>;
+}
+
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
@@ -85,15 +101,27 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
   if (error instanceof ApiError) {
     if (error.status === 401) {
-      return <UnauthorizedPage />;
+      return (
+        <OutsideRootProviders>
+          <UnauthorizedPage />
+        </OutsideRootProviders>
+      );
     }
 
     if (error.status === 403) {
-      return <ForbiddenPage />;
+      return (
+        <OutsideRootProviders>
+          <ForbiddenPage />
+        </OutsideRootProviders>
+      );
     }
 
     if (error.status >= 500) {
-      return <ServerErrorPage />;
+      return (
+        <OutsideRootProviders>
+          <ServerErrorPage />
+        </OutsideRootProviders>
+      );
     }
 
     // status 0  -> fetch/network failure (coreFetch's catch block)
@@ -103,7 +131,11 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
       // navigator is undefined during SSR; assume online in that case so we
       // don't render OfflinePage on the server for a purely client-side signal.
       const isOnline = typeof navigator === "undefined" ? true : navigator.onLine;
-      return isOnline ? <NetworkErrorPage /> : <OfflinePage />;
+      return (
+        <OutsideRootProviders>
+          {isOnline ? <NetworkErrorPage /> : <OfflinePage />}
+        </OutsideRootProviders>
+      );
     }
   }
 
@@ -159,8 +191,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      // Colours the browser/OS chrome when installed, and matches the
+      // manifest's theme_color.
+      { name: "theme-color", content: "#05b7d7" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "DevLink" },
+      {
+        name: "apple-mobile-web-app-status-bar-style",
+        content: "black-translucent",
+      },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "icon", type: "image/svg+xml", href: "/icons/icon.svg" },
+      { rel: "apple-touch-icon", href: "/icons/icon.svg" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -186,16 +232,37 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const location = useRouterState({ select: (s) => s.location });
 
+  useEffect(() => {
+    // No-ops outside a production browser build; see src/lib/pwa.ts.
+    void registerServiceWorker({
+      onUpdateAvailable: (registration) => {
+        toast("A new version of DevLink is available.", {
+          duration: Infinity,
+          action: {
+            label: "Reload",
+            onClick: () => applyServiceWorkerUpdate(registration),
+          },
+        });
+      },
+    });
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system">
-        <Outlet />
-        <Toaster position="top-right" richColors />
-      </ThemeProvider>
-      <AnimatePresence mode="wait" initial={false}>
-        <Outlet key={location.pathname} />
-      </AnimatePresence>
-      <Toaster position="top-right" richColors />
+      <I18nProvider>
+        <AnnouncerProvider>
+          <ThemeProvider defaultTheme="system">
+            {/* First thing in the tab order, so a keyboard user is not made to
+                walk the sidebar and header on every single navigation. */}
+            <SkipLink />
+            <OfflineBanner />
+            <AnimatePresence mode="wait" initial={false}>
+              <Outlet key={location.pathname} />
+            </AnimatePresence>
+            <Toaster position="top-right" richColors />
+          </ThemeProvider>
+        </AnnouncerProvider>
+      </I18nProvider>
     </QueryClientProvider>
   );
 }

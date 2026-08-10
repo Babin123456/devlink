@@ -11,17 +11,18 @@ export interface OAuthProviderItem {
 }
 
 export interface OAuthProvidersResponse {
-  has_password: bool;
+  has_password: boolean;
   linked_count: number;
   providers: OAuthProviderItem[];
 }
 
-const PROVIDER_METADATA: Record<string, { label: string; icon: any; color: string }> = {
-  github: { label: "GitHub", icon: Github, color: "text-foreground" },
-  google: { label: "Google", icon: Globe, color: "text-red-500" },
-  gitlab: { label: "GitLab", icon: Globe, color: "text-orange-500" },
-  linkedin: { label: "LinkedIn", icon: Globe, color: "text-blue-600" },
-};
+const PROVIDER_METADATA: Record<string, { label: string; icon: React.ElementType; color: string }> =
+  {
+    github: { label: "GitHub", icon: Github, color: "text-foreground" },
+    google: { label: "Google", icon: Globe, color: "text-red-500" },
+    gitlab: { label: "GitLab", icon: Globe, color: "text-orange-500" },
+    linkedin: { label: "LinkedIn", icon: Globe, color: "text-blue-600" },
+  };
 
 export function OAuthAccountsSection() {
   const [data, setData] = useState<OAuthProvidersResponse | null>(null);
@@ -82,7 +83,9 @@ export function OAuthAccountsSection() {
       if (res.ok) {
         const updated = await res.json();
         setData(updated);
-        toast.success(`Successfully connected ${PROVIDER_METADATA[provider]?.label || provider} account!`);
+        toast.success(
+          `Successfully connected ${PROVIDER_METADATA[provider]?.label || provider} account!`,
+        );
       } else {
         const err = await res.json();
         toast.error(err.detail || `Failed to connect ${provider}`);
@@ -119,7 +122,11 @@ export function OAuthAccountsSection() {
   };
 
   if (loading) {
-    return <div className="text-xs text-muted-foreground animate-pulse">Loading connected accounts...</div>;
+    return (
+      <div className="text-xs text-muted-foreground animate-pulse">
+        Loading connected accounts...
+      </div>
+    );
   }
 
   const providers = data?.providers || [

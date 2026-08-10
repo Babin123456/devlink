@@ -3,17 +3,51 @@ import { X, Check, ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
-const LANGUAGES = ["JavaScript", "TypeScript", "Python", "Java", "Go", "Rust", "C++", "C#", "Ruby", "PHP"];
+const LANGUAGES = [
+  "JavaScript",
+  "TypeScript",
+  "Python",
+  "Java",
+  "Go",
+  "Rust",
+  "C++",
+  "C#",
+  "Ruby",
+  "PHP",
+];
 const EXPERIENCES = ["Beginner", "Intermediate", "Advanced"];
 const TECH_STACKS = [
-  "React", "Next.js", "Node.js", "Express", "MongoDB", "PostgreSQL", 
-  "Prisma", "Docker", "AWS", "Python", "AI/ML", "Vue.js", "Angular", 
-  "Svelte", "Tailwind CSS", "React Native", "Flutter", "Swift", "Kotlin"
+  "React",
+  "Next.js",
+  "Node.js",
+  "Express",
+  "MongoDB",
+  "PostgreSQL",
+  "Prisma",
+  "Docker",
+  "AWS",
+  "Python",
+  "AI/ML",
+  "Vue.js",
+  "Angular",
+  "Svelte",
+  "Tailwind CSS",
+  "React Native",
+  "Flutter",
+  "Swift",
+  "Kotlin",
 ];
 
 export function ProjectFilters() {
@@ -21,24 +55,22 @@ export function ProjectFilters() {
 
   const handleLanguageChange = (lang: string, checked: boolean) => {
     const current = filters.language || [];
-    const next = checked ? [...current, lang] : current.filter((l) => l !== lang);
+    const next = checked ? [...current, lang] : current.filter((l: string) => l !== lang);
     setFilters({ language: next });
   };
 
   const handleExperienceChange = (exp: string, checked: boolean) => {
     const current = filters.experience || [];
-    const next = checked ? [...current, exp] : current.filter((e) => e !== exp);
+    const next = checked ? [...current, exp] : current.filter((e: string) => e !== exp);
     setFilters({ experience: next });
   };
 
   const handleTechToggle = (tech: string) => {
     const current = filters.tech || [];
-    const next = current.includes(tech)
-      ? current.filter((t) => t !== tech)
-      : [...current, tech];
+    const next = current.includes(tech) ? current.filter((t: string) => t !== tech) : [...current, tech];
     setFilters({ tech: next });
   };
-  
+
   const [techOpen, setTechOpen] = useState(false);
 
   return (
@@ -87,7 +119,9 @@ export function ProjectFilters() {
                 <Checkbox
                   id={`exp-${exp}`}
                   checked={(filters.experience || []).includes(exp.toLowerCase())}
-                  onCheckedChange={(checked) => handleExperienceChange(exp.toLowerCase(), !!checked)}
+                  onCheckedChange={(checked) =>
+                    handleExperienceChange(exp.toLowerCase(), !!checked)
+                  }
                 />
                 <label
                   htmlFor={`exp-${exp}`}
@@ -104,7 +138,7 @@ export function ProjectFilters() {
         <div className="space-y-6">
           <div className="space-y-4">
             <h4 className="text-[13px] font-medium text-foreground">Project Details</h4>
-            
+
             <div className="flex items-center justify-between">
               <label htmlFor="remote-toggle" className="text-[13px] font-medium cursor-pointer">
                 Remote Only
@@ -115,7 +149,7 @@ export function ProjectFilters() {
                 onCheckedChange={(checked) => setFilters({ remote: checked || undefined })}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <label htmlFor="paid-toggle" className="text-[13px] font-medium cursor-pointer">
                 Paid Only
@@ -126,7 +160,7 @@ export function ProjectFilters() {
                 onCheckedChange={(checked) => setFilters({ paid: checked || undefined })}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <label htmlFor="opensource-toggle" className="text-[13px] font-medium cursor-pointer">
                 Open Source Only
@@ -143,9 +177,7 @@ export function ProjectFilters() {
             <h4 className="text-[13px] font-medium text-foreground">Tech Stack</h4>
             <Popover open={techOpen} onOpenChange={setTechOpen}>
               <PopoverTrigger asChild>
-                <button
-                  className="flex w-full items-center justify-between rounded-md border border-border bg-surface px-3 py-2 text-[13px] hover:bg-muted"
-                >
+                <button className="flex w-full items-center justify-between rounded-md border border-border bg-surface px-3 py-2 text-[13px] hover:bg-muted">
                   <span className="truncate">
                     {(filters.tech || []).length > 0
                       ? `${(filters.tech || []).length} selected`
@@ -163,16 +195,13 @@ export function ProjectFilters() {
                       {TECH_STACKS.map((tech) => {
                         const isSelected = (filters.tech || []).includes(tech);
                         return (
-                          <CommandItem
-                            key={tech}
-                            onSelect={() => handleTechToggle(tech)}
-                          >
+                          <CommandItem key={tech} onSelect={() => handleTechToggle(tech)}>
                             <div
                               className={cn(
                                 "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
                                 isSelected
                                   ? "bg-primary text-primary-foreground"
-                                  : "opacity-50 [&_svg]:invisible"
+                                  : "opacity-50 [&_svg]:invisible",
                               )}
                             >
                               <Check className={cn("h-3 w-3")} />
@@ -187,8 +216,13 @@ export function ProjectFilters() {
               </PopoverContent>
             </Popover>
             <div className="flex flex-wrap gap-1">
-              {(filters.tech || []).map((t) => (
-                <Badge key={t} variant="secondary" className="px-1.5 py-0 text-[11px] font-normal cursor-pointer flex items-center gap-1" onClick={() => handleTechToggle(t)}>
+              {(filters.tech || []).map((t: string) => (
+                <Badge
+                  key={t}
+                  variant="secondary"
+                  className="px-1.5 py-0 text-[11px] font-normal cursor-pointer flex items-center gap-1"
+                  onClick={() => handleTechToggle(t)}
+                >
                   {t}
                   <X className="h-3 w-3" />
                 </Badge>

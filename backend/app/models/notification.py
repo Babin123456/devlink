@@ -87,8 +87,21 @@ class NotificationPreference(Base):
     websocket_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     database_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    # Event Toggles
+    # Core Event Categories (#586)
+    messages: Mapped[bool] = mapped_column(Boolean, default=True)
+    team_invitations: Mapped[bool] = mapped_column(Boolean, default=True)
     project_updates: Mapped[bool] = mapped_column(Boolean, default=True)
+    mentions: Mapped[bool] = mapped_column(Boolean, default=True)
+    system_announcements: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # Per-Category Email Delivery Preferences
+    email_messages: Mapped[bool] = mapped_column(Boolean, default=True)
+    email_team_invitations: Mapped[bool] = mapped_column(Boolean, default=True)
+    email_project_updates: Mapped[bool] = mapped_column(Boolean, default=True)
+    email_mentions: Mapped[bool] = mapped_column(Boolean, default=True)
+    email_system_announcements: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # Legacy & Auxiliary Toggles
     invitations: Mapped[bool] = mapped_column(Boolean, default=True)
     role_changes: Mapped[bool] = mapped_column(Boolean, default=True)
     marketing_emails: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -231,6 +244,16 @@ class Notification(Base):
     )
 
     read_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        index=True,
+    )
+
+    delivered_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        index=True,
+    )
+
+    clicked_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         index=True,
     )

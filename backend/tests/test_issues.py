@@ -7,10 +7,14 @@ from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models.issue import DuplicateSuggestion, Issue, IssueStatus
+from app.models.issue import DuplicateSuggestion, Issue, IssueDifficulty, IssueStatus
 from app.models.project import Project, ProjectStage, ProjectVisibility
 from app.models.user import User
 from app.services.duplicate_detection_service import DuplicateDetectionService
+from app.services.issue_difficulty_service import (
+    DifficultyResult,
+    IssueDifficultyService,
+)
 from app.services.issue_service import IssueService
 
 
@@ -25,6 +29,24 @@ def no_openai(monkeypatch):
         DuplicateDetectionService,
         "generate_embedding",
         staticmethod(lambda text: None),
+    )
+
+
+@pytest.fixture
+def fixed_difficulty(monkeypatch):
+    """Force a deterministic AI difficulty estimation result."""
+
+    def _fake_estimate(title, description, labels=None):
+        return DifficultyResult(
+            difficulty=IssueDifficulty.ADVANCED,
+            confidence=0.9,
+            reasoning="AI estimated complexity",
+        )
+
+    monkeypatch.setattr(
+        IssueDifficultyService,
+        "estimate_difficulty",
+        staticmethod(_fake_estimate),
     )
 
 
@@ -60,7 +82,9 @@ def _auth_headers(token: str) -> dict:
     return {"Authorization": f"Bearer {token}"}
 
 
-def test_create_issue(client: TestClient, register_and_login, issue_project, db: Session):
+def test_create_issue(
+    client: TestClient, register_and_login, issue_project, db: Session
+):
     _, project = issue_project
     user_id, token = register_and_login("issues_create@example.com", "issues_create")
 
@@ -124,7 +148,10 @@ def test_get_issue_returns_duplicate_suggestions(
 
     created = client.post(
         f"/api/projects/{project.id}/issues",
-        json={"title": "Button not responding", "description": "Clicking does nothing."},
+        json={
+            "title": "Button not responding",
+            "description": "Clicking does nothing.",
+        },
         headers=_auth_headers(token),
     ).json()
 
@@ -292,9 +319,7 @@ def test_mark_as_duplicate_requires_author(
 ):
     _, project = issue_project
     user_id, token = register_and_login("issues_mark2@example.com", "issues_mark2")
-    _, other_token = register_and_login(
-        "issues_mark3@example.com", "issues_mark3"
-    )
+    _, other_token = register_and_login("issues_mark3@example.com", "issues_mark3")
 
     created = client.post(
         f"/api/projects/{project.id}/issues",
@@ -343,3 +368,121 @@ def test_issue_service_check_duplicates_does_not_persist(
 
     persisted = db.scalar(select(func.count()).select_from(DuplicateSuggestion))
     assert persisted == 0
+
+
+# ------------------------------------------------------------------
+# AI Difficulty Estimation
+# ------------------------------------------------------------------
+
+
+def test_create_issue_auto_estimates_difficulty(
+    client: TestClient, register_and_login, issue_project, fixed_difficulty
+):
+    _, project = issue_project
+    _, token = register_and_login("issues_difficulty@example.com", "issues_difficulty")
+
+    response = client.post(
+        f"/api/projects/{project.id}/issues",
+        json={"title": "Hard bug", "description": "Very hard to fix."},
+        headers=_auth_headers(token),
+    )
+
+    assert response.status_code == 201, response.text
+    data = response.json()
+    assert data["difficulty"] == "advanced"
+    assert data["difficulty_confidence"] == 0.9
+    assert data["difficulty_manual_override"] is False
+
+
+def test_estimate_difficulty_endpoint(
+    client: TestClient, register_and_login, issue_project, fixed_difficulty
+):
+    _, project = issue_project
+    _, token = register_and_login("issues_est@example.com", "issues_est")
+    headers = _auth_headers(token)
+
+    created = client.post(
+        f"/api/projects/{project.id}/issues",
+        json={"title": "Something", "description": "Something here."},
+        headers=headers,
+    ).json()
+
+    response = client.post(
+        f"/api/projects/{project.id}/issues/{created['id']}/estimate",
+        headers=headers,
+    )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["difficulty"] == "advanced"
+    assert data["confidence"] == 0.9
+    assert data["reasoning"]
+
+    # Issue is updated with the re-estimated difficulty
+    issue = client.get(
+        f"/api/projects/{project.id}/issues/{created['id']}",
+        headers=headers,
+    ).json()
+    assert issue["difficulty"] == "advanced"
+
+
+def test_override_difficulty_endpoint(
+    client: TestClient, register_and_login, issue_project, fixed_difficulty
+):
+    _, project = issue_project
+    _, token = register_and_login("issues_ovr@example.com", "issues_ovr")
+    headers = _auth_headers(token)
+
+    created = client.post(
+        f"/api/projects/{project.id}/issues",
+        json={"title": "Something", "description": "Something here."},
+        headers=headers,
+    ).json()
+
+    response = client.patch(
+        f"/api/projects/{project.id}/issues/{created['id']}/difficulty",
+        json={"difficulty": "expert"},
+        headers=headers,
+    )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["difficulty"] == "expert"
+    assert data["difficulty_confidence"] == 1.0
+    assert data["difficulty_manual_override"] is True
+
+
+def test_override_difficulty_requires_author(
+    client: TestClient, register_and_login, issue_project
+):
+    _, project = issue_project
+    _, token = register_and_login("issues_ovr2@example.com", "issues_ovr2")
+    _, other_token = register_and_login("issues_ovr3@example.com", "issues_ovr3")
+
+    created = client.post(
+        f"/api/projects/{project.id}/issues",
+        json={"title": "Mine", "description": "My issue."},
+        headers=_auth_headers(token),
+    ).json()
+
+    response = client.patch(
+        f"/api/projects/{project.id}/issues/{created['id']}/difficulty",
+        json={"difficulty": "beginner"},
+        headers=_auth_headers(other_token),
+    )
+
+    assert response.status_code == 403
+
+
+def test_estimate_difficulty_unknown_issue_returns_404(
+    client: TestClient, register_and_login, issue_project
+):
+    _, project = issue_project
+    _, token = register_and_login("issues_est404@example.com", "issues_est404")
+
+    response = client.post(
+        f"/api/projects/{project.id}/issues/{uuid.uuid4()}/estimate",
+        headers=_auth_headers(token),
+    )
+
+    assert response.status_code == 404

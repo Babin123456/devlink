@@ -16,6 +16,7 @@ from app.schemas.issue import (
     IssueUpdate,
 )
 from app.services.duplicate_detection_service import DuplicateDetectionService
+from app.services.issue_difficulty_service import IssueDifficultyService
 
 
 class IssueService:
@@ -31,8 +32,16 @@ class IssueService:
         issue: IssueCreate,
     ) -> Issue:
         """
-        Create a new issue and generate its embedding for future duplicate detection.
+        Create a new issue, estimate its difficulty, and generate its
+        embedding for future duplicate detection.
         """
+        # Run AI difficulty estimation
+        difficulty_result = IssueDifficultyService.estimate_difficulty(
+            title=issue.title,
+            description=issue.description,
+            labels=issue.labels,
+        )
+
         # Generate embedding for the issue text
         embedding_text = f"{issue.title}\n\n{issue.description}"
         embedding = DuplicateDetectionService.generate_embedding(embedding_text)
@@ -44,6 +53,9 @@ class IssueService:
             description=issue.description,
             priority=issue.priority,
             labels=issue.labels,
+            difficulty=difficulty_result.difficulty,
+            difficulty_confidence=difficulty_result.confidence,
+            difficulty_manual_override=False,
             embedding=(
                 DuplicateDetectionService.embedding_to_json(embedding)
                 if embedding
@@ -155,9 +167,9 @@ class IssueService:
 
         checked_count = (
             db.scalar(
-                select(func.count()).select_from(Issue).where(
-                    Issue.project_id == project_id
-                )
+                select(func.count())
+                .select_from(Issue)
+                .where(Issue.project_id == project_id)
             )
             or 0
         )

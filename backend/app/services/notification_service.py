@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from app.utils.time import utcnow
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy import func, select
@@ -14,7 +14,7 @@ from app.schemas.notification import (
     NotificationCreate,
     NotificationUpdate,
 )
-
+from app.core.cache import cached
 
 class NotificationService:
     """
@@ -75,6 +75,22 @@ class NotificationService:
         )
 
     @staticmethod
+    def create_notification(
+        db: Session,
+        recipient_id: uuid.UUID,
+        sender_id: uuid.UUID | None,
+        notification: NotificationCreate,
+    ) -> Notification:
+        db_notification = Notification(
+            sender_id=sender_id,
+            **notification.model_dump()
+        )
+        db.add(db_notification)
+        db.flush()
+        db.refresh(db_notification)
+        return db_notification
+
+    @staticmethod
     def get_notification(
         db: Session,
         notification_id: uuid.UUID,
@@ -114,11 +130,11 @@ class NotificationService:
         return list(db.scalars(stmt))
 
     @staticmethod
+    @cached(ttl=30, key_prefix="notifications:unread_count")
     def unread_count(
         db: Session,
         recipient_id: uuid.UUID,
     ) -> int:
-
         stmt = (
             select(func.count())
             .select_from(Notification)
@@ -137,7 +153,7 @@ class NotificationService:
     ) -> Notification:
 
         db_notification.is_read = True
-        db_notification.read_at = datetime.utcnow()
+        db_notification.read_at = utcnow()
 
         db.flush()
         db.refresh(db_notification)
@@ -159,7 +175,7 @@ class NotificationService:
 
         for notification in notifications:
             notification.is_read = True
-            notification.read_at = datetime.utcnow()
+            notification.read_at = utcnow()
 
         db.flush()
 
@@ -188,6 +204,69 @@ class NotificationService:
 
         db.delete(db_notification)
         db.flush()
+
+    @staticmethod
+    def track_click(
+        db: Session,
+        db_notification: Notification,
+    ) -> Notification:
+        db_notification.clicked_at = utcnow()
+        if not db_notification.is_read:
+            db_notification.is_read = True
+            db_notification.read_at = utcnow()
+        db.flush()
+        db.refresh(db_notification)
+        return db_notification
+
+    @staticmethod
+    def track_delivered(
+        db: Session,
+        db_notification: Notification,
+    ) -> Notification:
+        db_notification.delivered_at = utcnow()
+        from app.models.notification import NotificationStatus
+        db_notification.status = NotificationStatus.SENT
+        db.flush()
+        db.refresh(db_notification)
+        return db_notification
+
+    @staticmethod
+    def get_delivery_analytics(db: Session) -> dict:
+        total_sent = db.scalar(
+            select(func.count(Notification.id)).where(Notification.sent_at.isnot(None))
+        ) or 0
+        total_delivered = db.scalar(
+            select(func.count(Notification.id)).where(Notification.delivered_at.isnot(None))
+        ) or 0
+        total_read = db.scalar(
+            select(func.count(Notification.id)).where(Notification.read_at.isnot(None))
+        ) or 0
+        total_clicked = db.scalar(
+            select(func.count(Notification.id)).where(Notification.clicked_at.isnot(None))
+        ) or 0
+        from app.models.notification import NotificationStatus
+        total_failed = db.scalar(
+            select(func.count(Notification.id)).where(Notification.status == NotificationStatus.FAILED)
+        ) or 0
+
+        delivery_rate = (total_delivered / total_sent * 100) if total_sent > 0 else 0.0
+        read_rate = (total_read / total_delivered * 100) if total_delivered > 0 else 0.0
+        click_rate = (total_clicked / total_read * 100) if total_read > 0 else 0.0
+
+        return {
+            "metrics": {
+                "sent": total_sent,
+                "delivered": total_delivered,
+                "read": total_read,
+                "clicked": total_clicked,
+                "failed": total_failed,
+            },
+            "rates": {
+                "delivery_rate_pct": round(delivery_rate, 2),
+                "read_rate_pct": round(read_rate, 2),
+                "click_rate_pct": round(click_rate, 2),
+            },
+        }
 
     @staticmethod
     def enqueue(
@@ -221,3 +300,61 @@ class NotificationService:
         }
 
         send_notification_task.delay(payload)
+
+    @staticmethod
+    def get_preferences(
+        db: Session,
+        user_id: uuid.UUID,
+    ):
+        from app.models.notification import NotificationPreference
+        pref = db.scalar(
+            select(NotificationPreference).where(NotificationPreference.user_id == user_id)
+        )
+        if not pref:
+            now = utcnow()
+            pref = NotificationPreference(
+                id=uuid.uuid4(),
+                user_id=user_id,
+                email_enabled=True,
+                websocket_enabled=True,
+                database_enabled=True,
+                messages=True,
+                team_invitations=True,
+                project_updates=True,
+                mentions=True,
+                system_announcements=True,
+                email_messages=True,
+                email_team_invitations=True,
+                email_project_updates=True,
+                email_mentions=True,
+                email_system_announcements=True,
+                invitations=True,
+                role_changes=True,
+                marketing_emails=False,
+                system_alerts=True,
+                updated_at=now,
+            )
+            db.add(pref)
+            db.commit()
+            db.refresh(pref)
+        return pref
+
+    @staticmethod
+    def update_preferences(
+        db: Session,
+        user_id: uuid.UUID,
+        update_in: Any,
+    ):
+        from app.models.notification import NotificationPreference
+        pref = NotificationService.get_preferences(db, user_id)
+        data = update_in.model_dump(exclude_unset=True)
+
+        for key, value in data.items():
+            if hasattr(pref, key) and value is not None:
+                setattr(pref, key, value)
+
+        pref.updated_at = utcnow()
+        db.add(pref)
+        db.commit()
+        db.refresh(pref)
+        return pref

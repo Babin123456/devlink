@@ -23,7 +23,7 @@ def _register_user(client: TestClient, email: str, username: str):
             "last_name": "User",
             "email": email,
             "username": username,
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
 
@@ -34,7 +34,7 @@ def test_login_creates_refresh_token_in_db():
 
     res = client.post(
         "/api/auth/login",
-        json={"email": "login_test@example.com", "password": "Password123!"},
+        json={"email": "login_test@example.com", "password": "Vermilion-Kestrel97!"},
         headers={"User-Agent": "Pytest-Client"},
     )
     assert res.status_code == 200
@@ -56,7 +56,7 @@ def test_refresh_token_rotation():
 
     login_res = client.post(
         "/api/auth/login",
-        json={"email": "rotate_test@example.com", "password": "Password123!"},
+        json={"email": "rotate_test@example.com", "password": "Vermilion-Kestrel97!"},
     )
     old_refresh_token = login_res.json()["refresh_token"]
 
@@ -87,7 +87,7 @@ def test_refresh_token_reuse_prevention():
 
     login_res = client.post(
         "/api/auth/login",
-        json={"email": "reuse_test@example.com", "password": "Password123!"},
+        json={"email": "reuse_test@example.com", "password": "Vermilion-Kestrel97!"},
     )
     initial_refresh_token = login_res.json()["refresh_token"]
 
@@ -120,7 +120,7 @@ def test_get_active_sessions():
 
     login_res = client.post(
         "/api/auth/login",
-        json={"email": "sessions_test@example.com", "password": "Password123!"},
+        json={"email": "sessions_test@example.com", "password": "Vermilion-Kestrel97!"},
     )
     access_token = login_res.json()["access_token"]
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -138,7 +138,7 @@ def test_revoke_individual_session():
 
     login_res = client.post(
         "/api/auth/login",
-        json={"email": "revonesess@example.com", "password": "Password123!"},
+        json={"email": "revonesess@example.com", "password": "Vermilion-Kestrel97!"},
     )
     access_token = login_res.json()["access_token"]
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -159,11 +159,11 @@ def test_revoke_all_sessions():
 
     login_res1 = client.post(
         "/api/auth/login",
-        json={"email": "revall@example.com", "password": "Password123!"},
+        json={"email": "revall@example.com", "password": "Vermilion-Kestrel97!"},
     )
     login_res2 = client.post(
         "/api/auth/login",
-        json={"email": "revall@example.com", "password": "Password123!"},
+        json={"email": "revall@example.com", "password": "Vermilion-Kestrel97!"},
     )
     access_token = login_res2.json()["access_token"]
     headers = {"Authorization": f"Bearer {access_token}"}

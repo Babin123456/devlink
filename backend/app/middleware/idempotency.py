@@ -5,6 +5,7 @@ from typing import Callable
 import redis
 from fastapi import Request, Response
 from fastapi.routing import APIRoute
+from jose import JWTError, jwt
 
 from app.core.config import settings
 
@@ -16,6 +17,23 @@ try:
 except Exception as e:
     logger.error(f"Failed to connect to Redis for idempotency: {e}")
     redis_client = None
+
+
+def _extract_user_id(request: Request) -> str:
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        try:
+            payload = jwt.decode(
+                auth_header[7:],
+                settings.SECRET_KEY,
+                algorithms=[settings.JWT_ALGORITHM],
+            )
+            sub = payload.get("sub")
+            if sub:
+                return str(sub)
+        except JWTError:
+            pass
+    return "anonymous"
 
 
 class IdempotentRoute(APIRoute):
@@ -41,10 +59,7 @@ class IdempotentRoute(APIRoute):
                 )
                 return await original_route_handler(request)
 
-            # Ensure uniqueness by user if auth exists, otherwise just key
-            user_id = "anonymous"
-            if "Authorization" in request.headers:
-                user_id = "authenticated"
+            user_id = _extract_user_id(request)
 
             cache_key = f"idempotent:{user_id}:{idempotency_key}"
 

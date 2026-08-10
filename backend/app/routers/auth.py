@@ -25,9 +25,11 @@ from sqlalchemy.orm import Session
 
 from app.middleware.rate_limit import (
     limiter,
+    AUTH_LIMIT,
     LOGIN_LIMIT,
-    PASSWORD_RESET_LIMIT,
     REGISTER_LIMIT,
+    PASSWORD_RESET_LIMIT,
+    VERIFY_EMAIL_LIMIT,
 )
 from app.dependencies import get_database
 from app.schemas.auth import (
@@ -50,6 +52,7 @@ from app.schemas.auth import (
 )
 from app.schemas.user import CurrentUser
 from app.services.auth_service import AuthService
+from app.services.email_service import EmailService
 
 router = APIRouter(
     tags=["Authentication"],
@@ -234,7 +237,7 @@ from app.core.config import settings
     response_model=AuthResponse,
     summary="GitHub OAuth Login",
 )
-@limiter.limit(LOGIN_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 async def github_login(
     request: Request,
     payload: GitHubLoginRequest,
@@ -359,7 +362,7 @@ async def linkedin_authorize():
     response_model=AuthResponse,
     summary="LinkedIn OAuth Login",
 )
-@limiter.limit(LOGIN_LIMIT)
+@limiter.limit(AUTH_LIMIT)
 async def linkedin_login(
     request: Request,
     payload: LinkedInLoginRequest,
@@ -444,7 +447,7 @@ async def linkedin_login(
     response_model=CurrentUserResponse,
     summary="Current authenticated user",
 )
-@limiter.limit("30/minute")
+@limiter.limit(AUTH_LIMIT)
 def me(
     request: Request,
     user_id: str = Depends(get_current_user_id),
@@ -466,7 +469,7 @@ def me(
     response_model=AuthResponse,
     summary="Refresh JWT",
 )
-@limiter.limit("10/minute")
+@limiter.limit(AUTH_LIMIT)
 def refresh(
     request: Request,
     payload: RefreshTokenRequest,
@@ -503,7 +506,7 @@ def refresh(
     response_model=LogoutResponse,
     summary="Logout",
 )
-@limiter.limit("10/minute")
+@limiter.limit(AUTH_LIMIT)
 def logout(
     request: Request,
     payload: LogoutRequest,
@@ -671,6 +674,7 @@ from app.schemas.auth import (  # noqa: E402
     SuccessResponse,
     VerifyEmailRequest,
     VerifyEmailResponse,
+    VerifyRecoveryTokenResponse,
     ResendVerificationEmailRequest,
 )
 
@@ -684,7 +688,7 @@ from app.schemas.auth import (  # noqa: E402
     response_model=SuccessResponse,
     summary="Change Password",
 )
-@limiter.limit("5/minute")
+@limiter.limit(AUTH_LIMIT)
 def change_password(
     request: Request,
     payload: ChangePasswordRequest,
@@ -717,12 +721,31 @@ def forgot_password(
     payload: ForgotPasswordRequest,
     db: Session = Depends(get_database),
 ):
-
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
     auth_service = AuthService(db)
 
     return auth_service.forgot_password(
-        payload.email,
+        email=payload.email,
+        ip_address=ip_address,
+        user_agent=user_agent,
     )
+
+
+@router.get(
+    "/verify-recovery-token",
+    response_model=VerifyRecoveryTokenResponse,
+    summary="Verify Recovery Token Status",
+    description="Validates a password recovery token without consuming it.",
+)
+@limiter.limit(PASSWORD_RESET_LIMIT)
+def verify_recovery_token(
+    request: Request,
+    token: str = Query(..., description="Recovery token string"),
+    db: Session = Depends(get_database),
+):
+    auth_service = AuthService(db)
+    return auth_service.verify_recovery_token(token)
 
 
 # ==========================================================
@@ -741,10 +764,14 @@ def reset_password(
     payload: ResetPasswordRequest,
     db: Session = Depends(get_database),
 ):
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
     auth_service = AuthService(db)
     return auth_service.reset_password(
         token=payload.token,
         new_password=payload.new_password,
+        ip_address=ip_address,
+        user_agent=user_agent,
     )
 
 
@@ -758,7 +785,7 @@ def reset_password(
     response_model=VerifyEmailResponse,
     summary="Verify Email",
 )
-@limiter.limit("5/minute")
+@limiter.limit(VERIFY_EMAIL_LIMIT)
 def verify_email(
     request: Request,
     payload: VerifyEmailRequest,
@@ -793,18 +820,12 @@ def verify_email(
     response_model=SuccessResponse,
     summary="Resend Verification Email",
 )
-@limiter.limit("3/hour")
+@limiter.limit(VERIFY_EMAIL_LIMIT)
 def resend_verification(
     request: Request,
     payload: ResendVerificationEmailRequest,
     db: Session = Depends(get_database),
 ):
-    """
-    Placeholder.
-
-    Email sending will be implemented after the
-    SMTP service is added.
-    """
 
     auth_service = AuthService(db)
 
@@ -818,11 +839,32 @@ def resend_verification(
             "message": ("If the account exists, a verification email has been sent."),
         }
 
-    # Generate verification token
-    token = create_verification_token(str(user.id))  # noqa: F841
-    create_verification_token(str(user.id))
-    # TODO:
-    # Send email via SMTP
+    if user.is_verified:
+        return {
+            "success": True,
+            "message": "Your email is already verified.",
+        }
+
+    token = create_verification_token(str(user.id))
+    verify_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+
+    html = f"""
+    <html>
+        <body>
+            <h2>Verify Your Email</h2>
+            <p>Click the link below to verify your email address:</p>
+            <p><a href="{verify_url}">Verify Email</a></p>
+            <p>This link expires in 24 hours.</p>
+            <br/>
+            <p>Thanks,<br/>The DevLink Team</p>
+        </body>
+    </html>
+    """
+    EmailService.send_email(
+        to_email=user.email,
+        subject="Verify Your Email - DevLink",
+        html_content=html,
+    )
 
     return {
         "success": True,

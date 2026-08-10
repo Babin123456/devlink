@@ -6,17 +6,21 @@ import { TopNavbar } from "./TopNavbar";
 import { RightPanel } from "./RightPanel";
 import { BottomNavigation } from "./BottomNavigation";
 import { FAB } from "./FAB";
+import { AnnouncementBanner } from "@/components/shared/AnnouncementBanner";
 import { SectionErrorBoundary } from "@/components/errors/SectionErrorBoundary";
+import { cn } from "@/lib/utils";
 
 export function DashboardLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isDashboard = pathname.endsWith("/dashboard") || pathname === "/";
 
   return (
-    <div className="grid h-screen w-full bg-background overflow-hidden
-      grid-cols-1 
-      md:grid-cols-[max-content_1fr] 
-      xl:grid-cols-[max-content_1fr_max-content]">
-      
+    <div
+      className={cn(
+        "grid h-screen w-full bg-background overflow-hidden grid-cols-1 md:grid-cols-[max-content_1fr]",
+        isDashboard ? "" : "xl:grid-cols-[max-content_1fr_max-content]",
+      )}
+    >
       {/* ─── Desktop & Tablet Sidebar ─────────────────────────────── */}
       <Sidebar />
 
@@ -25,13 +29,22 @@ export function DashboardLayout() {
 
       {/* ─── Main content column ──────────────────────────────────── */}
       <div className="flex min-w-0 flex-col relative h-screen overflow-hidden">
+        <AnnouncementBanner />
         <TopNavbar />
 
         <main
+          // The skip link's destination. tabIndex={-1} makes it focusable so
+          // the link can move focus here, not just the scroll position --
+          // otherwise the next Tab starts from the top of the document again.
+          id="main-content"
+          tabIndex={-1}
           className={[
             "flex-1 overflow-y-auto",
             // On mobile add bottom padding so bottom nav never obscures content
             "pb-16 md:pb-0",
+            // No focus ring: focus lands here programmatically, and a ring
+            // around the whole page reads as a rendering bug.
+            "outline-none",
           ].join(" ")}
         >
           <AnimatePresence mode="wait">
@@ -52,9 +65,11 @@ export function DashboardLayout() {
       </div>
 
       {/* ─── Desktop Right Activity Panel ─────────────────────────── */}
-      <SectionErrorBoundary sectionName="Right Activity Panel">
-        <RightPanel />
-      </SectionErrorBoundary>
+      {!isDashboard && (
+        <SectionErrorBoundary sectionName="Right Activity Panel">
+          <RightPanel />
+        </SectionErrorBoundary>
+      )}
 
       {/* ─── Mobile-only: Bottom Navigation & FAB ─────────────────── */}
       <BottomNavigation />

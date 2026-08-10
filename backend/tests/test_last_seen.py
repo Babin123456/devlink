@@ -15,9 +15,32 @@ from app.dependencies import get_database
 from app.main import app
 from app.models.user import User
 
+# SQLite setup for tests
+engine = create_engine(
+    "sqlite://",
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
+TestingSessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
+
+def override_get_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+@pytest.fixture(autouse=True)
+def setup_db():
+    app.dependency_overrides[get_database] = override_get_db
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
+    app.dependency_overrides.clear()
+
 # ==================== Helper ====================
-
-
 def _register_and_login(
     client: TestClient, email: str, username: str
 ) -> tuple[str, str]:
@@ -30,10 +53,10 @@ def _register_and_login(
             "last_name": "User",
             "email": email,
             "username": username,
-            "password": "Passw0rd!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
-    r = client.post("/api/auth/login", json={"email": email, "password": "Passw0rd!"})
+    r = client.post("/api/auth/login", json={"email": email, "password": "Vermilion-Kestrel97!"})
     token = r.json()["access_token"]
     me = client.get("/api/users/me", headers={"Authorization": f"Bearer {token}"})
     return me.json()["id"], token

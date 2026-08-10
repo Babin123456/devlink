@@ -61,9 +61,10 @@ export function NotificationCenter() {
 
   const { data: notifications = [] } = useQuery({
     queryKey: ["notifications"],
+    // api.get resolves to the parsed body directly; there is no `.data`
+    // envelope to unwrap, and unwrapping one left the panel permanently empty.
     queryFn: async () => {
-      const res = await api.get("/api/notifications/");
-      return res.data as Notification[];
+      return api.get<Notification[]>("/api/notifications/");
     },
     enabled: !!user,
   });
@@ -103,7 +104,7 @@ export function NotificationCenter() {
     const token = localStorage.getItem("token") || "";
     // Connect to collab ws as that handles personal messages too? Actually there's websocket_collab and websocket_chat.
     // For now we'll just periodically refetch or use simple polling if ws is not fully configured for notifications globally.
-    // Assuming backend emits to /ws/chat?token= or similar. 
+    // Assuming backend emits to /ws/chat?token= or similar.
     // We'll rely on react-query polling or simple invalidation.
     const interval = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });

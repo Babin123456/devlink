@@ -217,7 +217,9 @@ export const OrganizationAuditLogs: React.FC<OrganizationAuditLogsProps> = ({ or
                   </td>
                   <td className="px-4 py-3 text-gray-200 font-sans">{log.description || "—"}</td>
                   <td className="px-4 py-3 text-gray-400">{log.entity_type || "organization"}</td>
-                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{log.ip_address || "internal"}</td>
+                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                    {log.ip_address || "internal"}
+                  </td>
                 </tr>
               ))
             )}

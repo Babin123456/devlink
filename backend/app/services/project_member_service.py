@@ -152,12 +152,13 @@ class ProjectMemberService:
         AuditLogService.create_log(
             db=db,
             actor_id=actor_user.id,
-            action=AuditAction.ROLE_UPDATED,
+            action=AuditAction.PROJECT_MEMBER_ROLE_UPDATED,
             entity_type="project_member",
             entity_id=str(pm.id),
             project_id=project_id,
             target_user_id=target_user_id,
             description=f"Updated member {target_user_id} role to {new_role.value}",
+            new_values={"role": new_role.value},
         )
 
         return pm
@@ -244,12 +245,14 @@ class ProjectMemberService:
         AuditLogService.create_log(
             db=db,
             actor_id=current_owner.id,
-            action=AuditAction.PROJECT_UPDATED,
+            action=AuditAction.PROJECT_OWNERSHIP_TRANSFERRED,
             entity_type="project",
             entity_id=str(project_id),
             project_id=project_id,
             target_user_id=new_owner_id,
             description=f"Transferred project ownership to {new_owner.username}",
+            old_values={"owner_id": str(previous_owner_id)},
+            new_values={"owner_id": str(new_owner_id)},
         )
 
         return project
@@ -294,7 +297,7 @@ class ProjectMemberService:
         AuditLogService.create_log(
             db=db,
             actor_id=actor_user.id,
-            action=AuditAction.MEMBER_REMOVED,
+            action=AuditAction.PROJECT_MEMBER_REMOVED,
             entity_type="project_member",
             entity_id=str(target_user_id),
             project_id=project_id,

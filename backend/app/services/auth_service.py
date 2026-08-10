@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+import uuid
 from uuid import UUID
 
 from app.services.email_service import EmailService
@@ -9,6 +11,8 @@ from app.services.suspicious_login_service import SuspiciousLoginService
 from app.services.audit_log_service import AuditLogService
 from app.models.audit_log import AuditAction
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 # pyrefly: ignore [missing-import]
 
@@ -128,7 +132,11 @@ class AuthService:
 
         payload.username = validate_username(payload.username)
 
-        validate_password(payload.password)
+        validate_password(
+            payload.password,
+            username=payload.username,
+            email=payload.email,
+        )
 
         if self.get_user_by_email(payload.email):
             raise HTTPException(
@@ -179,6 +187,7 @@ class AuthService:
         user = self.get_user_by_email(payload.email)
 
         if not user:
+            logger.warning("Login failed: user not found for email")
             # Log failed login and check suspicious signals
             AuditLogService.create_log(
                 db=self.db,
@@ -209,6 +218,7 @@ class AuthService:
             payload.password,
             user.password_hash,
         ):
+            logger.warning("Login failed: password mismatch for user %s", user.id)
             # Log failed login and check suspicious signals
             AuditLogService.create_log(
                 db=self.db,
@@ -237,6 +247,7 @@ class AuthService:
                 detail="Invalid email or password.",
             )
         if not user.is_active:
+            logger.warning("Login blocked: inactive account %s", user.id)
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Account is disabled.",
@@ -277,6 +288,19 @@ class AuthService:
 
         self.db.flush()
 
+        if user.mfa_enabled:
+            mfa_token = create_access_token(
+                str(user.id),
+                {"type": "mfa_pending"},
+            )
+            self.db.commit()
+            return {
+                "success": True,
+                "mfa_required": True,
+                "mfa_token": mfa_token,
+                "message": "MFA verification required.",
+            }
+
         access_token = create_access_token(
             str(user.id),
             {
@@ -305,6 +329,71 @@ class AuthService:
         return {
             "success": True,
             "message": "Login successful.",
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "user": user,
+        }
+
+    def complete_mfa_login(
+        self,
+        mfa_token: str,
+        code: str,
+        user_agent: Optional[str] = None,
+        ip_address: Optional[str] = None,
+    ):
+        try:
+            payload = decode_token(mfa_token)
+            if payload.get("type") != "mfa_pending":
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid MFA session token.",
+                )
+            user_id_str = payload.get("sub")
+            user_id = UUID(user_id_str)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired MFA session token.",
+            )
+
+        user = self.db.get(User, user_id)
+        if not user or not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User account unavailable.",
+            )
+
+        from app.services.mfa_service import MFAService
+        verified = MFAService.verify_user_mfa(self.db, user, code)
+        if not verified:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid verification code or recovery code.",
+            )
+
+        access_token = create_access_token(
+            str(user.id),
+            {
+                "username": user.username,
+            },
+        )
+        refresh_token = create_refresh_token(str(user.id))
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+        RefreshTokenService.create_token_for_user(
+            db=self.db,
+            user_id=user.id,
+            token_str=refresh_token,
+            expires_at=expires_at,
+            user_agent=user_agent,
+            ip_address=ip_address,
+        )
+        self.db.commit()
+
+        return {
+            "success": True,
+            "message": "MFA authentication successful.",
             "access_token": access_token,
             "refresh_token": refresh_token,
             "token_type": "bearer",
@@ -487,10 +576,6 @@ class AuthService:
         )
 
         refresh_token = create_refresh_token(str(user.id))
-        expires_at = datetime.now(timezone.utc) + timedelta(
-            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
-        )
-        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
         expires_at = datetime.now(timezone.utc) + timedelta(
             days=settings.REFRESH_TOKEN_EXPIRE_DAYS
         )
@@ -884,7 +969,11 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Current password is incorrect.",
             )
-        validate_password(new_password)
+        validate_password(
+            new_password,
+            username=user.username,
+            email=user.email,
+        )
 
         if self._is_password_reused(user, new_password):
             raise HTTPException(
@@ -978,45 +1067,113 @@ class AuthService:
         }
 
     # =====================================================
-    # Forgot Password
+    # =====================================================
+    # Forgot Password & Account Recovery (#587)
     # =====================================================
 
-    def forgot_password(self, email: str):
+    def forgot_password(
+        self,
+        email: str,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
+    ):
+        import hashlib
+        from app.models.password_reset_token import PasswordResetToken
 
         user = self.get_user_by_email(email)
 
+        # Generic response to prevent account enumeration
+        generic_msg = "If an account associated with this email exists, a password reset link has been sent."
+
         if not user:
-            return {
-                "success": True,
-                "message": ("If the account exists, a reset email has been sent."),
-            }
+            return {"success": True, "message": generic_msg}
+
+        jti = str(uuid.uuid4())
         pwd_hash_frag = user.password_hash[-10:] if user.password_hash else "nohash"
+        expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
 
         token = _create_token(
             subject=str(user.id),
             expires_delta=timedelta(minutes=15),
             token_type="reset_password",
-            extra={"hash_frag": pwd_hash_frag},
+            extra={"jti": jti, "hash_frag": pwd_hash_frag},
         )
+
+        token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+        # Store single-use recovery token record
+        token_record = PasswordResetToken(
+            id=uuid.uuid4(),
+            user_id=user.id,
+            jti=jti,
+            token_hash=token_hash,
+            expires_at=expires_at,
+            is_used=False,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            created_at=datetime.now(timezone.utc),
+        )
+        self.db.add(token_record)
+        self.db.flush()
 
         reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
 
         EmailService.send_notification_email(
             to_email=user.email,
             title="Reset Your Password",
-            message="You requested a password reset. This link will expire in 15 minutes.",
+            message="You requested a password reset for your DevLink account. This link will expire in 15 minutes.",
             action_url=reset_url,
         )
+
+        AuditLogService.create_log(
+            db=self.db,
+            actor_id=user.id,
+            action=AuditAction.PASSWORD_RESET_REQUESTED,
+            entity_type="user",
+            entity_id=str(user.id),
+            description=f"Password recovery requested for {user.email}",
+            ip_address=ip_address,
+            user_agent=user_agent,
+        )
+        self.db.commit()
 
         event_bus.publish(
             "PASSWORD_RESET_REQUESTED",
             email=user.email,
         )
 
-        return {
-            "success": True,
-            "message": ("Password reset email sent."),
-        }
+        return {"success": True, "message": generic_msg}
+
+    def verify_recovery_token(self, token: str) -> dict:
+        from app.models.password_reset_token import PasswordResetToken
+
+        try:
+            payload = decode_token(token)
+            if payload.get("type") not in ("reset", "reset_password"):
+                return {"valid": False, "message": "Invalid token type."}
+            user_id = payload.get("sub")
+            jti = payload.get("jti")
+            hash_frag = payload.get("hash_frag")
+        except Exception:
+            return {"valid": False, "message": "Invalid or expired recovery token."}
+
+        user = self.db.get(User, UUID(user_id)) if user_id else None
+        if not user:
+            return {"valid": False, "message": "User account associated with token not found."}
+
+        if jti:
+            t_rec = self.db.scalar(select(PasswordResetToken).where(PasswordResetToken.jti == jti))
+            if t_rec:
+                if t_rec.is_used:
+                    return {"valid": False, "message": "This recovery token has already been used."}
+                if t_rec.expires_at and t_rec.expires_at < datetime.now(timezone.utc):
+                    return {"valid": False, "message": "This recovery token has expired."}
+
+        expected_frag = user.password_hash[-10:] if user.password_hash else "nohash"
+        if hash_frag and hash_frag != expected_frag:
+            return {"valid": False, "message": "This recovery token has already been used."}
+
+        return {"valid": True, "message": "Recovery token is valid.", "email": user.email}
 
     # =====================================================
     # Reset Password
@@ -1026,21 +1183,40 @@ class AuthService:
         self,
         token: str,
         new_password: str,
+        ip_address: Optional[str] = None,
+        user_agent: Optional[str] = None,
     ):
+        from app.models.password_reset_token import PasswordResetToken
+
         try:
             payload = decode_token(token)
             if payload.get("type") not in ("reset", "reset_password"):
                 raise ValueError("Invalid token type")
             user_id = payload.get("sub")
+            jti = payload.get("jti")
             hash_frag = payload.get("hash_frag")
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid or expired reset token.",
             )
-        validate_password(new_password)
 
         user = self.get_current_user(user_id)
+
+        token_record = None
+        if jti:
+            token_record = self.db.scalar(select(PasswordResetToken).where(PasswordResetToken.jti == jti))
+            if token_record:
+                if token_record.is_used:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="This reset token has already been used.",
+                    )
+                if token_record.expires_at and token_record.expires_at < datetime.now(timezone.utc):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="This reset token has expired.",
+                    )
 
         expected_frag = user.password_hash[-10:] if user.password_hash else "nohash"
         if hash_frag and hash_frag != expected_frag:
@@ -1048,16 +1224,43 @@ class AuthService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="This reset token has already been used.",
             )
+
+        validate_password(
+            new_password,
+            username=user.username,
+            email=user.email,
+        )
+
         if self._is_password_reused(user, new_password):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="You cannot reuse one of your last 5 passwords.",
             )
+
         self._save_password_history(user)
 
         user.password_hash = hash_password(new_password)
+        self.db.add(user)
 
-        self.db.flush()
+        if token_record:
+            token_record.is_used = True
+            token_record.used_at = datetime.now(timezone.utc)
+            self.db.add(token_record)
+
+        RefreshTokenService.revoke_all_tokens(self.db, user.id)
+
+        AuditLogService.create_log(
+            db=self.db,
+            actor_id=user.id,
+            action=AuditAction.PASSWORD_RESET_COMPLETED,
+            entity_type="user",
+            entity_id=str(user.id),
+            description=f"Account password successfully reset for {user.email}",
+            ip_address=ip_address,
+            user_agent=user_agent,
+        )
+
+        self.db.commit()
 
         event_bus.publish(
             "PASSWORD_RESET_COMPLETED",
@@ -1066,7 +1269,7 @@ class AuthService:
 
         return {
             "success": True,
-            "message": ("Password has been reset."),
+            "message": "Password has been successfully reset. You can now log in with your new password.",
         }
 
     # =====================================================

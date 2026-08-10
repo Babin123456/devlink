@@ -121,12 +121,12 @@ class AuthResponse(BaseModel):
     success: bool = True
     message: str
 
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-    user: Optional[UserResponse] = None
-
-    user: CurrentUser
+    access_token: Optional[str] = None
+    refresh_token: Optional[str] = None
+    token_type: Optional[str] = "bearer"
+    mfa_required: bool = False
+    mfa_token: Optional[str] = None
+    user: Optional[CurrentUser] = None
 
 
 # ==========================================================
@@ -180,6 +180,12 @@ class ForgotPasswordRequest(BaseModel):
 class ForgotPasswordResponse(BaseModel):
     success: bool = True
     message: str
+
+
+class VerifyRecoveryTokenResponse(BaseModel):
+    valid: bool = True
+    message: str
+    email: Optional[str] = None
 
 
 # ==========================================================
