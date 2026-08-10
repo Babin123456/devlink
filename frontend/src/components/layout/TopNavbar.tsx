@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   Bell,
   MessageSquare,
@@ -18,6 +17,7 @@ import {
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/hooks/useSidebar";
 import { Avatar } from "@/components/shared/primitives";
+import { cn } from "@/lib/utils";
 
 import { currentUser, builders, projects, flares } from "@/mocks/seed";
 import { useTheme } from "@/hooks/useTheme";
@@ -163,7 +163,15 @@ export function TopNavbar() {
             <p className="text-[12px] font-semibold leading-tight text-foreground flex items-center gap-1">
               {currentUser.name}
               {currentUser.verified && (
-                <BadgeCheck className="text-primary h-3 w-3" aria-label="Verified User" />
+                <BadgeCheck
+                  className={cn(
+                    "h-3 w-3 shrink-0",
+                    currentUser.premium
+                      ? "text-amber-500 fill-amber-500/10 animate-pulse"
+                      : "text-primary",
+                  )}
+                  aria-label={currentUser.premium ? "Premium Verified User" : "Verified User"}
+                />
               )}
             </p>
             <p className="text-[11px] leading-tight text-muted-foreground">View Profile</p>

@@ -21,8 +21,8 @@ interface ProjectVersion {
 }
 
 interface DiffField {
-  old: any;
-  new: any;
+  old: unknown;
+  new: unknown;
 }
 
 interface CompareResponse {
