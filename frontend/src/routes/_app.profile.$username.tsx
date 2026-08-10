@@ -244,7 +244,6 @@ function ProfilePage() {
           userProfile={{
             avatar: avatarUrl,
             banner: bannerUrl ?? undefined,
-            banner: bannerUrl || undefined,
             bio: b.bio,
             skills: b.profileSkills?.map((s) => s.name) ?? b.skills,
             experience: b.experienceLevel || b.role || b.company,
@@ -622,7 +621,6 @@ function ProfilePage() {
           title="Upload Cover Banner"
         />
       )}
-    </div>
     </div>
   );
 }
