@@ -17,11 +17,11 @@ import {
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useSidebar } from "@/hooks/useSidebar";
 import { Avatar } from "@/components/shared/primitives";
+import { cn } from "@/lib/utils";
 
 import { currentUser, builders, projects, flares } from "@/mocks/seed";
 import { useTheme } from "@/hooks/useTheme";
 import { NotificationCenter } from "@/components/shared/NotificationCenter";
-import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/useDebounce";

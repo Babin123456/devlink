@@ -139,6 +139,8 @@ function ProfilePage() {
         bio: "Product engineer. Ships fast, sleeps sometimes.",
         role: "Full Stack Developer",
         id: currentUser.id,
+        premium: currentUser.premium,
+        verified: currentUser.verified,
       }
     : builders.find((x) => x.handle === username);
   if (!b) throw notFound();
@@ -242,7 +244,6 @@ function ProfilePage() {
           userProfile={{
             avatar: avatarUrl,
             banner: bannerUrl || undefined,
-            banner: bannerUrl ?? undefined,
             bio: b.bio,
             skills: b.profileSkills?.map((s) => s.name) ?? b.skills,
             experience: b.experienceLevel || b.role || b.company,
@@ -568,38 +569,29 @@ function ProfilePage() {
             <p className="text-[13px] font-semibold text-foreground">Projects</p>
             <ul className="mt-3 divide-y divide-border">
               {projects.slice(0, 4).map((p) => (
-                <li key={p.id} className="flex items-center gap-3 py-2">
-                  <span className="grid h-8 w-8 place-items-center rounded-md bg-muted text-lg">
-                    {p.icon}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-semibold text-foreground">{p.name}</p>
-        <Card className="p-4 lg:col-span-2">
-          <p className="text-[13px] font-semibold text-foreground">Projects</p>
-          <ul className="mt-3 divide-y divide-border">
-            {projects.slice(0, 4).map((p) => (
-              <li key={p.id} className="py-2">
-                <Link
-                  to="/projects/$projectId"
-                  params={{ projectId: p.id }}
-                  onClick={() => {
-                    if (b.id) {
-                      analyticsApi.trackClick("project", b.id, p.id).catch(() => {});
-                    }
-                  }}
-                  className="flex items-center gap-3 hover:bg-muted/50 p-1.5 rounded-lg transition-colors w-full text-left"
-                >
-                  <span className="grid h-8 w-8 place-items-center rounded-md bg-muted text-lg shrink-0">
-                    {p.icon}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-semibold text-foreground hover:text-primary transition-colors">
-                      {p.name}
-                    </p>
-                    <p className="truncate text-[11px] text-muted-foreground">
-                      {p.stack.join(" · ")}
-                    </p>
-                  </div>
+                <li key={p.id} className="py-2">
+                  <Link
+                    to="/projects/$projectId"
+                    params={{ projectId: p.id }}
+                    onClick={() => {
+                      if (b.id) {
+                        analyticsApi.trackClick("project", b.id, p.id).catch(() => {});
+                      }
+                    }}
+                    className="flex items-center gap-3 hover:bg-muted/50 p-1.5 rounded-lg transition-colors w-full text-left"
+                  >
+                    <span className="grid h-8 w-8 place-items-center rounded-md bg-muted text-lg shrink-0">
+                      {p.icon}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-semibold text-foreground hover:text-primary transition-colors">
+                        {p.name}
+                      </p>
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        {p.stack.join(" · ")}
+                      </p>
+                    </div>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -607,11 +599,6 @@ function ProfilePage() {
 
           <ActivityTimeline userId={b.id} />
         </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Card>
       </div>
       {!me && (
         <ReportUserModal

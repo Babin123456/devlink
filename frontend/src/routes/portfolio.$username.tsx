@@ -1,7 +1,6 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { analyticsApi } from "@/api/modules/analytics";
 import React, { useState, useEffect } from "react";
-import type { Builder } from "@/mocks/seed";
 import {
   MapPin,
   Calendar,
