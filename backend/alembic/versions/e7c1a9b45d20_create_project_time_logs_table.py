@@ -1,7 +1,7 @@
 """create project time logs table
 
 Revision ID: e7c1a9b45d20
-Revises: d4e5f6a7b8c9
+Revises: f2a8c61d97b5
 Create Date: 2026-08-10 20:10:00.000000
 
 """
@@ -14,7 +14,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 # revision identifiers, used by Alembic.
 revision: str = "e7c1a9b45d20"
-down_revision: Union[str, Sequence[str], None] = "d4e5f6a7b8c9"
+down_revision: Union[str, Sequence[str], None] = "f2a8c61d97b5"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
