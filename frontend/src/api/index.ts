@@ -65,6 +65,14 @@ export type {
 export { teamMatchApi } from "./modules/teamMatch";
 export { contributorMatchingApi } from "./modules/contributorMatching";
 export type { ContributorMatchResponse, MatchedContributor } from "./modules/contributorMatching";
+export { reputationApi } from "./modules/reputation";
+export type {
+  ReputationLog,
+  ReputationSummary,
+  LeaderboardEntry,
+  LeaderboardResponse,
+  AwardReputationInput,
+} from "./modules/reputation";
 export { repositoryQualityApi } from "./modules/repositoryQuality";
 export type {
   RepositoryQualityResponse,

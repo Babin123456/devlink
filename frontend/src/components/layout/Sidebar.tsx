@@ -74,6 +74,11 @@ export const SIDEBAR_SECTIONS: SidebarSectionProps[] = [
         icon: <Sparkles size={16} strokeWidth={2} />,
       },
       {
+        label: "Leaderboard",
+        to: "/leaderboard",
+        icon: <Trophy size={16} strokeWidth={2} />,
+      },
+      {
         label: "Connections",
         to: "/builders?tab=connections",
         icon: <Share2 size={16} strokeWidth={2} />,
