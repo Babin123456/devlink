@@ -26,6 +26,7 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { toast } from "sonner";
+import { TypoSection, TypoHeading } from "@/components/shared/Typography";
 import {
   builders,
   currentUser,
@@ -303,9 +304,9 @@ function PortfolioPage() {
           </div>
           <div className="space-y-4 flex-1">
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+              <TypoHeading as="h1">
                 {b.name}
-              </h1>
+              </TypoHeading>
               <p className={`text-base font-semibold mt-1 ${activeAccent.text}`}>{b.role}</p>
               <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 mt-3 text-xs text-slate-400">
                 <span className="flex items-center gap-1">
@@ -403,7 +404,7 @@ function PortfolioPage() {
                         {p.status}
                       </span>
                     </div>
-                    <h3 className="text-sm font-bold text-slate-100 mt-4">{p.name}</h3>
+                    <TypoSection>{p.name}</TypoSection>
                     <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
                       {p.description}
                     </p>
@@ -463,7 +464,7 @@ function PortfolioPage() {
         {prefs.showContact && (
           <section className="bg-slate-900/50 border border-slate-800/80 p-8 rounded-2xl space-y-6">
             <div className="text-center md:text-left">
-              <h2 className="text-xl font-bold tracking-tight">Hire or Message {b.name}</h2>
+              <TypoHeading as="h2">Hire or Message {b.name}</TypoHeading>
               <p className="text-xs text-slate-400 mt-1">
                 Fill out this secure form. Your inquiry will arrive directly in their DevLink
                 notification inbox.
@@ -581,9 +582,9 @@ function PortfolioPage() {
               className="w-24 h-24 rounded-full border border-stone-400 bg-stone-100 filter grayscale"
             />
             <div className="text-center md:text-left space-y-2">
-              <h1 className="text-4xl font-normal tracking-tight font-serif text-[#1c1a18]">
+              <TypoHeading as="h1">
                 {b.name}
-              </h1>
+              </TypoHeading>
               <p
                 className={`text-sm font-sans font-semibold tracking-wider uppercase ${activeAccent.text}`}
               >
@@ -638,9 +639,9 @@ function PortfolioPage() {
 
         {/* Skills Section */}
         <section className="space-y-4">
-          <h2 className="text-xs uppercase tracking-widest font-sans font-bold text-stone-400">
+          <TypoHeading as="h2">
             Core Expertise
-          </h2>
+          </TypoHeading>
           <div className="flex flex-wrap gap-x-6 gap-y-3 font-sans text-sm">
             {b.skills.map((s) => (
               <span key={s} className="text-stone-800 hover:underline cursor-pointer">
@@ -653,9 +654,9 @@ function PortfolioPage() {
         {/* Projects Section */}
         {prefs.showProjects && (
           <section className="space-y-6">
-            <h2 className="text-xs uppercase tracking-widest font-sans font-bold text-stone-400">
+            <TypoHeading as="h2">
               Selected Works
-            </h2>
+            </TypoHeading>
             <div className="space-y-8">
               {displayProjects.map((p) => (
                 <div
@@ -664,7 +665,7 @@ function PortfolioPage() {
                 >
                   <div className="md:col-span-1">
                     <span className="text-xl mb-1 block">{p.icon}</span>
-                    <h3 className="text-base font-bold text-[#1c1a18]">{p.name}</h3>
+                    <TypoSection>{p.name}</TypoSection>
                     <p
                       className={`text-[10px] font-sans font-bold uppercase tracking-wider mt-1 ${activeAccent.text}`}
                     >
@@ -696,7 +697,7 @@ function PortfolioPage() {
         {prefs.showContact && (
           <section className="border-t-2 border-stone-300 pt-10 space-y-6">
             <div className="space-y-1">
-              <h2 className="text-xl font-bold tracking-tight">Initiate Inquiry</h2>
+              <TypoHeading as="h2">Initiate Inquiry</TypoHeading>
               <p className="text-xs font-sans text-stone-500">
                 Reach out for collaborations, full-time engineering placement, or consulting
                 projects.
@@ -807,9 +808,9 @@ function PortfolioPage() {
             />
             <div className="space-y-3">
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-[#00ff66]">
+                <TypoHeading as="h1">
                   {b.name.toUpperCase()}
-                </h1>
+                </TypoHeading>
                 <p className="text-xs mt-1 text-[#ff00ea]">&gt;&gt; {b.role.toUpperCase()}</p>
                 <div className="flex flex-wrap justify-center sm:justify-start gap-4 text-[10px] text-[#00ff66]/80 mt-2">
                   <span>LOC: {b.country.toUpperCase()}</span>
@@ -826,7 +827,7 @@ function PortfolioPage() {
 
         {/* Skills Section */}
         <section className="space-y-4">
-          <h2 className="text-sm font-bold text-[#ff00ea] uppercase">[ // CORE_SKILLS ]</h2>
+          <TypoHeading as="h2">[ // CORE_SKILLS ]</TypoHeading>
           <div className="flex flex-wrap gap-2">
             {b.skills.map((s) => (
               <span
@@ -842,7 +843,7 @@ function PortfolioPage() {
         {/* Projects Section */}
         {prefs.showProjects && (
           <section className="space-y-6">
-            <h2 className="text-sm font-bold text-[#ff00ea] uppercase">[ // GRID_PROJECTS ]</h2>
+            <TypoHeading as="h2">[ // GRID_PROJECTS ]</TypoHeading>
             <div className="grid gap-6 md:grid-cols-2">
               {displayProjects.map((p) => (
                 <div
@@ -856,9 +857,9 @@ function PortfolioPage() {
                         {p.status}
                       </span>
                     </div>
-                    <h3 className="text-sm font-bold text-[#00ff66] mt-4">
+                    <TypoSection>
                       {p.name.toUpperCase()}
-                    </h3>
+                    </TypoSection>
                     <p className="text-xs text-[#00ff66]/70 mt-2 line-clamp-3 leading-relaxed">
                       {p.description}
                     </p>
@@ -878,9 +879,9 @@ function PortfolioPage() {
         {prefs.showContact && (
           <section className="border-2 border-[#00ff66] p-6 shadow-[6px_6px_0px_rgba(0,255,102,0.2)] bg-black space-y-6">
             <div>
-              <h2 className="text-sm font-bold text-[#ff00ea] uppercase">
+              <TypoHeading as="h2">
                 [ // TERMINAL_COMMUNICATIONS ]
-              </h2>
+              </TypoHeading>
               <p className="text-[10px] text-[#00ff66]/80 mt-1">
                 ESTABLISH PORTFOLIO CONGESTION TUNNEL TO HOST DIRECTLY.
               </p>
@@ -994,9 +995,9 @@ function PortfolioPage() {
           </div>
           <div className="space-y-4 flex-1">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent">
+              <TypoHeading as="h1">
                 {b.name}
-              </h1>
+              </TypoHeading>
               <p className={`text-base font-semibold mt-1 ${activeAccent.text}`}>{b.role}</p>
               <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-white/60 mt-2">
                 <span>📍 {b.country}</span>
@@ -1036,7 +1037,7 @@ function PortfolioPage() {
 
         {/* Skills Section */}
         <section className="space-y-4">
-          <h2 className="text-base font-bold tracking-tight">Expertise</h2>
+          <TypoHeading as="h2">Expertise</TypoHeading>
           <div className="flex flex-wrap gap-2">
             {b.skills.map((s) => (
               <span
@@ -1052,7 +1053,7 @@ function PortfolioPage() {
         {/* Projects Section */}
         {prefs.showProjects && (
           <section className="space-y-6">
-            <h2 className="text-base font-bold tracking-tight">Featured Operations</h2>
+            <TypoHeading as="h2">Featured Operations</TypoHeading>
             <div className="grid gap-6 md:grid-cols-2">
               {displayProjects.map((p) => (
                 <div
@@ -1068,7 +1069,7 @@ function PortfolioPage() {
                         {p.status}
                       </span>
                     </div>
-                    <h3 className="text-sm font-bold text-white mt-4">{p.name}</h3>
+                    <TypoSection>{p.name}</TypoSection>
                     <p className="text-xs text-white/70 mt-2 line-clamp-2 leading-relaxed">
                       {p.description}
                     </p>
@@ -1093,7 +1094,7 @@ function PortfolioPage() {
         {prefs.showContact && (
           <section className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-xl space-y-6">
             <div>
-              <h2 className="text-lg font-bold tracking-tight">Connect Channels</h2>
+              <TypoHeading as="h2">Connect Channels</TypoHeading>
               <p className="text-xs text-white/60 mt-1">
                 Submit hiring inquiries or collaboration request tokens directly to {b.name}.
               </p>
@@ -1203,7 +1204,7 @@ function PortfolioPage() {
           </div>
           <div className="space-y-4 flex-1">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-white">{b.name}</h1>
+              <TypoHeading as="h1">{b.name}</TypoHeading>
               <p className={`text-sm font-semibold mt-0.5 ${activeAccent.text}`}>{b.role}</p>
               <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-slate-400 mt-2">
                 <span>📍 {b.country}</span>
@@ -1243,9 +1244,9 @@ function PortfolioPage() {
 
         {/* Skills Section */}
         <section className="space-y-4 bg-slate-900 border border-slate-800 p-6 rounded-xl">
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <TypoHeading as="h2">
             Stack Expertise
-          </h2>
+          </TypoHeading>
           <div className="flex flex-wrap gap-2">
             {b.skills.map((s) => (
               <span
@@ -1261,9 +1262,9 @@ function PortfolioPage() {
         {/* Projects Section */}
         {prefs.showProjects && (
           <section className="space-y-6">
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            <TypoHeading as="h2">
               Featured Projects
-            </h2>
+            </TypoHeading>
             <div className="grid gap-4 md:grid-cols-2">
               {displayProjects.map((p) => (
                 <div
@@ -1274,7 +1275,7 @@ function PortfolioPage() {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xl">{p.icon}</span>
-                        <h3 className="text-sm font-bold text-white">{p.name}</h3>
+                        <TypoSection>{p.name}</TypoSection>
                       </div>
                       <span
                         className={`text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-950 border border-slate-800 ${activeAccent.text}`}
@@ -1303,7 +1304,7 @@ function PortfolioPage() {
         {prefs.showContact && (
           <section className="bg-slate-900 border border-slate-800 p-8 rounded-xl space-y-6">
             <div>
-              <h2 className="text-lg font-bold tracking-tight text-white">Contact & Hire</h2>
+              <TypoHeading as="h2">Contact & Hire</TypoHeading>
               <p className="text-xs text-slate-400 mt-1">
                 Submit inquiries directly to {b.name}. Leads are delivered to their DevLink
                 dashboard.
@@ -1414,10 +1415,10 @@ function PortfolioPage() {
             <div className="w-screen max-w-sm bg-slate-900 text-white border-l border-slate-800 p-6 flex flex-col justify-between shadow-2xl">
               <div className="space-y-6 overflow-y-auto pr-1">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold flex items-center gap-1.5">
+                  <TypoSection>
                     <Sparkles size={16} className="text-primary animate-pulse" /> Portfolio
                     Customizer
-                  </h3>
+                  </TypoSection>
                   <button
                     onClick={() => setCustomizerOpen(false)}
                     className="p-1 text-slate-400 hover:text-white rounded-lg animate-fade-in"

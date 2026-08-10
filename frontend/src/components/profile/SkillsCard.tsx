@@ -3,6 +3,7 @@
 import { Card, TagChip } from "@/components/shared/primitives";
 import { Sparkles, Plus, Trash2 } from "lucide-react";
 import type { ProfileSkill } from "@/mocks/seed";
+import { TypoCaption, TypoHeading } from "@/components/shared/Typography";
 
 export interface SkillsCardProps {
   skills: ProfileSkill[];
@@ -61,10 +62,10 @@ export function SkillsCard({
               <Sparkles size={16} />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-foreground">Developer Skill Matrix</h2>
-              <p className="text-xs text-muted-foreground">
+              <TypoHeading as="h2">Developer Skill Matrix</TypoHeading>
+              <TypoCaption as="p">
                 Manage your skills across 7 core technical categories
-              </p>
+              </TypoCaption>
             </div>
           </div>
           <button
@@ -78,9 +79,9 @@ export function SkillsCard({
 
         <div className="mt-4 space-y-3">
           {formValues.length === 0 ? (
-            <p className="text-xs text-muted-foreground italic">
+            <TypoCaption as="p">
               No skills added. Click "Add Skill" to build your matrix.
-            </p>
+            </TypoCaption>
           ) : null}
           {formValues.map((skill, index) => (
             <div
@@ -89,9 +90,9 @@ export function SkillsCard({
             >
               <div className="grid gap-3 md:grid-cols-[1.5fr_1fr_1fr_auto]">
                 <label className="text-sm">
-                  <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  <TypoCaption>
                     Skill Name
-                  </span>
+                  </TypoCaption>
                   <input
                     value={skill.name}
                     onChange={(event) => onSkillChange?.(index, "name", event.target.value)}
@@ -100,9 +101,9 @@ export function SkillsCard({
                   />
                 </label>
                 <label className="text-sm">
-                  <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  <TypoCaption>
                     Proficiency
-                  </span>
+                  </TypoCaption>
                   <select
                     value={skill.level ?? "Intermediate"}
                     onChange={(event) => onSkillChange?.(index, "level", event.target.value)}
@@ -116,9 +117,9 @@ export function SkillsCard({
                   </select>
                 </label>
                 <label className="text-sm">
-                  <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                  <TypoCaption>
                     Years Exp.
-                  </span>
+                  </TypoCaption>
                   <input
                     type="number"
                     min="0"
@@ -138,9 +139,9 @@ export function SkillsCard({
                 </button>
               </div>
               <label className="mt-3 block text-sm">
-                <span className="mb-1 block text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                <TypoCaption>
                   Category
-                </span>
+                </TypoCaption>
                 <select
                   value={skill.category ?? "Languages"}
                   onChange={(event) => onSkillChange?.(index, "category", event.target.value)}
@@ -174,10 +175,10 @@ export function SkillsCard({
             <Sparkles size={18} />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-foreground">Developer Skill Matrix</h2>
-            <p className="text-xs text-muted-foreground">
+            <TypoHeading as="h2">Developer Skill Matrix</TypoHeading>
+            <TypoCaption as="p">
               Categorized technical expertise and proficiency
-            </p>
+            </TypoCaption>
           </div>
         </div>
       </div>
@@ -193,12 +194,12 @@ export function SkillsCard({
                 <span className="text-xs font-bold uppercase tracking-wider text-primary">
                   {category}
                 </span>
-                <span className="text-[10px] text-muted-foreground font-medium rounded bg-muted px-1.5 py-0.5">
+                <TypoCaption>
                   {items.length} {items.length === 1 ? "skill" : "skills"}
-                </span>
+                </TypoCaption>
               </div>
               {items.length === 0 ? (
-                <p className="text-xs text-muted-foreground/60 italic py-1">No skills added</p>
+                <TypoCaption as="p">No skills added</TypoCaption>
               ) : (
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {items.map((skill) => (
@@ -207,9 +208,9 @@ export function SkillsCard({
                       className="inline-flex items-center gap-1 rounded-md border border-border bg-surface px-2.5 py-1 text-xs font-medium text-foreground shadow-sm"
                     >
                       <span>{skill.name}</span>
-                      <span className="text-[10px] font-normal text-muted-foreground bg-muted/60 px-1 py-0.2 rounded">
+                      <TypoCaption>
                         {skill.level || "Intermediate"}
-                      </span>
+                      </TypoCaption>
                     </span>
                   ))}
                 </div>

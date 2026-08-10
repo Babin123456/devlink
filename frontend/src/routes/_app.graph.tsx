@@ -15,6 +15,7 @@ import "reactflow/dist/style.css";
 import { Card } from "@/components/shared/primitives";
 import { Loader2 } from "lucide-react";
 import { isBackendConfigured } from "@/api";
+import { TypoSection } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/graph")({
   head: () => ({
@@ -201,7 +202,7 @@ function GraphView() {
           position="top-left"
           className="bg-surface/80 p-4 rounded-md border border-border backdrop-blur-sm"
         >
-          <h3 className="font-semibold text-[14px] mb-2">Legend</h3>
+          <TypoSection>Legend</TypoSection>
           <div className="flex flex-col gap-2 text-[12px]">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-blue-500 rounded-sm"></div> Project

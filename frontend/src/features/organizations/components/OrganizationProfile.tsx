@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { OrganizationHeader } from "./OrganizationHeader";
 import { OrganizationApiTokens } from "./OrganizationApiTokens";
 import { OrganizationAuditLogs } from "./OrganizationAuditLogs";
+import { TypoHeading } from "@/components/shared/Typography";
 
 interface OrganizationProfileProps {
   organizationData: {
@@ -57,7 +58,7 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({
       <div className="bg-gray-900/30 border border-gray-800 rounded-xl p-6">
         {activeTab === "about" && (
           <div>
-            <h2 className="text-xl font-semibold text-white mb-3">About Us</h2>
+            <TypoHeading as="h2">About Us</TypoHeading>
             <p className="text-gray-300 leading-relaxed">
               {organizationData.description || "No description provided."}
             </p>
@@ -66,7 +67,7 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({
 
         {activeTab === "team" && (
           <div>
-            <h2 className="text-xl font-semibold text-white mb-4">Team Members</h2>
+            <TypoHeading as="h2">Team Members</TypoHeading>
             <p className="text-gray-400 text-sm">
               Showing team members connected to {organizationData.name}.
             </p>
@@ -75,7 +76,7 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({
 
         {activeTab === "projects" && (
           <div>
-            <h2 className="text-xl font-semibold text-white mb-4">Projects</h2>
+            <TypoHeading as="h2">Projects</TypoHeading>
             <p className="text-gray-400 text-sm">
               Projects built or maintained by {organizationData.name}.
             </p>
@@ -84,7 +85,7 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({
 
         {activeTab === "hiring" && (
           <div>
-            <h2 className="text-xl font-semibold text-white mb-4">Open Roles</h2>
+            <TypoHeading as="h2">Open Roles</TypoHeading>
             {organizationData.hiring ? (
               <p className="text-gray-300 text-sm">
                 We are actively recruiting talent! Apply below.

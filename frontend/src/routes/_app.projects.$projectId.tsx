@@ -33,6 +33,7 @@ import { addRecentlyViewedProject } from "@/lib/recentlyViewedProjects";
 import { usePermissions } from "@/hooks/usePermissions";
 import { ProjectTimeline } from "@/components/project/ProjectTimeline";
 import { ProjectInsightsCard } from "@/components/projects/ProjectInsightsCard";
+import { TypoCaption, TypoHeading } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/projects/$projectId")({
   head: ({ params }) => ({
@@ -191,8 +192,8 @@ function ProjectDetail() {
             {p.icon}
           </span>
           <div className="min-w-0 flex-1">
-            <h1 className="text-[22px] font-bold text-foreground">{p.name}</h1>
-            <p className="mt-1 text-[13px] text-muted-foreground">{p.description}</p>
+            <TypoHeading as="h1">{p.name}</TypoHeading>
+            <TypoCaption as="p">{p.description}</TypoCaption>
             <div className="mt-3 flex flex-wrap gap-1">
               {p.stack.map((s) => (
                 <TagChip key={s}>{s}</TagChip>
@@ -267,13 +268,13 @@ function ProjectDetail() {
             <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
               <div className="h-full bg-primary" style={{ width: `${p.progress}%` }} />
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">{p.progress}% complete</p>
+            <TypoCaption as="p">{p.progress}% complete</TypoCaption>
           </Card>
           <Card className="p-4">
             <p className="text-[13px] font-semibold text-foreground">Owner</p>
-            <p className="mt-2 text-[13px] text-muted-foreground">{p.owner}</p>
+            <TypoCaption as="p">{p.owner}</TypoCaption>
             <p className="mt-4 text-[13px] font-semibold text-foreground">Status</p>
-            <p className="mt-1 text-[13px] capitalize text-muted-foreground">{p.status}</p>
+            <TypoCaption as="p">{p.status}</TypoCaption>
 
             {/* AI Tag Generator Section */}
             <div className="mt-4 border-t border-border pt-4">
@@ -327,9 +328,9 @@ function ProjectDetail() {
                         ))}
                       </div>
                       <div className="flex items-center justify-between">
-                        <p className="text-[10px] text-muted-foreground">
+                        <TypoCaption as="p">
                           {selectedTags.length} tags selected
-                        </p>
+                        </TypoCaption>
                         <div className="flex items-center gap-1">
                           <button
                             onClick={() => tagMutation.mutate()}
@@ -386,7 +387,7 @@ function ProjectDetail() {
                 key={a.id}
                 className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-foreground"
               >
-                {a.text} <span className="ml-auto text-[11px] text-muted-foreground">{a.ago}</span>
+                {a.text} <TypoCaption>{a.ago}</TypoCaption>
               </li>
             ))}
           </ul>
@@ -399,7 +400,7 @@ function ProjectDetail() {
             <span className="text-[13px] font-medium text-foreground">
               devlink/{p.name.toLowerCase().replace(/\s+/g, "-")}
             </span>
-            <span className="ml-auto text-[11px] text-muted-foreground">main · updated 2h ago</span>
+            <TypoCaption>main · updated 2h ago</TypoCaption>
           </div>
         </Card>
       )}

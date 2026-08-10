@@ -10,6 +10,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { LoadingButton } from "@/components/shared/LoadingButton";
 import { authApi } from "@/api/modules/auth";
+import { TypoCaption } from "@/components/shared/Typography";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
@@ -170,7 +171,7 @@ function AuthScreen() {
         </button>
         <div className="mb-5 flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
-          <span className="text-[12px] text-muted-foreground">Or</span>
+          <TypoCaption>Or</TypoCaption>
           <div className="h-px flex-1 bg-border" />
         </div>
         {mode === "signin" ? (
@@ -305,7 +306,7 @@ function AuthScreen() {
             </LoadingButton>
           </form>
         )}
-        <p className="mt-2 text-center text-[13px] text-muted-foreground">
+        <TypoCaption as="p">
           {mode === "signin" ? (
             <>
               Don't have an account?{" "}
@@ -327,7 +328,7 @@ function AuthScreen() {
               </button>
             </>
           )}
-        </p>
+        </TypoCaption>
       </div>
 
       <div className="mt-3 flex items-center gap-5">
