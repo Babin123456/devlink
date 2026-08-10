@@ -826,6 +826,60 @@ function Landing() {
         </div>
       </section>
 
+      <section id="community-partners" className="border-b border-border py-20 bg-background">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              Trusted by the community
+            </h2>
+            <p className="mt-4 text-muted-foreground text-[15px]">
+              DevLink powers teams, hackathons, and communities across the globe.
+            </p>
+          </div>
+
+          {/* Logo Wall */}
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+            {/* Placeholder Logos */}
+            <div className="flex items-center gap-2 text-xl font-bold text-foreground">
+              <Globe className="h-8 w-8 text-primary" /> TechStars
+            </div>
+            <div className="flex items-center gap-2 text-xl font-bold text-foreground">
+              <Trophy className="h-8 w-8 text-primary" /> MLH
+            </div>
+            <div className="flex items-center gap-2 text-xl font-bold text-foreground">
+              <Users2 className="h-8 w-8 text-primary" /> Y Combinator
+            </div>
+            <div className="flex items-center gap-2 text-xl font-bold text-foreground">
+              <Code2 className="h-8 w-8 text-primary" /> GitHub Education
+            </div>
+          </div>
+
+          {/* Community Stats */}
+          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="flex flex-col items-center p-6 rounded-2xl bg-surface border border-border/50 text-center">
+              <div className="text-4xl font-extrabold text-primary mb-2">100+</div>
+              <div className="text-sm font-medium text-foreground">Hackathons</div>
+              <div className="text-xs text-muted-foreground mt-1">Powered by DevLink</div>
+            </div>
+            <div className="flex flex-col items-center p-6 rounded-2xl bg-surface border border-border/50 text-center">
+              <div className="text-4xl font-extrabold text-primary mb-2">50k+</div>
+              <div className="text-sm font-medium text-foreground">Builders</div>
+              <div className="text-xs text-muted-foreground mt-1">Finding matches daily</div>
+            </div>
+            <div className="flex flex-col items-center p-6 rounded-2xl bg-surface border border-border/50 text-center">
+              <div className="text-4xl font-extrabold text-primary mb-2">20k+</div>
+              <div className="text-sm font-medium text-foreground">Projects</div>
+              <div className="text-xs text-muted-foreground mt-1">Shipped to production</div>
+            </div>
+            <div className="flex flex-col items-center p-6 rounded-2xl bg-surface border border-border/50 text-center">
+              <div className="text-4xl font-extrabold text-primary mb-2">500+</div>
+              <div className="text-sm font-medium text-foreground">Communities</div>
+              <div className="text-xs text-muted-foreground mt-1">Active on the platform</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section
         id="squad-cta"
         className="border-b border-border bg-gradient-to-b from-background via-surface/10 to-background py-20 relative overflow-hidden"
