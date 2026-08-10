@@ -17,7 +17,7 @@ export function DashboardLayout() {
     <div
       className={cn(
         "grid h-screen w-full bg-background overflow-hidden grid-cols-1 md:grid-cols-[max-content_1fr]",
-        isDashboard ? "" : "xl:grid-cols-[max-content_1fr_max-content]"
+        isDashboard ? "" : "xl:grid-cols-[max-content_1fr_max-content]",
       )}
     >
       {/* ─── Desktop & Tablet Sidebar ─────────────────────────────── */}
