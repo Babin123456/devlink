@@ -553,6 +553,9 @@ app.include_router(
     project_milestones.router, prefix="/api", tags=["Project Milestones"]
 )
 app.include_router(project_milestones.router, prefix="/api", tags=["Project Milestones"])
+from app.routers import project_releases
+
+app.include_router(project_releases.router, prefix="/api", tags=["Project Releases"])
 from app.routers import calendar as calendar_router
 app.include_router(calendar_router.router, prefix="/api", tags=["Calendar"])
 app.include_router(analytics.router, prefix="/api", tags=["Analytics"])
