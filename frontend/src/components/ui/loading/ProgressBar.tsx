@@ -25,12 +25,12 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       aria-label="Progress bar"
     >
       {showLabel && !indeterminate && (
-        <div className="flex justify-between text-xs font-semibold text-slate-300">
+        <div className="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-300">
           <span>Progress</span>
           <span>{clampedProgress}%</span>
         </div>
       )}
-      <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700/60">
+      <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-300/60 dark:border-slate-700/60">
         {indeterminate ? (
           <div className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-full animate-pulse w-full"></div>
         ) : (
