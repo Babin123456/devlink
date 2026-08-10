@@ -8,6 +8,7 @@ import { DeleteAccountModal } from "@/components/settings/DeleteAccountModal";
 import { OAuthAccountsSection } from "@/components/settings/OAuthAccountsSection";
 import { MFASection } from "@/features/settings/components/MFASection";
 import { UserSessionsActivity } from "@/components/settings/UserSessionsActivity";
+import { BillingDashboard } from "@/features/settings/components/BillingDashboard";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -562,46 +563,8 @@ function SettingsPage() {
             )}
 
             {tab === "billing" && (
-              <div className="p-6 space-y-6">
-                <div>
-                  <h2 className="text-[16px] font-semibold text-foreground">Billing</h2>
-                  <p className="text-[13px] text-muted-foreground mt-0.5">
-                    Manage your subscription and payment methods
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-border p-5 space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Current plan</p>
-                      <p className="text-xs text-muted-foreground">You are on the Pro plan</p>
-                    </div>
-                    <span className="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
-                      Pro
-                    </span>
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Next invoice</span>
-                    <span className="font-medium text-foreground">November 4, 2026</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Amount</span>
-                    <span className="font-medium text-foreground">$19.00/month</span>
-                  </div>
-                  <Separator />
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <ExternalLink size={14} /> View invoices
-                  </Button>
-                </div>
-
-                <div className="rounded-lg border border-border p-5 space-y-3">
-                  <h3 className="text-sm font-semibold text-foreground">Payment method</h3>
-                  <p className="text-xs text-muted-foreground">No payment method on file</p>
-                  <Button variant="outline" size="sm">
-                    Add payment method
-                  </Button>
-                </div>
+              <div className="p-6">
+                <BillingDashboard />
               </div>
             )}
 
