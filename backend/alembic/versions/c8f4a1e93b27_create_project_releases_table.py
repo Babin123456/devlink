@@ -10,6 +10,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import UUID
 
 # revision identifiers, used by Alembic.
@@ -18,10 +19,22 @@ down_revision: Union[str, Sequence[str], None] = "d4e5f6a7b8c9"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-release_type_enum = sa.Enum(
-    "MAJOR", "MINOR", "PATCH", "PRERELEASE", name="releasetype"
+# create_type=False: the types are created explicitly in upgrade() with
+# checkfirst, so create_table must not try to emit CREATE TYPE a second time.
+release_type_enum = postgresql.ENUM(
+    "MAJOR",
+    "MINOR",
+    "PATCH",
+    "PRERELEASE",
+    name="releasetype",
+    create_type=False,
 )
-release_status_enum = sa.Enum("DRAFT", "PUBLISHED", name="releasestatus")
+release_status_enum = postgresql.ENUM(
+    "DRAFT",
+    "PUBLISHED",
+    name="releasestatus",
+    create_type=False,
+)
 
 
 def upgrade() -> None:
