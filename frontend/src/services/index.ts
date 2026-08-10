@@ -32,7 +32,7 @@ import type {
   IssueUpdateInput,
   TechStackResponse,
 } from "@/api";
-import type { Hackathon, Flare, Message } from "@/mocks/seed";
+import type { Hackathon, Flare } from "@/mocks/seed";
 
 const delay = 120;
 const mock = <T>(v: T): Promise<T> => new Promise((r) => setTimeout(() => r(v), delay));
@@ -258,6 +258,34 @@ export const messagesService = {
           attachment_size: m.attachment_size,
           mime_type: m.mime_type,
         }));
+        return msgs.map(
+          (m: {
+            id: string;
+            sender_id?: string;
+            content?: string;
+            created_at?: string;
+            type?: string;
+            attachment_url?: string;
+            attachment_name?: string;
+            attachment_size?: number;
+            mime_type?: string;
+          }): Message => ({
+            id: m.id,
+            from: m.sender_id === currentUser?.id ? "me" : (m.sender_id ?? "me"),
+            text: m.content ?? "",
+            at: m.created_at
+              ? new Date(m.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "",
+            type: m.type ?? "text",
+            attachment_url: m.attachment_url,
+            attachment_name: m.attachment_name,
+            attachment_size: m.attachment_size,
+            mime_type: m.mime_type,
+          }),
+        );
       },
       seed.messages[id] ?? [],
     );

@@ -139,6 +139,8 @@ function ProfilePage() {
         bio: "Product engineer. Ships fast, sleeps sometimes.",
         role: "Full Stack Developer",
         id: currentUser.id,
+        premium: currentUser.premium,
+        verified: currentUser.verified,
       }
     : builders.find((x) => x.handle === username);
   if (!b) throw notFound();
@@ -242,6 +244,7 @@ function ProfilePage() {
           userProfile={{
             avatar: avatarUrl,
             banner: bannerUrl ?? undefined,
+            banner: bannerUrl || undefined,
             bio: b.bio,
             skills: b.profileSkills?.map((s) => s.name) ?? b.skills,
             experience: b.experienceLevel || b.role || b.company,
@@ -597,6 +600,7 @@ function ProfilePage() {
 
           <ActivityTimeline userId={b.id} />
         </div>
+      </div>
       {!me && (
         <ReportUserModal
           isOpen={isReportModalOpen}
