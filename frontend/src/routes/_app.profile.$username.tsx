@@ -28,11 +28,11 @@ import { analyticsApi } from "@/api/modules/analytics";
 import SkillsCard from "@/components/profile/SkillsCard";
 import ExperienceCard from "@/components/profile/ExperienceCard";
 import { ProfileViewersList } from "@/components/profile/ProfileViewersList";
+import { PinnedProjectsCard } from "@/components/profile/PinnedProjectsCard";
 import { ProfileCompletionChecklist } from "@/components/profile/ProfileCompletionChecklist";
 import { FollowButton } from "@/components/shared/FollowButton";
 import { useFollowStatus } from "@/hooks/useFollow";
 import { ActivityTimeline } from "@/components/profile/ActivityTimeline";
-import { PinnedProjectsCard } from "@/components/profile/PinnedProjectsCard";
 
 export const Route = createFileRoute("/_app/profile/$username")({
   head: ({ params }) => ({
