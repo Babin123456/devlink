@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { createFileRoute } from '@tanstack/react-router';
-import { EmailTemplatePreviewer } from '../../components/admin/EmailTemplatePreviewer';
+import { EmailTemplatePreviewer } from '@/components/admin/EmailTemplatePreviewer';
 
 export const Route = createFileRoute('/_app/admin/email-templates')({
   component: AdminEmailTemplatesPage,
