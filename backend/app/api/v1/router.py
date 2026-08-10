@@ -28,10 +28,10 @@ from app.routers import (
     project_members,
     project_comments,
     project_milestones,
-    project_releases,
     project_tags,
     project_documents,
     project_dashboards,
+    project_releases,
     projects,
     recommendations,
     repositories,
@@ -77,7 +77,6 @@ api_v1_router.include_router(project_documents.router)
 api_v1_router.include_router(project_dashboards.router)
 api_v1_router.include_router(project_milestones.router)
 api_v1_router.include_router(project_comments.router)
-api_v1_router.include_router(project_releases.router)
 api_v1_router.include_router(
     builder_flares.router, prefix="/flare", tags=["Builder's Flare"]
 )
@@ -118,6 +117,7 @@ api_v1_router.include_router(
     tags=["Contributor Matching"],
 )
 api_v1_router.include_router(repositories.router)
+api_v1_router.include_router(project_releases.router)
 api_v1_router.include_router(organizations.router)
 api_v1_router.include_router(applications.router)
 api_v1_router.include_router(skills.router)
