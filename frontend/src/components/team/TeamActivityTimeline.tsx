@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   UserPlus,
   UserMinus,
@@ -10,10 +10,14 @@ import {
   Clock,
   Filter,
   Loader2,
-  AlertCircle
-} from 'lucide-react';
-import { formatDistanceToNow, parseISO } from 'date-fns';
-import { getTeamActivityTimeline, TeamActivityItem, TeamActivityType } from '../../api/modules/teamActivity';
+  AlertCircle,
+} from "lucide-react";
+import { formatDistanceToNow, parseISO } from "date-fns";
+import {
+  getTeamActivityTimeline,
+  TeamActivityItem,
+  TeamActivityType,
+} from "../../api/modules/teamActivity";
 
 interface TeamActivityTimelineProps {
   projectId: number;
@@ -23,40 +27,43 @@ export const TeamActivityTimeline: React.FC<TeamActivityTimelineProps> = ({ proj
   const [items, setItems] = useState<TeamActivityItem[]>([]);
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [selectedType, setSelectedType] = useState<string>('');
+  const [selectedType, setSelectedType] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTimeline = async (pageNum: number, typeFilter: string, isAppend: boolean = false) => {
-    if (isAppend) {
-      setLoadingMore(true);
-    } else {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      const res = await getTeamActivityTimeline(projectId, pageNum, 5, typeFilter || undefined);
+  const fetchTimeline = useCallback(
+    async (pageNum: number, typeFilter: string, isAppend: boolean = false) => {
       if (isAppend) {
-        setItems((prev) => [...prev, ...res.items]);
+        setLoadingMore(true);
       } else {
-        setItems(res.items);
+        setLoading(true);
       }
-      setHasMore(res.has_more);
-    } catch (err: unknown) {
-      const errorObj = err as { message?: string };
-      setError(errorObj?.message || 'Failed to load activity timeline.');
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  };
+      setError(null);
+
+      try {
+        const res = await getTeamActivityTimeline(projectId, pageNum, 5, typeFilter || undefined);
+        if (isAppend) {
+          setItems((prev) => [...prev, ...res.items]);
+        } else {
+          setItems(res.items);
+        }
+        setHasMore(res.has_more);
+      } catch (err: unknown) {
+        const errorObj = err as { message?: string };
+        setError(errorObj?.message || "Failed to load activity timeline.");
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [projectId],
+  );
 
   useEffect(() => {
     setPage(1);
     fetchTimeline(1, selectedType, false);
-  }, [projectId, selectedType]);
+  }, [fetchTimeline, selectedType]);
 
   const handleLoadMore = () => {
     if (!hasMore || loadingMore) return;
@@ -67,19 +74,19 @@ export const TeamActivityTimeline: React.FC<TeamActivityTimelineProps> = ({ proj
 
   const getActivityIcon = (type: TeamActivityType) => {
     switch (type) {
-      case 'member_joined':
+      case "member_joined":
         return <UserPlus className="w-5 h-5 text-emerald-400" />;
-      case 'member_left':
+      case "member_left":
         return <UserMinus className="w-5 h-5 text-rose-400" />;
-      case 'role_updated':
+      case "role_updated":
         return <ShieldCheck className="w-5 h-5 text-amber-400" />;
-      case 'project_updated':
-        return <Edit3 className="w-5 h-5 text-blue-400" />;
-      case 'milestone_completed':
-        return <CheckCircle2 className="w-5 h-5 text-indigo-400" />;
-      case 'new_discussion':
+      case "project_updated":
+        return <Edit3 className="w-5 h-5 text-cyan-400" />;
+      case "milestone_completed":
+        return <CheckCircle2 className="w-5 h-5 text-cyan-400" />;
+      case "new_discussion":
         return <MessageSquare className="w-5 h-5 text-purple-400" />;
-      case 'file_uploaded':
+      case "file_uploaded":
         return <FileUp className="w-5 h-5 text-cyan-400" />;
       default:
         return <Clock className="w-5 h-5 text-slate-400" />;
@@ -95,14 +102,14 @@ export const TeamActivityTimeline: React.FC<TeamActivityTimelineProps> = ({ proj
   };
 
   const filterOptions = [
-    { label: 'All Activities', value: '' },
-    { label: 'Member Joined', value: 'member_joined' },
-    { label: 'Member Left', value: 'member_left' },
-    { label: 'Role Updated', value: 'role_updated' },
-    { label: 'Project Updated', value: 'project_updated' },
-    { label: 'Milestone Completed', value: 'milestone_completed' },
-    { label: 'New Discussion', value: 'new_discussion' },
-    { label: 'File Uploaded', value: 'file_uploaded' },
+    { label: "All Activities", value: "" },
+    { label: "Member Joined", value: "member_joined" },
+    { label: "Member Left", value: "member_left" },
+    { label: "Role Updated", value: "role_updated" },
+    { label: "Project Updated", value: "project_updated" },
+    { label: "Milestone Completed", value: "milestone_completed" },
+    { label: "New Discussion", value: "new_discussion" },
+    { label: "File Uploaded", value: "file_uploaded" },
   ];
 
   return (
@@ -111,7 +118,7 @@ export const TeamActivityTimeline: React.FC<TeamActivityTimelineProps> = ({ proj
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            <Clock className="w-5 h-5 text-indigo-400" />
+            <Clock className="w-5 h-5 text-cyan-400" />
             Team Activity Timeline
           </h3>
           <p className="text-xs text-slate-400">
@@ -165,7 +172,9 @@ export const TeamActivityTimeline: React.FC<TeamActivityTimelineProps> = ({ proj
             <div className="text-center py-12 border border-dashed border-slate-800 rounded-xl space-y-2">
               <Clock className="w-10 h-10 text-slate-600 mx-auto" />
               <p className="text-sm font-medium text-slate-400">No activity events found</p>
-              <p className="text-xs text-slate-500">Activities will show up here as your team collaborates.</p>
+              <p className="text-xs text-slate-500">
+                Activities will show up here as your team collaborates.
+              </p>
             </div>
           ) : (
             <div className="relative pl-6 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">
@@ -185,9 +194,11 @@ export const TeamActivityTimeline: React.FC<TeamActivityTimelineProps> = ({ proj
                             className="w-5 h-5 rounded-full bg-slate-700"
                           />
                         )}
-                        <span className="text-xs font-semibold text-slate-300">{item.actor_name}</span>
+                        <span className="text-xs font-semibold text-slate-300">
+                          {item.actor_name}
+                        </span>
                       </div>
-                      <span className="text-[11px] font-medium text-indigo-400">
+                      <span className="text-[11px] font-medium text-cyan-400">
                         {formatRelativeTime(item.created_at)}
                       </span>
                     </div>
@@ -215,7 +226,7 @@ export const TeamActivityTimeline: React.FC<TeamActivityTimelineProps> = ({ proj
                     <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading...
                   </>
                 ) : (
-                  'Load More Activity'
+                  "Load More Activity"
                 )}
               </button>
             </div>
