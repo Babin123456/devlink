@@ -27,7 +27,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ShareProfileButton } from "@/components/shared/ShareProfileButton";
-import { builders, currentUser, projects as allProjects, flares as allFlares } from "@/mocks/seed";
 import {
   builders,
   currentUser,

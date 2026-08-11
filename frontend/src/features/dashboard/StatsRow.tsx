@@ -79,9 +79,6 @@ export function StatsRow() {
   }
 
   return (
-<div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-5">      {primaryStats.map((s, i) => {
-        const Icon = iconMap[s.icon] ?? Folder;
-        const trend = trends[i];
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {statsData.map((s, i) => {
         const Icon = s.icon;
@@ -93,13 +90,6 @@ export function StatsRow() {
             transition={{ delay: i * 0.03, duration: 0.2 }}
             className="h-full"
           >
-            <Card
-              interactive
-className="flex flex-col h-full gap-3 p-4 transition-all duration-200 hover:border-border hover:shadow-md"            >
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground p-1.5 rounded-lg bg-muted/30">
-                  <Icon size={16} />
-                </span>
             <Card className="flex flex-col h-full gap-3.5 rounded-2xl p-5 border-border/60 bg-card shadow-xs">
               <div className="flex items-center gap-4">
                 {/* Left Side: Circular Icon container */}
