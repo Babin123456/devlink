@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Mail, Eye, FileText, Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from "react";
+import { Mail, Eye, FileText, Send, CheckCircle2, AlertCircle } from "lucide-react";
 import {
   listEmailTemplates,
   renderEmailTemplate,
   EmailTemplateInfo,
   EmailRenderResponse,
   EmailTemplateType,
-} from '../../api/modules/emailTemplates';
+} from "../../api/modules/emailTemplates";
 
 export const EmailTemplatePreviewer: React.FC = () => {
   const [templates, setTemplates] = useState<EmailTemplateInfo[]>([]);
-  const [selectedType, setSelectedType] = useState<EmailTemplateType>('welcome');
-  const [viewMode, setViewMode] = useState<'html' | 'text'>('html');
+  const [selectedType, setSelectedType] = useState<EmailTemplateType>("welcome");
+  const [viewMode, setViewMode] = useState<"html" | "text">("html");
   const [renderData, setRenderData] = useState<EmailRenderResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,13 +26,13 @@ export const EmailTemplatePreviewer: React.FC = () => {
         }
       } catch (err: unknown) {
         const errorObj = err as { message?: string };
-        setError(errorObj?.message || 'Failed to load email templates.');
+        setError(errorObj?.message || "Failed to load email templates.");
       }
     };
     fetchList();
   }, []);
 
-  const handleRender = async (tType: EmailTemplateType) => {
+  const handleRender = useCallback(async (tType: EmailTemplateType) => {
     setLoading(true);
     setError(null);
     try {
@@ -40,17 +40,17 @@ export const EmailTemplatePreviewer: React.FC = () => {
       setRenderData(res);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
-      setError(errorObj?.message || 'Failed to render email template.');
+      setError(errorObj?.message || "Failed to render email template.");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (selectedType) {
       handleRender(selectedType);
     }
-  }, [selectedType]);
+  }, [selectedType, handleRender]);
 
   const currentInfo = templates.find((t) => t.template_type === selectedType);
 
@@ -60,7 +60,7 @@ export const EmailTemplatePreviewer: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Mail className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            <Mail className="w-6 h-6 text-cyan-500 dark:text-cyan-400" />
             Email Notification Template Library
           </h2>
           <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -71,21 +71,21 @@ export const EmailTemplatePreviewer: React.FC = () => {
         {/* View mode toggle */}
         <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
           <button
-            onClick={() => setViewMode('html')}
+            onClick={() => setViewMode("html")}
             className={`px-3 py-1.5 text-xs font-medium rounded-md flex items-center gap-1.5 transition-all ${
-              viewMode === 'html'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              viewMode === "html"
+                ? "bg-cyan-500 text-white shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
             <Eye className="w-3.5 h-3.5" /> HTML Preview
           </button>
           <button
-            onClick={() => setViewMode('text')}
+            onClick={() => setViewMode("text")}
             className={`px-3 py-1.5 text-xs font-medium rounded-md flex items-center gap-1.5 transition-all ${
-              viewMode === 'text'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              viewMode === "text"
+                ? "bg-cyan-500 text-white shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
             }`}
           >
             <FileText className="w-3.5 h-3.5" /> Plain-Text Fallback
@@ -107,17 +107,19 @@ export const EmailTemplatePreviewer: React.FC = () => {
                 onClick={() => setSelectedType(tpl.template_type)}
                 className={`w-full text-left p-3.5 rounded-xl border transition-all ${
                   selectedType === tpl.template_type
-                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-500 text-indigo-950 dark:text-white shadow-sm'
-                    : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80'
+                    ? "bg-cyan-50 dark:bg-cyan-950/60 border-cyan-500 text-cyan-950 dark:text-white shadow-sm"
+                    : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-sm">{tpl.name}</span>
                   {selectedType === tpl.template_type && (
-                    <CheckCircle2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <CheckCircle2 className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
                   )}
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{tpl.description}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                  {tpl.description}
+                </p>
               </button>
             ))}
           </div>
@@ -136,15 +138,17 @@ export const EmailTemplatePreviewer: React.FC = () => {
             <div className="bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 rounded-xl p-5 space-y-4">
               {/* Subject Line Header */}
               <div className="space-y-1 pb-3 border-b border-slate-200 dark:border-slate-700/60">
-                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-medium">Subject Line</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 uppercase font-medium">
+                  Subject Line
+                </span>
                 <p className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Send className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  <Send className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
                   {renderData.subject}
                 </p>
               </div>
 
               {/* Live Preview Display */}
-              {viewMode === 'html' ? (
+              {viewMode === "html" ? (
                 <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-white">
                   <iframe
                     title="Email HTML Preview"

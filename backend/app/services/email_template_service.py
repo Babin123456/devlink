@@ -179,10 +179,10 @@ class EmailTemplateService:
         body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }}
         .email-container {{ max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155; }}
         .header {{ background-color: #0f172a; padding: 24px; text-align: center; border-bottom: 1px solid #334155; }}
-        .header h1 {{ color: #6366f1; margin: 0; font-size: 24px; font-weight: 800; }}
+        .header h1 {{ color: #05b7d7; margin: 0; font-size: 24px; font-weight: 800; }}
         .content {{ padding: 32px 24px; line-height: 1.6; color: #cbd5e1; }}
         .content h2 {{ color: #ffffff; margin-top: 0; }}
-        .btn {{ display: inline-block; background-color: #6366f1; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 16px; }}
+        .btn {{ display: inline-block; background-color: #05b7d7; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; margin-top: 16px; }}
         .footer {{ background-color: #0f172a; padding: 20px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #334155; }}
     </style>
 </head>
