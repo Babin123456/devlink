@@ -1,5 +1,14 @@
 import { Card } from "@/components/shared/primitives";
-import { Folder, Users2, Calendar, ArrowRight, Plus } from "lucide-react";
+import {
+  Folder,
+  Users2,
+  Calendar,
+  ArrowRight,
+  Plus,
+  TrendingUp,
+  Flame,
+  Sparkles,
+} from "lucide-react";
 import { currentUser } from "@/mocks/seed";
 import { Link } from "@tanstack/react-router";
 
