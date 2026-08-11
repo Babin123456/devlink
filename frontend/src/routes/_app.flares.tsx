@@ -238,18 +238,7 @@ function FlaresPage() {
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
       <div className="space-y-4">
         {/* Compose Card */}
-        <PostComposer
-          placeholder="Share an update, a tip, or ask the community…"
-          onPost={async (newContent) => {
-            try {
-              const tags = Array.from(new Set(newContent.match(/#(\w+)/g)?.map((t) => t.slice(1)) ?? []));
-              await flaresService.create({ content: newContent, tags });
-              toast.success("Flare posted");
-              refetchFeed();
-            } catch (err: any) {
-              toast.error(err.message || "Failed to create flare");
-            }
-          }}
+
         <PostComposer
           placeholder="Share an update, a tip, or ask the community…"
           onPost={handlePost}

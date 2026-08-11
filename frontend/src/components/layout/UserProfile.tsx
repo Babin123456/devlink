@@ -1,9 +1,11 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOut, BadgeCheck } from "lucide-react";
 import { Avatar } from "@/components/shared/primitives";
 import { cn } from "@/lib/utils";
 import { currentUser } from "@/mocks/seed";
 import { useSidebar } from "@/hooks/useSidebar";
+import { useAuth } from "@/contexts/auth-context";
+import { authApi } from "@/api/modules/auth";
 
 interface UserProfileProps {
   /** When true, renders compact avatar-only view regardless of sidebar state */
@@ -13,6 +15,14 @@ interface UserProfileProps {
 export function UserProfile({ forceCollapsed }: UserProfileProps) {
   const { isCollapsed, closeMobile } = useSidebar();
   const collapsed = forceCollapsed ?? isCollapsed;
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await authApi.logout().catch(() => {});
+    logout();
+    navigate({ to: "/auth" });
+  };
 
   if (collapsed) {
     return (
@@ -35,6 +45,7 @@ export function UserProfile({ forceCollapsed }: UserProfileProps) {
         <button
           title="Logout"
           aria-label="Logout"
+          onClick={handleLogout}
           className="text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md p-1"
         >
           <LogOut size={18} />
@@ -75,7 +86,10 @@ export function UserProfile({ forceCollapsed }: UserProfileProps) {
           </span>
         )}
       </Link>
-      <button className="mt-1 flex w-full items-center gap-3 rounded-md px-2 py-2 text-[13px] text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+      <button
+        onClick={handleLogout}
+        className="mt-1 flex w-full items-center gap-3 rounded-md px-2 py-2 text-[13px] text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
         <LogOut size={16} /> Logout
       </button>
     </div>
