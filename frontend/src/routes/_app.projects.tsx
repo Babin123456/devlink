@@ -3,7 +3,7 @@ import { createFileRoute, Outlet, useRouterState, Link } from "@tanstack/react-r
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import { projectsService } from "@/services";
-import { Card, TagChip, SectionHeader } from "@/components/shared/primitives";
+import { Card, TagChip, SectionHeader, Skeleton } from "@/components/shared/primitives";
 import {
   Pagination,
   PaginationContent,
@@ -21,7 +21,7 @@ import { useProjectFilters } from "@/hooks/useProjectFilters";
 import { cn } from "@/lib/utils";
 import { getRecentlyViewedProjectIds } from "@/lib/recentlyViewedProjects";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { FilterDrawer, FilterSection } from "@/components/ui/filter-drawer";
+import { FilterDrawer, FilterSection, type FilterValue } from "@/components/ui/filter-drawer";
 
 export const projectSearchSchema = z.object({
   page: z.number().catch(1).optional(),
@@ -41,7 +41,32 @@ export const projectSearchSchema = z.object({
   remote: z.boolean().optional(),
   paid: z.boolean().optional(),
   opensource: z.boolean().optional(),
+  create: z.boolean().optional(),
 });
+
+/**
+ * The filter drawer speaks in strings because it renders radio-style chips;
+ * the search schema speaks in booleans. These two helpers are the translation,
+ * and they keep "unset" distinct from "explicitly false" in both directions —
+ * collapsing those was why an unset "Paid" filter used to read as "Unpaid".
+ */
+function booleanToChoice(value: boolean | undefined): string {
+  if (value === undefined) return "";
+  return value ? "true" : "false";
+}
+
+function choiceToBoolean(value: FilterValue): boolean | undefined {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return undefined;
+}
+
+/** Normalise a drawer value into the string array the search schema stores. */
+function toStringList(value: FilterValue): string[] {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  if (typeof value === "string" && value !== "") return [value];
+  return [];
+}
 
 export const Route = createFileRoute("/_app/projects")({
   head: () => ({
@@ -75,10 +100,26 @@ function ProjectsPage() {
   >("all");
   const [showFilters, setShowFilters] = useState(false);
   const [recentProjectIds, setRecentProjectIds] = useState<string[]>([]);
+  const search = Route.useSearch();
 
   useEffect(() => {
     setRecentProjectIds(getRecentlyViewedProjectIds());
   }, []);
+
+  useEffect(() => {
+    if (search.create) {
+      setCreateOpen(true);
+      // Remove query param to keep the URL clean
+      navigate({
+        search: (prev) => {
+          const next = { ...prev };
+          delete next.create;
+          return next;
+        },
+        replace: true,
+      });
+    }
+  }, [search.create]);
 
   const { data = [], isLoading } = useQuery({
     queryKey: [
@@ -310,9 +351,9 @@ function ProjectsPage() {
           values={{
             language: filters.language ?? [],
             experience: filters.experience?.[0] ?? "",
-            remote: filters.remote === undefined ? "" : String(filters.remote),
-            paid: filters.paid === undefined ? "" : String(filters.paid),
-            opensource: filters.opensource === undefined ? "" : String(filters.opensource),
+            remote: booleanToChoice(filters.remote),
+            paid: booleanToChoice(filters.paid),
+            opensource: booleanToChoice(filters.opensource),
           }}
           onApply={(newValues) => {
             const boolOrUndefined = (v: unknown): boolean | undefined =>
@@ -366,7 +407,39 @@ function ProjectsPage() {
       {isLoading ? (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="h-40 animate-pulse" />
+            <Card key={i} className="p-4 flex flex-col justify-between h-[190px]">
+              <div>
+                <div className="flex items-start gap-3">
+                  <Skeleton className="h-10 w-10 shrink-0 rounded-md animate-pulse" />
+                  <div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
+                    <Skeleton className="h-4 w-2/3 animate-pulse" />
+                    <Skeleton className="h-3 w-5/6 animate-pulse" />
+                  </div>
+                </div>
+                <div className="mt-3 flex gap-1">
+                  <Skeleton className="h-5 w-14 rounded-full animate-pulse" />
+                  <Skeleton className="h-5 w-16 rounded-full animate-pulse" />
+                  <Skeleton className="h-5 w-12 rounded-full animate-pulse" />
+                </div>
+              </div>
+              <div>
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-3 w-10 animate-pulse" />
+                    <Skeleton className="h-3 w-8 animate-pulse" />
+                  </div>
+                  <Skeleton className="h-1 w-full rounded-full animate-pulse" />
+                </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="flex gap-4">
+                    <Skeleton className="h-3.5 w-6 animate-pulse" />
+                    <Skeleton className="h-3.5 w-6 animate-pulse" />
+                    <Skeleton className="h-3.5 w-6 animate-pulse" />
+                  </div>
+                  <Skeleton className="h-5 w-20 rounded-md animate-pulse" />
+                </div>
+              </div>
+            </Card>
           ))}
         </div>
       ) : filtered.length === 0 ? (
