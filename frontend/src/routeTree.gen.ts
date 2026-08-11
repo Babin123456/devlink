@@ -50,7 +50,6 @@ import { Route as AppAdminSearchAnalyticsRouteImport } from './routes/_app.admin
 import { Route as AppAdminNotificationsRouteImport } from './routes/_app.admin.notifications'
 import { Route as AppAdminMaintenanceRouteImport } from './routes/_app.admin.maintenance'
 import { Route as AppAdminJobsRouteImport } from './routes/_app.admin.jobs'
-import { Route as AppAdminEmailTemplatesRouteImport } from './routes/_app.admin.email-templates'
 import { Route as AppAdminCommunityStatsRouteImport } from './routes/_app.admin.community-stats'
 import { Route as AppAdminAuditLogsRouteImport } from './routes/_app.admin.audit-logs'
 import { Route as AppAdminApiRequestAnalyticsRouteImport } from './routes/_app.admin.api-request-analytics'
@@ -263,11 +262,6 @@ const AppAdminJobsRoute = AppAdminJobsRouteImport.update({
   path: '/jobs',
   getParentRoute: () => AppAdminRoute,
 } as any)
-const AppAdminEmailTemplatesRoute = AppAdminEmailTemplatesRouteImport.update({
-  id: '/email-templates',
-  path: '/email-templates',
-  getParentRoute: () => AppAdminRoute,
-} as any)
 const AppAdminCommunityStatsRoute = AppAdminCommunityStatsRouteImport.update({
   id: '/community-stats',
   path: '/community-stats',
@@ -323,7 +317,6 @@ export interface FileRoutesByFullPath {
   '/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/admin/audit-logs': typeof AppAdminAuditLogsRoute
   '/admin/community-stats': typeof AppAdminCommunityStatsRoute
-  '/admin/email-templates': typeof AppAdminEmailTemplatesRoute
   '/admin/jobs': typeof AppAdminJobsRoute
   '/admin/maintenance': typeof AppAdminMaintenanceRoute
   '/admin/notifications': typeof AppAdminNotificationsRoute
@@ -369,7 +362,6 @@ export interface FileRoutesByTo {
   '/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/admin/audit-logs': typeof AppAdminAuditLogsRoute
   '/admin/community-stats': typeof AppAdminCommunityStatsRoute
-  '/admin/email-templates': typeof AppAdminEmailTemplatesRoute
   '/admin/jobs': typeof AppAdminJobsRoute
   '/admin/maintenance': typeof AppAdminMaintenanceRoute
   '/admin/notifications': typeof AppAdminNotificationsRoute
@@ -418,7 +410,6 @@ export interface FileRoutesById {
   '/_app/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/_app/admin/audit-logs': typeof AppAdminAuditLogsRoute
   '/_app/admin/community-stats': typeof AppAdminCommunityStatsRoute
-  '/_app/admin/email-templates': typeof AppAdminEmailTemplatesRoute
   '/_app/admin/jobs': typeof AppAdminJobsRoute
   '/_app/admin/maintenance': typeof AppAdminMaintenanceRoute
   '/_app/admin/notifications': typeof AppAdminNotificationsRoute
@@ -467,7 +458,6 @@ export interface FileRouteTypes {
     | '/admin/api-request-analytics'
     | '/admin/audit-logs'
     | '/admin/community-stats'
-    | '/admin/email-templates'
     | '/admin/jobs'
     | '/admin/maintenance'
     | '/admin/notifications'
@@ -513,7 +503,6 @@ export interface FileRouteTypes {
     | '/admin/api-request-analytics'
     | '/admin/audit-logs'
     | '/admin/community-stats'
-    | '/admin/email-templates'
     | '/admin/jobs'
     | '/admin/maintenance'
     | '/admin/notifications'
@@ -561,7 +550,6 @@ export interface FileRouteTypes {
     | '/_app/admin/api-request-analytics'
     | '/_app/admin/audit-logs'
     | '/_app/admin/community-stats'
-    | '/_app/admin/email-templates'
     | '/_app/admin/jobs'
     | '/_app/admin/maintenance'
     | '/_app/admin/notifications'
@@ -877,13 +865,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminJobsRouteImport
       parentRoute: typeof AppAdminRoute
     }
-    '/_app/admin/email-templates': {
-      id: '/_app/admin/email-templates'
-      path: '/email-templates'
-      fullPath: '/admin/email-templates'
-      preLoaderRoute: typeof AppAdminEmailTemplatesRouteImport
-      parentRoute: typeof AppAdminRoute
-    }
     '/_app/admin/community-stats': {
       id: '/_app/admin/community-stats'
       path: '/community-stats'
@@ -919,7 +900,6 @@ interface AppAdminRouteChildren {
   AppAdminApiRequestAnalyticsRoute: typeof AppAdminApiRequestAnalyticsRoute
   AppAdminAuditLogsRoute: typeof AppAdminAuditLogsRoute
   AppAdminCommunityStatsRoute: typeof AppAdminCommunityStatsRoute
-  AppAdminEmailTemplatesRoute: typeof AppAdminEmailTemplatesRoute
   AppAdminJobsRoute: typeof AppAdminJobsRoute
   AppAdminMaintenanceRoute: typeof AppAdminMaintenanceRoute
   AppAdminNotificationsRoute: typeof AppAdminNotificationsRoute
@@ -930,7 +910,6 @@ const AppAdminRouteChildren: AppAdminRouteChildren = {
   AppAdminApiRequestAnalyticsRoute: AppAdminApiRequestAnalyticsRoute,
   AppAdminAuditLogsRoute: AppAdminAuditLogsRoute,
   AppAdminCommunityStatsRoute: AppAdminCommunityStatsRoute,
-  AppAdminEmailTemplatesRoute: AppAdminEmailTemplatesRoute,
   AppAdminJobsRoute: AppAdminJobsRoute,
   AppAdminMaintenanceRoute: AppAdminMaintenanceRoute,
   AppAdminNotificationsRoute: AppAdminNotificationsRoute,
