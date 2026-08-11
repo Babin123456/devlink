@@ -9,6 +9,14 @@ export function GreetingHero() {
   const first = currentUser.name.split(" ")[0];
 
   return (
+<Card className="flex flex-col gap-5 p-5 sm:p-6 sm:flex-row sm:items-center sm:justify-between">      <div className="min-w-0 flex-1">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+          {greeting}, {first}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Here's what's happening with your projects today.
+        </p>
+        <div className="mt-3 flex items-center gap-4">
     <Card className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between rounded-2xl bg-card border-border/60 shadow-sm relative overflow-hidden">
       <div className="min-w-0 flex-1 flex flex-col gap-4">
         <div>
@@ -53,6 +61,42 @@ export function GreetingHero() {
         </div>
       </div>
 
+<div className="grid grid-cols-3 gap-3 sm:flex sm:w-auto sm:flex-row sm:shrink-0">        <MiniStat icon={<TrendingUp size={14} />} label="Progress" value="75%" progress={75} />
+        <MiniStat icon={<Flame size={14} />} label="Streak" value="12d" />
+        <MiniStat icon={<Sparkles size={14} />} label="AI Score" value="96" />
+      </div>
+    </Card>
+  );
+}
+
+function MiniStat({
+  icon,
+  label,
+  value,
+  progress,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  progress?: number;
+}) {
+  return (
+<div className="flex flex-col justify-between gap-1.5 rounded-xl border border-border/50 bg-muted/20 p-3 sm:min-w-[130px] sm:shrink-0"><div className="flex items-center gap-1.5 text-muted-foreground">
+        {icon}
+        <p className="text-[10px] font-medium uppercase tracking-wider truncate">{label}</p>
+      </div>
+      <div>
+        <p className="text-lg font-semibold tracking-tight text-foreground">{value}</p>
+        {progress !== undefined && (
+          <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted/50">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
+      </div>
+    </div>
       {/* SVG Laptop/Plant Illustration */}
       <svg
         width="180"
