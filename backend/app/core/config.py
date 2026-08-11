@@ -130,9 +130,15 @@ class Settings(BaseSettings):
 
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = ""
 
     LINKEDIN_CLIENT_ID: str = ""
     LINKEDIN_CLIENT_SECRET: str = ""
+
+    MICROSOFT_CLIENT_ID: str = ""
+    MICROSOFT_CLIENT_SECRET: str = ""
+    MICROSOFT_TENANT_ID: str = "common"
+    MICROSOFT_REDIRECT_URI: str = ""
 
     # ==========================================================
     # Uploads
@@ -185,6 +191,8 @@ class Settings(BaseSettings):
     MESSAGE_RATE_LIMIT: str = "30/minute"
     PROJECT_RATE_LIMIT: str = "100/minute"
     PASSWORD_RESET_RATE_LIMIT: str = "3/15minutes"
+    VERIFY_EMAIL_RATE_LIMIT: str = "5/minute"
+    MFA_RATE_LIMIT: str = "5/minute"
     COMMENT_RATE_LIMIT: str = "30/minute"
     RECOMMENDATION_RATE_LIMIT: str = "20/minute"
 
@@ -297,6 +305,7 @@ class Settings(BaseSettings):
     ENABLE_EMAIL_VERIFICATION: bool = True
     ENABLE_GOOGLE_LOGIN: bool = True
     ENABLE_GITHUB_LOGIN: bool = True
+    ENABLE_MICROSOFT_LOGIN: bool = True
     ENABLE_AI_ASSISTANT: bool = True
     ENABLE_NOTIFICATIONS: bool = True
     ENABLE_CHAT: bool = True

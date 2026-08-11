@@ -1,43 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { api } from "@/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import {
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  XCircle,
-  RefreshCw,
-  Search,
-  Activity,
-  Cpu,
-  Play,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/_app/admin/jobs")({
-  component: AdminJobsPage,
+  component: () => <div className="p-6">Admin Jobs Page</div>,
 });
 
 interface AdminJobStats {
@@ -486,3 +450,4 @@ function AdminJobsPage() {
     </div>
   );
 }
+
