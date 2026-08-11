@@ -17,13 +17,16 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PortfolioUsernameRouteImport } from './routes/portfolio.$username'
+import { Route as AppTemplatesRouteImport } from './routes/_app.templates'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppSearchRouteImport } from './routes/_app.search'
 import { Route as AppRepositoryQualityRouteImport } from './routes/_app.repository-quality'
 import { Route as AppProjectsRouteImport } from './routes/_app.projects'
+import { Route as AppProfileAnalyticsRouteImport } from './routes/_app.profile-analytics'
 import { Route as AppOrganizationsRouteImport } from './routes/_app.organizations'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMessagesRouteImport } from './routes/_app.messages'
+import { Route as AppLeaderboardRouteImport } from './routes/_app.leaderboard'
 import { Route as AppHackathonsRouteImport } from './routes/_app.hackathons'
 import { Route as AppGraphRouteImport } from './routes/_app.graph'
 import { Route as AppFlaresRouteImport } from './routes/_app.flares'
@@ -90,6 +93,11 @@ const PortfolioUsernameRoute = PortfolioUsernameRouteImport.update({
   path: '/portfolio/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppTemplatesRoute = AppTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -110,6 +118,11 @@ const AppProjectsRoute = AppProjectsRouteImport.update({
   path: '/projects',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProfileAnalyticsRoute = AppProfileAnalyticsRouteImport.update({
+  id: '/profile-analytics',
+  path: '/profile-analytics',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOrganizationsRoute = AppOrganizationsRouteImport.update({
   id: '/organizations',
   path: '/organizations',
@@ -123,6 +136,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
 const AppMessagesRoute = AppMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLeaderboardRoute = AppLeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppHackathonsRoute = AppHackathonsRouteImport.update({
@@ -278,13 +296,16 @@ export interface FileRoutesByFullPath {
   '/flares': typeof AppFlaresRoute
   '/graph': typeof AppGraphRoute
   '/hackathons': typeof AppHackathonsRouteWithChildren
+  '/leaderboard': typeof AppLeaderboardRoute
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
   '/organizations': typeof AppOrganizationsRouteWithChildren
+  '/profile-analytics': typeof AppProfileAnalyticsRoute
   '/projects': typeof AppProjectsRouteWithChildren
   '/repository-quality': typeof AppRepositoryQualityRoute
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRouteWithChildren
+  '/templates': typeof AppTemplatesRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
   '/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/admin/audit-logs': typeof AppAdminAuditLogsRoute
@@ -320,12 +341,15 @@ export interface FileRoutesByTo {
   '/flares': typeof AppFlaresRoute
   '/graph': typeof AppGraphRoute
   '/hackathons': typeof AppHackathonsRouteWithChildren
+  '/leaderboard': typeof AppLeaderboardRoute
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
+  '/profile-analytics': typeof AppProfileAnalyticsRoute
   '/projects': typeof AppProjectsRouteWithChildren
   '/repository-quality': typeof AppRepositoryQualityRoute
   '/search': typeof AppSearchRoute
   '/settings': typeof AppSettingsRouteWithChildren
+  '/templates': typeof AppTemplatesRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
   '/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/admin/audit-logs': typeof AppAdminAuditLogsRoute
@@ -363,13 +387,16 @@ export interface FileRoutesById {
   '/_app/flares': typeof AppFlaresRoute
   '/_app/graph': typeof AppGraphRoute
   '/_app/hackathons': typeof AppHackathonsRouteWithChildren
+  '/_app/leaderboard': typeof AppLeaderboardRoute
   '/_app/messages': typeof AppMessagesRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/organizations': typeof AppOrganizationsRouteWithChildren
+  '/_app/profile-analytics': typeof AppProfileAnalyticsRoute
   '/_app/projects': typeof AppProjectsRouteWithChildren
   '/_app/repository-quality': typeof AppRepositoryQualityRoute
   '/_app/search': typeof AppSearchRoute
   '/_app/settings': typeof AppSettingsRouteWithChildren
+  '/_app/templates': typeof AppTemplatesRoute
   '/portfolio/$username': typeof PortfolioUsernameRoute
   '/_app/admin/api-request-analytics': typeof AppAdminApiRequestAnalyticsRoute
   '/_app/admin/audit-logs': typeof AppAdminAuditLogsRoute
@@ -407,13 +434,16 @@ export interface FileRouteTypes {
     | '/flares'
     | '/graph'
     | '/hackathons'
+    | '/leaderboard'
     | '/messages'
     | '/notifications'
     | '/organizations'
+    | '/profile-analytics'
     | '/projects'
     | '/repository-quality'
     | '/search'
     | '/settings'
+    | '/templates'
     | '/portfolio/$username'
     | '/admin/api-request-analytics'
     | '/admin/audit-logs'
@@ -449,12 +479,15 @@ export interface FileRouteTypes {
     | '/flares'
     | '/graph'
     | '/hackathons'
+    | '/leaderboard'
     | '/messages'
     | '/notifications'
+    | '/profile-analytics'
     | '/projects'
     | '/repository-quality'
     | '/search'
     | '/settings'
+    | '/templates'
     | '/portfolio/$username'
     | '/admin/api-request-analytics'
     | '/admin/audit-logs'
@@ -491,13 +524,16 @@ export interface FileRouteTypes {
     | '/_app/flares'
     | '/_app/graph'
     | '/_app/hackathons'
+    | '/_app/leaderboard'
     | '/_app/messages'
     | '/_app/notifications'
     | '/_app/organizations'
+    | '/_app/profile-analytics'
     | '/_app/projects'
     | '/_app/repository-quality'
     | '/_app/search'
     | '/_app/settings'
+    | '/_app/templates'
     | '/portfolio/$username'
     | '/_app/admin/api-request-analytics'
     | '/_app/admin/audit-logs'
@@ -586,6 +622,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortfolioUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/templates': {
+      id: '/_app/templates'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof AppTemplatesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/settings': {
       id: '/_app/settings'
       path: '/settings'
@@ -614,6 +657,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjectsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/profile-analytics': {
+      id: '/_app/profile-analytics'
+      path: '/profile-analytics'
+      fullPath: '/profile-analytics'
+      preLoaderRoute: typeof AppProfileAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/organizations': {
       id: '/_app/organizations'
       path: '/organizations'
@@ -633,6 +683,13 @@ declare module '@tanstack/react-router' {
       path: '/messages'
       fullPath: '/messages'
       preLoaderRoute: typeof AppMessagesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/leaderboard': {
+      id: '/_app/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof AppLeaderboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/hackathons': {
@@ -939,13 +996,16 @@ interface AppRouteChildren {
   AppFlaresRoute: typeof AppFlaresRoute
   AppGraphRoute: typeof AppGraphRoute
   AppHackathonsRoute: typeof AppHackathonsRouteWithChildren
+  AppLeaderboardRoute: typeof AppLeaderboardRoute
   AppMessagesRoute: typeof AppMessagesRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppOrganizationsRoute: typeof AppOrganizationsRouteWithChildren
+  AppProfileAnalyticsRoute: typeof AppProfileAnalyticsRoute
   AppProjectsRoute: typeof AppProjectsRouteWithChildren
   AppRepositoryQualityRoute: typeof AppRepositoryQualityRoute
   AppSearchRoute: typeof AppSearchRoute
   AppSettingsRoute: typeof AppSettingsRouteWithChildren
+  AppTemplatesRoute: typeof AppTemplatesRoute
   AppProfileUsernameRoute: typeof AppProfileUsernameRoute
 }
 
@@ -960,13 +1020,16 @@ const AppRouteChildren: AppRouteChildren = {
   AppFlaresRoute: AppFlaresRoute,
   AppGraphRoute: AppGraphRoute,
   AppHackathonsRoute: AppHackathonsRouteWithChildren,
+  AppLeaderboardRoute: AppLeaderboardRoute,
   AppMessagesRoute: AppMessagesRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,
   AppOrganizationsRoute: AppOrganizationsRouteWithChildren,
+  AppProfileAnalyticsRoute: AppProfileAnalyticsRoute,
   AppProjectsRoute: AppProjectsRouteWithChildren,
   AppRepositoryQualityRoute: AppRepositoryQualityRoute,
   AppSearchRoute: AppSearchRoute,
   AppSettingsRoute: AppSettingsRouteWithChildren,
+  AppTemplatesRoute: AppTemplatesRoute,
   AppProfileUsernameRoute: AppProfileUsernameRoute,
 }
 

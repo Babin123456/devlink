@@ -96,7 +96,12 @@ def search_users(db: Session, q: str, limit: int = 20) -> List[User]:
                 User.is_active.is_(True),
                 ts_vector.op("@@")(ts_query),
             )
-            .order_by(func.ts_rank(ts_vector, ts_query).desc(), User.username.asc())
+            .order_by(
+                User.is_verified.desc(),
+                User.premium.desc(),
+                func.ts_rank(ts_vector, ts_query).desc(),
+                User.username.asc()
+            )
             .limit(limit)
             .all()
         )
@@ -114,7 +119,11 @@ def search_users(db: Session, q: str, limit: int = 20) -> List[User]:
                 User.headline.ilike(pattern),
             ),
         )
-        .order_by(User.username.asc())
+        .order_by(
+            User.is_verified.desc(),
+            User.premium.desc(),
+            User.username.asc()
+        )
         .limit(limit)
         .all()
     )
@@ -535,6 +544,8 @@ class SearchService:
                     headline=u.headline,
                     profile_image=u.profile_image,
                     location=u.location,
+                    is_verified=u.is_verified,
+                    premium=u.premium,
                 )
                 for u in users
             ],

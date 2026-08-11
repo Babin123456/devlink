@@ -23,7 +23,6 @@ import { cn } from "@/lib/utils";
 
 import {
   ArrowRight,
-  BadgeCheck,
   Bookmark,
   Briefcase,
   Calendar,
@@ -31,6 +30,7 @@ import {
   Search,
   Sparkles,
   UsersRound,
+  BadgeCheck,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { containerVariants } from "@/lib/animations";
@@ -113,8 +113,11 @@ function AIMatchCard({ builder }: { builder: Builder }) {
                 {builder.name}
                 {builder.verified && (
                   <BadgeCheck
-                    className="text-primary shrink-0 h-5 w-5"
-                    aria-label="Verified User"
+                    className={cn(
+                      "shrink-0 h-5 w-5",
+                      builder.premium ? "text-amber-500 fill-amber-500/10 animate-pulse" : "text-primary"
+                    )}
+                    aria-label={builder.premium ? "Premium Verified User" : "Verified User"}
                   />
                 )}
               </h3>
@@ -414,8 +417,11 @@ function BuildersPage() {
                       <HighlightText text={b.name} query={q} />
                       {b.verified && (
                         <BadgeCheck
-                          className="text-primary h-3.5 w-3.5"
-                          aria-label="Verified User"
+                          className={cn(
+                            "h-3.5 w-3.5 shrink-0",
+                            b.premium ? "text-amber-500 fill-amber-500/10 animate-pulse" : "text-primary"
+                          )}
+                          aria-label={b.premium ? "Premium Verified User" : "Verified User"}
                         />
                       )}
                     </p>

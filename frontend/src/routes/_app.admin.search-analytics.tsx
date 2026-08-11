@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
@@ -7,12 +6,17 @@ export const Route = createFileRoute("/_app/admin/search-analytics")({
   component: SearchAnalyticsDashboard,
 });
 
+interface KeywordCount {
+  keyword: string;
+  count: number;
+}
+
 interface SearchAnalyticsData {
   total_searches: number;
   zero_result_rate_pct: number;
   click_through_rate_pct: number;
   average_latency_ms: number;
-  top_keywords: { keyword: string; count: number }[];
+  top_keywords?: KeywordCount[];
 }
 
 function SearchAnalyticsDashboard() {
@@ -20,19 +24,18 @@ function SearchAnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAnalytics();
-  }, []);
+    const fetchAnalytics = async () => {
+      try {
+        setData(await api.get<SearchAnalyticsData>("/api/search/analytics?days=30"));
+      } catch (error) {
+        console.error("Failed to fetch search analytics", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchAnalytics = async () => {
-    try {
-      // Assuming api wrapper adds the base url and token
-      setData(await api.get<SearchAnalyticsData>("/api/search/analytics?days=30"));
-    } catch (error) {
-      console.error("Failed to fetch search analytics", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    void fetchAnalytics();
+  }, []);
 
   if (loading) return <div className="p-6">Loading Analytics...</div>;
   if (!data) return <div className="p-6 text-red-500">Failed to load data.</div>;
@@ -77,11 +80,11 @@ function SearchAnalyticsDashboard() {
               </tr>
             </thead>
             <tbody>
-              {data.top_keywords.map((item: { keyword: string; count: number }, idx: number) => (
+              {data.top_keywords?.map((item: KeywordCount, idx: number) => (
                 <tr key={idx} className="border-b">
                   <td className="p-3 text-gray-500">#{idx + 1}</td>
-                  <td className="p-3 font-medium">{item.keyword}</td>
-                  <td className="p-3">{item.count}</td>
+                  <td className="p-3 font-medium">{item?.keyword}</td>
+                  <td className="p-3">{item?.count}</td>
                 </tr>
               ))}
             </tbody>
