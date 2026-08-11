@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export interface ProgressBarProps {
   progress?: number;
@@ -11,7 +11,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   progress = 0,
   indeterminate = false,
   showLabel = false,
-  className = '',
+  className = "",
 }) => {
   const clampedProgress = Math.min(100, Math.max(0, progress));
 
@@ -32,10 +32,10 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       )}
       <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-300/60 dark:border-slate-700/60">
         {indeterminate ? (
-          <div className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-full animate-pulse w-full"></div>
+          <div className="h-full bg-gradient-to-r from-cyan-500 via-teal-400 to-cyan-500 rounded-full animate-pulse w-full"></div>
         ) : (
           <div
-            className="h-full bg-indigo-600 rounded-full transition-all duration-300 ease-out"
+            className="h-full bg-cyan-500 dark:bg-cyan-400 rounded-full transition-all duration-300 ease-out"
             style={{ width: `${clampedProgress}%` }}
           ></div>
         )}

@@ -1,12 +1,12 @@
-import React from 'react';
-import { Spinner } from './Spinner';
+import React from "react";
+import { Spinner } from "./Spinner";
 
 export interface FullPageLoaderProps {
   message?: string;
 }
 
 export const FullPageLoader: React.FC<FullPageLoaderProps> = ({
-  message = 'Loading DevLink application...',
+  message = "Loading DevLink application...",
 }) => {
   return (
     <div
@@ -15,7 +15,7 @@ export const FullPageLoader: React.FC<FullPageLoaderProps> = ({
       aria-busy="true"
       aria-label={message}
     >
-      <Spinner size="xl" color="indigo" />
+      <Spinner size="xl" color="cyan" />
       <p className="text-sm font-semibold tracking-wide text-slate-300 animate-pulse">{message}</p>
     </div>
   );
