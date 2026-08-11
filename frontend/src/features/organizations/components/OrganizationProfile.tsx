@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { OrganizationHeader } from "./OrganizationHeader";
 import { OrganizationApiTokens } from "./OrganizationApiTokens";
 import { OrganizationAuditLogs } from "./OrganizationAuditLogs";
+import { OrganizationMembers } from "./OrganizationMembers";
 
 interface OrganizationProfileProps {
   organizationData: {
@@ -21,7 +22,7 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({
   orgId,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    "about" | "team" | "projects" | "hiring" | "tokens" | "audit"
+    "about" | "members" | "team" | "projects" | "hiring" | "tokens" | "audit"
   >("about");
 
   return (
@@ -38,7 +39,7 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({
 
       {/* Tabs */}
       <div className="flex border-b border-gray-800 mb-6 gap-6 overflow-x-auto">
-        {(["about", "team", "projects", "hiring", "tokens", "audit"] as const).map((tab) => (
+        {(["about", "members", "team", "projects", "hiring", "tokens", "audit"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -62,6 +63,10 @@ export const OrganizationProfile: React.FC<OrganizationProfileProps> = ({
               {organizationData.description || "No description provided."}
             </p>
           </div>
+        )}
+
+        {activeTab === "members" && (
+          <OrganizationMembers orgId={orgId} />
         )}
 
         {activeTab === "team" && (
