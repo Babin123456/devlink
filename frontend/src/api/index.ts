@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 export { api, ApiError, API_BASE_URL, isBackendConfigured } from "./client";
 export { tokenStore } from "./tokens";
 export { ws } from "./ws";
-export type { WsEvent } from "./ws";
+export type { CollabEvent as WsEvent } from "./ws";
 
 export { authApi } from "./modules/auth";
 export { usersApi } from "./modules/users";
@@ -51,9 +49,28 @@ export { conversationStartersApi } from "./modules/conversationStarters";
 export type { ConversationStarterResponse } from "./modules/conversationStarters";
 export { projectTagsApi } from "./modules/projectTags";
 export type { ProjectTagResponse } from "./modules/projectTags";
+
+export { projectCommentsApi } from "./modules/projectComments";
+export type {
+  CommentAuthor,
+  ProjectComment,
+  ProjectCommentThread,
+  ProjectCommentList,
+  ListCommentsParams,
+  CreateCommentPayload,
+  UpdateCommentPayload,
+} from "./modules/projectComments";
 export { teamMatchApi } from "./modules/teamMatch";
 export { contributorMatchingApi } from "./modules/contributorMatching";
 export type { ContributorMatchResponse, MatchedContributor } from "./modules/contributorMatching";
+export { reputationApi } from "./modules/reputation";
+export type {
+  ReputationLog,
+  ReputationSummary,
+  LeaderboardEntry,
+  LeaderboardResponse,
+  AwardReputationInput,
+} from "./modules/reputation";
 export { repositoryQualityApi } from "./modules/repositoryQuality";
 export type {
   RepositoryQualityResponse,
@@ -84,3 +101,11 @@ export type {
   RoleGap,
   RiskAlert,
 } from "./modules/projectInsights";
+export { sessionsApi } from "./modules/sessions";
+export type { UserSession, RevokeSessionResponse } from "./modules/sessions";
+export { projectTemplatesApi } from "./modules/projectTemplates";
+export type {
+  ProjectTemplate,
+  ProjectTemplateListResponse,
+  ProjectTemplateCreateInput,
+} from "./modules/projectTemplates";
