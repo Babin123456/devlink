@@ -8,6 +8,9 @@ from app.schemas.search import (
     SearchRequest,
     SearchResponse,
 )
+from app.models.centralized_analytics import CentralizedAnalyticsEvent
+from app.dependencies import get_database, get_current_user_optional, get_current_user
+from app.schemas.search import SearchAutocompleteResponse
 from app.schemas.search_index import (
     SearchIndexedResponse,
     SearchAnalyticsMetric,
@@ -83,6 +86,18 @@ def full_search(
             user_id=user.id if user else None,
             filters={"category": category} if category else None,
         )
+
+        # Log search appearances for returned users/developers
+        if results.get("users"):
+            for u in results["users"]:
+                db.add(
+                    CentralizedAnalyticsEvent(
+                        event_type="profile_search_appearance",
+                        user_id=user.id if user else None,
+                        properties={"target_user_id": str(u.id), "query": q},
+                    )
+                )
+            db.commit()
 
     return results
 

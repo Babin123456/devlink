@@ -27,10 +27,6 @@ export const Route = createFileRoute("/_app/graph")({
 });
 
 /** A node as the backend sends it, before we lay it out. */
-interface GraphNode {
-  id: string;
-  data: { label?: string; type?: string };
-  position?: { x: number; y: number };
 interface GraphNodeData {
   label: string;
   type: string;
@@ -126,15 +122,8 @@ function GraphView() {
   const initialNodes = useMemo<GraphFlowNode[]>(() => {
     if (!data?.nodes) return [];
 
-    const radius = 300;
-
-    return data.nodes.map((n, i) => {
-      if (n.position) {
-        return { ...n, position: n.position };
-      }
-
     return data.nodes.map((n: GraphNode, i: number) => {
-      if (n.position) return n;
+      if (n.position) return n as GraphFlowNode;
       // Simple layout if no position provided by backend
       const radius = 300;
       const angle = (i / data.nodes.length) * 2 * Math.PI;
@@ -143,14 +132,14 @@ function GraphView() {
         ...n,
         position: { x: 400 + radius * Math.cos(angle), y: 300 + radius * Math.sin(angle) },
         style: {
-          background: NODE_COLOURS[n.data.type ?? ""] ?? NODE_COLOURS.default,
+          background: NODE_COLOURS[n.data?.type ?? ""] ?? NODE_COLOURS.default,
           color: "#fff",
           border: "none",
           borderRadius: "8px",
           padding: "10px",
           fontWeight: "bold",
         },
-      };
+      } as GraphFlowNode;
     });
   }, [data]);
 

@@ -335,6 +335,22 @@ def update_me(
     return updated_user
 
 
+@router.put(
+    "/me/premium",
+    response_model=UserResponse,
+    summary="Toggle user premium status",
+)
+def update_premium_status(
+    premium: bool = Query(True, description="Enable or disable premium status"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    current_user.premium = premium
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
 @router.post(
     "/me/resume",
     response_model=UserResponse,
