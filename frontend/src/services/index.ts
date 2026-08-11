@@ -32,7 +32,7 @@ import type {
   IssueUpdateInput,
   TechStackResponse,
 } from "@/api";
-import type { Hackathon, Flare } from "@/mocks/seed";
+import type { Hackathon, Flare, Message } from "@/mocks/seed";
 
 const delay = 120;
 const mock = <T>(v: T): Promise<T> => new Promise((r) => setTimeout(() => r(v), delay));
@@ -264,6 +264,10 @@ export const messagesService = {
           attachment_name: m.attachment_name,
           attachment_size: m.attachment_size,
           mime_type: m.mime_type,
+        }));
+      },
+      seed.messages[id] ?? [],
+    );
         }),
       );
     }, seed.messages[id] ?? []);
