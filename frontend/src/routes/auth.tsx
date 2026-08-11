@@ -102,17 +102,35 @@ function AuthScreen() {
       toast.error("Unable to start sign-in. Please try again.");
     }
   }, []);
-  const onSubmit = useCallback(async () => {
-    if (submitting) return;
-    setSubmitting(true);
-    try {
-      await new Promise((r) => setTimeout(r, 800));
-      toast.success(mode === "signin" ? "Signed in" : "Account created");
-      navigate({ to: "/dashboard" });
-    } finally {
-      setSubmitting(false);
-    }
-  }, [submitting, mode, navigate]);
+  const onSubmit = useCallback(
+    async (data: any) => {
+      if (submitting) return;
+      setSubmitting(true);
+      try {
+        if (mode === "signin") {
+          await authApi.login({ email: data.email, password: data.password });
+          toast.success("Signed in");
+        } else {
+          await authApi.register({
+            email: data.email,
+            username: data.username,
+            password: data.password,
+            full_name: `${data.firstName} ${data.lastName}`,
+          });
+          toast.success("Account created");
+        }
+        navigate({ to: "/dashboard" });
+      } catch (error: any) {
+        toast.error(
+          error?.response?.data?.detail ||
+            (mode === "signin" ? "Invalid credentials" : "Sign-up failed"),
+        );
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [submitting, mode, navigate],
+  );
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center overflow-y-auto bg-background px-4 py-8">
