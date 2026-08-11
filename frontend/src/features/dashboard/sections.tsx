@@ -76,6 +76,47 @@ import {
 
 // 1. Current Projects
 export function CurrentProjects() {
+  const projectsList = [
+    {
+      id: "p1",
+      name: "DevLink Platform",
+      status: "In Progress",
+      progress: 80,
+      dueText: "Due in 5 days",
+      iconText: "D",
+      iconBg: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
+      avatars: [
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Alex",
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
+      ],
+      extraAvatars: 3,
+    },
+    {
+      id: "p2",
+      name: "AI Matching Engine",
+      status: "In Progress",
+      progress: 60,
+      dueText: "Due in 12 days",
+      iconText: "A",
+      iconBg: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
+      avatars: [
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Priya",
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=John",
+      ],
+      extraAvatars: 2,
+    },
+    {
+      id: "p3",
+      name: "Mobile App",
+      status: "Planning",
+      progress: 25,
+      dueText: "Due in 18 days",
+      iconText: "M",
+      iconBg: "bg-violet-500/10 text-violet-500 border border-violet-500/20",
+      avatars: ["https://api.dicebear.com/9.x/notionists-neutral/svg?seed=David"],
+      extraAvatars: 1,
+    },
+  ];
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ["dashboard-projects"],
     queryFn: () => projectsService.list({ limit: 3 }),
@@ -103,6 +144,54 @@ export function CurrentProjects() {
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
       <SectionHeader title="Current Projects" action="View All" actionTo="/projects" />
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-4">
+        {projectsList.map((p) => (
+          <div
+            key={p.id}
+            className="flex items-center justify-between gap-4 p-3 rounded-xl border border-border/40 hover:bg-muted/10 transition-colors"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className={cn(
+                  "flex items-center justify-center h-10 w-10 shrink-0 rounded-lg text-sm font-bold",
+                  p.iconBg,
+                )}
+              >
+                {p.iconText}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{p.status}</p>
+              </div>
+            </div>
+
+            {/* Progress bar stack */}
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="hidden sm:flex flex-col items-end gap-1">
+                <div className="h-1.5 w-24 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full"
+                    style={{ width: `${p.progress}%` }}
+                  />
+                </div>
+                <span className="text-[10px] font-semibold text-muted-foreground">
+                  {p.progress}%
+                </span>
+              </div>
+
+              {/* Avatar stack */}
+              <div className="flex -space-x-1.5 items-center shrink-0">
+                {p.avatars.map((av, idx) => (
+                  <Avatar
+                    key={idx}
+                    src={av}
+                    alt="Team"
+                    size={24}
+                    className="border border-card ring-1 ring-border/20"
+                  />
+                ))}
+                {p.extraAvatars > 0 && (
+                  <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted border border-card text-[9px] font-semibold text-muted-foreground ring-1 ring-border/20">
+                    +{p.extraAvatars}
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div
@@ -261,6 +350,21 @@ export function AISuggestions() {
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
       <SectionHeader title="AI Suggestions" action="View All" actionTo="/builders" />
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-4">
+        {suggestions.map((s) => {
+          const Icon = s.icon;
+          return (
+            <div
+              key={s.id}
+              className="flex items-center justify-between gap-4 p-3.5 rounded-xl border border-border/40 hover:bg-muted/10 transition-colors"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className={cn(
+                    "flex items-center justify-center h-8 w-8 rounded-lg shrink-0",
+                    s.iconColor,
+                  )}
+                >
+                  <Icon size={16} />
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div
@@ -300,6 +404,17 @@ export function AISuggestions() {
                   {s.badge}
                 </span>
               </div>
+              <span
+                className={cn(
+                  "text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0",
+                  s.badgeClass,
+                )}
+              >
+                {s.badge}
+              </span>
+            </div>
+          );
+        })}
             );
           })
         )}
@@ -584,6 +699,24 @@ export function Upcoming() {
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
       <SectionHeader title="Upcoming" action="View All" actionTo="/dashboard" />
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-3">
+        {upcomingList.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div
+              key={item.id}
+              className="flex items-center gap-3 p-2.5 rounded-lg border border-border/40"
+            >
+              <div
+                className={cn(
+                  "flex items-center justify-center h-8 w-8 rounded-lg shrink-0",
+                  item.iconColor,
+                )}
+              >
+                <Icon size={16} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-foreground truncate">{item.title}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{item.time}</p>
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div
@@ -722,6 +855,20 @@ export function UpcomingEventsWidget() {
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
       <SectionHeader title="Upcoming Events" action="View All" actionTo="/dashboard" />
       <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5">
+        {events.map((e) => (
+          <div key={e.id} className="flex items-center gap-3">
+            <div
+              className={cn(
+                "flex items-center justify-center h-8 w-8 rounded-lg shrink-0",
+                e.iconColor,
+              )}
+            >
+              <Calendar size={16} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-foreground truncate">{e.title}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{e.time}</p>
+            </div>
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div
