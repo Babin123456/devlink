@@ -268,9 +268,6 @@ export const messagesService = {
       },
       seed.messages[id] ?? [],
     );
-        }),
-      );
-    }, seed.messages[id] ?? []);
   },
   send: (
     conversationId: string,
