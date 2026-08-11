@@ -10,8 +10,11 @@ import {
   notificationsService,
 } from "@/services";
 import { Card, SectionHeader, Avatar } from "@/components/shared/primitives";
+import { dashboardService } from "@/services";
+import { useQuery } from "@tanstack/react-query";
 import {
   Plus,
+  FolderPlus,
   Flame,
   Users2,
   MessageSquare,
@@ -21,6 +24,7 @@ import {
   Rocket,
   User,
   Sparkles,
+  UserPlus,
   TrendingUp,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -306,42 +310,38 @@ export function AISuggestions() {
 
 // 3. Quick Actions
 export function QuickActions() {
-  const actions = [
-    {
-      label: "Create Project",
-      icon: Plus,
-      bg: "bg-blue-50/50 dark:bg-blue-950/20",
-      border: "border-blue-100 dark:border-blue-900/40",
-      color: "text-blue-600 dark:text-blue-400",
-      to: "/projects" as const,
-    },
-    {
-      label: "Publish Flare",
-      icon: Flame,
-      bg: "bg-orange-50/50 dark:bg-orange-950/20",
-      border: "border-orange-100 dark:border-orange-900/40",
-      color: "text-orange-600 dark:text-orange-400",
-      to: "/flares" as const,
-    },
-    {
-      label: "Find Builders",
-      icon: Users2,
-      bg: "bg-emerald-50/50 dark:bg-emerald-950/20",
-      border: "border-emerald-100 dark:border-emerald-900/40",
-      color: "text-emerald-600 dark:text-emerald-400",
-      to: "/builders" as const,
-    },
-    {
-      label: "Messages",
-      icon: MessageSquare,
-      bg: "bg-purple-50/50 dark:bg-purple-950/20",
-      border: "border-purple-100 dark:border-purple-900/40",
-      color: "text-purple-600 dark:text-purple-400",
-      to: "/messages" as const,
-    },
-  ];
+  const { data = [] } = useQuery({
+    queryKey: ["quick-actions"],
+    queryFn: dashboardService.quickActions,
+  });
+
+  const getIcon = (name: string) => {
+    switch (name) {
+      case "FolderPlus":
+        return FolderPlus;
+      case "Users2":
+        return Users2;
+      case "Flame":
+        return Flame;
+      case "UserPlus":
+        return UserPlus;
+      default:
+        return FolderPlus;
+    }
+  };
 
   return (
+    <Card className="border-border/60 bg-transparent shadow-none border-none">
+      <div className="grid grid-cols-2 gap-4">
+        {data.map((a) => {
+          const Icon = getIcon(a.iconName);
+          return (
+            <Link
+              key={a.label}
+              to={a.to}
+              className="group flex flex-col items-start gap-4 rounded-2xl border border-border/60 bg-card p-5 transition-all hover:border-border hover:shadow-md hover:-translate-y-0.5"
+            >
+              <span className="flex items-center justify-center h-10 w-10 rounded-xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
 <Card className="hover:shadow-md transition-shadow duration-200">      <SectionHeader title="Suggested Builders" action="View All" actionTo="/builders" />
 {isLoading && <ListRowsSkeleton rows={3} />}
       {!isLoading && (
@@ -407,10 +407,11 @@ className="flex flex-col h-full rounded-3xl border border-border/40 bg-surface p
                 )}
               >
                 <Icon size={20} />
-              </div>
-              <span className="text-xs font-bold text-foreground">{act.label}</span>
+              </span>
+              <span className="text-sm font-semibold text-foreground">{a.label}</span>
             </Link>
           );
+        })}      </div>
         })}
 </motion.div>
       )}
@@ -452,6 +453,8 @@ export function TrendingProjects() {
     </Card>
   );
 }
+
+// 7. Upcoming Events (Sidebar Widget)
 
 // 4. Recent Activity
 export function RecentActivity() {
@@ -620,6 +623,7 @@ export function Upcoming() {
     </Card>
   );
 }
+
 
 // 6. Notifications (Sidebar Widget)
 export function NotificationsWidget() {
