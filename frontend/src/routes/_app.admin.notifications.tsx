@@ -10,21 +10,6 @@ export const Route = createFileRoute("/_app/admin/notifications")({
   component: AdminNotificationsPage,
 });
 
-interface NotificationDeliveryStats {
-  total: number;
-  pending: number;
-  sent: number;
-  failed: number;
-}
-
-interface FailedNotification {
-  id: string;
-  title: string;
-  message: string;
-  channel: string;
-  recipient_id: string;
-}
-
 function AdminNotificationsPage() {
   const queryClient = useQueryClient();
 

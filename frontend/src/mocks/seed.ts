@@ -44,6 +44,7 @@ export interface Builder {
   lastActiveAt: string | null;
   publicEmail?: string;
   verified?: boolean;
+  premium?: boolean;
   pinnedProjects?: string[];
   contributions?: number;
   followers?: number;
@@ -118,6 +119,8 @@ export interface Flare {
   likes: number;
   comments: number;
   ago: string;
+  status?: string;
+  publish_at?: string;
 }
 export interface Conversation {
   id: ID;
@@ -131,6 +134,11 @@ export interface Message {
   from: ID;
   text: string;
   at: string;
+  type?: string;
+  attachment_url?: string;
+  attachment_name?: string;
+  attachment_size?: number;
+  mime_type?: string;
 }
 export interface Notification {
   id: ID;
@@ -214,6 +222,15 @@ export const builders: Builder[] = [
     yearsExp: 3,
     matchScore: 92,
     skills: ["React", "Next.js", "TypeScript"],
+    profileSkills: [
+      { name: "TypeScript", level: "Expert", category: "Languages", yearsOfExperience: 4 },
+      { name: "React", level: "Expert", category: "Frameworks", yearsOfExperience: 4 },
+      { name: "Next.js", level: "Advanced", category: "Frameworks", yearsOfExperience: 3 },
+      { name: "PostgreSQL", level: "Intermediate", category: "Databases", yearsOfExperience: 2 },
+      { name: "AWS", level: "Intermediate", category: "Cloud", yearsOfExperience: 2 },
+      { name: "Docker", level: "Advanced", category: "DevOps", yearsOfExperience: 3 },
+      { name: "Tailwind CSS", level: "Expert", category: "Design", yearsOfExperience: 4 },
+    ],
     badges: ["Top Contributor", "Social Butterfly"],
     online: true,
     bio: "Loves accessible UIs and design systems.",
@@ -811,6 +828,15 @@ export const currentUser = {
   avatar: AV("Nancy"),
   premium: true,
   verified: true,
+  profileSkills: [
+    { name: "TypeScript", level: "Expert", category: "Languages", yearsOfExperience: 4 },
+    { name: "React", level: "Expert", category: "Frameworks", yearsOfExperience: 4 },
+    { name: "Python", level: "Advanced", category: "Languages", yearsOfExperience: 3 },
+    { name: "FastAPI", level: "Advanced", category: "Frameworks", yearsOfExperience: 3 },
+    { name: "PostgreSQL", level: "Intermediate", category: "Databases", yearsOfExperience: 2 },
+    { name: "AWS", level: "Intermediate", category: "Cloud", yearsOfExperience: 2 },
+    { name: "Docker", level: "Advanced", category: "DevOps", yearsOfExperience: 3 },
+  ],
 };
 
 export const stats = [
