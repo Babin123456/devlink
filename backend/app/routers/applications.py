@@ -22,7 +22,6 @@ from app.services.application_service import ApplicationService
 from app.services.notification_service import NotificationService
 
 router = APIRouter(
-    prefix="/applications",
     tags=["Applications"],
     route_class=IdempotentRoute,
 )
