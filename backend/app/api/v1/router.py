@@ -22,6 +22,7 @@ from app.routers import (
     oauth_linking,
     org_audit_logs,
     organizations,
+    pinned_projects,
     plugins,
     profile_summary,
     profile_suggestions,
@@ -71,6 +72,7 @@ api_v1_router.include_router(oauth_linking.router)
 api_v1_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_v1_router.include_router(blocks.router, prefix="/blocks", tags=["User Blocks"])
 api_v1_router.include_router(export.router, prefix="/users", tags=["Export"])
+api_v1_router.include_router(pinned_projects.router)
 api_v1_router.include_router(backup.router)
 api_v1_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
 api_v1_router.include_router(project_members.router)

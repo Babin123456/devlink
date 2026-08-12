@@ -540,6 +540,9 @@ from app.routers import testimonials
 
 app.include_router(testimonials.router, prefix="/api", tags=["Testimonials"])
 app.include_router(export.router, prefix="/api/users", tags=["Export"])
+from app.routers import pinned_projects
+
+app.include_router(pinned_projects.router, prefix="/api", tags=["Pinned Projects"])
 from app.routers import feedback
 
 app.include_router(feedback.router, prefix="/api/feedback", tags=["Feedback"])

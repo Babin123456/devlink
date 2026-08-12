@@ -36,6 +36,12 @@ export { collectionsApi } from "./modules/collections";
 export { recommendationsApi, fallbackTechStack } from "./modules/recommendations";
 export type { TechStackRecommendation, TechStackResponse } from "./modules/recommendations";
 export { bookmarksApi } from "./modules/bookmarks";
+export { pinnedProjectsApi, MAX_PINNED_PROJECTS } from "./modules/pinnedProjects";
+export type {
+  PinnedProject,
+  PinnedProjectList,
+  PinnedProjectSummary,
+} from "./modules/pinnedProjects";
 export { issuesApi } from "./modules/issues";
 export type {
   Issue,
