@@ -85,6 +85,11 @@ from .security_event import SecurityEvent, SecurityEventType, SecurityEventSever
 from .profile_suggestion import ProfileSuggestionDismissal
 from .request_log import RequestLog  # noqa: F401
 from .background_job import BackgroundJob, JobStatus
+from .testimonial import (  # noqa: F401
+    Testimonial,
+    TestimonialRelationship,
+    TestimonialStatus,
+)
 from .badge import Badge, UserBadge  # noqa: F401
 from .centralized_analytics import CentralizedAnalyticsEvent, AnalyticsEventType  # noqa: F401
 from .global_announcement import GlobalAnnouncement, AnnouncementSeverity, TargetAudience  # noqa: F401

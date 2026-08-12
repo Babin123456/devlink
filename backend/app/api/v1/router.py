@@ -40,6 +40,7 @@ from app.routers import (
     security_dashboard,
     security_events,
     skills,
+    testimonials,
     users,
     webhooks,
     websockets,
@@ -119,6 +120,7 @@ api_v1_router.include_router(repositories.router)
 api_v1_router.include_router(organizations.router)
 api_v1_router.include_router(applications.router)
 api_v1_router.include_router(skills.router)
+api_v1_router.include_router(testimonials.router)
 api_v1_router.include_router(websockets.router)
 api_v1_router.include_router(recommendations.router)
 api_v1_router.include_router(repository_quality.router, tags=["Repository Quality"])
