@@ -45,19 +45,19 @@ const STALE_TIME = 5 * 60 * 1000; // 5 minutes
 
 export const githubApi = {
   getProfile: async (username: string): Promise<GitHubProfile> => {
-    const { data } = await api.get(`/github/${username}/profile`);
+    const { data } = (await api.get(`/github/${username}/profile`)) as any;
     return data;
   },
   getRepositories: async (username: string): Promise<GitHubRepository[]> => {
-    const { data } = await api.get(`/github/${username}/repositories`);
+    const { data } = (await api.get(`/github/${username}/repositories`)) as any;
     return data;
   },
   getStats: async (username: string): Promise<GitHubStats> => {
-    const { data } = await api.get(`/github/${username}/stats`);
+    const { data } = (await api.get(`/github/${username}/stats`)) as any;
     return data;
   },
   getContributions: async (username: string): Promise<GitHubContribution[]> => {
-    const { data } = await api.get(`/github/${username}/contributions`);
+    const { data } = (await api.get(`/github/${username}/contributions`)) as any;
     return data;
   },
 };
