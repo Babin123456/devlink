@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
 import { ApiError } from "@/api/client";
+import { TypoHeading } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/maintenance")({
   component: MaintenancePage,
@@ -80,7 +81,7 @@ function MaintenancePage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full text-center">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">Under Maintenance</h1>
+        <TypoHeading as="h1">Under Maintenance</TypoHeading>
         <p className="text-gray-600 mb-6">
           {maintenance?.message ||
             "The system is currently undergoing scheduled maintenance. Please check back later."}

@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TypoCaption, TypoHeading } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/settings/notifications")({
   component: NotificationSettingsPage,
@@ -118,10 +119,10 @@ function NotificationSettingsPage() {
   return (
     <div className="space-y-6 max-w-4xl mx-auto p-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Notification Preferences Center</h2>
-        <p className="text-muted-foreground">
+        <TypoHeading as="h2">Notification Preferences Center</TypoHeading>
+        <TypoCaption as="p">
           Manage your notification channels, category alerts, and email delivery preferences.
-        </p>
+        </TypoCaption>
       </div>
 
       <div className="grid gap-6">
@@ -136,9 +137,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Master Email Notifications</Label>
-                <p className="text-sm text-muted-foreground">
+                <TypoCaption as="p">
                   Master switch to enable or disable all email notifications.
-                </p>
+                </TypoCaption>
               </div>
               <Switch
                 checked={formData.email_enabled}
@@ -149,9 +150,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">In-App Notifications</Label>
-                <p className="text-sm text-muted-foreground">
+                <TypoCaption as="p">
                   Store notifications in your notification center tray.
-                </p>
+                </TypoCaption>
               </div>
               <Switch
                 checked={formData.database_enabled}
@@ -162,9 +163,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Real-time Popups (WebSocket)</Label>
-                <p className="text-sm text-muted-foreground">
+                <TypoCaption as="p">
                   Receive instant desktop toast popups while actively using DevLink.
-                </p>
+                </TypoCaption>
               </div>
               <Switch
                 checked={formData.websocket_enabled}
@@ -186,9 +187,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Messages</Label>
-                <p className="text-sm text-muted-foreground">
+                <TypoCaption as="p">
                   Direct messages and active conversation alerts.
-                </p>
+                </TypoCaption>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
@@ -213,9 +214,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Team Invitations</Label>
-                <p className="text-sm text-muted-foreground">
+                <TypoCaption as="p">
                   Project invites, team membership, and role changes.
-                </p>
+                </TypoCaption>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
@@ -240,9 +241,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Project Updates</Label>
-                <p className="text-sm text-muted-foreground">
+                <TypoCaption as="p">
                   Milestones, project status changes, and repository activity.
-                </p>
+                </TypoCaption>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
@@ -267,9 +268,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Mentions</Label>
-                <p className="text-sm text-muted-foreground">
+                <TypoCaption as="p">
                   When developers tag or mention @username in issues or discussions.
-                </p>
+                </TypoCaption>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
@@ -294,9 +295,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">System Announcements</Label>
-                <p className="text-sm text-muted-foreground">
+                <TypoCaption as="p">
                   Platform updates, scheduled maintenance, and system alerts.
-                </p>
+                </TypoCaption>
               </div>
               <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
@@ -321,9 +322,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Role Changes</Label>
-                <p className="text-sm text-muted-foreground">
+                <TypoCaption as="p">
                   When your permissions or roles are modified.
-                </p>
+                </TypoCaption>
               </div>
               <Switch
                 checked={formData.role_changes}
@@ -335,9 +336,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between pb-4 border-b">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">System Alerts</Label>
-                <p className="text-sm text-muted-foreground">
+                <TypoCaption as="p">
                   Critical security and system notifications.
-                </p>
+                </TypoCaption>
               </div>
               <Switch
                 checked={formData.system_alerts}
@@ -350,9 +351,9 @@ function NotificationSettingsPage() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label className="text-base font-semibold">Marketing & News</Label>
-                <p className="text-sm text-muted-foreground">
+                <TypoCaption as="p">
                   Occasional updates about DevLink features.
-                </p>
+                </TypoCaption>
               </div>
               <Switch
                 checked={formData.marketing_emails}

@@ -28,10 +28,13 @@ import { analyticsApi } from "@/api/modules/analytics";
 import SkillsCard from "@/components/profile/SkillsCard";
 import ExperienceCard from "@/components/profile/ExperienceCard";
 import { ProfileViewersList } from "@/components/profile/ProfileViewersList";
+import { PinnedProjectsCard } from "@/components/profile/PinnedProjectsCard";
 import { ProfileCompletionChecklist } from "@/components/profile/ProfileCompletionChecklist";
 import { FollowButton } from "@/components/shared/FollowButton";
 import { useFollowStatus } from "@/hooks/useFollow";
 import { ActivityTimeline } from "@/components/profile/ActivityTimeline";
+import { ContributionHeatmap } from "@/components/profile/ContributionHeatmap";
+import { TypoSection, TypoCaption, TypoHeading } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/profile/$username")({
   head: ({ params }) => ({
@@ -193,13 +196,13 @@ function ProfilePage() {
         <Card className="p-6 bg-gradient-to-r from-primary-soft via-transparent to-transparent border-primary/20">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <TypoSection>
                 <span className="text-lg">🚀</span> Your Shareable Public Portfolio
-              </h3>
-              <p className="text-xs text-muted-foreground">
+              </TypoSection>
+              <TypoCaption as="p">
                 Showcase your projects, skills, and flares with beautiful custom themes, custom
                 layouts, and a direct contact form.
-              </p>
+              </TypoCaption>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <Link
@@ -225,9 +228,9 @@ function ProfilePage() {
       ) : (
         <Card className="p-4 bg-muted/40">
           <div className="flex items-center justify-between gap-4">
-            <p className="text-xs text-muted-foreground">
+            <TypoCaption as="p">
               Looking for a more polished, professional view of {b.name}'s work?
-            </p>
+            </TypoCaption>
             <Link
               to="/portfolio/$username"
               params={{ username: b.handle }}
@@ -243,7 +246,7 @@ function ProfilePage() {
         <ProfileCompletionChecklist
           userProfile={{
             avatar: avatarUrl,
-            banner: bannerUrl ?? undefined,
+            banner: bannerUrl || undefined,
             bio: b.bio,
             skills: b.profileSkills?.map((s) => s.name) ?? b.skills,
             experience: b.experienceLevel || b.role || b.company,
@@ -306,7 +309,7 @@ function ProfilePage() {
               className="ring-4 ring-card shadow-lg"
             />
             <div className="min-w-0 flex-1 pt-12 sm:pt-4">
-              <h1 className="text-[22px] font-bold text-foreground flex items-center gap-2">
+              <TypoHeading as="h1">
                 {b.name}
                 {b.verified &&
                   (b.premium ? (
@@ -322,27 +325,27 @@ function ProfilePage() {
                   ) : (
                     <BadgeCheck className="text-primary h-6 w-6" aria-label="Verified User" />
                   ))}
-              </h1>
-              <p className="text-[13px] text-muted-foreground">
+              </TypoHeading>
+              <TypoCaption as="p">
                 @{b.handle} · {b.role}
-              </p>
+              </TypoCaption>
               <p className="mt-2 text-[13px] text-foreground">{b.bio}</p>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
                 <div>
                   <span className="font-semibold">
                     {followStatus?.follower_count ?? b.followers ?? 0}
                   </span>
-                  <span className="m-1 text-muted-foreground">Followers</span>
+                  <TypoCaption>Followers</TypoCaption>
                 </div>
                 <div>
                   <span className="font-semibold">
                     {followStatus?.following_count ?? b.following ?? 0}
                   </span>
-                  <span className="m-1 text-muted-foreground">Following</span>
+                  <TypoCaption>Following</TypoCaption>
                 </div>
                 <div>
                   <span className="font-semibold">{b.contributions ?? 0}</span>
-                  <span className="ml-1 text-muted-foreground">Contributions</span>
+                  <TypoCaption>Contributions</TypoCaption>
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground">
@@ -509,9 +512,9 @@ function ProfilePage() {
         )}
 
         {!summary && !summaryMutation.isPending && !summaryMutation.isError && (
-          <p className="mt-2 text-[12px] text-muted-foreground">
+          <TypoCaption as="p">
             Generate an AI-powered professional summary based on your profile, skills, and activity.
-          </p>
+          </TypoCaption>
         )}
 
         {summaryMutation.isError && (
@@ -536,16 +539,7 @@ function ProfilePage() {
           <SkillsCard skills={b.profileSkills ?? []} />
           <ExperienceCard role={b.role} company={b.company} experienceLevel={b.experienceLevel} />
 
-          {b.pinnedProjects?.length ? (
-            <Card className="p-4">
-              <p className="text-[13px] font-semibold text-foreground">Pinned Projects</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {b.pinnedProjects.map((project) => (
-                  <TagChip key={project}>{project}</TagChip>
-                ))}
-              </div>
-            </Card>
-          ) : null}
+          <PinnedProjectsCard username={b.handle} isOwnProfile={me} />
 
           {b.badges && b.badges.length > 0 && (
             <Card className="p-4">
@@ -587,15 +581,17 @@ function ProfilePage() {
                       <p className="truncate text-[13px] font-semibold text-foreground hover:text-primary transition-colors">
                         {p.name}
                       </p>
-                      <p className="truncate text-[11px] text-muted-foreground">
+                      <TypoCaption as="p">
                         {p.stack.join(" · ")}
-                      </p>
+                      </TypoCaption>
                     </div>
                   </Link>
                 </li>
               ))}
             </ul>
           </Card>
+
+          <ContributionHeatmap username={b.handle} className="mt-4" />
 
           <ActivityTimeline userId={b.id} />
         </div>
