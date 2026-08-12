@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TechStackSuggest } from "./TechStackSuggest";
 import { ProjectTemplateSelect } from "./ProjectTemplateSelect";
+import { AIDescriptionGenerator } from "./AIDescriptionGenerator";
 
 interface Props {
   open: boolean;
@@ -197,6 +198,10 @@ export function CreateProjectDialog({ open, onOpenChange }: Props) {
                 className="bg-surface text-sm sm:text-[13px]"
               />
             </div>
+
+            <AIDescriptionGenerator 
+              onGenerated={(desc) => setValue("description", desc, { shouldValidate: true })} 
+            />
 
             <div className="space-y-1.5">
               <Label className="text-[12px] text-muted-foreground">Description</Label>
