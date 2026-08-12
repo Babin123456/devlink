@@ -102,10 +102,12 @@ export function ActivityFeed({ actorId, targetId, targetType }: ActivityFeedProp
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const sentinelRef = useIntersectionObserver(
-    handleIntersect,
-    Boolean(hasNextPage && !isFetchingNextPage),
-  );
+  // `enabled` deliberately leaves out `isFetchingNextPage`. Toggling it off
+  // while a page loads tears the observer down, and the fresh one built when
+  // the fetch finishes reports the still-visible sentinel immediately, which
+  // asks for the next page, which toggles it again. `handleIntersect` already
+  // refuses to stack fetches, so the observer can just stay up.
+  const sentinelRef = useIntersectionObserver(handleIntersect, Boolean(hasNextPage));
 
   const activities = data?.pages.flatMap((page) => page) ?? [];
 
