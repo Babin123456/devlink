@@ -11,6 +11,17 @@ class MilestoneCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=200, description="Title of the milestone")
     description: Optional[str] = Field(default=None, description="Detailed description")
     due_date: Optional[datetime] = Field(default=None, description="When the milestone is due")
+    owner_id: Optional[uuid.UUID] = Field(default=None, description="ID of the user assigned to the milestone")
+
+class MilestoneOwner(BaseModel):
+    id: uuid.UUID
+    username: str
+    first_name: str
+    last_name: str
+    profile_image: Optional[str] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+
 
 
 class MilestoneUpdate(BaseModel):
@@ -19,11 +30,14 @@ class MilestoneUpdate(BaseModel):
     due_date: Optional[datetime] = Field(default=None)
     is_completed: Optional[bool] = Field(default=None)
     is_archived: Optional[bool] = Field(default=None)
+    owner_id: Optional[uuid.UUID] = Field(default=None)
 
 
 class MilestoneResponse(BaseModel):
     id: uuid.UUID
     project_id: uuid.UUID
+    owner_id: Optional[uuid.UUID] = None
+    owner: Optional[MilestoneOwner] = None
     title: str
     description: Optional[str] = None
     due_date: Optional[datetime] = None
