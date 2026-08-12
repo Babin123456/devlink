@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { uploadImage } from "@/services/imageUpload";
 import { useCamera } from "@/hooks/useCamera";
 import { cn } from "@/lib/utils";
+import { TypoCaption } from "@/components/shared/Typography";
 
 export type ImageCropMode = "avatar" | "banner";
 
@@ -355,6 +356,21 @@ export function ImageCropUploadModal({
                 </div>
               )}
             </div>
+            <p className="mt-3 text-sm font-medium text-foreground">
+              Drag & drop your image here, or <span className="text-primary underline">browse</span>
+            </p>
+            <TypoCaption as="p">
+              Supports JPEG, PNG, WebP, GIF · Max {maxSizeMB}MB
+            </TypoCaption>
+            <input
+              ref={fileInputRef}
+              type="file"
+              data-testid="file-input"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
           ) : (
             <div
               onDragOver={handleDragOver}
@@ -449,9 +465,9 @@ export function ImageCropUploadModal({
                       className="h-1.5 flex-1 appearance-none rounded-lg bg-border accent-primary cursor-pointer"
                     />
                     <ZoomIn size={14} className="text-muted-foreground shrink-0" />
-                    <span className="w-10 font-mono text-muted-foreground text-right">
+                    <TypoCaption>
                       {Math.round(zoom * 100)}%
-                    </span>
+                    </TypoCaption>
                   </div>
 
                   {/* Action Buttons */}
@@ -501,7 +517,7 @@ export function ImageCropUploadModal({
                       </>
                     )}
                   </span>
-                  <span className="font-mono text-muted-foreground">{uploadProgress}%</span>
+                  <TypoCaption>{uploadProgress}%</TypoCaption>
                 </div>
 
                 {/* Progress Bar Container */}

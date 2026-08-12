@@ -18,6 +18,7 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { TypoCard } from "@/components/shared/Typography";
 
 export interface FilterOption {
   label: string;
@@ -271,9 +272,9 @@ export function FilterDrawer({
           key={section.id}
           className="space-y-1.5 border-b border-border/50 pb-4 last:border-b-0 last:pb-0"
         >
-          <h4 className="text-[13px] font-semibold text-foreground uppercase tracking-wider">
+          <TypoCard>
             {section.title}
-          </h4>
+          </TypoCard>
           {renderSectionContent(section)}
         </div>
       ))}

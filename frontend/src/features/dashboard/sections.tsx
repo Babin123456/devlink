@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { TypoCaption, TypoCard } from "@/components/shared/Typography";
 import { motion, useReducedMotion } from "framer-motion";
 import { containerVariants, cardEntrance, cardHover } from "@/lib/animations";
 
@@ -160,7 +161,7 @@ export function CurrentProjects() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{p.status}</p>
+                <TypoCaption as="p">{p.status}</TypoCaption>
               </div>
             </div>
 
@@ -173,6 +174,7 @@ export function CurrentProjects() {
                     style={{ width: `${p.progress}%` }}
                   />
                 </div>
+                <TypoCaption>{p.progress}%</TypoCaption>
                 <span className="text-[10px] font-semibold text-muted-foreground">
                   {p.progress}%
                 </span>
@@ -276,6 +278,9 @@ export function CurrentProjects() {
     </Card>  );
 }
 
+              <TypoCaption>
+                {p.dueText}
+              </TypoCaption>
 export function InviteRequests() {
 const { data = [], isLoading } = useQuery({
     queryKey: ["invite-requests"],
@@ -626,6 +631,17 @@ export function RecentActivity() {
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
       <SectionHeader title="Recent Activity" action="View All" actionTo="/dashboard" />
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-3">
+        {activities.map((act) => (
+          <Link
+            key={act.id}
+            to="/dashboard"
+            className="flex items-center justify-between gap-4 p-2.5 rounded-lg border border-transparent hover:border-border/40 hover:bg-muted/10 transition-colors"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={cn("h-2 w-2 rounded-full shrink-0", act.bulletColor)} />
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-foreground truncate">{act.text}</p>
+                <TypoCaption as="p">{act.time}</TypoCaption>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <div
@@ -716,6 +732,7 @@ export function Upcoming() {
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-foreground truncate">{item.title}</p>
+                <TypoCaption as="p">{item.time}</TypoCaption>
                 <p className="text-[10px] text-muted-foreground mt-0.5">{item.time}</p>
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
@@ -792,6 +809,13 @@ className="group flex flex-col items-start gap-4 rounded-3xl border border-borde
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
       <SectionHeader title="Notifications" action="View All" actionTo="/dashboard" />
       <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5">
+        {notifications.map((n) => (
+          <div key={n.id} className="flex items-start gap-3 min-w-0">
+            <div className={cn("h-2.5 w-2.5 rounded-full shrink-0 mt-1", n.dotColor)} />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-foreground leading-tight">{n.text}</p>
+              <TypoCaption as="p">{n.time}</TypoCaption>
+            </div>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <div
@@ -867,7 +891,7 @@ export function UpcomingEventsWidget() {
             </div>
             <div className="min-w-0">
               <p className="text-xs font-bold text-foreground truncate">{e.title}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{e.time}</p>
+              <TypoCaption as="p">{e.time}</TypoCaption>
             </div>
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
@@ -935,10 +959,10 @@ export function UpgradePlanCTA() {
       </div>
 
       <div className="min-w-0 flex-1 relative z-10">
-        <h4 className="text-sm font-bold text-foreground">Upgrade your plan</h4>
-        <p className="text-[11px] text-muted-foreground mt-1 leading-normal">
+        <TypoCard>Upgrade your plan</TypoCard>
+        <TypoCaption as="p">
           Unlock premium features and boost your productivity.
-        </p>
+        </TypoCaption>
         <Link
           to="/dashboard"
           className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline mt-2 cursor-pointer"

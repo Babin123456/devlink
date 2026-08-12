@@ -20,6 +20,7 @@ import {
 } from "@/hooks/useBookmarkCollections";
 import type { BookmarkCollection } from "@/api";
 import { ProjectDifficultyBadge } from "@/components/project/ProjectDifficultyBadge";
+import { TypoCaption, TypoHeading } from "@/components/shared/Typography";
 import type { RepositoryItem } from "@/mocks/repositories";
 
 export const Route = createFileRoute("/_app/bookmarks")({
@@ -148,10 +149,12 @@ function BookmarksPage() {
       <div className="min-w-0 flex-1 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-[22px] font-bold tracking-tight text-foreground">Bookmarks</h1>
-            <p className="text-[13px] text-muted-foreground">
+            <TypoHeading as="h1">Bookmarks</TypoHeading>
+            <TypoCaption as="p">
               {activeCollectionId
                 ? "Filtered by collection"
+                : "Projects, developers, and flares you've saved."}
+            </TypoCaption>
                 : "Developers, projects, repositories and posts you've saved."}
             </p>
           </div>
@@ -168,16 +171,77 @@ function BookmarksPage() {
 
         {/* SAVED DEVELOPERS */}
         <section>
+          <div className="mb-2 flex items-center justify-between">
+            <TypoCaption as="p">
+              <Users size={14} /> Saved Developers
+            </TypoCaption>
+          </div>
+          {bookmarkedDevs.length === 0 ? (
+            <Card className="p-6 text-center border-dashed">
+              <TypoCaption as="p">
           <SectionHeader icon={Users} label="Saved Developers" />
           {bookmarkedDevs.length === 0 ? (
             <Card className="border-dashed p-6 text-center">
               <p className="text-[13px] text-muted-foreground">
                 No developers bookmarked yet. Save builders from their profiles to see them here!
-              </p>
+              </TypoCaption>
             </Card>
           ) : (
             <Card className="px-2 py-1">
               {bookmarkedDevs.map((dev) => (
+                <Card key={dev.id} className="p-4 flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <Avatar
+                          src={dev.avatar_url || ""}
+                          alt={dev.name || "Developer"}
+                          size={40}
+                        />
+                        <div>
+                          <p className="text-[14px] font-semibold text-foreground">{dev.name}</p>
+                          <TypoCaption as="p">{dev.role}</TypoCaption>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => toggleBookmark(dev)}
+                        title="Remove bookmark"
+                        className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-1 mb-3 text-[11px] text-muted-foreground">
+                      {dev.location && (
+                        <div className="flex items-center gap-1.5">
+                          <MapPin size={12} />
+                          <span>{dev.location}</span>
+                        </div>
+                      )}
+                      {dev.experience && (
+                        <div className="flex items-center gap-1.5">
+                          <Briefcase size={12} />
+                          <span>{dev.experience}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {dev.skills && dev.skills.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {dev.skills.map((s) => (
+                          <TagChip key={s}>{s}</TagChip>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <Link
+                    to="/builders/$builderId"
+                    params={{ builderId: dev.id || "" }}
+                    className="mt-2 block w-full text-center text-[12px] font-medium py-1.5 rounded-md border border-border hover:bg-muted text-foreground transition-colors"
+                  >
+                    View Profile
                 <BookmarkListItem
                   key={dev.id}
                   actions={
@@ -207,6 +271,11 @@ function BookmarksPage() {
 
         {/* SAVED PROJECTS */}
         <section>
+          <div className="mb-2 flex items-center justify-between">
+            <TypoCaption as="p">
+              Projects
+            </TypoCaption>
+          </div>
           <SectionHeader icon={FolderKanban} label="Saved Projects" />
           {bookmarkedProjects.length === 0 ? (
             <EmptyState
@@ -216,6 +285,35 @@ function BookmarksPage() {
           ) : (
             <Card className="px-2 py-1">
               {bookmarkedProjects.map((p) => (
+                <div key={p.id} className="group relative">
+                  <Link to="/projects/$projectId" params={{ projectId: p.id }}>
+                    <Card interactive className="p-4">
+                      <div className="flex items-start gap-3">
+                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-muted text-xl">
+                          {p.icon}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="truncate text-[14px] font-semibold text-foreground">
+                              {p.name}
+                            </p>
+                            {p.difficulty && <ProjectDifficultyBadge difficulty={p.difficulty} />}
+                          </div>
+                          <TypoCaption as="p">
+                            {p.description}
+                          </TypoCaption>
+                        </div>
+
+                        <Bookmark size={14} className="text-primary fill-primary" />
+
+                        <Bookmark size={14} className="text-primary fill-primary shrink-0" />
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-1">
+                        {p.stack.map((s) => (
+                          <TagChip key={s}>{s}</TagChip>
+                        ))}
+                      </div>
+                    </Card>
                 <BookmarkListItem
                   key={p.id}
                   actions={
@@ -297,6 +395,17 @@ function BookmarksPage() {
 
         {/* SAVED POSTS */}
         <section>
+          <TypoCaption as="p">
+            Flares
+          </TypoCaption>
+          <div className="space-y-2">
+            {flares.slice(0, 2).map((f) => (
+              <Card key={f.id} className="p-4">
+                <p className="text-[13px] font-semibold text-foreground">{f.author.name}</p>
+                <p className="mt-1 text-[13px] text-foreground">{f.content}</p>
+              </Card>
+            ))}
+          </div>
           <SectionHeader icon={FileText} label="Saved Posts" />
           {bookmarkedPosts.length === 0 ? (
             <EmptyState

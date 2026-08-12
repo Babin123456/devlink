@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { getRecentlyViewedProjectIds } from "@/lib/recentlyViewedProjects";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { FilterDrawer, FilterSection, type FilterValue } from "@/components/ui/filter-drawer";
+import { TypoCaption, TypoHeading } from "@/components/shared/Typography";
 
 export const projectSearchSchema = z.object({
   page: z.number().catch(1).optional(),
@@ -178,10 +179,10 @@ function ProjectsPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-[22px] font-bold tracking-tight text-foreground">Projects</h1>
-          <p className="text-[13px] text-muted-foreground">
+          <TypoHeading as="h1">Projects</TypoHeading>
+          <TypoCaption as="p">
             Everything you're building, in one place.
-          </p>
+          </TypoCaption>
         </div>
         <button
           onClick={() => setCreateOpen(true)}
@@ -194,8 +195,8 @@ function ProjectsPage() {
       {recentlyViewed.length > 0 && (
         <section className="space-y-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-[15px] font-semibold text-foreground">Recently Viewed Projects</h2>
-            <span className="text-[11px] text-muted-foreground">Your latest project visits</span>
+            <TypoHeading as="h2">Recently Viewed Projects</TypoHeading>
+            <TypoCaption>Your latest project visits</TypoCaption>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -211,9 +212,9 @@ function ProjectsPage() {
                       <p className="truncate text-[14px] font-semibold text-foreground">
                         {project.name}
                       </p>
-                      <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
+                      <TypoCaption as="p">
                         {project.description}
-                      </p>
+                      </TypoCaption>
                     </div>
                   </div>
 
@@ -423,9 +424,9 @@ function ProjectsPage() {
           <p className="text-[14px] font-semibold text-foreground">
             No projects match your filters
           </p>
-          <p className="mt-1 text-[13px] text-muted-foreground">
+          <TypoCaption as="p">
             Try adjusting or resetting your filters.
-          </p>
+          </TypoCaption>
           {hasActiveFilters && (
             <button
               onClick={handleClearAllFilters}
@@ -452,9 +453,9 @@ function ProjectsPage() {
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[14px] font-semibold text-foreground">{p.name}</p>
-                      <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
+                      <TypoCaption as="p">
                         {p.description}
-                      </p>
+                      </TypoCaption>
                     </div>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1">

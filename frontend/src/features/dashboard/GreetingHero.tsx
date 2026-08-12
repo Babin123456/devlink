@@ -2,6 +2,7 @@ import { Card } from "@/components/shared/primitives";
 import { Folder, Users2, Calendar, ArrowRight, Plus } from "lucide-react";
 import { currentUser } from "@/mocks/seed";
 import { Link } from "@tanstack/react-router";
+import { TypoCaption, TypoHeading } from "@/components/shared/Typography";
 
 export function GreetingHero() {
   const hour = new Date().getHours();
@@ -20,12 +21,12 @@ export function GreetingHero() {
     <Card className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between rounded-2xl bg-card border-border/60 shadow-sm relative overflow-hidden">
       <div className="min-w-0 flex-1 flex flex-col gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <TypoHeading as="h1">
             {greeting}, {first}! 👋
-          </h1>
-          <p className="mt-1 text-[15px] text-muted-foreground">
+          </TypoHeading>
+          <TypoCaption as="p">
             Here's what's happening with your workspace today.
-          </p>
+          </TypoCaption>
         </div>
 
         {/* Inline Stats Badges Row */}

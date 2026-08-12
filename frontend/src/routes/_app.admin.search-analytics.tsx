@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
+import { TypoSection, TypoHeading } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/admin/search-analytics")({
   component: SearchAnalyticsDashboard,
@@ -42,32 +43,32 @@ function SearchAnalyticsDashboard() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Platform Search Analytics (Last 30 Days)</h1>
+      <TypoHeading as="h1">Platform Search Analytics (Last 30 Days)</TypoHeading>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded shadow border">
-          <h3 className="text-gray-500 text-sm font-medium">Total Searches</h3>
+          <TypoSection>Total Searches</TypoSection>
           <p className="text-3xl font-bold mt-2">{data.total_searches}</p>
         </div>
 
         <div className="bg-white p-6 rounded shadow border">
-          <h3 className="text-gray-500 text-sm font-medium">Zero-Result Rate</h3>
+          <TypoSection>Zero-Result Rate</TypoSection>
           <p className="text-3xl font-bold mt-2 text-rose-600">{data.zero_result_rate_pct}%</p>
         </div>
 
         <div className="bg-white p-6 rounded shadow border">
-          <h3 className="text-gray-500 text-sm font-medium">Click-Through Rate (CTR)</h3>
+          <TypoSection>Click-Through Rate (CTR)</TypoSection>
           <p className="text-3xl font-bold mt-2 text-green-600">{data.click_through_rate_pct}%</p>
         </div>
 
         <div className="bg-white p-6 rounded shadow border">
-          <h3 className="text-gray-500 text-sm font-medium">Avg Latency</h3>
+          <TypoSection>Avg Latency</TypoSection>
           <p className="text-3xl font-bold mt-2 text-blue-600">{data.average_latency_ms} ms</p>
         </div>
       </div>
 
       <div className="bg-white p-6 rounded shadow border">
-        <h2 className="text-xl font-semibold mb-4">Top 10 Searched Keywords</h2>
+        <TypoHeading as="h2">Top 10 Searched Keywords</TypoHeading>
         {data.top_keywords?.length === 0 ? (
           <p className="text-gray-500">No keyword data available.</p>
         ) : (

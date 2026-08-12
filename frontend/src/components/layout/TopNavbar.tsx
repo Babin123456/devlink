@@ -28,6 +28,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { searchService } from "@/services";
 import { GlobalSearchModal } from "@/components/search/GlobalSearchModal";
 import { toast } from "sonner";
+import { TypoCaption } from "@/components/shared/Typography";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -174,7 +175,7 @@ export function TopNavbar() {
                 />
               )}
             </p>
-            <p className="text-[11px] leading-tight text-muted-foreground">View Profile</p>
+            <TypoCaption as="p">View Profile</TypoCaption>
           </div>
         </Link>
       </header>

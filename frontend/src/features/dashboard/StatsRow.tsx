@@ -8,6 +8,50 @@ import {
   ArrowDownRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { TypoCaption } from "@/components/shared/Typography";
+
+const statsData = [
+  {
+    key: "active-projects",
+    value: "2",
+    label: "Active Projects",
+    trend: "+ 20% from last week",
+    positive: true,
+    icon: Folder,
+    iconColor: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+  },
+  {
+    key: "team-members",
+    value: "24",
+    label: "Team Members",
+    trend: "+ 8% from last week",
+    positive: true,
+    icon: Users2,
+    iconColor: "text-emerald-500",
+    bgColor: "bg-emerald-500/10",
+  },
+  {
+    key: "unread-messages",
+    value: "3",
+    label: "Unread Messages",
+    trend: "- 25% from last week",
+    positive: false,
+    icon: MessageSquare,
+    iconColor: "text-violet-500",
+    bgColor: "bg-violet-500/10",
+  },
+  {
+    key: "ai-score",
+    value: "85",
+    label: "AI Score",
+    trend: "+ 15% from last week",
+    positive: true,
+    icon: Sparkles,
+    iconColor: "text-amber-500",
+    bgColor: "bg-amber-500/10",
+  },
+];
 import { useQuery } from "@tanstack/react-query";
 import { dashboardService } from "@/services";
 
@@ -113,9 +157,9 @@ className="flex flex-col h-full gap-3 p-4 transition-all duration-200 hover:bord
                   <p className="text-2xl font-bold tracking-tight text-foreground leading-none">
                     {s.value}
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-muted-foreground truncate">
+                  <TypoCaption as="p">
                     {s.label}
-                  </p>
+                  </TypoCaption>
                 </div>
               </div>
 

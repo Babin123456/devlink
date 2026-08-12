@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { TypoSection, TypoCaption } from "@/components/shared/Typography";
 
 interface ProjectVersion {
   id: string;
@@ -117,10 +118,10 @@ export function ProjectVersionHistory({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-bold tracking-tight">Project Version History</h3>
-          <p className="text-sm text-muted-foreground">
+          <TypoSection>Project Version History</TypoSection>
+          <TypoCaption as="p">
             Review previous edits, compare field diffs, and restore prior project snapshots.
-          </p>
+          </TypoCaption>
         </div>
       </div>
 
@@ -150,9 +151,9 @@ export function ProjectVersionHistory({
                       {new Date(ver.created_at).toLocaleDateString()}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1 truncate">
+                  <TypoCaption as="p">
                     {ver.change_summary || ver.title}
-                  </p>
+                  </TypoCaption>
                 </div>
               ))}
             </CardContent>
@@ -187,16 +188,16 @@ export function ProjectVersionHistory({
               </CardHeader>
               <CardContent className="space-y-4">
                 {Object.keys(compareData.diff).length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic">
+                  <TypoCaption as="p">
                     No differences detected between version {compareData.v1_version_number} and
                     current state.
-                  </p>
+                  </TypoCaption>
                 ) : (
                   Object.entries(compareData.diff).map(([field, { old: oldVal, new: newVal }]) => (
                     <div key={field} className="p-3 border rounded-md space-y-2">
-                      <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                      <TypoCaption>
                         {field}
-                      </span>
+                      </TypoCaption>
                       <div className="grid grid-cols-2 gap-4 text-xs">
                         <div className="p-2 bg-red-500/10 rounded border border-red-500/20">
                           <span className="font-semibold text-red-600 block mb-1">
