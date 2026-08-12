@@ -2,13 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { GreetingHero } from "@/features/dashboard/GreetingHero";
 import { StatsRow } from "@/features/dashboard/StatsRow";
 import {
-  CurrentProjects,
-  AISuggestions,
-  QuickActions,
-  RecentActivity,
-  Upcoming,
-  NotificationsWidget,
-  UpcomingEventsWidget,
+  ProjectsOverview,
+  ActivityOverview,
+  SidebarUpdates,
   UpgradePlanCTA,
 } from "@/features/dashboard/sections";
 
@@ -44,15 +40,8 @@ function Dashboard() {
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         {/* Left/Main Column - 9 cols */}
         <div className="lg:col-span-9 flex flex-col gap-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <CurrentProjects />
-            <AISuggestions />
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            <QuickActions />
-            <RecentActivity />
-            <Upcoming />
-          </div>
+          <ProjectsOverview />
+          <ActivityOverview />
         </div>
 
         {/* Right Sidebar - 4 cols */}
@@ -62,8 +51,7 @@ function Dashboard() {
           <NotificationsFeed />
         {/* Right Sidebar - 3 cols */}
         <div className="lg:col-span-3 flex flex-col gap-6">
-          <NotificationsWidget />
-          <UpcomingEventsWidget />
+          <SidebarUpdates />
           <UpgradePlanCTA />
         </div>
       </div>

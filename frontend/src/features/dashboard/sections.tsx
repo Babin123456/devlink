@@ -21,11 +21,11 @@ import {
   ChevronRight,
   Calendar,
   Clock,
-  Rocket,
   User,
   Sparkles,
   UserPlus,
   TrendingUp,
+  Rocket,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
@@ -75,6 +75,24 @@ import {
   notificationsService,
 } from "@/services";
 
+// Shared row treatment: a divider between rows instead of wrapping every
+// row in its own bordered "card". Keeps lists visually grouped under a
+// single container while still separating individual entries.
+const ROW_CLASS =
+  "flex items-center justify-between gap-4 py-3 border-b border-border/50 last:border-b-0 -mx-2 px-2 rounded-md transition-colors hover:bg-muted/10";
+
+function SubDivider() {
+  return <div className="border-t border-border/60" />;
+}
+
+// ---------------------------------------------------------------------------
+// Projects & Suggestions — combines "Current Projects" and "AI Suggestions"
+// into a single card. They were previously two separate cards; grouping
+// them under one container with a divider keeps the related "what's
+// relevant to me right now" info together without extra chrome.
+// ---------------------------------------------------------------------------
+export function ProjectsOverview() {
+  const { data: projects = [], isLoading: projectsLoading } = useQuery({
 // 1. Current Projects
 export function CurrentProjects() {
   const projectsList = [
@@ -141,9 +159,42 @@ export function CurrentProjects() {
     extraAvatars: Math.max(0, p.members - 2),
   }));
 
+  const { data: builders = [], isLoading: suggestionsLoading } = useQuery({
+    queryKey: ["dashboard-ai-suggestions"],
+    queryFn: () => buildersService.suggested(),
+  });
+
+  const suggestions = builders.slice(0, 3).map((b, i) => {
+    // Generate some diverse suggestion badges for demo purposes
+    const isTop = i === 0;
+    const isEvent = i === 1;
+    return {
+      id: b.id,
+      icon: isEvent ? Calendar : isTop ? User : TrendingUp,
+      iconColor: isEvent
+        ? "text-blue-500 bg-blue-500/10"
+        : isTop
+          ? "text-emerald-500 bg-emerald-500/10"
+          : "text-amber-500 bg-amber-500/10",
+      text: isEvent
+        ? `${b.name} invited you to an event`
+        : isTop
+          ? `${b.name} matches your backend role`
+          : `${b.name} liked your profile`,
+      badge: isEvent ? "Event" : isTop ? `${b.matchScore || 95}% Match` : "Connect",
+      badgeClass: isEvent
+        ? "bg-blue-500/15 text-blue-500 border border-blue-500/20"
+        : isTop
+          ? "bg-success/15 text-success border border-success/20"
+          : "bg-amber-500/15 text-amber-500 border border-amber-500/20",
+    };
+  });
+
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
       <SectionHeader title="Current Projects" action="View All" actionTo="/projects" />
+      <div className="px-5 pb-4">
+        {projectsLoading ? (
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-4">
         {projectsList.map((p) => (
           <div
@@ -196,10 +247,7 @@ export function CurrentProjects() {
                     +{p.extraAvatars}
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-16 rounded-xl border border-border/40 bg-muted/50 animate-pulse"
-            />
+            <div key={i} className="h-16 my-1.5 rounded-lg bg-muted/50 animate-pulse" />
           ))
         ) : projectsList.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
@@ -207,10 +255,7 @@ export function CurrentProjects() {
           </div>
         ) : (
           projectsList.map((p) => (
-            <div
-              key={p.id}
-              className="flex items-center justify-between gap-4 p-3 rounded-xl border border-border/40 hover:bg-muted/10 transition-colors"
-            >
+            <div key={p.id} className={ROW_CLASS}>
               <div className="flex items-center gap-3 min-w-0">
                 <div
                   className={cn(
@@ -314,46 +359,12 @@ const { data = [], isLoading } = useQuery({
           ))
         )}
       </div>
-    </Card>
-  );
-}
 
-// 2. AI Suggestions
-export function AISuggestions() {
-  const { data: builders = [], isLoading } = useQuery({
-    queryKey: ["dashboard-ai-suggestions"],
-    queryFn: () => buildersService.suggested(),
-  });
+      <SubDivider />
 
-  const suggestions = builders.slice(0, 3).map((b, i) => {
-    // Generate some diverse suggestion badges for demo purposes
-    const isTop = i === 0;
-    const isEvent = i === 1;
-    return {
-      id: b.id,
-      icon: isEvent ? Calendar : isTop ? User : TrendingUp,
-      iconColor: isEvent
-        ? "text-blue-500 bg-blue-500/10"
-        : isTop
-          ? "text-emerald-500 bg-emerald-500/10"
-          : "text-amber-500 bg-amber-500/10",
-      text: isEvent
-        ? `${b.name} invited you to an event`
-        : isTop
-          ? `${b.name} matches your backend role`
-          : `${b.name} liked your profile`,
-      badge: isEvent ? "Event" : isTop ? `${b.matchScore || 95}% Match` : "Connect",
-      badgeClass: isEvent
-        ? "bg-blue-500/15 text-blue-500 border border-blue-500/20"
-        : isTop
-          ? "bg-success/15 text-success border border-success/20"
-          : "bg-amber-500/15 text-amber-500 border border-amber-500/20",
-    };
-  });
-
-  return (
-    <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
       <SectionHeader title="AI Suggestions" action="View All" actionTo="/builders" />
+      <div className="px-5 pb-5">
+        {suggestionsLoading ? (
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-4">
         {suggestions.map((s) => {
           const Icon = s.icon;
@@ -372,10 +383,7 @@ export function AISuggestions() {
                   <Icon size={16} />
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-12 rounded-xl border border-border/40 bg-muted/50 animate-pulse"
-            />
+            <div key={i} className="h-12 my-1.5 rounded-lg bg-muted/50 animate-pulse" />
           ))
         ) : suggestions.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
@@ -385,10 +393,7 @@ export function AISuggestions() {
           suggestions.map((s) => {
             const Icon = s.icon;
             return (
-              <div
-                key={s.id}
-                className="flex items-center justify-between gap-4 p-3.5 rounded-xl border border-border/40 hover:bg-muted/10 transition-colors"
-              >
+              <div key={s.id} className={ROW_CLASS}>
                 <div className="flex items-center gap-3 min-w-0">
                   <div
                     className={cn(
@@ -428,6 +433,48 @@ export function AISuggestions() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Activity — combines "Quick Actions", "Recent Activity" and "Upcoming"
+// (previously three separate cards) into one card with dividers between
+// each grouped section.
+// ---------------------------------------------------------------------------
+export function ActivityOverview() {
+  const actions = [
+    {
+      label: "Create Project",
+      icon: Plus,
+      bg: "bg-blue-50/50 dark:bg-blue-950/20",
+      border: "border-blue-100 dark:border-blue-900/40",
+      color: "text-blue-600 dark:text-blue-400",
+      to: "/projects" as const,
+    },
+    {
+      label: "Publish Flare",
+      icon: Flame,
+      bg: "bg-orange-50/50 dark:bg-orange-950/20",
+      border: "border-orange-100 dark:border-orange-900/40",
+      color: "text-orange-600 dark:text-orange-400",
+      to: "/flares" as const,
+    },
+    {
+      label: "Find Builders",
+      icon: Users2,
+      bg: "bg-emerald-50/50 dark:bg-emerald-950/20",
+      border: "border-emerald-100 dark:border-emerald-900/40",
+      color: "text-emerald-600 dark:text-emerald-400",
+      to: "/builders" as const,
+    },
+    {
+      label: "Messages",
+      icon: MessageSquare,
+      bg: "bg-purple-50/50 dark:bg-purple-950/20",
+      border: "border-purple-100 dark:border-purple-900/40",
+      color: "text-purple-600 dark:text-purple-400",
+      to: "/messages" as const,
+    },
+  ];
+
+  const { data: activities = [], isLoading: activitiesLoading } = useQuery({
 // 3. Quick Actions
 export function QuickActions() {
   const { data = [] } = useQuery({
@@ -593,6 +640,7 @@ export function RecentActivity() {
     };
   });
 
+  const { data: hackathons = [], isLoading: upcomingLoading } = useQuery({
   return (
 <Card className="relative overflow-hidden hover:shadow-md transition-shadow duration-200">      <SectionHeader title="AI Insights" />
       <div className="space-y-4 px-5 pb-5">
@@ -713,6 +761,20 @@ export function Upcoming() {
                 <p className="truncate text-sm font-semibold text-foreground">{c.with.name}</p>
                 <p className="truncate text-xs text-muted-foreground mt-0.5">{c.preview}</p>
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
+      <div className="px-5 pt-5 pb-2 font-semibold text-sm text-foreground">Quick Actions</div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-5 pb-5">
+        {actions.map((act) => {
+          const Icon = act.icon;
+          return (
+            <Link
+              key={act.label}
+              to={act.to}
+              className={cn(
+                "flex flex-col items-center justify-center gap-3 p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0 text-center cursor-pointer",
+                act.bg,
+                act.border,
+              )}
+            >
       <SectionHeader title="Upcoming" action="View All" actionTo="/dashboard" />
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-3">
         {upcomingList.map((item) => {
@@ -750,30 +812,100 @@ export function Upcoming() {
             const Icon = item.icon;
             return (
               <div
-                key={item.id}
-                className="flex items-center gap-3 p-2.5 rounded-lg border border-border/40"
+                className={cn(
+                  "flex items-center justify-center h-10 w-10 rounded-xl bg-card shadow-2xs border border-border/20",
+                  act.color,
+                )}
               >
-                <div
-                  className={cn(
-                    "flex items-center justify-center h-8 w-8 rounded-lg shrink-0",
-                    item.iconColor,
-                  )}
-                >
-                  <Icon size={16} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-foreground truncate">{item.title}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{item.time}</p>
-                </div>
+                <Icon size={20} />
               </div>
-            );
-          })
-        )}
+              <span className="text-xs font-bold text-foreground">{act.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+
+      <SubDivider />
+
+      <div className="grid sm:grid-cols-2">
+        <div className="sm:border-r sm:border-border/60">
+          <SectionHeader title="Recent Activity" action="View All" actionTo="/dashboard" />
+          <div className="px-5 pb-5">
+            {activitiesLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-10 my-1.5 rounded-lg bg-muted/30 animate-pulse" />
+              ))
+            ) : activityList.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
+                <p className="text-xs">No recent activity</p>
+              </div>
+            ) : (
+              activityList.map((act) => (
+                <Link key={act.id} to="/dashboard" className={cn(ROW_CLASS, "group")}>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={cn("h-2 w-2 rounded-full shrink-0", act.bulletColor)} />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-foreground truncate">{act.text}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{act.time}</p>
+                    </div>
+                  </div>
+                  <ChevronRight
+                    size={14}
+                    className="text-muted-foreground shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  />
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div>
+          <SectionHeader title="Upcoming" action="View All" actionTo="/dashboard" />
+          <div className="px-5 pb-5">
+            {upcomingLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-12 my-1.5 rounded-lg bg-muted/30 animate-pulse" />
+              ))
+            ) : upcomingList.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
+                <p className="text-xs">No upcoming events</p>
+              </div>
+            ) : (
+              upcomingList.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.id} className={ROW_CLASS}>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={cn(
+                          "flex items-center justify-center h-8 w-8 rounded-lg shrink-0",
+                          item.iconColor,
+                        )}
+                      >
+                        <Icon size={16} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-foreground truncate">{item.title}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{item.time}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
       </div>
     </Card>
   );
 }
 
+// ---------------------------------------------------------------------------
+// Sidebar updates — combines "Notifications" and "Upcoming Events"
+// (previously two separate cards) into one card with a divider between them.
+// ---------------------------------------------------------------------------
+export function SidebarUpdates() {
+  const { data: rawNotifications = [], isLoading: notificationsLoading } = useQuery({
 
 // 6. Notifications (Sidebar Widget)
 export function NotificationsWidget() {
@@ -789,6 +921,25 @@ export function NotificationsWidget() {
       dotColor: colors[i % colors.length],
       text: n.title,
       time: n.created_at ? new Date(n.created_at).toLocaleDateString() : "Recently",
+    };
+  });
+
+  const { data: hackathons = [], isLoading: eventsLoading } = useQuery({
+    queryKey: ["dashboard-upcoming-events"],
+    queryFn: () => hackathonsService.list(),
+  });
+
+  const events = hackathons.slice(0, 3).map((h, i) => {
+    const colors = [
+      "text-rose-500 bg-rose-500/10",
+      "text-blue-500 bg-blue-500/10",
+      "text-violet-500 bg-violet-500/10",
+    ];
+    return {
+      id: h.id,
+      title: h.name,
+      time: new Date(h.starts_at).toLocaleDateString(),
+      iconColor: colors[i % colors.length],
     };
   });
 
@@ -808,6 +959,8 @@ className="group flex flex-col items-start gap-4 rounded-3xl border border-borde
         ))}
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
       <SectionHeader title="Notifications" action="View All" actionTo="/dashboard" />
+      <div className="px-5 pb-4 flex flex-col gap-3.5">
+        {notificationsLoading ? (
       <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5">
         {notifications.map((n) => (
           <div key={n.id} className="flex items-start gap-3 min-w-0">
@@ -818,10 +971,7 @@ className="group flex flex-col items-start gap-4 rounded-3xl border border-borde
             </div>
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-8 rounded-lg border border-transparent bg-muted/30 animate-pulse"
-            />
+            <div key={i} className="h-8 rounded-lg bg-muted/30 animate-pulse" />
           ))
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-4 text-center text-muted-foreground">
@@ -839,17 +989,12 @@ className="group flex flex-col items-start gap-4 rounded-3xl border border-borde
           ))
         )}
       </div>
-    </Card>
-  );
-}
 
-// 7. Upcoming Events (Sidebar Widget)
-export function UpcomingEventsWidget() {
-  const { data: hackathons = [], isLoading } = useQuery({
-    queryKey: ["dashboard-upcoming-events"],
-    queryFn: () => hackathonsService.list(),
-  });
+      <SubDivider />
 
+      <SectionHeader title="Upcoming Events" action="View All" actionTo="/dashboard" />
+      <div className="px-5 pb-5 flex flex-col gap-3.5">
+        {eventsLoading ? (
   const events = hackathons.slice(0, 3).map((h, i) => {
     const colors = [
       "text-rose-500 bg-rose-500/10",
@@ -895,10 +1040,7 @@ export function UpcomingEventsWidget() {
             </div>
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-10 rounded-lg border border-transparent bg-muted/30 animate-pulse"
-            />
+            <div key={i} className="h-10 rounded-lg bg-muted/30 animate-pulse" />
           ))
         ) : events.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-4 text-center text-muted-foreground">
@@ -927,7 +1069,10 @@ export function UpcomingEventsWidget() {
   );
 }
 
-// 8. Upgrade Plan CTA Card (Sidebar Card)
+// ---------------------------------------------------------------------------
+// Upgrade Plan CTA — kept as its own card since it is a distinct promo
+// banner, not a list of information that can be grouped with other widgets.
+// ---------------------------------------------------------------------------
 export function UpgradePlanCTA() {
   return (
 <Card className="hover:shadow-md transition-shadow duration-200">      <SectionHeader title="Notifications" action="View All" actionTo="/notifications" />
