@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Attachment, UploadState } from "./types";
 import { X, RefreshCw, FileText, BarChart, Book, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TypoCaption } from "@/components/shared/Typography";
 
 interface AttachmentPreviewProps {
   attachment: Attachment;
@@ -54,7 +55,7 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
             <Book className="w-8 h-8 text-muted-foreground" />
             <div>
               <p className="font-medium text-sm">Attached Repository</p>
-              <p className="text-xs text-muted-foreground">{attachment.id}</p>
+              <TypoCaption as="p">{attachment.id}</TypoCaption>
             </div>
           </div>
         );
@@ -64,7 +65,7 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
             <Briefcase className="w-8 h-8 text-muted-foreground" />
             <div>
               <p className="font-medium text-sm">Attached Project</p>
-              <p className="text-xs text-muted-foreground">{attachment.id}</p>
+              <TypoCaption as="p">{attachment.id}</TypoCaption>
             </div>
           </div>
         );
@@ -74,7 +75,7 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
             <BarChart className="w-8 h-8 text-muted-foreground" />
             <div>
               <p className="font-medium text-sm">Poll</p>
-              <p className="text-xs text-muted-foreground">{attachment.data.question}</p>
+              <TypoCaption as="p">{attachment.data.question}</TypoCaption>
             </div>
           </div>
         );
@@ -84,7 +85,7 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
             <FileText className="w-8 h-8 text-muted-foreground" />
             <div>
               <p className="font-medium text-sm">Article</p>
-              <p className="text-xs text-muted-foreground">{attachment.data.title}</p>
+              <TypoCaption as="p">{attachment.data.title}</TypoCaption>
             </div>
           </div>
         );

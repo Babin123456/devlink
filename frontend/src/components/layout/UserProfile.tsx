@@ -6,6 +6,7 @@ import { currentUser } from "@/mocks/seed";
 import { useSidebar } from "@/hooks/useSidebar";
 import { useAuth } from "@/contexts/auth-context";
 import { authApi } from "@/api/modules/auth";
+import { TypoCaption } from "@/components/shared/Typography";
 
 interface UserProfileProps {
   /** When true, renders compact avatar-only view regardless of sidebar state */
@@ -78,7 +79,7 @@ export function UserProfile({ forceCollapsed }: UserProfileProps) {
               />
             )}
           </p>
-          <p className="truncate text-[12px] text-muted-foreground">@{currentUser.handle}</p>
+          <TypoCaption as="p">@{currentUser.handle}</TypoCaption>
         </div>
         {currentUser.premium && (
           <span className="rounded-md bg-amber-500/15 border border-amber-500/30 px-1.5 py-0.5 text-[10px] font-semibold text-amber-500 animate-pulse">

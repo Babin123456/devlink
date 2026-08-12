@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { Button } from "../ui/button";
 import { UploadCloud, CameraOff } from "lucide-react";
+import { TypoSection, TypoCaption } from "@/components/shared/Typography";
 
 interface MediaFallbackProps {
   message?: string;
@@ -28,11 +29,11 @@ export const MediaFallback: React.FC<MediaFallbackProps> = ({
       </div>
 
       <div className="space-y-2 max-w-sm">
-        <h3 className="font-semibold text-lg">{message}</h3>
-        <p className="text-sm text-muted-foreground">
+        <TypoSection>{message}</TypoSection>
+        <TypoCaption as="p">
           You can allow camera access in your browser settings, or choose an image from your device
           instead.
-        </p>
+        </TypoCaption>
       </div>
 
       <input

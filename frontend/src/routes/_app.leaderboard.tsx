@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { reputationApi, type LeaderboardEntry, type ReputationSummary } from "@/api";
+import { TypoSection, TypoCaption, TypoCard, TypoHeading } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/leaderboard")({
   head: () => ({
@@ -110,7 +111,7 @@ function LeaderboardPage() {
     if (rank === 3) {
       return <Badge className="bg-amber-700 text-white font-bold gap-1"><Award size={12} /> #3 Bronze</Badge>;
     }
-    return <span className="font-mono font-semibold text-muted-foreground text-sm">#{rank}</span>;
+    return <TypoCaption>#{rank}</TypoCaption>;
   };
 
   return (
@@ -120,13 +121,13 @@ function LeaderboardPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Trophy className="h-6 w-6 text-primary animate-bounce" />
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            <TypoHeading as="h1">
               Community Leaderboard & Reputation
-            </h1>
+            </TypoHeading>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <TypoCaption as="p">
             Earn reputation points for merging pull requests, completing projects, and helping fellow builders.
-          </p>
+          </TypoCaption>
         </div>
 
         <Button onClick={() => setAwardModalOpen(true)} className="gap-2 shrink-0">
@@ -140,9 +141,9 @@ function LeaderboardPage() {
         <Card className="p-5 flex flex-col justify-between border-l-4 border-l-primary">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <TypoCaption>
                 My Reputation
-              </span>
+              </TypoCaption>
               <Badge variant="outline" className="font-semibold text-xs">
                 {mySummary?.rank_tier || "Novice 🥉"}
               </Badge>
@@ -151,12 +152,12 @@ function LeaderboardPage() {
               <span className="text-4xl font-extrabold text-foreground">
                 {mySummary?.reputation_score || 0}
               </span>
-              <span className="text-sm text-muted-foreground font-medium">pts</span>
+              <TypoCaption>pts</TypoCaption>
             </div>
           </div>
 
           <div className="space-y-2">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase">Recent Log</h4>
+            <TypoCard>Recent Log</TypoCard>
             {mySummary?.recent_logs && mySummary.recent_logs.length > 0 ? (
               <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
                 {mySummary.recent_logs.slice(0, 3).map((log) => (
@@ -171,16 +172,16 @@ function LeaderboardPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground italic">No reputation logs recorded yet.</p>
+              <TypoCaption as="p">No reputation logs recorded yet.</TypoCaption>
             )}
           </div>
         </Card>
 
         {/* Reputation Sources Card */}
         <Card className="p-5 md:col-span-2">
-          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+          <TypoSection>
             <Sparkles className="h-4 w-4 text-amber-500" /> How to Earn Reputation Points
-          </h3>
+          </TypoSection>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
             {Object.entries(ACTION_POINTS_LABEL).map(([key, item]) => {
               const IconComp = item.icon;
@@ -202,10 +203,10 @@ function LeaderboardPage() {
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+            <TypoHeading as="h2">
               <Flame className="h-5 w-5 text-orange-500" /> Top Community Members
-            </h2>
-            <p className="text-xs text-muted-foreground">Showing {leaderboard.length} of {total} registered builders</p>
+            </TypoHeading>
+            <TypoCaption as="p">Showing {leaderboard.length} of {total} registered builders</TypoCaption>
           </div>
         </div>
 
@@ -243,7 +244,7 @@ function LeaderboardPage() {
                           <p className="font-semibold text-foreground text-sm leading-tight">
                             {entry.full_name || entry.username}
                           </p>
-                          <p className="text-xs text-muted-foreground">@{entry.username}</p>
+                          <TypoCaption as="p">@{entry.username}</TypoCaption>
                         </div>
                       </div>
                     </td>
@@ -256,7 +257,7 @@ function LeaderboardPage() {
                       <span className="font-extrabold text-foreground text-base">
                         {entry.reputation_score.toLocaleString()}
                       </span>
-                      <span className="text-xs text-muted-foreground ml-1">pts</span>
+                      <TypoCaption>pts</TypoCaption>
                     </td>
                   </tr>
                 ))}
