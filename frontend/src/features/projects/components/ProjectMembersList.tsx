@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Users, UserMinus, ArrowRightLeft, Shield, Check, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { ProjectMemberRoleBadge, ProjectRole } from "./ProjectMemberRoleBadge";
+import { TypoSection } from "@/components/shared/Typography";
 
 export interface ProjectMemberData {
   id: string;
@@ -147,9 +148,9 @@ export const ProjectMembersList: React.FC<ProjectMembersListProps> = ({
     <div className="space-y-6">
       <div className="flex items-center justify-between border-b border-gray-800 pb-4">
         <div>
-          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+          <TypoSection>
             <Users size={18} className="text-indigo-400" /> Team Members & Roles
-          </h3>
+          </TypoSection>
           <p className="text-xs text-gray-400 mt-1">
             Manage project team roles (Owner, Maintainer, Contributor, Reviewer, Viewer).
           </p>
