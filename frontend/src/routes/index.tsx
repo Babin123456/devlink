@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { useTheme } from "@/hooks/useTheme";
+import { AnimatedBackground } from "@/components/shared/AnimatedBackground";
 import {
   Accordion,
   AccordionItem,
@@ -56,6 +57,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
+import { TypoSection, TypoCaption, TypoCard, TypoHeading } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -344,6 +346,9 @@ function Landing() {
         )}
       </AnimatePresence>
 
+<section className="relative overflow-hidden border-b border-border">
+        <AnimatedBackground />
+        <div className="relative z-10 mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-24 text-center">          <motion.div
       <section className="border-b border-border bg-gradient-to-b from-background to-surface/20">
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-16">
           <motion.div
@@ -354,16 +359,16 @@ function Landing() {
           >
             {/* Left Column: Heading, description, CTA, Trust indicators */}
             <div className="lg:col-span-6 flex flex-col justify-center text-center lg:text-left">
-              <span className="inline-flex w-fit mx-auto lg:mx-0 items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-[12px] font-medium text-muted-foreground mb-6">
+              <TypoCaption>
                 <Sparkles size={12} className="text-primary" /> AI-powered team matching · in beta
-              </span>
-              <h1 className="text-[36px] font-extrabold leading-tight tracking-tight text-foreground sm:text-[48px] lg:text-[50px]">
+              </TypoCaption>
+              <TypoHeading as="h1">
                 Where builders connect, <span className="text-primary">collaborate</span> and ship.
-              </h1>
-              <p className="mt-4 text-[15px] text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0">
+              </TypoHeading>
+              <TypoCaption as="p">
                 Match with teammates by skills and vibe, run projects with real-time messaging, and
                 enter hackathons together — all in one clean workspace.
-              </p>
+              </TypoCaption>
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
                 <Link to="/auth" className={primaryBtnClass}>
                   Start free <ArrowRight size={15} />
@@ -400,9 +405,9 @@ function Landing() {
                     <span className="h-3 w-3 rounded-full bg-[#ffbd2e]" />
                     <span className="h-3 w-3 rounded-full bg-[#27c93f]" />
                   </div>
-                  <span className="text-[11px] font-medium text-muted-foreground tracking-tight select-none">
+                  <TypoCaption>
                     app.devlink.com
-                  </span>
+                  </TypoCaption>
                   <div className="w-12" /> {/* Spacing spacer */}
                 </div>
 
@@ -415,25 +420,25 @@ function Landing() {
                       <span className="h-8 w-8 rounded-lg bg-primary-soft text-primary flex items-center justify-center">
                         <Users2 size={16} />
                       </span>
-                      <span className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-muted flex items-center justify-center">
+                      <TypoCaption>
                         <MessageSquare size={16} />
-                      </span>
-                      <span className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-muted flex items-center justify-center">
+                      </TypoCaption>
+                      <TypoCaption>
                         <Trophy size={16} />
-                      </span>
-                      <span className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-muted flex items-center justify-center">
+                      </TypoCaption>
+                      <TypoCaption>
                         <Sparkles size={16} />
-                      </span>
+                      </TypoCaption>
                     </div>
                   </div>
 
                   {/* Mock Main Content Area */}
                   <div className="flex-1 p-4 flex flex-col gap-4 overflow-hidden relative">
                     <div className="flex items-center justify-between border-b border-border pb-2">
-                      <h4 className="font-bold text-foreground text-[14px]">Workspace Dashboard</h4>
-                      <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-medium">
+                      <TypoCard>Workspace Dashboard</TypoCard>
+                      <TypoCaption>
                         Dev Mode
-                      </span>
+                      </TypoCaption>
                     </div>
 
                     {/* Mock Active Project Card */}
@@ -460,9 +465,9 @@ function Landing() {
                         <span className="h-5 w-5 rounded-full bg-secondary text-foreground text-[10px] font-bold flex items-center justify-center border border-border">
                           PM
                         </span>
-                        <span className="h-5 w-5 rounded-full border border-dashed border-border text-muted-foreground text-[10px] font-bold flex items-center justify-center border border-border">
+                        <TypoCaption>
                           +
-                        </span>
+                        </TypoCaption>
                       </div>
                     </div>
 
@@ -496,6 +501,14 @@ function Landing() {
         </div>
       </section>
 
+<section id="features" className="border-b border-border">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6 }}
+          className="mx-auto grid max-w-6xl gap-4 px-4 py-16 sm:grid-cols-2 sm:px-6 lg:grid-cols-4"
+        >          {[
       <section id="features" className="border-b border-border">
         <div className="mx-auto grid max-w-6xl gap-6 px-4 py-16 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:px-6">
           {[
@@ -548,18 +561,20 @@ function Landing() {
                 <f.icon size={18} />
               </span>
               <p className="mt-3 text-[15px] font-semibold text-foreground">{f.title}</p>
-              <p className="mt-1 text-[13px] text-muted-foreground">{f.desc}</p>
+              <TypoCaption as="p">{f.desc}</TypoCaption>
             </div>
+              <p className="mt-1 text-[13px] text-muted-foreground">{f.desc}</p>
+</div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* ===== AI FEATURES SECTION ===== */}
       <section id="ai-features" className="border-b border-border py-16 bg-gradient-to-b from-background to-surface/10">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto mb-8">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">AI Features</h2>
-            <p className="mt-4 text-muted-foreground text-[15px]">Powerful AI tools to speed up collaboration, streamline triage, and enrich profiles.</p>
+            <TypoHeading as="h2">AI Features</TypoHeading>
+            <TypoCaption as="p">Powerful AI tools to speed up collaboration, streamline triage, and enrich profiles.</TypoCaption>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
@@ -595,7 +610,7 @@ function Landing() {
                   <f.icon size={18} />
                 </span>
                 <p className="mt-3 text-[15px] font-semibold text-foreground">{f.title}</p>
-                <p className="mt-1 text-[13px] text-muted-foreground">{f.desc}</p>
+                <TypoCaption as="p">{f.desc}</TypoCaption>
               </div>
             ))}
           </div>
@@ -609,13 +624,13 @@ function Landing() {
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <TypoHeading as="h2">
               See DevLink in action
-            </h2>
-            <p className="mt-4 text-muted-foreground text-[15px]">
+            </TypoHeading>
+            <TypoCaption as="p">
               Explore how the platform brings teams together — from project dashboards to real-time
               collaboration.
-            </p>
+            </TypoCaption>
           </div>
 
           {/* Tab buttons */}
@@ -659,7 +674,7 @@ function Landing() {
                   <div className="rounded-xl border border-border bg-card p-6 shadow-sm h-full flex flex-col">
                     <div className="flex items-center gap-2 mb-4">
                       <LayoutDashboard className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold text-foreground">Dashboard</h3>
+                      <TypoSection>Dashboard</TypoSection>
                     </div>
                     <div className="flex-1 space-y-4">
                       {/* Mock stats */}
@@ -675,7 +690,7 @@ function Landing() {
                       </div>
                       <div className="rounded-md border border-border/50 p-3 bg-surface/50">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Active tasks</span>
+                          <TypoCaption>Active tasks</TypoCaption>
                           <span className="font-medium">4 / 9</span>
                         </div>
                         <div className="mt-2 h-1.5 w-full bg-muted rounded-full overflow-hidden">
@@ -688,7 +703,7 @@ function Landing() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm">
                           <Activity className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Recent activity</span>
+                          <TypoCaption>Recent activity</TypoCaption>
                         </div>
                         <ul className="text-sm space-y-1.5 text-muted-foreground">
                           <li className="flex justify-between border-b border-border/30 pb-1">
@@ -712,7 +727,7 @@ function Landing() {
                   <div className="rounded-xl border border-border bg-card p-6 shadow-sm h-full flex flex-col">
                     <div className="flex items-center gap-2 mb-4">
                       <Users2 className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold text-foreground">Builder Profile</h3>
+                      <TypoSection>Builder Profile</TypoSection>
                     </div>
                     <div className="flex-1 space-y-4">
                       <div className="flex items-center gap-3">
@@ -751,10 +766,10 @@ function Landing() {
                         </span>
                       </div>
                       <div className="rounded-md bg-surface p-3 border border-border/50 text-sm">
-                        <p className="text-muted-foreground">
+                        <TypoCaption as="p">
                           "Passionate about building inclusive developer tools and mentoring junior
                           devs."
-                        </p>
+                        </TypoCaption>
                       </div>
                     </div>
                   </div>
@@ -767,7 +782,7 @@ function Landing() {
                   <div className="rounded-xl border border-border bg-card p-6 shadow-sm h-full flex flex-col">
                     <div className="flex items-center gap-2 mb-4">
                       <Sparkles className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold text-foreground">AI Matching</h3>
+                      <TypoSection>AI Matching</TypoSection>
                     </div>
                     <div className="flex-1 space-y-4">
                       <div className="flex items-center gap-3 p-3 rounded-lg border border-primary/20 bg-primary-soft/5">
@@ -787,15 +802,15 @@ function Landing() {
                       </div>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Shared interests</span>
+                          <TypoCaption>Shared interests</TypoCaption>
                           <span className="font-medium">Open Source, Hackathons</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Complementary skills</span>
+                          <TypoCaption>Complementary skills</TypoCaption>
                           <span className="font-medium">Backend • DevOps</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Availability</span>
+                          <TypoCaption>Availability</TypoCaption>
                           <span className="font-medium text-success">Both available</span>
                         </div>
                       </div>
@@ -816,7 +831,7 @@ function Landing() {
                   <div className="rounded-xl border border-border bg-card p-6 shadow-sm h-full flex flex-col">
                     <div className="flex items-center gap-2 mb-4">
                       <MessageSquare className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold text-foreground">Messaging</h3>
+                      <TypoSection>Messaging</TypoSection>
                     </div>
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center gap-2 border-b border-border/50 pb-2">
@@ -894,12 +909,12 @@ function Landing() {
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <TypoHeading as="h2">
               How it works
-            </h2>
-            <p className="mt-4 text-muted-foreground text-[15px]">
+            </TypoHeading>
+            <TypoCaption as="p">
               Form teams, collaborate, and ship products in four simple steps.
-            </p>
+            </TypoCaption>
           </div>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4 relative">
@@ -946,10 +961,64 @@ function Landing() {
                   <s.icon size={24} />
                 </div>
 
-                <h3 className="mt-6 text-[16px] font-bold text-foreground">{s.title}</h3>
-                <p className="mt-2 text-[13px] text-muted-foreground leading-relaxed">{s.desc}</p>
+                <TypoSection>{s.title}</TypoSection>
+                <TypoCaption as="p">{s.desc}</TypoCaption>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="community-partners" className="border-b border-border py-20 bg-background">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              Trusted by the community
+            </h2>
+            <p className="mt-4 text-muted-foreground text-[15px]">
+              DevLink powers teams, hackathons, and communities across the globe.
+            </p>
+          </div>
+
+          {/* Logo Wall */}
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+            {/* Placeholder Logos */}
+            <div className="flex items-center gap-2 text-xl font-bold text-foreground">
+              <Globe className="h-8 w-8 text-primary" /> TechStars
+            </div>
+            <div className="flex items-center gap-2 text-xl font-bold text-foreground">
+              <Trophy className="h-8 w-8 text-primary" /> MLH
+            </div>
+            <div className="flex items-center gap-2 text-xl font-bold text-foreground">
+              <Users2 className="h-8 w-8 text-primary" /> Y Combinator
+            </div>
+            <div className="flex items-center gap-2 text-xl font-bold text-foreground">
+              <Code2 className="h-8 w-8 text-primary" /> GitHub Education
+            </div>
+          </div>
+
+          {/* Community Stats */}
+          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="flex flex-col items-center p-6 rounded-2xl bg-surface border border-border/50 text-center">
+              <div className="text-4xl font-extrabold text-primary mb-2">100+</div>
+              <div className="text-sm font-medium text-foreground">Hackathons</div>
+              <div className="text-xs text-muted-foreground mt-1">Powered by DevLink</div>
+            </div>
+            <div className="flex flex-col items-center p-6 rounded-2xl bg-surface border border-border/50 text-center">
+              <div className="text-4xl font-extrabold text-primary mb-2">50k+</div>
+              <div className="text-sm font-medium text-foreground">Builders</div>
+              <div className="text-xs text-muted-foreground mt-1">Finding matches daily</div>
+            </div>
+            <div className="flex flex-col items-center p-6 rounded-2xl bg-surface border border-border/50 text-center">
+              <div className="text-4xl font-extrabold text-primary mb-2">20k+</div>
+              <div className="text-sm font-medium text-foreground">Projects</div>
+              <div className="text-xs text-muted-foreground mt-1">Shipped to production</div>
+            </div>
+            <div className="flex flex-col items-center p-6 rounded-2xl bg-surface border border-border/50 text-center">
+              <div className="text-4xl font-extrabold text-primary mb-2">500+</div>
+              <div className="text-sm font-medium text-foreground">Communities</div>
+              <div className="text-xs text-muted-foreground mt-1">Active on the platform</div>
+            </div>
           </div>
         </div>
       </section>
@@ -969,9 +1038,9 @@ function Landing() {
                 <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
                   <div className="flex items-center gap-2">
                     <span className="flex h-2.5 w-2.5 rounded-full bg-success animate-pulse" />
-                    <span className="text-[12px] font-medium text-muted-foreground">
+                    <TypoCaption>
                       Match found nearby
-                    </span>
+                    </TypoCaption>
                   </div>
                   <span className="rounded-full bg-primary-soft px-2.5 py-0.5 text-[11px] font-bold text-primary">
                     98% Match
@@ -984,10 +1053,10 @@ function Landing() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-foreground text-[16px]">Alex Rivera</h4>
-                      <span className="text-[12px] text-muted-foreground">Active 2h ago</span>
+                      <TypoCard>Alex Rivera</TypoCard>
+                      <TypoCaption>Active 2h ago</TypoCaption>
                     </div>
-                    <p className="text-[13px] text-muted-foreground mt-0.5">Full Stack Developer</p>
+                    <TypoCaption as="p">Full Stack Developer</TypoCaption>
 
                     <div className="flex flex-wrap gap-1.5 mt-3">
                       {["React", "TypeScript", "FastAPI", "WebSockets"].map((skill) => (
@@ -1004,10 +1073,10 @@ function Landing() {
 
                 <div className="mt-5 bg-background rounded-xl p-3 border border-border/40 relative">
                   <div className="absolute top-3 left-3 h-1.5 w-1.5 rounded-full bg-primary" />
-                  <p className="text-[12px] italic text-muted-foreground pl-4">
+                  <TypoCaption as="p">
                     "Looking for a frontend lead to join our team for the next web-jam. We're
                     building a real-time developer portfolio builder."
-                  </p>
+                  </TypoCaption>
                 </div>
 
                 <div className="mt-5 flex gap-2">
@@ -1032,14 +1101,14 @@ function Landing() {
               <span className="inline-flex w-fit mx-auto lg:mx-0 items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-[12px] font-semibold text-primary mb-4">
                 <Users2 size={12} /> Team Formation
               </span>
-              <h2 className="text-[30px] font-bold leading-tight tracking-tight text-foreground sm:text-[40px]">
+              <TypoHeading as="h2">
                 Connect with the <span className="text-primary">perfect squad</span>.
-              </h2>
-              <p className="mt-4 text-[15px] text-muted-foreground leading-relaxed">
+              </TypoHeading>
+              <TypoCaption as="p">
                 Stop looking for teammates in scattered Discord servers. DevLink's matching engine
                 pairs you with builders who complement your skillset, match your vibe, and are ready
                 to ship.
-              </p>
+              </TypoCaption>
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3">
                 <Link to="/auth" className={primaryBtnClass}>
                   Find teammates <ArrowRight size={16} />
@@ -1054,20 +1123,27 @@ function Landing() {
       </section>
 
       <section
-        id="pricing"
-        className="border-b border-border py-24 relative overflow-hidden bg-gradient-to-b from-background via-surface/30 to-background"
+        id="pricing"        className="border-b border-border py-24 relative overflow-hidden bg-gradient-to-b from-background via-surface/30 to-background"
       >
         {/* Subtle decorative background blur */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
         <div className="mx-auto max-w-5xl px-4 sm:px-6 relative z-10">
           <div className="text-center max-w-2xl mx-auto">
+            <TypoHeading as="h2">
+<motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.6 }}
+          className="mx-auto max-w-5xl px-4 sm:px-6 relative z-10"
+        >          <div className="text-center max-w-2xl mx-auto">
             <h2 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
               Simple, transparent pricing
-            </h2>
-            <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
+            </TypoHeading>
+            <TypoCaption as="p">
               Start for free, upgrade when you need more power. No hidden fees.
-            </p>
+            </TypoCaption>
           </div>
 
           <div className="mt-12 flex justify-center">
@@ -1167,14 +1243,14 @@ function Landing() {
                   >
                     {p.name}
                   </h3>
-                  <p className="mt-2 text-[15px] text-muted-foreground leading-relaxed">{p.desc}</p>
+                  <TypoCaption as="p">{p.desc}</TypoCaption>
                 </div>
 
                 <div className="mb-6 flex items-baseline gap-2">
                   <span className="text-6xl font-extrabold tracking-tight text-foreground">
                     {p.price}
                   </span>
-                  <span className="text-[15px] font-medium text-muted-foreground">{p.period}</span>
+                  <TypoCaption>{p.period}</TypoCaption>
                 </div>
 
                 <Link
@@ -1228,8 +1304,8 @@ function Landing() {
           {/* Feature Comparison */}
           <div className="mt-32 max-w-4xl mx-auto">
             <div className="text-center mb-10">
-              <h3 className="text-3xl font-bold text-foreground">Compare plans</h3>
-              <p className="mt-3 text-muted-foreground">Find the perfect plan for your needs.</p>
+              <TypoSection>Compare plans</TypoSection>
+              <TypoCaption as="p">Find the perfect plan for your needs.</TypoCaption>
             </div>
             <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
               <table className="w-full text-left text-sm text-foreground">
@@ -1267,7 +1343,7 @@ function Landing() {
           {/* FAQ Section */}
           <div className="mt-32 max-w-3xl mx-auto">
             <div className="text-center mb-10">
-              <h3 className="text-3xl font-bold text-foreground">Frequently asked questions</h3>
+              <TypoSection>Frequently asked questions</TypoSection>
             </div>
             <div className="space-y-4">
               {[
@@ -1318,20 +1394,21 @@ function Landing() {
                   </AnimatePresence>
                 </div>
               ))}
-            </div>
+</div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
+      <footer className="border-t border-border bg-surface py-3">        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-2 sm:flex-row sm:text-left">
       <section className="border-b border-border bg-background">
         <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
           <div className="text-center">
-            <h2 className="text-[28px] font-bold tracking-tight text-foreground">
+            <TypoHeading as="h2">
               Frequently Asked Questions
-            </h2>
-            <p className="mt-2 text-[14px] text-muted-foreground">
+            </TypoHeading>
+            <TypoCaption as="p">
               Everything you need to know about DevLink.
-            </p>
+            </TypoCaption>
           </div>
 
           <Accordion
@@ -1343,7 +1420,7 @@ function Landing() {
               <AccordionItem key={index} value={`item-${index}`}>
                 <AccordionTrigger>{faq.question}</AccordionTrigger>
                 <AccordionContent>
-                  <p className="text-sm text-muted-foreground">{faq.answer}</p>
+                  <TypoCaption as="p">{faq.answer}</TypoCaption>
                 </AccordionContent>
               </AccordionItem>
             ))}
@@ -1354,13 +1431,13 @@ function Landing() {
       <section className="border-t border-border py-20 relative overflow-hidden bg-gradient-to-b from-background to-surface">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(5,183,215,0.06),transparent_70%)] pointer-events-none" />
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center relative z-10">
-          <h2 className="text-[32px] font-bold leading-tight tracking-tight text-foreground sm:text-[44px]">
+          <TypoHeading as="h2">
             Ready to build the <span className="text-primary">future</span>?
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-[16px] text-muted-foreground leading-relaxed">
+          </TypoHeading>
+          <TypoCaption as="p">
             Join thousands of developers, designers, and product builders matching, collaborating,
             and shipping together on DevLink.
-          </p>
+          </TypoCaption>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link to="/auth" className={primaryBtnClass}>
               Get started for free <ArrowRight size={16} />
@@ -1377,9 +1454,9 @@ function Landing() {
           <div className="flex items-center gap-2">
             <img src={APP_LOGO} alt="Devlink Logo" className="h-12 w-12 rounded" />
             <span className="text-[20px] font-bold text-foreground ">DevLink</span>
-            <span className="text-[11px] text-muted-foreground opacity-70">
+            <TypoCaption>
               © {new Date().getFullYear()}
-            </span>
+            </TypoCaption>
           </div>
           <div className="flex items-center gap-5 text-[16px] text-muted-foreground">
             {[
