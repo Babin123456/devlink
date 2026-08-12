@@ -311,9 +311,21 @@ async function coreFetch(path: string, opts: RequestOptions): Promise<Response> 
       const newToken = await refreshAccessToken();
       if (newToken) {
         finalHeaders.set("Authorization", `Bearer ${newToken}`);
-        // A 401 means the server rejected the request before acting on it, so
-        // replaying it is safe regardless of method.
-        res = await sendOnce(url, { ...init, headers: finalHeaders }, timeout, signal);
+        try {
+          // A 401 means the server rejected the request before acting on it,
+          // so replaying it is safe regardless of method.
+          res = await sendOnce(url, { ...init, headers: finalHeaders }, timeout, signal);
+        } catch (err) {
+          // This replay is outside the retry loop, so nothing below would
+          // convert a raw fetch rejection into an ApiError. Callers catch
+          // ApiError; letting a bare TypeError through here would slip past
+          // every one of them.
+          if (err instanceof ApiError) throw err;
+          if (err instanceof DOMException && err.name === "AbortError") {
+            throw new ApiError("Request cancelled or timed out", 408, null);
+          }
+          throw new ApiError(err instanceof Error ? err.message : "Network error", 0, null);
+        }
       }
     }
 

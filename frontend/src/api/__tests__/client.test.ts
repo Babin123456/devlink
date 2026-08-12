@@ -320,3 +320,95 @@ describe("backoffDelay", () => {
     expect(backoffDelay(20)).toBe(8000);
   });
 });
+
+/**
+ * The refresh path only engages when a base URL is configured, so these load a
+ * fresh copy of the module with `VITE_API_BASE_URL` stubbed. Without that,
+ * `refreshAccessToken` short-circuits and the replay never happens — a test
+ * written against the default module passes without exercising anything.
+ */
+describe("the post-refresh replay", () => {
+  let fetchMock: ReturnType<typeof vi.fn>;
+  let client: typeof import("../client");
+
+  beforeEach(async () => {
+    vi.stubEnv("VITE_API_BASE_URL", "https://api.test");
+    vi.resetModules();
+
+    fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    vi.spyOn(Math, "random").mockReturnValue(0);
+
+    client = await import("../client");
+    const tokens = await import("../tokens");
+    tokens.tokenStore.set("stale-access", "refresh-token");
+  });
+
+  afterEach(async () => {
+    const tokens = await import("../tokens");
+    tokens.tokenStore.clear();
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("replays the request once with the refreshed token", async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(401, { detail: "Expired" }))
+      .mockResolvedValueOnce(jsonResponse(200, { access_token: "fresh" }))
+      .mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+
+    await expect(client.api.get("/projects", { retries: 0 })).resolves.toEqual({ ok: true });
+
+    const [, replayInit] = fetchMock.mock.calls[2];
+    expect(new Headers(replayInit.headers).get("Authorization")).toBe("Bearer fresh");
+  });
+
+  it("gives the replay a signal, so it can time out and be cancelled", async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(401, { detail: "Expired" }))
+      .mockResolvedValueOnce(jsonResponse(200, { access_token: "fresh" }))
+      .mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+
+    await client.api.get("/projects", { retries: 0 });
+
+    // Previously this was a bare fetch with no signal at all.
+    const [, replayInit] = fetchMock.mock.calls[2];
+    expect(replayInit.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("surfaces a network failure during the replay as an ApiError", async () => {
+    // The replay sits outside the retry loop, so nothing there would convert a
+    // raw fetch rejection. Callers only ever catch ApiError.
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(401, { detail: "Expired" }))
+      .mockResolvedValueOnce(jsonResponse(200, { access_token: "fresh" }))
+      .mockRejectedValueOnce(networkError());
+
+    await expect(client.api.get("/projects", { retries: 0 })).rejects.toBeInstanceOf(
+      client.ApiError,
+    );
+  });
+
+  it("surfaces an abort during the replay as a 408", async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(401, { detail: "Expired" }))
+      .mockResolvedValueOnce(jsonResponse(200, { access_token: "fresh" }))
+      .mockRejectedValueOnce(abortError());
+
+    await expect(client.api.get("/projects", { retries: 0 })).rejects.toMatchObject({
+      status: 408,
+    });
+  });
+
+  it("does not replay when the refresh itself fails", async () => {
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(401, { detail: "Expired" }))
+      .mockResolvedValueOnce(jsonResponse(401, { detail: "Refresh rejected" }));
+
+    await expect(client.api.get("/projects", { retries: 0 })).rejects.toMatchObject({
+      status: 401,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
