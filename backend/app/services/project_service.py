@@ -74,6 +74,7 @@ class ProjectService:
             hiring=project.hiring,
             scheduled_publish_at=project.scheduled_publish_at,
             is_published=(project.scheduled_publish_at is None),
+            version=1,
         )
 
         db.add(db_project)
@@ -249,9 +250,21 @@ class ProjectService:
 
         data = project.model_dump(exclude_unset=True)
 
+        from fastapi import HTTPException, status
         from datetime import datetime, timezone
         from app.models.project import ProjectStatus
         from app.services.project_status_service import ProjectStatusService
+
+        # Optimistic locking check
+        if "version" in data and data["version"] is not None:
+            expected_version = data.pop("version")
+            if db_project.version != expected_version:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Version conflict: The project has been updated by another user. Please refresh and try again.",
+                )
+        else:
+            data.pop("version", None)
 
         current_status = getattr(db_project, "status", None) or (
             ProjectStatus.ARCHIVED if db_project.is_archived else ProjectStatus.RECRUITING
@@ -279,6 +292,7 @@ class ProjectService:
         for key, value in data.items():
             setattr(db_project, key, value)
 
+        db_project.version = (db_project.version or 1) + 1
         db.flush()
         db.refresh(db_project)
 

@@ -147,6 +147,7 @@ class ProjectUpdate(BaseModel):
 
     scheduled_publish_at: Optional[datetime] = None
     is_published: Optional[bool] = None
+    version: Optional[int] = None
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -200,6 +201,7 @@ class ProjectResponse(ProjectBase):
 
     created_at: datetime
     updated_at: datetime
+    version: int = 1
 
     deleted_at: Optional[datetime] = None
     deleted_by_id: Optional[uuid.UUID] = None

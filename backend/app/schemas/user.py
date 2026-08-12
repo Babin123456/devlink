@@ -145,6 +145,7 @@ class UserUpdate(BaseModel):
     is_private: Optional[bool] = None
     privacy_settings: Optional[PrivacySettingsUpdate] = None
     availability: Optional[list[AvailabilitySlot]] = None
+    version: Optional[int] = None
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -178,6 +179,7 @@ class UserResponse(UserBase):
     is_verified: bool
     premium: bool = False
     is_superuser: bool
+    version: int = 1
 
     last_seen: Optional[datetime] = Field(
         default=None,
