@@ -218,6 +218,30 @@ describe("useIntersectionObserver", () => {
       expect(getByTestId("pages").textContent).toBe("1");
     });
 
+    it("fires once per visible sentinel even when the sentinel remounts", () => {
+      // ActivityFeed used to render the sentinel only while
+      // `!isFetchingNextPage`, so it was unmounted for the duration of every
+      // fetch. A remounted node is a genuinely new node, so the hook cannot
+      // dedupe it — the component has to keep it mounted. This pins the cost
+      // of getting that wrong: one extra fire per remount, not zero.
+      FakeIntersectionObserver.initiallyIntersecting = true;
+      const onIntersect = vi.fn();
+
+      function Remounting({ show }: { show: boolean }) {
+        const ref = useIntersectionObserver(onIntersect, true);
+        return show ? <div ref={ref} /> : null;
+      }
+
+      const { rerender } = render(<Remounting show />);
+      expect(onIntersect).toHaveBeenCalledTimes(1);
+
+      rerender(<Remounting show={false} />);
+      rerender(<Remounting show />);
+
+      expect(onIntersect).toHaveBeenCalledTimes(2);
+      expect(FakeIntersectionObserver.live).toHaveLength(1);
+    });
+
     it("does not refire when a re-render hands back the same node", () => {
       FakeIntersectionObserver.initiallyIntersecting = true;
       const onIntersect = vi.fn();
