@@ -15,6 +15,7 @@ from app.routers import (
     conversations,
     export,
     followers,
+    connections,
     hackathons,
     health,
     messages,
@@ -96,6 +97,7 @@ api_v1_router.include_router(
     notifications.router, prefix="/notifications", tags=["Notifications"]
 )
 api_v1_router.include_router(followers.router, prefix="/followers", tags=["Followers"])
+api_v1_router.include_router(connections.router, prefix="/connections", tags=["Connections"])
 api_v1_router.include_router(bookmarks.router)
 api_v1_router.include_router(bookmark_collections.router)
 api_v1_router.include_router(activities.router)
