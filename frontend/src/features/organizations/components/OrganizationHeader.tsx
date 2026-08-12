@@ -1,3 +1,4 @@
+import { TypoHeading } from "@/components/shared/Typography";
 import React from "react";
 
 interface OrganizationHeaderProps {
@@ -43,7 +44,7 @@ export const OrganizationHeader: React.FC<OrganizationHeaderProps> = ({
           </div>
 
           <div className="mb-2">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2 flex-wrap">
+            <TypoHeading as="h1">
               {name}
               {isVerified && (
                 <span
@@ -58,7 +59,7 @@ export const OrganizationHeader: React.FC<OrganizationHeaderProps> = ({
                   Hiring
                 </span>
               )}
-            </h1>
+            </TypoHeading>
             {location && <p className="text-sm text-gray-400">{location}</p>}
           </div>
         </div>

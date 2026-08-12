@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { TypoCaption } from "@/components/shared/Typography";
 
 const MAX_BODY_LENGTH = 5000;
 const PAGE_SIZE = 20;
@@ -128,7 +129,7 @@ export function ProjectComments({
             {formatTimestamp(comment.created_at)}
           </time>
           {comment.is_edited && !comment.is_deleted ? (
-            <span className="text-xs text-muted-foreground">(edited)</span>
+            <TypoCaption>(edited)</TypoCaption>
           ) : null}
         </div>
 
@@ -256,7 +257,7 @@ export function ProjectComments({
         <CardTitle>
           Discussion
           {data ? (
-            <span className="ml-2 text-sm font-normal text-muted-foreground">{data.total}</span>
+            <TypoCaption>{data.total}</TypoCaption>
           ) : null}
         </CardTitle>
       </CardHeader>
@@ -272,9 +273,9 @@ export function ProjectComments({
               aria-label="Add a comment"
             />
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">
+              <TypoCaption>
                 {body.length}/{MAX_BODY_LENGTH}
-              </span>
+              </TypoCaption>
               <Button
                 size="sm"
                 disabled={!body.trim() || createComment.isPending}
@@ -285,18 +286,18 @@ export function ProjectComments({
             </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">Sign in to join the discussion.</p>
+          <TypoCaption as="p">Sign in to join the discussion.</TypoCaption>
         )}
 
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading discussion…</p>
+          <TypoCaption as="p">Loading discussion…</TypoCaption>
         ) : isError ? (
           <p className="text-sm text-destructive">Could not load the discussion. Please refresh.</p>
         ) : threads.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <TypoCaption as="p">
             No comments yet. Ask the first question — the answer will be useful to the next person
             who looks at this project.
-          </p>
+          </TypoCaption>
         ) : (
           <div className="space-y-4">{threads.map(renderThread)}</div>
         )}
