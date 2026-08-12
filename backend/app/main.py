@@ -588,6 +588,9 @@ app.include_router(
     tags=["Bookmark Collections"],
 )
 app.include_router(activities.router, prefix="/api/activities", tags=["Activities"])
+from app.routers import activity_heatmap
+
+app.include_router(activity_heatmap.router, prefix="/api", tags=["Activity Heatmap"])
 app.include_router(
     conversations.router, prefix="/api/conversations", tags=["Conversations"]
 )

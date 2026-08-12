@@ -33,6 +33,7 @@ import { ProfileCompletionChecklist } from "@/components/profile/ProfileCompleti
 import { FollowButton } from "@/components/shared/FollowButton";
 import { useFollowStatus } from "@/hooks/useFollow";
 import { ActivityTimeline } from "@/components/profile/ActivityTimeline";
+import { ContributionHeatmap } from "@/components/profile/ContributionHeatmap";
 import { TypoSection, TypoCaption, TypoHeading } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/profile/$username")({
@@ -589,6 +590,8 @@ function ProfilePage() {
               ))}
             </ul>
           </Card>
+
+          <ContributionHeatmap username={b.handle} className="mt-4" />
 
           <ActivityTimeline userId={b.id} />
         </div>

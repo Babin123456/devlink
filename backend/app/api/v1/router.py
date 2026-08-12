@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.routers import (
     activities,
+    activity_heatmap,
     applications,
     auth,
     backup,
@@ -98,6 +99,7 @@ api_v1_router.include_router(followers.router, prefix="/followers", tags=["Follo
 api_v1_router.include_router(bookmarks.router)
 api_v1_router.include_router(bookmark_collections.router)
 api_v1_router.include_router(activities.router)
+api_v1_router.include_router(activity_heatmap.router)
 api_v1_router.include_router(conversations.router)
 api_v1_router.include_router(
     profile_summary.router, prefix="/profile-summary", tags=["Profile Summary"]
