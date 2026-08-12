@@ -23,6 +23,7 @@ import type { Flare } from "@/mocks/seed";
 import { toast } from "sonner";
 import { useToggleLike, useLikedFlares } from "@/hooks/useLike";
 import { cn } from "@/lib/utils";
+import { TypoCaption } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/flares")({
   head: () => ({
@@ -64,10 +65,10 @@ function FlareCard({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <p className="text-[13px] font-semibold text-foreground">{flare.author?.name}</p>
-              <p className="text-[12px] text-muted-foreground">
+              <TypoCaption as="p">
                 @{flare.author?.handle}
                 {flare.ago && ` · ${flare.ago}`}
-              </p>
+              </TypoCaption>
             </div>
             {isDraft && (
               <span
@@ -305,7 +306,7 @@ function FlaresPage() {
           feedPosts.length > 0 ? (
             feedPosts.map((f) => <FlareCard key={f.id} flare={f} />)
           ) : (
-            <p className="text-center py-8 text-xs text-muted-foreground">No feed posts found.</p>
+            <TypoCaption as="p">No feed posts found.</TypoCaption>
           )
         ) : draftPosts.length > 0 ? (
           draftPosts.map((f) => (
@@ -319,7 +320,7 @@ function FlaresPage() {
             />
           ))
         ) : (
-          <p className="text-center py-8 text-xs text-muted-foreground">No drafts or scheduled posts found.</p>
+          <TypoCaption as="p">No drafts or scheduled posts found.</TypoCaption>
         )}
       </div>
 
@@ -345,9 +346,9 @@ function FlaresPage() {
         </Card>
         <Card className="p-4">
           <p className="text-[13px] font-semibold text-foreground">Community guidelines</p>
-          <p className="mt-2 text-[12px] text-muted-foreground">
+          <TypoCaption as="p">
             Be kind, credit sources, no spam. Ship generously.
-          </p>
+          </TypoCaption>
         </Card>
       </aside>
     </div>

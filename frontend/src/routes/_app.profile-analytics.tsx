@@ -13,6 +13,7 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
+import { TypoSection, TypoCaption, TypoCard, TypoHeading } from "@/components/shared/Typography";
 import {
   Eye,
   Search,
@@ -68,8 +69,8 @@ function ProfileAnalyticsPage() {
   if (error || !data) {
     return (
       <div className="mx-auto max-w-[1536px] w-full p-6 text-center space-y-4">
-        <h2 className="text-xl font-bold text-destructive">Failed to load analytics</h2>
-        <p className="text-sm text-muted-foreground">Please try again later.</p>
+        <TypoHeading as="h2">Failed to load analytics</TypoHeading>
+        <TypoCaption as="p">Please try again later.</TypoCaption>
         <Link to="/dashboard" className="text-xs text-primary hover:underline">
           Back to Dashboard
         </Link>
@@ -138,13 +139,13 @@ function ProfileAnalyticsPage() {
           >
             <ArrowLeft size={12} /> Back to Dashboard
           </Link>
-          <h1 className="text-[22px] font-bold tracking-tight text-foreground flex items-center gap-2">
+          <TypoHeading as="h1">
             Professional Profile Analytics
             <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-          </h1>
-          <p className="text-[13px] text-muted-foreground">
+          </TypoHeading>
+          <TypoCaption as="p">
             Monitor views, search results, and developer click interactions.
-          </p>
+          </TypoCaption>
         </div>
         <div className="flex items-center gap-2 rounded-lg border border-border bg-surface p-1 self-start sm:self-auto">
           <Calendar size={14} className="text-muted-foreground ml-2" />
@@ -184,13 +185,13 @@ function ProfileAnalyticsPage() {
               </div>
 
               <div className="mt-4 space-y-1 relative z-10">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <TypoCaption as="p">
                   {kpi.title}
-                </p>
-                <h3 className="text-2xl font-bold text-foreground">{kpi.value}</h3>
-                <p className="text-[10px] text-muted-foreground leading-normal pt-1">
+                </TypoCaption>
+                <TypoSection>{kpi.value}</TypoSection>
+                <TypoCaption as="p">
                   {kpi.description}
-                </p>
+                </TypoCaption>
               </div>
             </Card>
           );
@@ -201,10 +202,10 @@ function ProfileAnalyticsPage() {
       <Card className="p-6 border border-border space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
           <div className="space-y-1">
-            <h3 className="text-base font-semibold text-foreground">Performance Trends</h3>
-            <p className="text-xs text-muted-foreground">
+            <TypoSection>Performance Trends</TypoSection>
+            <TypoCaption as="p">
               Analyze daily growth of your profile metrics.
-            </p>
+            </TypoCaption>
           </div>
 
           {/* Filtering tabs */}
@@ -344,10 +345,10 @@ function ProfileAnalyticsPage() {
       <Card className="p-4 bg-muted/40 border border-border/80 flex items-start gap-3">
         <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <h4 className="text-xs font-semibold text-foreground">About Profile Privacy & Analytics</h4>
-          <p className="text-[11px] text-muted-foreground leading-normal">
+          <TypoCard>About Profile Privacy & Analytics</TypoCard>
+          <TypoCaption as="p">
             We respect developer privacy opt-outs. Visitor profiles are anonymous if the viewer has enabled private browsing in their settings. Clicks are logged anonymously, and search appearances are tallied for every global multi-category search index query match.
-          </p>
+          </TypoCaption>
         </div>
       </Card>
     </div>

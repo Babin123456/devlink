@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 export { api, ApiError, API_BASE_URL, isBackendConfigured } from "./client";
 export { tokenStore } from "./tokens";
 export { ws } from "./ws";
-export type { WsEvent } from "./ws";
+export type { CollabEvent as WsEvent } from "./ws";
 
 export { authApi } from "./modules/auth";
 export { usersApi } from "./modules/users";
@@ -45,6 +43,12 @@ export { collectionsApi } from "./modules/collections";
 export { recommendationsApi, fallbackTechStack } from "./modules/recommendations";
 export type { TechStackRecommendation, TechStackResponse } from "./modules/recommendations";
 export { bookmarksApi } from "./modules/bookmarks";
+export { pinnedProjectsApi, MAX_PINNED_PROJECTS } from "./modules/pinnedProjects";
+export type {
+  PinnedProject,
+  PinnedProjectList,
+  PinnedProjectSummary,
+} from "./modules/pinnedProjects";
 export { issuesApi } from "./modules/issues";
 export type {
   Issue,

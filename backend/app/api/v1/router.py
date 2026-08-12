@@ -23,15 +23,18 @@ from app.routers import (
     oauth_linking,
     org_audit_logs,
     organizations,
+    pinned_projects,
     plugins,
     profile_summary,
     profile_suggestions,
     project_members,
     project_comments,
     project_milestones,
+    project_time_logs,
     project_tags,
     project_documents,
     project_dashboards,
+    project_releases,
     projects,
     recommendations,
     repositories,
@@ -41,6 +44,7 @@ from app.routers import (
     security_dashboard,
     security_events,
     skills,
+    testimonials,
     users,
     webhooks,
     websockets,
@@ -70,6 +74,7 @@ api_v1_router.include_router(oauth_linking.router)
 api_v1_router.include_router(users.router, prefix="/users", tags=["Users"])
 api_v1_router.include_router(blocks.router, prefix="/blocks", tags=["User Blocks"])
 api_v1_router.include_router(export.router, prefix="/users", tags=["Export"])
+api_v1_router.include_router(pinned_projects.router)
 api_v1_router.include_router(backup.router)
 api_v1_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
 api_v1_router.include_router(project_members.router)
@@ -77,6 +82,7 @@ api_v1_router.include_router(project_documents.router)
 api_v1_router.include_router(project_dashboards.router)
 api_v1_router.include_router(project_milestones.router)
 api_v1_router.include_router(project_comments.router)
+api_v1_router.include_router(project_time_logs.router)
 api_v1_router.include_router(
     builder_flares.router, prefix="/flare", tags=["Builder's Flare"]
 )
@@ -118,9 +124,11 @@ api_v1_router.include_router(
     tags=["Contributor Matching"],
 )
 api_v1_router.include_router(repositories.router)
+api_v1_router.include_router(project_releases.router)
 api_v1_router.include_router(organizations.router)
 api_v1_router.include_router(applications.router)
 api_v1_router.include_router(skills.router)
+api_v1_router.include_router(testimonials.router)
 api_v1_router.include_router(websockets.router)
 api_v1_router.include_router(recommendations.router)
 api_v1_router.include_router(repository_quality.router, tags=["Repository Quality"])
