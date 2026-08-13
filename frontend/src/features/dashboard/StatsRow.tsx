@@ -1,6 +1,7 @@
 import { Card } from "@/components/shared/primitives";
 import { Folder, Users2, MessageSquare, Sparkles, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { TypoCaption } from "@/components/shared/Typography";
 
 const statsData = [
   {
@@ -69,9 +70,9 @@ export function StatsRow() {
                   <p className="text-2xl font-bold tracking-tight text-foreground leading-none">
                     {s.value}
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-muted-foreground truncate">
+                  <TypoCaption as="p">
                     {s.label}
-                  </p>
+                  </TypoCaption>
                 </div>
               </div>
 

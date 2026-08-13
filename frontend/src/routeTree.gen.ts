@@ -54,6 +54,7 @@ import { Route as AppAdminAuditLogsRouteImport } from './routes/_app.admin.audit
 import { Route as AppAdminApiRequestAnalyticsRouteImport } from './routes/_app.admin.api-request-analytics'
 import { Route as AppProjectsProjectIdIssuesRouteImport } from './routes/_app.projects.$projectId.issues'
 import { Route as AppProjectsProjectIdCollaborationMetricsRouteImport } from './routes/_app.projects.$projectId.collaboration-metrics'
+import { Route as AppProjectsProjectIdActivityRouteImport } from './routes/_app.projects.$projectId.activity'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -283,6 +284,10 @@ const AppProjectsProjectIdCollaborationMetricsRoute =
   AppProjectsProjectIdCollaborationMetricsRouteImport.update({
     id: '/collaboration-metrics',
     path: '/collaboration-metrics',
+const AppProjectsProjectIdActivityRoute =
+  AppProjectsProjectIdActivityRouteImport.update({
+    id: '/activity',
+    path: '/activity',
     getParentRoute: () => AppProjectsProjectIdRoute,
   } as any)
 
@@ -330,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/settings/notifications': typeof AppSettingsNotificationsRoute
   '/organizations/': typeof AppOrganizationsIndexRoute
   '/projects/$projectId/collaboration-metrics': typeof AppProjectsProjectIdCollaborationMetricsRoute
+  '/projects/$projectId/activity': typeof AppProjectsProjectIdActivityRoute
   '/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
 export interface FileRoutesByTo {
@@ -375,6 +381,7 @@ export interface FileRoutesByTo {
   '/settings/notifications': typeof AppSettingsNotificationsRoute
   '/organizations': typeof AppOrganizationsIndexRoute
   '/projects/$projectId/collaboration-metrics': typeof AppProjectsProjectIdCollaborationMetricsRoute
+  '/projects/$projectId/activity': typeof AppProjectsProjectIdActivityRoute
   '/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
 export interface FileRoutesById {
@@ -423,6 +430,7 @@ export interface FileRoutesById {
   '/_app/settings/notifications': typeof AppSettingsNotificationsRoute
   '/_app/organizations/': typeof AppOrganizationsIndexRoute
   '/_app/projects/$projectId/collaboration-metrics': typeof AppProjectsProjectIdCollaborationMetricsRoute
+  '/_app/projects/$projectId/activity': typeof AppProjectsProjectIdActivityRoute
   '/_app/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
 export interface FileRouteTypes {
@@ -471,6 +479,7 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/organizations/'
     | '/projects/$projectId/collaboration-metrics'
+    | '/projects/$projectId/activity'
     | '/projects/$projectId/issues'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -516,6 +525,7 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/organizations'
     | '/projects/$projectId/collaboration-metrics'
+    | '/projects/$projectId/activity'
     | '/projects/$projectId/issues'
   id:
     | '__root__'
@@ -563,6 +573,7 @@ export interface FileRouteTypes {
     | '/_app/settings/notifications'
     | '/_app/organizations/'
     | '/_app/projects/$projectId/collaboration-metrics'
+    | '/_app/projects/$projectId/activity'
     | '/_app/projects/$projectId/issues'
   fileRoutesById: FileRoutesById
 }
@@ -892,6 +903,11 @@ declare module '@tanstack/react-router' {
       path: '/collaboration-metrics'
       fullPath: '/projects/$projectId/collaboration-metrics'
       preLoaderRoute: typeof AppProjectsProjectIdCollaborationMetricsRouteImport
+    '/_app/projects/$projectId/activity': {
+      id: '/_app/projects/$projectId/activity'
+      path: '/activity'
+      fullPath: '/projects/$projectId/activity'
+      preLoaderRoute: typeof AppProjectsProjectIdActivityRouteImport
       parentRoute: typeof AppProjectsProjectIdRoute
     }
   }
@@ -972,12 +988,14 @@ const AppOrganizationsRouteWithChildren =
 
 interface AppProjectsProjectIdRouteChildren {
   AppProjectsProjectIdCollaborationMetricsRoute: typeof AppProjectsProjectIdCollaborationMetricsRoute
+  AppProjectsProjectIdActivityRoute: typeof AppProjectsProjectIdActivityRoute
   AppProjectsProjectIdIssuesRoute: typeof AppProjectsProjectIdIssuesRoute
 }
 
 const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
   AppProjectsProjectIdCollaborationMetricsRoute:
     AppProjectsProjectIdCollaborationMetricsRoute,
+  AppProjectsProjectIdActivityRoute: AppProjectsProjectIdActivityRoute,
   AppProjectsProjectIdIssuesRoute: AppProjectsProjectIdIssuesRoute,
 }
 
