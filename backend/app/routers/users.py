@@ -22,6 +22,7 @@ from app.dependencies import get_current_user, get_database
 from app.middleware.rate_limit import SEARCH_LIMIT, limiter
 from app.models.user import User
 from app.schemas.user import (
+    CollaborationStatus,
     CurrentUser,
     PrivacySettings,
     PrivacySettingsUpdate,
@@ -332,6 +333,53 @@ def update_me(
     )
 
     return updated_user
+
+
+@router.get(
+    "/me/collaboration-status",
+    response_model=dict,
+    summary="Get live collaboration presence status",
+)
+def get_collaboration_status(
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get the current user's live collaboration presence status
+    (coding, reviewing_pr, in_meeting, looking_for_project, available).
+    """
+    return {"user_id": str(current_user.id), "status": current_user.collaboration_status}
+
+
+@router.put(
+    "/me/collaboration-status",
+    response_model=dict,
+    summary="Set live collaboration presence status",
+)
+def set_collaboration_status(
+    status_val: CollaborationStatus = Query(
+        ..., description="One of: coding, reviewing_pr, in_meeting, looking_for_project, available"
+    ),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    """
+    Set the current user's live collaboration presence status and broadcast the
+    change to all connected WebSocket clients.
+    """
+    current_user.collaboration_status = status_val.value
+    db.commit()
+    db.refresh(current_user)
+
+    try:
+        from app.routers.websockets import manager
+
+        manager.set_collaboration_status(str(current_user.id), status_val.value)
+    except Exception:
+        # WebSocket manager is in-memory; a failure to broadcast should not
+        # fail the persistence of the status update.
+        pass
+
+    return {"user_id": str(current_user.id), "status": status_val.value}
 
 
 @router.put(

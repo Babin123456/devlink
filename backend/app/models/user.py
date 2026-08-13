@@ -219,6 +219,13 @@ class User(Base):
         nullable=False,
     )
 
+    collaboration_status: Mapped[str | None] = mapped_column(
+        String(40),
+        nullable=True,
+        default="available",
+        server_default="available",
+    )
+
     is_private: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
