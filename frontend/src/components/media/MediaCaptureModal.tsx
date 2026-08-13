@@ -4,6 +4,7 @@ import { CameraCapture } from "./CameraCapture";
 import { CameraPreview } from "./CameraPreview";
 import { MediaFallback } from "./MediaFallback";
 import { isCameraSupported } from "../../utils/media";
+import { TypoCaption } from "@/components/shared/Typography";
 
 interface MediaCaptureModalProps {
   open: boolean;
@@ -79,7 +80,7 @@ export const MediaCaptureModal: React.FC<MediaCaptureModalProps> = ({
                   </button>
                   <div className="relative flex items-center py-2">
                     <div className="flex-grow border-t border-border"></div>
-                    <span className="flex-shrink-0 mx-4 text-muted-foreground text-sm">or</span>
+                    <TypoCaption>or</TypoCaption>
                     <div className="flex-grow border-t border-border"></div>
                   </div>
                   <MediaFallback message="" onFileSelect={handleFileSelect} />

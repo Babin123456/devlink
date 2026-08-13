@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LoadingButton } from "@/components/shared/LoadingButton";
 import { toast } from "sonner";
 import { projectTemplatesApi, type ProjectTemplate } from "@/api";
+import { TypoSection, TypoCaption, TypoHeading } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/templates")({
   head: () => ({
@@ -176,12 +177,12 @@ function TemplatesPage() {
           <div className="flex items-center gap-2 text-primary font-semibold text-sm mb-1">
             <LayoutTemplate className="h-4 w-4" /> Templates Marketplace
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <TypoHeading as="h1">
             Reusable Project Blueprints
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground max-w-2xl">
+          </TypoHeading>
+          <TypoCaption as="p">
             Discover, share, and clone production-ready starters, fullstack templates, and scaffolding for your next build.
-          </p>
+          </TypoCaption>
         </div>
 
         <Button onClick={() => setPublishOpen(true)} className="gap-2 shrink-0 self-start md:self-auto">
@@ -203,9 +204,9 @@ function TemplatesPage() {
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
+            <TypoCaption>
               <Filter size={13} /> Sort by:
-            </span>
+            </TypoCaption>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -246,10 +247,10 @@ function TemplatesPage() {
       ) : templates.length === 0 ? (
         <div className="p-12 text-center border border-dashed rounded-2xl bg-card">
           <LayoutTemplate className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
-          <h3 className="text-base font-semibold text-foreground">No templates found</h3>
-          <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+          <TypoSection>No templates found</TypoSection>
+          <TypoCaption as="p">
             Try adjusting your search criteria or be the first to publish a template in this category!
-          </p>
+          </TypoCaption>
           <Button onClick={() => setPublishOpen(true)} variant="outline" size="sm" className="mt-4 gap-2">
             <Plus size={14} /> Publish Template
           </Button>
@@ -271,12 +272,12 @@ function TemplatesPage() {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-base text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                  <TypoSection>
                     {tpl.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
+                  </TypoSection>
+                  <TypoCaption as="p">
                     {tpl.description}
-                  </p>
+                  </TypoCaption>
                 </div>
 
                 {/* Tech Stack Pills */}
@@ -288,9 +289,9 @@ function TemplatesPage() {
                       </span>
                     ))}
                     {tpl.tech_stack.length > 4 && (
-                      <span className="text-[10px] font-mono text-muted-foreground px-1 py-0.5">
+                      <TypoCaption>
                         +{tpl.tech_stack.length - 4} more
-                      </span>
+                      </TypoCaption>
                     )}
                   </div>
                 )}
