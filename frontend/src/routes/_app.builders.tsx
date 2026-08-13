@@ -48,7 +48,7 @@ export const Route = createFileRoute("/_app/builders")({
       },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>) => {
+  validateSearch: (search: Record<string, unknown>): { tab?: string; q?: string } => {
     return {
       tab: typeof search.tab === "string" ? search.tab : undefined,
       q: typeof search.q === "string" ? search.q : undefined,
@@ -124,16 +124,16 @@ function AIMatchCard({ builder }: { builder: Builder }) {
                   <BadgeCheck
                     className={cn(
                       "shrink-0 h-5 w-5",
-                      builder.premium ? "text-amber-500 fill-amber-500/10 animate-pulse" : "text-primary"
+                      builder.premium
+                        ? "text-amber-500 fill-amber-500/10 animate-pulse"
+                        : "text-primary",
                     )}
                     aria-label={builder.premium ? "Premium Verified User" : "Verified User"}
                   />
                 )}
               </TypoSection>
             </Link>
-            <TypoCaption as="p">
-              {builder.role}
-            </TypoCaption>
+            <TypoCaption as="p">{builder.role}</TypoCaption>
           </div>
           <button
             type="button"
@@ -186,27 +186,21 @@ function AIMatchCard({ builder }: { builder: Builder }) {
               <Sparkles size={14} className="text-primary shrink-0" />
               <span>{matchPercentage}</span>
             </p>
-            <TypoCaption as="p">
-              Match
-            </TypoCaption>
+            <TypoCaption as="p">Match</TypoCaption>
           </div>
           <div className="border-x border-border/50">
             <p className="text-[14px] font-bold text-foreground flex items-center justify-center gap-0.5">
               <Briefcase size={14} className="text-primary shrink-0" />
               <span>{experienceText}</span>
             </p>
-            <TypoCaption as="p">
-              Experience
-            </TypoCaption>
+            <TypoCaption as="p">Experience</TypoCaption>
           </div>
           <div>
             <p className="text-[14px] font-bold text-foreground flex items-center justify-center gap-0.5">
               <Calendar size={14} className="text-primary shrink-0" />
               <span>{availabilityText}</span>
             </p>
-            <TypoCaption as="p">
-              Availability
-            </TypoCaption>
+            <TypoCaption as="p">Availability</TypoCaption>
           </div>
         </div>
       </div>
@@ -276,7 +270,7 @@ function BuildersPage() {
   const saveSearch = useSavedSearches((s) => s.saveSearch);
 
   useEffect(() => {
-    if (search.q !== undefined && search.q !== q) {
+    if (search.q !== undefined) {
       setQ(search.q);
     }
   }, [search.q]);
@@ -466,7 +460,9 @@ function BuildersPage() {
                         <BadgeCheck
                           className={cn(
                             "h-3.5 w-3.5 shrink-0",
-                            b.premium ? "text-amber-500 fill-amber-500/10 animate-pulse" : "text-primary"
+                            b.premium
+                              ? "text-amber-500 fill-amber-500/10 animate-pulse"
+                              : "text-primary",
                           )}
                           aria-label={b.premium ? "Premium Verified User" : "Verified User"}
                         />

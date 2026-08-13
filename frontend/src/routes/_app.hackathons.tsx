@@ -47,19 +47,15 @@ function HackathonsPage() {
         replace: true,
       });
     }
-  }, [search.create]);
+  }, [search.create, navigate]);
 
   const { data = [], isLoading } = useQuery({
     queryKey: ["hackathons"],
     queryFn: hackathonsService.list,
   });
 
-  if (pathname !== "/hackathons" && pathname !== "/hackathons/") {
-    return <Outlet />;
-  }
-
   useEffect(() => {
-    if (search.q !== undefined && search.q !== q) {
+    if (search.q !== undefined) {
       setQ(search.q);
     }
   }, [search.q]);
@@ -76,12 +72,17 @@ function HackathonsPage() {
 
   const filteredData = useMemo(() => {
     const query = q.toLowerCase();
-    return data.filter((h) =>
-      h.name.toLowerCase().includes(query) ||
-      h.description.toLowerCase().includes(query) ||
-      (h.theme && h.theme.toLowerCase().includes(query))
+    return data.filter(
+      (h) =>
+        h.name.toLowerCase().includes(query) ||
+        h.description.toLowerCase().includes(query) ||
+        (h.theme && h.theme.toLowerCase().includes(query)),
     );
   }, [data, q]);
+
+  if (pathname !== "/hackathons" && pathname !== "/hackathons/") {
+    return <Outlet />;
+  }
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -91,9 +92,7 @@ function HackathonsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <TypoHeading as="h1">Hackathons</TypoHeading>
-          <TypoCaption as="p">
-            Join a jam, build a team, ship something new.
-          </TypoCaption>
+          <TypoCaption as="p">Join a jam, build a team, ship something new.</TypoCaption>
         </div>
         <button
           onClick={() => setCreateOpen(true)}
@@ -106,7 +105,10 @@ function HackathonsPage() {
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-0 flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            size={14}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -189,9 +191,7 @@ function HackathonsPage() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[14px] font-semibold text-foreground">{h.name}</p>
-                    <TypoCaption as="p">
-                      {h.description}
-                    </TypoCaption>
+                    <TypoCaption as="p">{h.description}</TypoCaption>
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1">
