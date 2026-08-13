@@ -40,13 +40,9 @@ import { ApplyModal } from "@/features/projects/components/ApplyModal";
 
 export const Route = createFileRoute("/_app/projects/$projectId")({
   loader: async ({ params }) => {
-    try {
-      const project = await projectsService.get(params.projectId);
-      if (!project) throw notFound();
-      return { project };
-    } catch (e) {
-      throw notFound();
-    }
+    const project = await projectsService.get(params.projectId).catch(() => null);
+    if (!project) throw notFound();
+    return { project };
   },
   head: ({ loaderData, params }) => {
     const p = loaderData?.project;
