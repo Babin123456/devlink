@@ -708,6 +708,10 @@ app.include_router(feature_flags.router, prefix="/api", tags=["Feature Flags"])
 from app.routers import reputation
 app.include_router(reputation.router, prefix="/api", tags=["User Reputation System"])
 
+from app.routers import team_activity
+app.include_router(team_activity.router, prefix="/api", tags=["Team Activity Timeline"])
+
+
 
 
 # The generated OpenAPI document only lists the responses each handler declares
