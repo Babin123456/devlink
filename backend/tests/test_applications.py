@@ -234,3 +234,64 @@ def test_delete_application(client: TestClient, register_and_login, test_project
     # Verify not found
     nf = client.get(f"/api/applications/{app_id}")
     assert nf.status_code == 404
+
+
+def test_accept_application_unauthorized(client: TestClient, register_and_login, test_project):
+    pid = test_project["id"]
+    applicant_id, applicant_token = register_and_login("applicant_unauth@example.com", "appunauth")
+    other_id, other_token = register_and_login("random_user_unauth@example.com", "randomunauth")
+
+    c = client.post(
+        "/api/applications/",
+        json={"project_id": str(pid), "flare_id": str(test_project["flare_id"])},
+        headers={"Authorization": f"Bearer {applicant_token}"},
+    )
+    assert c.status_code == 201
+    app_id = c.json()["id"]
+
+    # Random non-owner user attempts to accept application -> 403 Forbidden
+    res = client.patch(
+        f"/api/applications/{app_id}/accept",
+        headers={"Authorization": f"Bearer {other_token}"},
+    )
+    assert res.status_code == 403
+
+
+def test_withdraw_application_unauthorized(client: TestClient, register_and_login, test_project):
+    pid = test_project["id"]
+    applicant_id, applicant_token = register_and_login("applicant_w_unauth@example.com", "appwunauth")
+    other_id, other_token = register_and_login("random_w_unauth@example.com", "randwunauth")
+
+    c = client.post(
+        "/api/applications/",
+        json={"project_id": str(pid), "flare_id": str(test_project["flare_id"])},
+        headers={"Authorization": f"Bearer {applicant_token}"},
+    )
+    assert c.status_code == 201
+    app_id = c.json()["id"]
+
+    # Other user attempts to withdraw applicant's application -> 403 Forbidden
+    res = client.patch(
+        f"/api/applications/{app_id}/withdraw",
+        headers={"Authorization": f"Bearer {other_token}"},
+    )
+    assert res.status_code == 403
+
+
+def test_create_application_unauthenticated(client: TestClient, test_project):
+    pid = test_project["id"]
+    res = client.post(
+        "/api/applications/",
+        json={"project_id": str(pid), "flare_id": str(test_project["flare_id"])},
+    )
+    assert res.status_code == 401
+
+
+def test_accept_application_not_found(client: TestClient, register_and_login, test_project):
+    owner_token = test_project["token"]
+    res = client.patch(
+        f"/api/applications/{uuid.uuid4()}/accept",
+        headers={"Authorization": f"Bearer {owner_token}"},
+    )
+    assert res.status_code == 404
+
