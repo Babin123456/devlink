@@ -4,6 +4,7 @@ import { Card, Skeleton } from "@/components/shared/primitives";
 import { formatDistanceToNow } from "date-fns";
 import { UserPlus, Edit3, FolderPlus, Award, Clock } from "lucide-react";
 import type { BackendActivity } from "@/services";
+import { TypoCaption } from "@/components/shared/Typography";
 
 interface ActivityTimelineProps {
   userId: string;
@@ -56,9 +57,9 @@ export function ActivityTimeline({ userId }: ActivityTimelineProps) {
       )}
 
       {!isLoading && !isError && activities?.length === 0 && (
-        <p className="text-[13px] text-muted-foreground">
+        <TypoCaption as="p">
           No recent activity to show.
-        </p>
+        </TypoCaption>
       )}
 
       {!isLoading && !isError && activities && activities.length > 0 && (
@@ -73,9 +74,9 @@ export function ActivityTimeline({ userId }: ActivityTimelineProps) {
                   {activity.title}
                 </p>
                 {activity.description && (
-                  <p className="text-[12px] text-muted-foreground mt-0.5">
+                  <TypoCaption as="p">
                     {activity.description}
-                  </p>
+                  </TypoCaption>
                 )}
                 <time className="text-[11px] text-muted-foreground mt-1">
                   {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}

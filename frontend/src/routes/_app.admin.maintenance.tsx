@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import api from "@/lib/api";
+import { TypoHeading } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/admin/maintenance")({
   component: AdminMaintenance,
@@ -67,10 +68,10 @@ function AdminMaintenance() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Maintenance Mode Configuration</h1>
+      <TypoHeading as="h1">Maintenance Mode Configuration</TypoHeading>
 
       <div className="bg-white p-6 rounded shadow mb-8">
-        <h2 className="text-xl font-semibold mb-4">Schedule New Window</h2>
+        <TypoHeading as="h2">Schedule New Window</TypoHeading>
         <form onSubmit={handleCreate} className="flex flex-col gap-4 max-w-md">
           <div>
             <label className="block mb-1">Start Time</label>
@@ -123,7 +124,7 @@ function AdminMaintenance() {
       </div>
 
       <div className="bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-semibold mb-4">Scheduled Windows</h2>
+        <TypoHeading as="h2">Scheduled Windows</TypoHeading>
         {windows.length === 0 ? (
           <p>No maintenance windows scheduled.</p>
         ) : (

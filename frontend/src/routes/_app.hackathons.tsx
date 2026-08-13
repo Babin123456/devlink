@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { CreateHackathonDialog } from "@/components/hackathons/CreateHackathonDialog";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
+import { TypoCaption, TypoHeading } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/hackathons")({
   head: () => ({
@@ -58,10 +59,10 @@ function HackathonsPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-[22px] font-bold tracking-tight text-foreground">Hackathons</h1>
-          <p className="text-[13px] text-muted-foreground">
+          <TypoHeading as="h1">Hackathons</TypoHeading>
+          <TypoCaption as="p">
             Join a jam, build a team, ship something new.
-          </p>
+          </TypoCaption>
         </div>
         <button
           onClick={() => setCreateOpen(true)}
@@ -102,7 +103,7 @@ function HackathonsPage() {
             🏆
           </div>
           <p className="text-[14px] font-semibold text-foreground">No hackathons yet</p>
-          <p className="mt-1 text-[13px] text-muted-foreground">Be the first to create one.</p>
+          <TypoCaption as="p">Be the first to create one.</TypoCaption>
           <button
             onClick={() => setCreateOpen(true)}
             className="mt-3 text-[13px] font-medium text-primary hover:underline"
@@ -126,9 +127,9 @@ function HackathonsPage() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[14px] font-semibold text-foreground">{h.name}</p>
-                    <p className="mt-0.5 line-clamp-2 text-[12px] text-muted-foreground">
+                    <TypoCaption as="p">
                       {h.description}
-                    </p>
+                    </TypoCaption>
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1">

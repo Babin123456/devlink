@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode, type ComponentType } from "react";
 import { motion } from "framer-motion";
 import { useCardAnimation } from "@/lib/animations";
 import { FolderKanban, BellOff, MessageSquareDashed, UserX, SearchX, Sparkles } from "lucide-react";
+import { TypoSection, TypoCaption } from "@/components/shared/Typography";
 
 export function SectionHeader({
   title,
@@ -18,10 +19,10 @@ export function SectionHeader({
 }) {
   return (
     <div className={cn("flex items-center justify-between px-5 pt-4 pb-3.5", className)}>
-      <h3 className="text-[14px] font-bold tracking-tight text-foreground flex items-center gap-2">
+      <TypoSection>
         <span className="inline-block h-2 w-2 rounded-full bg-primary/80" />
         {title}
-      </h3>
+      </TypoSection>
       {action &&
         (actionTo ? (
           <Link
@@ -135,9 +136,9 @@ export function EmptyState({
           </div>
         )}
       </div>
-      <h3 className="text-[15px] font-semibold tracking-tight text-foreground">{title}</h3>
+      <TypoSection>{title}</TypoSection>
       {desc && (
-        <p className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted-foreground">{desc}</p>
+        <TypoCaption as="p">{desc}</TypoCaption>
       )}
       {action && <div className="mt-4">{action}</div>}
     </div>
