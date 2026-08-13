@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode, type ComponentType } from "react";
 import { motion } from "framer-motion";
 import { useCardAnimation } from "@/lib/animations";
 import { FolderKanban, BellOff, MessageSquareDashed, UserX, SearchX, Sparkles } from "lucide-react";
+import { TypoSection, TypoCaption } from "@/components/shared/Typography";
 
 export function SectionHeader({
   title,
@@ -17,10 +18,11 @@ export function SectionHeader({
   className?: string;
 }) {
   return (
-<div className={cn("flex items-center justify-between px-6 pt-5 pb-4", className)}>      <h3 className="text-[14px] font-bold tracking-tight text-foreground flex items-center gap-2">
+    <div className={cn("flex items-center justify-between px-5 pt-4 pb-3.5", className)}>
+      <TypoSection>
         <span className="inline-block h-2 w-2 rounded-full bg-primary/80" />
         {title}
-      </h3>
+      </TypoSection>
       {action &&
         (actionTo ? (
           <Link
@@ -52,7 +54,8 @@ export function Card({
   return (
     <As
       className={cn(
-"rounded-3xl border border-border/40 bg-card shadow-sm transition-all duration-200",        interactive && "hover-lift hover:border-primary/40 hover:shadow-card",
+        "rounded-2xl border border-border/70 bg-card shadow-xs transition-all duration-200",
+        interactive && "hover-lift hover:border-primary/40 hover:shadow-card",
         className,
       )}
     >
@@ -133,9 +136,9 @@ export function EmptyState({
           </div>
         )}
       </div>
-      <h3 className="text-[15px] font-semibold tracking-tight text-foreground">{title}</h3>
+      <TypoSection>{title}</TypoSection>
       {desc && (
-        <p className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted-foreground">{desc}</p>
+        <TypoCaption as="p">{desc}</TypoCaption>
       )}
       {action && <div className="mt-4">{action}</div>}
     </div>
@@ -498,20 +501,4 @@ export function Avatar({
 
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cn("animate-pulse rounded-xl bg-muted/70", className)} />;
-}
-
-export function ListRowsSkeleton({ rows = 3 }: { rows?: number }) {
-  return (
-    <div className="divide-y divide-border/40">
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 px-5 py-4">
-          <Skeleton className="h-10 w-10 rounded-full shrink-0" />
-          <div className="min-w-0 flex-1 space-y-2">
-            <Skeleton className="h-3 w-2/3" />
-            <Skeleton className="h-3 w-1/3" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
 }

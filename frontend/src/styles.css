@@ -13,11 +13,14 @@
   /* Typography */
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 
-  /* Radius */
+  /* Radius scale — kept in sync with the design system:
+     buttons/inputs use --radius-lg (8px), cards use --radius-xl (12px),
+     modals use --radius-2xl (16px). */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 
   /* Font Size Scale */
   --text-xs: 0.75rem;
@@ -151,7 +154,11 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Shadow Scale */
+  /* Elevation (shadow) scale — subtle by design. `--shadow` backs the bare
+     `shadow` utility so components that haven't opted into a specific tier
+     still render the soft, low-contrast elevation used everywhere else,
+     instead of Tailwind's heavier built-in default. */
+  --shadow: 0 1px 2px rgb(31 35 40 / 0.03);
   --shadow-xs: 0 1px 2px rgb(31 35 40 / 0.03);
   --shadow-sm: 0 1px 3px rgb(31 35 40 / 0.05);
   --shadow-md: 0 4px 6px rgb(31 35 40 / 0.08);
@@ -183,7 +190,7 @@
  * All hex values live here; components use semantic classes only.
  */
 :root {
---radius: 0.75rem;
+  --radius: 0.75rem;
   /* Neutrals — GitHub-like light */
   --background: #f6f8fa;
   --surface: #ffffff;
@@ -196,7 +203,8 @@
   --popover: #ffffff;
   --popover-foreground: #1f2328;
 
---border: #dde3e9;  --input: #d0d7de;
+  --border: #dde3e9;
+  --input: #d0d7de;
   --ring: #05b7d7;
 
   /* Brand — cyan from AuthScreen */

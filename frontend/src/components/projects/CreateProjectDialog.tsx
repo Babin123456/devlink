@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TechStackSuggest } from "./TechStackSuggest";
 import { ProjectTemplateSelect } from "./ProjectTemplateSelect";
+import { TypoCaption } from "@/components/shared/Typography";
 import { AIDescriptionGenerator } from "./AIDescriptionGenerator";
 
 interface Props {
@@ -115,9 +116,9 @@ export function CreateProjectDialog({ open, onOpenChange }: Props) {
                 <p className="text-[13px] font-semibold text-foreground">
                   Similar projects already exist
                 </p>
-                <p className="text-[12px] text-muted-foreground">
+                <TypoCaption as="p">
                   Review these before creating a duplicate.
-                </p>
+                </TypoCaption>
               </div>
             </div>
 
@@ -128,10 +129,10 @@ export function CreateProjectDialog({ open, onOpenChange }: Props) {
                   className="rounded-md border border-border bg-surface p-3 text-[12px]"
                 >
                   <p className="font-semibold text-foreground">{w.title}</p>
-                  <p className="mt-0.5 text-muted-foreground">
+                  <TypoCaption as="p">
                     Title match: {Math.round(w.title_similarity * 100)}% · Description match:{" "}
                     {Math.round(w.description_similarity * 100)}%
-                  </p>
+                  </TypoCaption>
                   <a
                     href={`/projects/${w.slug}`}
                     target="_blank"

@@ -32,6 +32,7 @@ import {
 } from "@/mocks/seed";
 import { repositories, type RepositoryItem } from "@/mocks/repositories";
 import { cn } from "@/lib/utils";
+import { TypoCaption } from "@/components/shared/Typography";
 
 const RECENT_SEARCHES_KEY = "devlink-recent-searches";
 const MAX_RECENT_SEARCHES = 5;
@@ -501,9 +502,9 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
           {filteredResults.length > 0 && (
             <div className="space-y-1 p-2">
               {!query.trim() && (
-                <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                <TypoCaption as="p">
                   Navigation & Actions
-                </p>
+                </TypoCaption>
               )}
               {filteredResults.map((item, idx) => (
                 <div
@@ -529,14 +530,14 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                           {item.title}
                         </p>
                         {item.badge && (
-                          <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                          <TypoCaption>
                             {item.badge}
-                          </span>
+                          </TypoCaption>
                         )}
                       </div>
-                      <p className="truncate text-[12px] text-muted-foreground mt-0.5">
+                      <TypoCaption as="p">
                         {item.subtitle}
-                      </p>
+                      </TypoCaption>
                     </div>
                   </div>
                   {idx === selectedIndex && (
@@ -550,9 +551,9 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
           {/* Popular Suggestions (only if query is empty) */}
           {!query.trim() && (
             <div className="p-2 pt-4">
-              <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+              <TypoCaption as="p">
                 Popular Suggestions
-              </p>
+              </TypoCaption>
               <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
                 {[
                   { label: "React", icon: <Users size={13} /> },
@@ -570,7 +571,7 @@ export function GlobalSearchModal({ isOpen, onClose }: GlobalSearchModalProps) {
                     }}
                     className="flex items-center gap-2 rounded-md border border-border/60 bg-surface px-3 py-2 text-left text-[12px] font-medium text-foreground hover:border-primary/50 hover:bg-primary-soft/30 transition-colors cursor-pointer"
                   >
-                    <span className="text-muted-foreground">{sug.icon}</span>
+                    <TypoCaption>{sug.icon}</TypoCaption>
                     {sug.label}
                   </button>
                 ))}
