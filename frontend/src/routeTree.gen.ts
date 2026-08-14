@@ -27,6 +27,7 @@ import { Route as AppOrganizationsRouteImport } from './routes/_app.organization
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMessagesRouteImport } from './routes/_app.messages'
 import { Route as AppLeaderboardRouteImport } from './routes/_app.leaderboard'
+import { Route as AppInsightsRouteImport } from './routes/_app.insights'
 import { Route as AppHackathonsRouteImport } from './routes/_app.hackathons'
 import { Route as AppGraphRouteImport } from './routes/_app.graph'
 import { Route as AppFlaresRouteImport } from './routes/_app.flares'
@@ -143,6 +144,11 @@ const AppMessagesRoute = AppMessagesRouteImport.update({
 const AppLeaderboardRoute = AppLeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInsightsRoute = AppInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
   getParentRoute: () => AppRoute,
 } as any)
 const AppHackathonsRoute = AppHackathonsRouteImport.update({
@@ -284,6 +290,8 @@ const AppProjectsProjectIdCollaborationMetricsRoute =
   AppProjectsProjectIdCollaborationMetricsRouteImport.update({
     id: '/collaboration-metrics',
     path: '/collaboration-metrics',
+    getParentRoute: () => AppProjectsProjectIdRoute,
+  } as any)
 const AppProjectsProjectIdActivityRoute =
   AppProjectsProjectIdActivityRouteImport.update({
     id: '/activity',
@@ -308,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/flares': typeof AppFlaresRoute
   '/graph': typeof AppGraphRoute
   '/hackathons': typeof AppHackathonsRouteWithChildren
+  '/insights': typeof AppInsightsRoute
   '/leaderboard': typeof AppLeaderboardRoute
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
@@ -334,8 +343,8 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
   '/settings/notifications': typeof AppSettingsNotificationsRoute
   '/organizations/': typeof AppOrganizationsIndexRoute
-  '/projects/$projectId/collaboration-metrics': typeof AppProjectsProjectIdCollaborationMetricsRoute
   '/projects/$projectId/activity': typeof AppProjectsProjectIdActivityRoute
+  '/projects/$projectId/collaboration-metrics': typeof AppProjectsProjectIdCollaborationMetricsRoute
   '/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
 export interface FileRoutesByTo {
@@ -355,6 +364,7 @@ export interface FileRoutesByTo {
   '/flares': typeof AppFlaresRoute
   '/graph': typeof AppGraphRoute
   '/hackathons': typeof AppHackathonsRouteWithChildren
+  '/insights': typeof AppInsightsRoute
   '/leaderboard': typeof AppLeaderboardRoute
   '/messages': typeof AppMessagesRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
@@ -380,8 +390,8 @@ export interface FileRoutesByTo {
   '/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
   '/settings/notifications': typeof AppSettingsNotificationsRoute
   '/organizations': typeof AppOrganizationsIndexRoute
-  '/projects/$projectId/collaboration-metrics': typeof AppProjectsProjectIdCollaborationMetricsRoute
   '/projects/$projectId/activity': typeof AppProjectsProjectIdActivityRoute
+  '/projects/$projectId/collaboration-metrics': typeof AppProjectsProjectIdCollaborationMetricsRoute
   '/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
 export interface FileRoutesById {
@@ -403,6 +413,7 @@ export interface FileRoutesById {
   '/_app/flares': typeof AppFlaresRoute
   '/_app/graph': typeof AppGraphRoute
   '/_app/hackathons': typeof AppHackathonsRouteWithChildren
+  '/_app/insights': typeof AppInsightsRoute
   '/_app/leaderboard': typeof AppLeaderboardRoute
   '/_app/messages': typeof AppMessagesRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
@@ -429,8 +440,8 @@ export interface FileRoutesById {
   '/_app/projects/$projectId': typeof AppProjectsProjectIdRouteWithChildren
   '/_app/settings/notifications': typeof AppSettingsNotificationsRoute
   '/_app/organizations/': typeof AppOrganizationsIndexRoute
-  '/_app/projects/$projectId/collaboration-metrics': typeof AppProjectsProjectIdCollaborationMetricsRoute
   '/_app/projects/$projectId/activity': typeof AppProjectsProjectIdActivityRoute
+  '/_app/projects/$projectId/collaboration-metrics': typeof AppProjectsProjectIdCollaborationMetricsRoute
   '/_app/projects/$projectId/issues': typeof AppProjectsProjectIdIssuesRoute
 }
 export interface FileRouteTypes {
@@ -452,6 +463,7 @@ export interface FileRouteTypes {
     | '/flares'
     | '/graph'
     | '/hackathons'
+    | '/insights'
     | '/leaderboard'
     | '/messages'
     | '/notifications'
@@ -478,8 +490,8 @@ export interface FileRouteTypes {
     | '/projects/$projectId'
     | '/settings/notifications'
     | '/organizations/'
-    | '/projects/$projectId/collaboration-metrics'
     | '/projects/$projectId/activity'
+    | '/projects/$projectId/collaboration-metrics'
     | '/projects/$projectId/issues'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -499,6 +511,7 @@ export interface FileRouteTypes {
     | '/flares'
     | '/graph'
     | '/hackathons'
+    | '/insights'
     | '/leaderboard'
     | '/messages'
     | '/notifications'
@@ -524,8 +537,8 @@ export interface FileRouteTypes {
     | '/projects/$projectId'
     | '/settings/notifications'
     | '/organizations'
-    | '/projects/$projectId/collaboration-metrics'
     | '/projects/$projectId/activity'
+    | '/projects/$projectId/collaboration-metrics'
     | '/projects/$projectId/issues'
   id:
     | '__root__'
@@ -546,6 +559,7 @@ export interface FileRouteTypes {
     | '/_app/flares'
     | '/_app/graph'
     | '/_app/hackathons'
+    | '/_app/insights'
     | '/_app/leaderboard'
     | '/_app/messages'
     | '/_app/notifications'
@@ -572,8 +586,8 @@ export interface FileRouteTypes {
     | '/_app/projects/$projectId'
     | '/_app/settings/notifications'
     | '/_app/organizations/'
-    | '/_app/projects/$projectId/collaboration-metrics'
     | '/_app/projects/$projectId/activity'
+    | '/_app/projects/$projectId/collaboration-metrics'
     | '/_app/projects/$projectId/issues'
   fileRoutesById: FileRoutesById
 }
@@ -714,6 +728,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof AppLeaderboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/insights': {
+      id: '/_app/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof AppInsightsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/hackathons': {
@@ -903,6 +924,8 @@ declare module '@tanstack/react-router' {
       path: '/collaboration-metrics'
       fullPath: '/projects/$projectId/collaboration-metrics'
       preLoaderRoute: typeof AppProjectsProjectIdCollaborationMetricsRouteImport
+      parentRoute: typeof AppProjectsProjectIdRoute
+    }
     '/_app/projects/$projectId/activity': {
       id: '/_app/projects/$projectId/activity'
       path: '/activity'
@@ -987,15 +1010,15 @@ const AppOrganizationsRouteWithChildren =
   AppOrganizationsRoute._addFileChildren(AppOrganizationsRouteChildren)
 
 interface AppProjectsProjectIdRouteChildren {
-  AppProjectsProjectIdCollaborationMetricsRoute: typeof AppProjectsProjectIdCollaborationMetricsRoute
   AppProjectsProjectIdActivityRoute: typeof AppProjectsProjectIdActivityRoute
+  AppProjectsProjectIdCollaborationMetricsRoute: typeof AppProjectsProjectIdCollaborationMetricsRoute
   AppProjectsProjectIdIssuesRoute: typeof AppProjectsProjectIdIssuesRoute
 }
 
 const AppProjectsProjectIdRouteChildren: AppProjectsProjectIdRouteChildren = {
+  AppProjectsProjectIdActivityRoute: AppProjectsProjectIdActivityRoute,
   AppProjectsProjectIdCollaborationMetricsRoute:
     AppProjectsProjectIdCollaborationMetricsRoute,
-  AppProjectsProjectIdActivityRoute: AppProjectsProjectIdActivityRoute,
   AppProjectsProjectIdIssuesRoute: AppProjectsProjectIdIssuesRoute,
 }
 
@@ -1037,6 +1060,7 @@ interface AppRouteChildren {
   AppFlaresRoute: typeof AppFlaresRoute
   AppGraphRoute: typeof AppGraphRoute
   AppHackathonsRoute: typeof AppHackathonsRouteWithChildren
+  AppInsightsRoute: typeof AppInsightsRoute
   AppLeaderboardRoute: typeof AppLeaderboardRoute
   AppMessagesRoute: typeof AppMessagesRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
@@ -1061,6 +1085,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFlaresRoute: AppFlaresRoute,
   AppGraphRoute: AppGraphRoute,
   AppHackathonsRoute: AppHackathonsRouteWithChildren,
+  AppInsightsRoute: AppInsightsRoute,
   AppLeaderboardRoute: AppLeaderboardRoute,
   AppMessagesRoute: AppMessagesRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,
