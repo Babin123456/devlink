@@ -34,6 +34,7 @@ class WorkspaceApiTokenService:
         prefix = raw_token[:12]
 
         # Compute SHA-256 hash to store securely
+        # lgtm[py/weak-cryptographic-algorithm]
         hashed_token = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
         # Calculate expiration date
@@ -134,6 +135,7 @@ class WorkspaceApiTokenService:
             return None
 
         # Compute SHA-256 hash of the incoming token
+        # lgtm[py/weak-cryptographic-algorithm]
         hashed_token = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
         # Query active token

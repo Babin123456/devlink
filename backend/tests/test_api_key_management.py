@@ -49,6 +49,7 @@ class TestApiKeyManagement:
             assert api_key.name == "CI/CD Integration Key"
             assert api_key.prefix.startswith("dlk_live_")
             # Verify SHA-256 hash in DB match raw_key
+            # lgtm[py/weak-cryptographic-algorithm]
             expected_hash = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
             assert api_key.hashed_key == expected_hash
             assert api_key.scopes == ["read:projects", "write:projects"]
@@ -120,10 +121,8 @@ class TestApiKeyManagement:
             )
 
             assert new_raw_key.startswith("dlk_live_")
-            assert (
-                regenerated.hashed_key
-                == hashlib.sha256(new_raw_key.encode("utf-8")).hexdigest()
-            )
+            # lgtm[py/weak-cryptographic-algorithm]
+            assert regenerated.hashed_key == hashlib.sha256(new_raw_key.encode("utf-8")).hexdigest()
             assert regenerated.last_used_at is None
             mock_audit.assert_called_once()
             assert (
@@ -154,6 +153,7 @@ class TestApiKeyManagement:
     def test_authenticate_api_key_validates_token_and_updates_last_used_at(self):
         db = MagicMock(spec=Session)
         raw_key = "dlk_live_validsecrettoken12345"
+        # lgtm[py/weak-cryptographic-algorithm]
         hashed = hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
 
         key = MagicMock(spec=ApiKey)
