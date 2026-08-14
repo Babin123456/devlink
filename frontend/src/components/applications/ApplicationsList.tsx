@@ -1,94 +1,44 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
-import type { ApplicationResponse, UUID } from "@/lib/api";
-import {
-  acceptApplication,
-  getProjectApplications,
-  rejectApplication,
-  withdrawApplication,
-} from "@/lib/api";
+import type { UUID, ApplicationResponse } from "@/lib/api";
+import { getProjectApplications } from "@/lib/api";
 import { ApplicationStatusBadge } from "./ApplicationStatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, Skeleton } from "@/components/shared/primitives";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { TypoCaption } from "@/components/shared/Typography";
+import {
+  useAcceptApplication,
+  useRejectApplication,
+  useWithdrawApplication,
+} from "@/hooks/useApplications";
 
 type Props = {
   projectId: UUID;
   className?: string;
 };
 
-/**
- * Project owner view:
- * - list applicants
- * - Accept/Reject (optimistic) for pending
- */
 export function ApplicationsList({ projectId, className }: Props) {
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["projectApplications", projectId],
     queryFn: () => getProjectApplications(projectId),
   });
 
-  const [optimistic, setOptimistic] = useState<Record<UUID, ApplicationResponse["status"]>>({});
+  const acceptMutation = useAcceptApplication(projectId);
+  const rejectMutation = useRejectApplication(projectId);
+  const withdrawMutation = useWithdrawApplication(projectId);
 
-  const apps = useMemo(() => {
-    if (!data) return [];
-    return data.map((a) => ({
-      ...a,
-      status: optimistic[a.id] ?? a.status,
-    }));
-  }, [data, optimistic]);
-
-  async function setStatus(id: UUID, status: "accepted" | "rejected") {
-    // Optimistic update
-    setOptimistic((prev) => ({ ...prev, [id]: status }));
-
-    try {
-      const apiFn = status === "accepted" ? acceptApplication : rejectApplication;
-      await apiFn(id);
-      await refetch();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to update application");
-      await refetch();
-    } finally {
-      setOptimistic((prev) => {
-        const copy = { ...prev };
-        delete copy[id];
-        return copy;
-      });
-    }
-  }
-
-  async function onWithdraw(id: UUID) {
-    setOptimistic((prev) => ({ ...prev, [id]: "withdrawn" }));
-    try {
-      await withdrawApplication(id);
-      await refetch();
-      toast.success("Application withdrawn");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to withdraw");
-      await refetch();
-    } finally {
-      setOptimistic((prev) => {
-        const copy = { ...prev };
-        delete copy[id];
-        return copy;
-      });
-    }
-  }
-
-  const [busyId, setBusyId] = useState<UUID | null>(null);
   const [q, setQ] = useState("");
+
+  const apps = useMemo(() => data ?? [], [data]);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     if (!needle) return apps;
-    // Without applicant display schema in response, we can only filter by links/message if present
-    return apps.filter((a) => {
+    return apps.filter((a: ApplicationResponse) => {
       const hay = [
         a.message ?? "",
         a.portfolio_url ?? "",
@@ -106,9 +56,9 @@ export function ApplicationsList({ projectId, className }: Props) {
     return (
       <Card className={cn("p-4", className)}>
         <p className="text-[13px] font-semibold text-destructive">Failed to load applications</p>
-        <p className="mt-1 text-[12px] text-muted-foreground">
+        <TypoCaption as="p">
           {error instanceof Error ? error.message : "Unknown error"}
-        </p>
+        </TypoCaption>
       </Card>
     );
   }
@@ -118,9 +68,9 @@ export function ApplicationsList({ projectId, className }: Props) {
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[13px] font-semibold text-foreground">Applications</p>
-          <p className="mt-1 text-[12px] text-muted-foreground">
+          <TypoCaption as="p">
             Review applicants and update status.
-          </p>
+          </TypoCaption>
         </div>
         <div className="min-w-0">
           <Input
@@ -135,7 +85,7 @@ export function ApplicationsList({ projectId, className }: Props) {
       {isLoading ? (
         <div className="mt-4 grid gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="p-3">
+            <Card key={i} className="p-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-48" />
@@ -149,12 +99,13 @@ export function ApplicationsList({ projectId, className }: Props) {
       ) : filtered.length === 0 ? (
         <div className="mt-6 text-center">
           <p className="text-[13px] font-semibold text-foreground">No applications found</p>
-          <p className="mt-1 text-[12px] text-muted-foreground">Try adjusting your search.</p>
+          <TypoCaption as="p">Try adjusting your search.</TypoCaption>
         </div>
       ) : (
         <ul className="mt-4 divide-y divide-border">
-          {filtered.map((a) => {
-            const disabled = busyId === a.id || a.status !== "pending";
+          {filtered.map((a: ApplicationResponse) => {
+            const isBusy =
+              acceptMutation.isPending || rejectMutation.isPending || withdrawMutation.isPending;
             const canReview = a.status === "pending";
             return (
               <li key={a.id} className="px-1 py-3">
@@ -162,9 +113,9 @@ export function ApplicationsList({ projectId, className }: Props) {
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <ApplicationStatusBadge status={a.status} />
-                      <span className="text-[12px] text-muted-foreground">
+                      <TypoCaption>
                         Application ID: {a.id}
-                      </span>
+                      </TypoCaption>
                     </div>
 
                     {a.message && (
@@ -209,33 +160,16 @@ export function ApplicationsList({ projectId, className }: Props) {
                     <div className="flex gap-2">
                       <Button
                         size="sm"
-                        variant="secondary"
-                        disabled={!canReview || disabled}
-                        onClick={async () => {
-                          setBusyId(a.id);
-                          try {
-                            await setStatus(a.id, "accepted");
-                            toast.success("Application accepted");
-                          } finally {
-                            setBusyId(null);
-                          }
-                        }}
+                        disabled={!canReview || isBusy}
+                        onClick={() => acceptMutation.mutate(a.id)}
                       >
                         Accept
                       </Button>
                       <Button
                         size="sm"
                         variant="destructive"
-                        disabled={!canReview || disabled}
-                        onClick={async () => {
-                          setBusyId(a.id);
-                          try {
-                            await setStatus(a.id, "rejected");
-                            toast.success("Application rejected");
-                          } finally {
-                            setBusyId(null);
-                          }
-                        }}
+                        disabled={!canReview || isBusy}
+                        onClick={() => rejectMutation.mutate(a.id)}
                       >
                         Reject
                       </Button>
@@ -244,15 +178,8 @@ export function ApplicationsList({ projectId, className }: Props) {
                       <Button
                         size="sm"
                         variant="outline"
-                        disabled={disabled}
-                        onClick={async () => {
-                          setBusyId(a.id);
-                          try {
-                            await onWithdraw(a.id);
-                          } finally {
-                            setBusyId(null);
-                          }
-                        }}
+                        disabled={isBusy}
+                        onClick={() => withdrawMutation.mutate(a.id)}
                       >
                         Withdraw
                       </Button>

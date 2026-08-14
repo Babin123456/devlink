@@ -10,4 +10,14 @@ export const usersApi = {
   recommendations: () => api.get<unknown[]>("/api/users/recommendations"),
   follow: (id: string) => api.post<void>("/api/users/follow", { user_id: id }),
   unfollow: (id: string) => api.delete<void>("/api/users/unfollow", { query: { user_id: id } }),
+  report: (id: string, data: { reason: string; description?: string }) =>
+    api.post<unknown>(`/api/users/${id}/report`, data),
+  completion: () =>
+    api.get<{
+      completion: number;
+      missing: string[];
+      completed_factors: string[];
+      reward_unlocked: boolean;
+      reward_badge?: string;
+    }>("/api/users/me/completion"),
 };

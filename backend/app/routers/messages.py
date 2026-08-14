@@ -3,8 +3,8 @@ from __future__ import annotations
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
@@ -14,6 +14,8 @@ from app.dependencies import get_current_user
 from app.middleware.rate_limit import limiter, MESSAGE_LIMIT, SEARCH_LIMIT
 from app.models.user import User
 from app.schemas.message import (
+    BulkReadRequest,
+    BulkReadResponse,
     MessageCreate,
     MessageResponse,
     MessageUpdate,
@@ -61,7 +63,7 @@ def send_message(
         ).all()
 
         for recipient_id in recipient_ids:
-            NotificationService.enqueue(
+            NotificationService.notify(
                 db,
                 recipient_id=recipient_id,
                 sender_id=current_user.id,
@@ -82,7 +84,9 @@ def send_message(
     "/me",
     response_model=list[MessageResponse],
 )
+@limiter.limit(MESSAGE_LIMIT)
 def my_messages(
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
 ):
@@ -97,7 +101,9 @@ def my_messages(
     "/search/{conversation_id}",
     response_model=list[MessageResponse],
 )
+@limiter.limit(SEARCH_LIMIT)
 def search_messages(
+    request: Request,
     conversation_id: uuid.UUID,
     keyword: str = Query(...),
     db: Session = Depends(get_database),
@@ -113,7 +119,9 @@ def search_messages(
 @router.get(
     "/conversation/{conversation_id}/count",
 )
+@limiter.limit(MESSAGE_LIMIT)
 def count_messages(
+    request: Request,
     conversation_id: uuid.UUID,
     db: Session = Depends(get_database),
 ):
@@ -131,9 +139,8 @@ def count_messages(
     response_model=list[MessageResponse],
 )
 @limiter.limit(SEARCH_LIMIT)
-def search_messages(
-    request: Request,
 def list_conversation_messages(
+    request: Request,
     conversation_id: uuid.UUID,
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_database),
@@ -146,13 +153,94 @@ def list_conversation_messages(
     )
 
 
+# ------------------------------------------------------------------
+# Typing indicator  (issue #337)
+# ------------------------------------------------------------------
+
+
+@router.post(
+    "/conversation/{conversation_id}/typing",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+@limiter.limit("60/minute")
+def set_typing(
+    request: Request,
+    conversation_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    """Record that the current user is typing in a conversation.
+
+    Clients should call this on a debounce (e.g. every 1–2s while the
+    input has focus and is changing). The state expires automatically
+    after ``MessageService.TYPING_TTL_SECONDS`` if no further heartbeats
+    arrive, so there is no strict requirement to call the "stop" endpoint.
+    """
+    MessageService.set_typing(
+        conversation_id=conversation_id,
+        user_id=current_user.id,
+    )
+    return None
+
+
+@router.delete(
+    "/conversation/{conversation_id}/typing",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+@limiter.limit("60/minute")
+def stop_typing(
+    request: Request,
+    conversation_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    """Explicitly clear the current user's typing state.
+
+    Called when the user sends a message or blurs the input so the
+    indicator disappears immediately rather than waiting for the TTL.
+    """
+    MessageService.clear_typing(
+        conversation_id=conversation_id,
+        user_id=current_user.id,
+    )
+    return None
+
+
+@router.get(
+    "/conversation/{conversation_id}/typing",
+)
+@limiter.limit("60/minute")
+def get_typing(
+    request: Request,
+    conversation_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    """Return the list of user IDs currently typing in a conversation.
+
+    The requesting user is excluded so a client never sees its own
+    indicator echoed back.
+    """
+    typing_user_ids = MessageService.get_typing_users(
+        conversation_id=conversation_id,
+        exclude_user_id=current_user.id,
+    )
+    return {
+        "conversation_id": str(conversation_id),
+        "typing_user_ids": [str(uid) for uid in typing_user_ids],
+    }
+
+
 @router.get(
     "/{message_id}",
     response_model=MessageResponse,
 )
+@limiter.limit(MESSAGE_LIMIT)
 def get_message(
+    request: Request,
     message_id: uuid.UUID,
     db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
 ):
 
     message = MessageService.get_message(
@@ -253,3 +341,76 @@ def delete_message(
         db,
         db_message,
     )
+
+
+@router.patch(
+    "/{message_id}/read",
+    response_model=MessageResponse,
+)
+@limiter.limit(MESSAGE_LIMIT)
+def mark_message_as_read(
+    request: Request,
+    message_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    """Mark a single message as read by the current user."""
+    return MessageService.mark_as_read(
+        db=db,
+        message_id=message_id,
+        user_id=current_user.id,
+    )
+
+
+@router.post(
+    "/read/bulk",
+    response_model=BulkReadResponse,
+)
+@limiter.limit(MESSAGE_LIMIT)
+def bulk_mark_read(
+    request: Request,
+    body: BulkReadRequest,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    """Bulk mark messages or an entire conversation as read by the current user."""
+    if body.conversation_id:
+        count, read_at = MessageService.mark_conversation_as_read(
+            db=db,
+            conversation_id=body.conversation_id,
+            user_id=current_user.id,
+        )
+    elif body.message_ids:
+        count, read_at = MessageService.bulk_mark_as_read(
+            db=db,
+            message_ids=body.message_ids,
+            user_id=current_user.id,
+        )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Must provide either message_ids or conversation_id",
+        )
+
+    return BulkReadResponse(updated_count=count, read_at=read_at)
+
+
+@router.post(
+    "/conversation/{conversation_id}/read",
+    response_model=BulkReadResponse,
+)
+@limiter.limit(MESSAGE_LIMIT)
+def mark_conversation_as_read(
+    request: Request,
+    conversation_id: uuid.UUID,
+    db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
+):
+    """Mark all unread messages in a conversation as read by the current user."""
+    count, read_at = MessageService.mark_conversation_as_read(
+        db=db,
+        conversation_id=conversation_id,
+        user_id=current_user.id,
+    )
+    return BulkReadResponse(updated_count=count, read_at=read_at)
+

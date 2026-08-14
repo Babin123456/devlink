@@ -8,8 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_database
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_database
 from app.models.user import User
 from app.schemas.notification import (
     NotificationCreate,
@@ -189,6 +188,7 @@ def update_notification(
 )
 def delete_notification(
     notification_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
 ):
 
@@ -203,7 +203,96 @@ def delete_notification(
             detail="Notification not found",
         )
 
+    if notification.recipient_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to delete this notification",
+        )
+
     NotificationService.delete_notification(
         db,
         notification,
     )
+
+
+from app.schemas.notification import (
+    NotificationPreferenceResponse,
+    NotificationPreferenceUpdate,
+)
+
+
+@router.get(
+    "/preferences",
+    response_model=NotificationPreferenceResponse,
+    summary="Get Notification Preferences",
+    description="Retrieve current user's notification preferences across messages, team invitations, project updates, mentions, system announcements, and email settings.",
+)
+def get_preferences(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+) -> NotificationPreferenceResponse:
+    pref = NotificationService.get_preferences(db, user_id=current_user.id)
+    return NotificationPreferenceResponse.model_validate(pref)
+
+
+@router.put(
+    "/preferences",
+    response_model=NotificationPreferenceResponse,
+    summary="Update Notification Preferences (PUT)",
+    description="Update current user's notification settings for all channels and categories.",
+)
+@router.patch(
+    "/preferences",
+    response_model=NotificationPreferenceResponse,
+    summary="Update Notification Preferences (PATCH)",
+    description="Partially update current user's notification settings.",
+)
+def update_preferences(
+    prefs: NotificationPreferenceUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+) -> NotificationPreferenceResponse:
+    pref = NotificationService.update_preferences(
+        db, user_id=current_user.id, update_in=prefs
+    )
+    return NotificationPreferenceResponse.model_validate(pref)
+
+
+@router.post(
+    "/{notification_id}/click",
+    response_model=NotificationResponse,
+    summary="Track notification click interaction",
+)
+def track_click(
+    notification_id: uuid.UUID,
+    db: Session = Depends(get_database),
+):
+    notification = NotificationService.get_notification(db, notification_id)
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return NotificationService.track_click(db, notification)
+
+
+@router.post(
+    "/{notification_id}/delivered",
+    response_model=NotificationResponse,
+    summary="Track notification delivery status",
+)
+def track_delivered(
+    notification_id: uuid.UUID,
+    db: Session = Depends(get_database),
+):
+    notification = NotificationService.get_notification(db, notification_id)
+    if not notification:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return NotificationService.track_delivered(db, notification)
+
+
+@router.get(
+    "/analytics/delivery",
+    summary="Get notification delivery and interaction analytics dashboard responses",
+)
+def get_delivery_analytics(
+    db: Session = Depends(get_database),
+):
+    return NotificationService.get_delivery_analytics(db)

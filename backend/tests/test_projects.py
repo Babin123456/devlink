@@ -2,18 +2,20 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.database.base import Base
-from app.dependencies import get_database, get_current_user
+from app.dependencies import get_database
 from app.main import app
 from app.models.user import User
-from app.models.project import Project, ProjectStage, ProjectVisibility
+from app.models.project import ProjectStage, ProjectVisibility
 from app.schemas.project import ProjectCreate
 from app.services.project_service import ProjectService
 
+
+# SQLite setup for tests
 engine = create_engine(
     "sqlite://",
     connect_args={"check_same_thread": False},
@@ -34,9 +36,7 @@ def override_get_db():
 def setup_db():
     app.dependency_overrides[get_database] = override_get_db
     Base.metadata.create_all(bind=engine)
-
     yield
-
     Base.metadata.drop_all(bind=engine)
     app.dependency_overrides.clear()
 
@@ -149,9 +149,8 @@ def test_list_projects_does_not_increment_views():
     db.close()
 
 
-import pytest
-import uuid
-from fastapi.testclient import TestClient
+import pytest  # noqa: E402
+import uuid  # noqa: E402
 
 
 def test_create_project(client: TestClient, register_and_login):
@@ -629,3 +628,88 @@ def test_invite_user(client: TestClient, register_and_login):
         headers={"Authorization": f"Bearer {token2}"},
     )
     assert pd.status_code == 403
+
+
+def test_update_project_unauthorized(client: TestClient, register_and_login):
+    owner_id, owner_token = register_and_login("projowner_auth@example.com", "projownerauth")
+    other_id, other_token = register_and_login("projother_auth@example.com", "projotherauth")
+
+    # Owner creates project
+    c = client.post(
+        "/api/projects/",
+        json={
+            "title": "Auth Project Test",
+            "slug": "auth-project-test",
+            "description": "Testing non-owner update rejection.",
+            "status": "active",
+            "visibility": "public",
+        },
+        headers={"Authorization": f"Bearer {owner_token}"},
+    )
+    assert c.status_code == 201
+    pid = c.json()["id"]
+
+    # Non-owner attempts to update -> 403 Forbidden
+    res = client.put(
+        f"/api/projects/{pid}",
+        json={"tagline": "Hacked tagline"},
+        headers={"Authorization": f"Bearer {other_token}"},
+    )
+    assert res.status_code == 403
+
+
+def test_delete_project_unauthorized(client: TestClient, register_and_login):
+    owner_id, owner_token = register_and_login("projdel_owner@example.com", "projdelowner")
+    other_id, other_token = register_and_login("projdel_other@example.com", "projdelother")
+
+    c = client.post(
+        "/api/projects/",
+        json={
+            "title": "Auth Delete Project",
+            "slug": "auth-delete-project",
+            "description": "Testing non-owner delete rejection.",
+            "status": "active",
+            "visibility": "public",
+        },
+        headers={"Authorization": f"Bearer {owner_token}"},
+    )
+    assert c.status_code == 201
+    pid = c.json()["id"]
+
+    # Non-owner attempts to delete -> 403 Forbidden
+    res = client.delete(
+        f"/api/projects/{pid}",
+        headers={"Authorization": f"Bearer {other_token}"},
+    )
+    assert res.status_code == 403
+
+
+def test_create_project_unauthenticated(client: TestClient):
+    res = client.post(
+        "/api/projects/",
+        json={
+            "title": "Unauthenticated Project",
+            "slug": "unauth-project",
+            "description": "Should fail without auth token.",
+        },
+    )
+    assert res.status_code == 401
+
+
+def test_get_project_not_found(client: TestClient):
+    res = client.get(f"/api/projects/{uuid.uuid4()}")
+    assert res.status_code == 404
+
+
+def test_create_project_invalid_payload(client: TestClient, register_and_login):
+    _, token = register_and_login("proj_inv_payload@example.com", "projinvpayload")
+    res = client.post(
+        "/api/projects/",
+        json={
+            "title": "",  # invalid min_length=1
+            "description": "Short title test",
+        },
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 422
+

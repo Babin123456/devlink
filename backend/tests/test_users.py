@@ -1,5 +1,5 @@
-import pytest
 import uuid
+
 from fastapi.testclient import TestClient
 
 
@@ -29,7 +29,7 @@ def test_create_user(client: TestClient):
             "last_name": "User",
             "email": "createuser@example.com",
             "username": "createuser",
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
     assert response.status_code == 201
@@ -45,7 +45,7 @@ def test_create_user_duplicate_email(client: TestClient, register_and_login):
             "last_name": "User",
             "email": "dupem@example.com",
             "username": "dupem2",
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
     assert response.status_code == 400
@@ -61,7 +61,7 @@ def test_create_user_duplicate_username(client: TestClient, register_and_login):
             "last_name": "User",
             "email": "dupusr2@example.com",
             "username": "dupusr",
-            "password": "Password123!",
+            "password": "Vermilion-Kestrel97!",
         },
     )
     assert response.status_code == 400
@@ -168,3 +168,29 @@ def test_verify_user(client: TestClient, register_and_login):
 def test_verify_user_not_found(client: TestClient):
     response = client.patch(f"/api/users/{uuid.uuid4()}/verify")
     assert response.status_code == 404
+
+
+def test_get_me_unauthenticated(client: TestClient):
+    res = client.get("/api/users/me")
+    assert res.status_code == 401
+
+
+def test_update_me_unauthenticated(client: TestClient):
+    res = client.put("/api/users/me", json={"headline": "Test Headline"})
+    assert res.status_code == 401
+
+
+def test_get_user_not_found(client: TestClient):
+    res = client.get(f"/api/users/{uuid.uuid4()}")
+    assert res.status_code == 404
+
+
+def test_update_user_invalid_payload(client: TestClient, register_and_login):
+    _, token = register_and_login("usr_inv_payload@example.com", "usrinvpayload")
+    res = client.put(
+        "/api/users/me",
+        json={"website": "not-a-valid-url"},  # invalid URL pattern
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert res.status_code == 422
+

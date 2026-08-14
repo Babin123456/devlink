@@ -3,16 +3,22 @@ from __future__ import annotations
 import uuid
 
 # pyrefly: ignore [missing-import]
-from sqlalchemy import and_, select
+from sqlalchemy import and_, select, func
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
+from app.models.activity import ActivityType
 from app.models.follower import Follower
-from app.models.user import User
 from app.models.notification import NotificationType
+from app.models.user import User
 from app.schemas.notification import NotificationCreate
+from app.services.activity_service import ActivityService
 from app.services.notification_service import NotificationService
+
+
+from app.services.block_service import BlockService
+from fastapi import HTTPException, status
 
 
 class FollowerService:
@@ -27,6 +33,12 @@ class FollowerService:
         following_id: uuid.UUID,
     ) -> Follower:
 
+        if BlockService.is_blocked(db, follower_id, following_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Cannot follow a user who has blocked you or whom you have blocked.",
+            )
+
         relationship = Follower(
             follower_id=follower_id,
             following_id=following_id,
@@ -35,6 +47,21 @@ class FollowerService:
         db.add(relationship)
         db.flush()
         db.refresh(relationship)
+
+        following_user = db.get(User, following_id)
+        following_username = following_user.username if following_user else str(following_id)
+
+        ActivityService.record_activity(
+            db=db,
+            actor_id=follower_id,
+            activity_type=ActivityType.FOLLOWED_USER,
+            title="Followed a builder",
+            description=f"Started following @{following_username}",
+            target_id=following_id,
+            target_type="user",
+            icon="user-plus",
+            color="success",
+        )
 
         # Trigger notification
         follower = db.get(User, follower_id)
@@ -125,9 +152,13 @@ class FollowerService:
         user_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(Follower).where(Follower.following_id == user_id)
+        stmt = (
+            select(func.count())
+            .select_from(Follower)
+            .where(Follower.following_id == user_id)
+        )
 
-        return len(list(db.scalars(stmt)))
+        return db.scalar(stmt) or 0
 
     @staticmethod
     def following_count(
@@ -135,9 +166,13 @@ class FollowerService:
         user_id: uuid.UUID,
     ) -> int:
 
-        stmt = select(Follower).where(Follower.follower_id == user_id)
+        stmt = (
+            select(func.count())
+            .select_from(Follower)
+            .where(Follower.follower_id == user_id)
+        )
 
-        return len(list(db.scalars(stmt)))
+        return db.scalar(stmt) or 0
 
     @staticmethod
     def mutual_followers(

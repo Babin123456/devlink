@@ -8,8 +8,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_database
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, get_database
+from app.middleware.idempotency import IdempotentRoute
+from app.models.notification import NotificationType
+from app.models.project import Project
 from app.models.user import User
 from app.schemas.application import (
     ApplicationCreate,
@@ -17,14 +19,9 @@ from app.schemas.application import (
     ApplicationUpdate,
 )
 from app.services.application_service import ApplicationService
-from app.models.notification import NotificationType
-from app.models.project import Project
 from app.services.notification_service import NotificationService
 
-from app.middleware.idempotency import IdempotentRoute
-
 router = APIRouter(
-    prefix="/applications",
     tags=["Applications"],
     route_class=IdempotentRoute,
 )
@@ -52,7 +49,7 @@ def create_application(
     try:
         project = db.get(Project, created.project_id)
         if project is not None:
-            NotificationService.enqueue(
+            NotificationService.notify(
                 db,
                 recipient_id=project.owner_id,
                 sender_id=current_user.id,
@@ -67,6 +64,21 @@ def create_application(
         db.rollback()
 
     return created
+
+
+@router.get(
+    "/me",
+    response_model=list[ApplicationResponse],
+)
+def my_applications(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+
+    return ApplicationService.list_user_applications(
+        db,
+        current_user.id,
+    )
 
 
 @router.get(
@@ -90,21 +102,6 @@ def get_application(
         )
 
     return db_application
-
-
-@router.get(
-    "/me",
-    response_model=list[ApplicationResponse],
-)
-def my_applications(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_database),
-):
-
-    return ApplicationService.list_user_applications(
-        db,
-        current_user.id,
-    )
 
 
 @router.get(
@@ -171,13 +168,20 @@ def accept_application(
             detail="Application not found",
         )
 
+    project = db.query(Project).filter(Project.id == db_application.project_id).first()
+    if project and project.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the project owner can accept applications",
+        )
+
     accepted = ApplicationService.accept_application(
         db,
         db_application,
     )
 
     try:
-        NotificationService.enqueue(
+        NotificationService.notify(
             db,
             recipient_id=db_application.applicant_id,
             sender_id=current_user.id,
@@ -215,13 +219,20 @@ def reject_application(
             detail="Application not found",
         )
 
+    project = db.query(Project).filter(Project.id == db_application.project_id).first()
+    if project and project.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the project owner can reject applications",
+        )
+
     rejected = ApplicationService.reject_application(
         db,
         db_application,
     )
 
     try:
-        NotificationService.enqueue(
+        NotificationService.notify(
             db,
             recipient_id=db_application.applicant_id,
             sender_id=current_user.id,
@@ -245,6 +256,7 @@ def reject_application(
 def withdraw_application(
     application_id: uuid.UUID,
     db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
 ):
 
     db_application = ApplicationService.get_application(
@@ -256,6 +268,12 @@ def withdraw_application(
         raise HTTPException(
             status_code=404,
             detail="Application not found",
+        )
+
+    if db_application.applicant_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the applicant can withdraw this application",
         )
 
     return ApplicationService.withdraw_application(
@@ -271,6 +289,7 @@ def withdraw_application(
 def delete_application(
     application_id: uuid.UUID,
     db: Session = Depends(get_database),
+    current_user: User = Depends(get_current_user),
 ):
 
     db_application = ApplicationService.get_application(
@@ -282,6 +301,12 @@ def delete_application(
         raise HTTPException(
             status_code=404,
             detail="Application not found",
+        )
+
+    if db_application.applicant_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the applicant can delete this application",
         )
 
     ApplicationService.delete_application(

@@ -1,361 +1,283 @@
-import { Card, SectionHeader, TagChip, Avatar } from "@/components/shared/primitives";
-import { useQuery } from "@tanstack/react-query";
+import { Card, SectionHeader, Avatar } from "@/components/shared/primitives";
 import {
-  dashboardService,
-  buildersService,
-  projectsService,
-  flaresService,
-  messagesService,
-  notificationsService,
-} from "@/services";
-import {
-  Activity as ActivityIcon,
-  GitMerge,
-  GitPullRequest,
-  UserPlus,
-  UserCheck,
-  BookMarked,
-  Trophy,
-  Sparkles,
-  Check,
-  X,
-  Star,
-  MessageCircle,
-  FolderPlus,
+  Plus,
   Flame,
   Users2,
-  FileText,
-  BarChart3,
+  MessageSquare,
+  ChevronRight,
+  Calendar,
+  Clock,
+  Rocket,
+  User,
+  Sparkles,
+  TrendingUp,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { TypoCaption, TypoCard } from "@/components/shared/Typography";
 
-const kindIcon = {
-  join: UserPlus,
-  accept: UserCheck,
-  commit: GitPullRequest,
-  merge: GitMerge,
-  follow: UserPlus,
-  repo: BookMarked,
-  hackathon: Trophy,
-  ai: Sparkles,
-} as const;
+// 1. Current Projects
+export function CurrentProjects() {
+  const projectsList = [
+    {
+      id: "p1",
+      name: "DevLink Platform",
+      status: "In Progress",
+      progress: 80,
+      dueText: "Due in 5 days",
+      iconText: "D",
+      iconBg: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
+      avatars: [
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Alex",
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
+      ],
+      extraAvatars: 3,
+    },
+    {
+      id: "p2",
+      name: "AI Matching Engine",
+      status: "In Progress",
+      progress: 60,
+      dueText: "Due in 12 days",
+      iconText: "A",
+      iconBg: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
+      avatars: [
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Priya",
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=John",
+      ],
+      extraAvatars: 2,
+    },
+    {
+      id: "p3",
+      name: "Mobile App",
+      status: "Planning",
+      progress: 25,
+      dueText: "Due in 18 days",
+      iconText: "M",
+      iconBg: "bg-violet-500/10 text-violet-500 border border-violet-500/20",
+      avatars: [
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=David",
+      ],
+      extraAvatars: 1,
+    },
+  ];
 
-export function RecentActivity() {
-  const { data = [] } = useQuery({ queryKey: ["activity"], queryFn: dashboardService.activity });
   return (
-    <Card>
-      <SectionHeader title="Recent Activity" action="View All" />
-      <ul className="divide-y divide-border">
-        {data.map((a) => {
-          const Icon = kindIcon[a.kind] ?? ActivityIcon;
+    <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
+      <SectionHeader title="Current Projects" action="View All" actionTo="/projects" />
+      <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-4">
+        {projectsList.map((p) => (
+          <div key={p.id} className="flex items-center justify-between gap-4 p-3 rounded-xl border border-border/40 hover:bg-muted/10 transition-colors">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={cn("flex items-center justify-center h-10 w-10 shrink-0 rounded-lg text-sm font-bold", p.iconBg)}>
+                {p.iconText}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
+                <TypoCaption as="p">{p.status}</TypoCaption>
+              </div>
+            </div>
+
+            {/* Progress bar stack */}
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="hidden sm:flex flex-col items-end gap-1">
+                <div className="h-1.5 w-24 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full" style={{ width: `${p.progress}%` }} />
+                </div>
+                <TypoCaption>{p.progress}%</TypoCaption>
+              </div>
+
+              {/* Avatar stack */}
+              <div className="flex -space-x-1.5 items-center shrink-0">
+                {p.avatars.map((av, idx) => (
+                  <Avatar key={idx} src={av} alt="Team" size={24} className="border border-card ring-1 ring-border/20" />
+                ))}
+                {p.extraAvatars > 0 && (
+                  <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted border border-card text-[9px] font-semibold text-muted-foreground ring-1 ring-border/20">
+                    +{p.extraAvatars}
+                  </div>
+                )}
+              </div>
+
+              <TypoCaption>
+                {p.dueText}
+              </TypoCaption>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+// 2. AI Suggestions
+export function AISuggestions() {
+  const suggestions = [
+    {
+      id: "s1",
+      icon: User,
+      iconColor: "text-emerald-500 bg-emerald-500/10",
+      text: "Rahul Verma matches your backend role",
+      badge: "94% Match",
+      badgeClass: "bg-success/15 text-success border border-success/20",
+    },
+    {
+      id: "s2",
+      icon: Calendar,
+      iconColor: "text-blue-500 bg-blue-500/10",
+      text: "React Meetup in your city this Friday",
+      badge: "Event",
+      badgeClass: "bg-blue-500/15 text-blue-500 border border-blue-500/20",
+    },
+    {
+      id: "s3",
+      icon: TrendingUp,
+      iconColor: "text-amber-500 bg-amber-500/10",
+      text: "Your profile is 85% complete",
+      badge: "Improve",
+      badgeClass: "bg-amber-500/15 text-amber-500 border border-amber-500/20",
+    },
+  ];
+
+  return (
+    <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
+      <SectionHeader title="AI Suggestions" action="View All" actionTo="/builders" />
+      <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-4">
+        {suggestions.map((s) => {
+          const Icon = s.icon;
           return (
-            <li key={a.id} className="flex items-start gap-3 px-4 py-2.5">
-              <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md bg-primary-soft text-primary">
-                <Icon size={12} />
+            <div key={s.id} className="flex items-center justify-between gap-4 p-3.5 rounded-xl border border-border/40 hover:bg-muted/10 transition-colors">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className={cn("flex items-center justify-center h-8 w-8 rounded-lg shrink-0", s.iconColor)}>
+                  <Icon size={16} />
+                </div>
+                <p className="text-xs font-semibold text-foreground truncate">{s.text}</p>
+              </div>
+              <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0", s.badgeClass)}>
+                {s.badge}
               </span>
-              <p className="min-w-0 flex-1 text-[13px] text-foreground">
-                {a.text}{" "}
-                {a.highlight && <span className="font-semibold text-primary">{a.highlight}</span>}
-              </p>
-              <span className="whitespace-nowrap text-[11px] text-muted-foreground">{a.ago}</span>
-            </li>
+            </div>
           );
         })}
-      </ul>
-    </Card>
-  );
-}
-
-export function BuilderRequests() {
-  const { data = [] } = useQuery({
-    queryKey: ["builder-requests"],
-    queryFn: dashboardService.builderRequests,
-  });
-  return (
-    <Card>
-      <SectionHeader title="Builder Requests" action="View All" />
-      <ul className="divide-y divide-border">
-        {data.map((r) => (
-          <li key={r.id} className="px-4 py-3">
-            <div className="flex items-start gap-3">
-              <Avatar src={r.builder.avatar} alt={r.builder.name} size={40} />
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-foreground">{r.builder.name}</p>
-                <p className="text-[12px] text-muted-foreground">{r.builder.role}</p>
-                <div className="mt-1.5 flex flex-wrap gap-1">
-                  {r.builder.skills.slice(0, 3).map((s) => (
-                    <TagChip key={s}>{s}</TagChip>
-                  ))}
-                </div>
-                <p className="mt-1.5 text-[11px] text-muted-foreground">
-                  {r.builder.yearsExp} yrs exp ·{" "}
-                  <span className="font-semibold text-success">{r.builder.matchScore}% Match</span>
-                </p>
-              </div>
-            </div>
-            <div className="mt-2 flex gap-1.5">
-              <button className="flex-1 rounded-md bg-primary px-2 py-1 text-[12px] font-semibold text-primary-foreground hover:opacity-90">
-                Accept
-              </button>
-              <button className="flex-1 rounded-md border border-border bg-surface px-2 py-1 text-[12px] font-medium text-foreground hover:bg-muted">
-                Reject
-              </button>
-              <button className="rounded-md border border-border bg-surface px-2 py-1 text-[12px] font-medium text-foreground hover:bg-muted">
-                View
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </Card>
-  );
-}
-
-export function InviteRequests() {
-  const { data = [] } = useQuery({
-    queryKey: ["invite-requests"],
-    queryFn: dashboardService.inviteRequests,
-  });
-  return (
-    <Card>
-      <SectionHeader title="Invite Requests" action="View All" />
-      <ul className="divide-y divide-border">
-        {data.map((r) => (
-          <li key={r.id} className="flex items-center gap-3 px-4 py-3">
-            <span
-              className={cn(
-                "grid h-10 w-10 shrink-0 place-items-center rounded-md text-lg",
-                r.color,
-              )}
-            >
-              {r.icon}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-semibold text-foreground">{r.project}</p>
-              <p className="text-[11px] text-muted-foreground">{r.role}</p>
-              <p className="text-[11px] text-muted-foreground">
-                Due in {r.dueDays} days · By {r.by}
-              </p>
-            </div>
-            <div className="flex gap-1">
-              <button className="grid h-7 w-7 place-items-center rounded-md border border-success/30 bg-success/10 text-success hover:bg-success/20">
-                <Check size={14} />
-              </button>
-              <button className="grid h-7 w-7 place-items-center rounded-md border border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20">
-                <X size={14} />
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </Card>
-  );
-}
-
-export function SuggestedBuilders() {
-  const { data = [] } = useQuery({ queryKey: ["suggested"], queryFn: buildersService.suggested });
-  return (
-    <Card>
-      <SectionHeader title="Suggested Builders" action="View All" actionTo="/builders" />
-      <div className="grid grid-cols-1 gap-3 p-4 pt-0 sm:grid-cols-3">
-        {data.map((b) => (
-          <motion.div
-            key={b.id}
-            whileHover={{ y: -2 }}
-            className="rounded-md border border-border p-3 text-center"
-          >
-            <Avatar src={b.avatar} alt={b.name} size={56} online={b.online} />
-            <p className="mt-2 text-[13px] font-semibold text-foreground">{b.name}</p>
-            <p className="text-[11px] text-muted-foreground">{b.role}</p>
-            <p className="text-[11px] text-muted-foreground">{b.country}</p>
-            <div className="mt-1.5 flex flex-wrap justify-center gap-1">
-              {b.skills.slice(0, 2).map((s) => (
-                <TagChip key={s}>{s}</TagChip>
-              ))}
-            </div>
-            <p className="mt-1.5 text-[11px] text-muted-foreground">{b.yearsExp} yrs exp</p>
-            <p className="text-[11px] font-semibold text-success">{b.matchScore}% Match</p>
-            <div className="mt-2 flex gap-1.5">
-              <button className="flex-1 rounded-md bg-primary px-2 py-1 text-[11px] font-semibold text-primary-foreground hover:opacity-90">
-                Connect
-              </button>
-              <button className="flex-1 rounded-md border border-border px-2 py-1 text-[11px] font-medium text-foreground hover:bg-muted">
-                Message
-              </button>
-            </div>
-          </motion.div>
-        ))}
       </div>
     </Card>
   );
 }
 
-export function TrendingProjects() {
-  const { data = [] } = useQuery({ queryKey: ["trending"], queryFn: projectsService.trending });
-  return (
-    <Card>
-      <SectionHeader title="Trending Projects" action="View All" actionTo="/projects" />
-      <ul className="divide-y divide-border">
-        {data.map((p) => (
-          <li key={p.id} className="flex items-center gap-3 px-4 py-2.5">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-muted text-lg">
-              {p.icon}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-semibold text-foreground">{p.name}</p>
-              <p className="truncate text-[11px] text-muted-foreground">{p.stack.join(" · ")}</p>
-            </div>
-            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <Star size={12} /> {p.stars}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <MessageCircle size={12} /> {p.forks}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </Card>
-  );
-}
-
-export function AIRecommendations() {
-  return (
-    <Card>
-      <SectionHeader title="AI Recommendations" action="View All" />
-      <div className="space-y-3 px-4 pb-4">
-        <p className="text-[13px] text-foreground">
-          You need a <span className="font-semibold">Backend Developer</span> for your project{" "}
-          <span className="font-semibold text-primary">AI Chatbot</span>
-        </p>
-        <div className="rounded-md border border-border p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Top Match
-          </p>
-          <div className="mt-2 flex items-center gap-3">
-            <Avatar
-              src="https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Rahul"
-              alt="Rahul"
-              size={40}
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[13px] font-semibold text-foreground">Rahul Verma</p>
-              <p className="text-[11px] text-muted-foreground">Full Stack Developer</p>
-              <p className="text-[11px] font-semibold text-success">93% Match</p>
-            </div>
-            <button className="rounded-md bg-primary px-2.5 py-1 text-[12px] font-semibold text-primary-foreground hover:opacity-90">
-              Invite
-            </button>
-          </div>
-        </div>
-        <div className="rounded-md bg-muted/50 p-3">
-          <p className="text-[11px] font-semibold text-foreground">Why this match?</p>
-          <ul className="mt-1.5 space-y-1 text-[11px] text-muted-foreground">
-            <li className="flex items-center gap-1.5">
-              <Check size={12} className="text-success" /> Skills match 90%
-            </li>
-            <li className="flex items-center gap-1.5">
-              <Check size={12} className="text-success" /> Past experience
-            </li>
-            <li className="flex items-center gap-1.5">
-              <Check size={12} className="text-success" /> Available this week
-            </li>
-          </ul>
-          <button className="mt-2 text-[11px] font-semibold text-primary hover:underline">
-            Learn More →
-          </button>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-export function MessagesPreview() {
-  const { data = [] } = useQuery({
-    queryKey: ["conversations"],
-    queryFn: messagesService.conversations,
-  });
-  return (
-    <Card>
-      <SectionHeader title="Messages Preview" action="View All" actionTo="/messages" />
-      <ul className="divide-y divide-border">
-        {data.map((c) => (
-          <li key={c.id}>
-            <Link
-              to="/messages/$conversationId"
-              params={{ conversationId: c.id }}
-              className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50"
-            >
-              <Avatar src={c.with.avatar} alt={c.with.name} size={32} online={c.with.online} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-semibold text-foreground">{c.with.name}</p>
-                <p className="truncate text-[12px] text-muted-foreground">{c.preview}</p>
-              </div>
-              <span className="text-[11px] text-muted-foreground">{c.ago}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </Card>
-  );
-}
-
+// 3. Quick Actions
 export function QuickActions() {
   const actions = [
     {
-      icon: FolderPlus,
-      label: "New Project",
-      tint: "bg-info/10 text-info",
+      label: "Create Project",
+      icon: Plus,
+      bg: "bg-blue-50/50 dark:bg-blue-950/20",
+      border: "border-blue-100 dark:border-blue-900/40",
+      color: "text-blue-600 dark:text-blue-400",
       to: "/projects" as const,
     },
     {
+      label: "Publish Flare",
       icon: Flame,
-      label: "Create Flare",
-      tint: "bg-warning/10 text-warning",
+      bg: "bg-orange-50/50 dark:bg-orange-950/20",
+      border: "border-orange-100 dark:border-orange-900/40",
+      color: "text-orange-600 dark:text-orange-400",
       to: "/flares" as const,
     },
     {
+      label: "Find Builders",
       icon: Users2,
-      label: "Find Builder",
-      tint: "bg-success/10 text-success",
+      bg: "bg-emerald-50/50 dark:bg-emerald-950/20",
+      border: "border-emerald-100 dark:border-emerald-900/40",
+      color: "text-emerald-600 dark:text-emerald-400",
       to: "/builders" as const,
     },
     {
-      icon: Trophy,
-      label: "Start Hackathon",
-      tint: "bg-primary-soft text-primary",
-      to: "/hackathons" as const,
-    },
-    {
-      icon: FileText,
-      label: "AI Description",
-      tint: "bg-destructive/10 text-destructive",
-      to: "/dashboard" as const,
-    },
-    {
-      icon: BarChart3,
-      label: "View Analytics",
-      tint: "bg-info/10 text-info",
-      to: "/analytics" as const,
+      label: "Messages",
+      icon: MessageSquare,
+      bg: "bg-purple-50/50 dark:bg-purple-950/20",
+      border: "border-purple-100 dark:border-purple-900/40",
+      color: "text-purple-600 dark:text-purple-400",
+      to: "/messages" as const,
     },
   ];
+
   return (
-    <Card>
-      <SectionHeader title="Quick Actions" />
-      <div className="grid grid-cols-3 gap-2 p-4 pt-0">
-        {actions.map((a) => (
+    <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
+      <div className="px-5 pt-5 pb-2 font-semibold text-sm text-foreground">
+        Quick Actions
+      </div>
+      <div className="grid grid-cols-2 gap-3 p-4 pt-1 flex-1">
+        {actions.map((act) => {
+          const Icon = act.icon;
+          return (
+            <Link
+              key={act.label}
+              to={act.to}
+              className={cn(
+                "flex flex-col items-center justify-center gap-3 p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xs active:translate-y-0 text-center cursor-pointer",
+                act.bg,
+                act.border
+              )}
+            >
+              <div className={cn("flex items-center justify-center h-10 w-10 rounded-xl bg-card shadow-2xs border border-border/20", act.color)}>
+                <Icon size={20} />
+              </div>
+              <span className="text-xs font-bold text-foreground">{act.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
+// 4. Recent Activity
+export function RecentActivity() {
+  const activities = [
+    {
+      id: "a1",
+      bulletColor: "bg-blue-500",
+      text: "Alex commented on DevLink Platform",
+      time: "2 hours ago",
+    },
+    {
+      id: "a2",
+      bulletColor: "bg-emerald-500",
+      text: "Sarah accepted your invitation",
+      time: "Yesterday",
+    },
+    {
+      id: "a3",
+      bulletColor: "bg-purple-500",
+      text: "New builder joined your team",
+      time: "2 days ago",
+    },
+    {
+      id: "a4",
+      bulletColor: "bg-orange-500",
+      text: "You published a new flare",
+      time: "3 days ago",
+    },
+  ];
+
+  return (
+    <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
+      <SectionHeader title="Recent Activity" action="View All" actionTo="/dashboard" />
+      <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-3">
+        {activities.map((act) => (
           <Link
-            key={a.label}
-            to={a.to}
-            className="flex flex-col items-center gap-1.5 rounded-md border border-border p-2 text-center transition-colors hover:bg-muted"
+            key={act.id}
+            to="/dashboard"
+            className="flex items-center justify-between gap-4 p-2.5 rounded-lg border border-transparent hover:border-border/40 hover:bg-muted/10 transition-colors"
           >
-            <span className={cn("grid h-8 w-8 place-items-center rounded-md", a.tint)}>
-              <a.icon size={14} />
-            </span>
-            <span className="text-[11px] font-medium text-foreground">{a.label}</span>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={cn("h-2 w-2 rounded-full shrink-0", act.bulletColor)} />
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-foreground truncate">{act.text}</p>
+                <TypoCaption as="p">{act.time}</TypoCaption>
+              </div>
+            </div>
+            <ChevronRight size={14} className="text-muted-foreground shrink-0" />
           </Link>
         ))}
       </div>
@@ -363,57 +285,168 @@ export function QuickActions() {
   );
 }
 
-export function UpcomingDeadlines() {
-  const { data = [] } = useQuery({ queryKey: ["deadlines"], queryFn: dashboardService.deadlines });
-  const sevTint = {
-    danger: "text-destructive",
-    warning: "text-warning",
-    info: "text-info",
-  } as const;
+// 5. Upcoming (Center list widget)
+export function Upcoming() {
+  const upcomingList = [
+    {
+      id: "u1",
+      title: "Web3 Hackathon",
+      time: "Tomorrow, 10:00 AM",
+      icon: Calendar,
+      iconColor: "text-rose-500 bg-rose-500/10",
+    },
+    {
+      id: "u2",
+      title: "React Meetup",
+      time: "Fri, 4:00 PM",
+      icon: Calendar,
+      iconColor: "text-blue-500 bg-blue-500/10",
+    },
+    {
+      id: "u3",
+      title: "Project Deadline",
+      time: "May 20, 2025",
+      icon: Clock,
+      iconColor: "text-emerald-500 bg-emerald-500/10",
+    },
+  ];
+
   return (
-    <Card>
-      <SectionHeader title="Upcoming Deadlines" action="View Calendar" />
-      <ul className="divide-y divide-border">
-        {data.map((d) => (
-          <li key={d.id} className="flex items-center gap-3 px-4 py-2.5">
-            <FolderPlus size={14} className="shrink-0 text-muted-foreground" />
-            <p className="min-w-0 flex-1 truncate text-[13px] text-foreground">
-              {d.project} — <span className="text-muted-foreground">{d.milestone}</span>
-            </p>
-            <span
-              className={cn("whitespace-nowrap text-[11px] font-semibold", sevTint[d.severity])}
-            >
-              Due in {d.dueDays} days
-            </span>
-          </li>
-        ))}
-      </ul>
+    <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
+      <SectionHeader title="Upcoming" action="View All" actionTo="/dashboard" />
+      <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-3">
+        {upcomingList.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div key={item.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border/40">
+              <div className={cn("flex items-center justify-center h-8 w-8 rounded-lg shrink-0", item.iconColor)}>
+                <Icon size={16} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-foreground truncate">{item.title}</p>
+                <TypoCaption as="p">{item.time}</TypoCaption>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </Card>
   );
 }
 
-export function NotificationsFeed() {
-  const { data = [] } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: notificationsService.list,
-  });
+// 6. Notifications (Sidebar Widget)
+export function NotificationsWidget() {
+  const notifications = [
+    {
+      id: "n1",
+      dotColor: "bg-blue-500",
+      text: "Alex commented on your flare",
+      time: "2 hours ago",
+    },
+    {
+      id: "n2",
+      dotColor: "bg-emerald-500",
+      text: "Sarah accepted your invitation",
+      time: "5 hours ago",
+    },
+    {
+      id: "n3",
+      dotColor: "bg-purple-500",
+      text: "New builder joined DevLink",
+      time: "1 day ago",
+    },
+    {
+      id: "n4",
+      dotColor: "bg-orange-500",
+      text: "Your project is 80% complete",
+      time: "2 days ago",
+    },
+  ];
+
   return (
-    <Card>
-      <SectionHeader title="Notifications Feed" action="View All" actionTo="/notifications" />
-      <ul className="divide-y divide-border">
-        {data.map((n) => (
-          <li key={n.id} className="flex items-center gap-3 px-4 py-2.5">
-            <span
-              className={cn(
-                "h-2 w-2 shrink-0 rounded-full",
-                n.unread ? "bg-primary" : "bg-transparent",
-              )}
-            />
-            <p className="min-w-0 flex-1 truncate text-[13px] text-foreground">{n.text}</p>
-            <span className="text-[11px] text-muted-foreground">{n.ago}</span>
-          </li>
+    <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
+      <SectionHeader title="Notifications" action="View All" actionTo="/dashboard" />
+      <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5">
+        {notifications.map((n) => (
+          <div key={n.id} className="flex items-start gap-3 min-w-0">
+            <div className={cn("h-2.5 w-2.5 rounded-full shrink-0 mt-1", n.dotColor)} />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-foreground leading-tight">{n.text}</p>
+              <TypoCaption as="p">{n.time}</TypoCaption>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
+    </Card>
+  );
+}
+
+// 7. Upcoming Events (Sidebar Widget)
+export function UpcomingEventsWidget() {
+  const events = [
+    {
+      id: "e1",
+      title: "Web3 Hackathon",
+      time: "Tomorrow, 10:00 AM",
+      iconColor: "text-rose-500 bg-rose-500/10",
+    },
+    {
+      id: "e2",
+      title: "React Meetup",
+      time: "Fri, 4:00 PM",
+      iconColor: "text-blue-500 bg-blue-500/10",
+    },
+    {
+      id: "e3",
+      title: "AI Builders Summit",
+      time: "May 24, 9:00 AM",
+      iconColor: "text-violet-500 bg-violet-500/10",
+    },
+  ];
+
+  return (
+    <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
+      <SectionHeader title="Upcoming Events" action="View All" actionTo="/dashboard" />
+      <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5">
+        {events.map((e) => (
+          <div key={e.id} className="flex items-center gap-3">
+            <div className={cn("flex items-center justify-center h-8 w-8 rounded-lg shrink-0", e.iconColor)}>
+              <Calendar size={16} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-foreground truncate">{e.title}</p>
+              <TypoCaption as="p">{e.time}</TypoCaption>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+// 8. Upgrade Plan CTA Card (Sidebar Card)
+export function UpgradePlanCTA() {
+  return (
+    <Card className="border-border/60 rounded-2xl bg-blue-50/50 dark:bg-blue-950/10 shadow-xs p-5 relative overflow-hidden flex items-center gap-4">
+      {/* Background radial glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,183,215,0.04),transparent_60%)] pointer-events-none" />
+      
+      <div className="flex items-center justify-center h-12 w-12 rounded-xl shrink-0 bg-primary/10 text-primary relative z-10">
+        <Rocket size={24} className="animate-bounce" />
+      </div>
+
+      <div className="min-w-0 flex-1 relative z-10">
+        <TypoCard>Upgrade your plan</TypoCard>
+        <TypoCaption as="p">
+          Unlock premium features and boost your productivity.
+        </TypoCaption>
+        <Link
+          to="/dashboard"
+          className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline mt-2 cursor-pointer"
+        >
+          Upgrade Now <ChevronRight size={12} />
+        </Link>
+      </div>
     </Card>
   );
 }

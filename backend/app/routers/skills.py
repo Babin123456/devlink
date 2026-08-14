@@ -3,8 +3,8 @@ from __future__ import annotations
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+
 # pyrefly: ignore [missing-import]
-from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
@@ -19,6 +19,7 @@ from app.schemas.skill import (
     SkillUpdate,
 )
 from app.services.skill_service import SkillService
+from app.core.cache import cached
 
 router = APIRouter(
     prefix="/skills",

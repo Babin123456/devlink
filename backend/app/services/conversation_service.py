@@ -42,7 +42,7 @@ class ConversationService:
             role=ConversationRole.OWNER,
         )
         db.add(owner_member)
-        db.flush()
+        db.commit()
         db.refresh(db_conversation)
 
         return db_conversation

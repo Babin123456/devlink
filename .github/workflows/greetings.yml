@@ -1,4 +1,3 @@
-
 name: Greetings
 
 on:
@@ -17,7 +16,7 @@ jobs:
 
     steps:
       - name: Welcome First-Time Contributors
-        uses: actions/first-interaction@v1
+        uses: actions/first-interaction@v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -51,4 +50,3 @@ jobs:
             Our maintainers will review your PR as soon as possible.
 
             Thank you for helping improve DevLink! 💙
-

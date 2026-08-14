@@ -7,6 +7,9 @@ from app.core.celery_app import celery_app
 from app.database.session import SessionLocal
 from app.models.notification import NotificationType
 from app.services.notification_service import NotificationService
+from app.services.email_service import EmailService
+from app.services.push_service import PushNotificationService
+from app.services.user_service import UserService
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +28,7 @@ def _to_uuid(value: str | None) -> uuid.UUID | None:
 def send_notification_task(self, payload: dict) -> str | None:
     db = SessionLocal()
     try:
-        notification = NotificationService.notify(
+        notifications = NotificationService.notify(
             db,
             recipient_id=_to_uuid(payload["recipient_id"]),
             sender_id=_to_uuid(payload.get("sender_id")),
@@ -39,7 +42,21 @@ def send_notification_task(self, payload: dict) -> str | None:
             message_id=_to_uuid(payload.get("message_id")),
             application_id=_to_uuid(payload.get("application_id")),
         )
-        return str(notification.id) if notification else None
+
+        user = UserService.get_user(db, _to_uuid(payload["recipient_id"]))
+        if user:
+            PushNotificationService.notify_user(
+                user_id=str(user.id),
+                title=payload["title"],
+                body=payload["message"],
+                action_url=payload.get("action_url"),
+            )
+
+        # Return the first database notification ID if any
+        for n in notifications or []:
+            if n.channel == "database":
+                return str(n.id)
+        return None
     except Exception as exc:
         db.rollback()
         logger.exception("send_notification_task failed; retrying")

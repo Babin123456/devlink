@@ -13,7 +13,6 @@ from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.exc import IntegrityError
 
 # pyrefly: ignore [missing-import]
-from sqlalchemy.orm import Session, selectinload
 
 from app.models.application import (
     Application,
@@ -32,6 +31,36 @@ class ApplicationService:
     """
     Business logic for project applications.
     """
+
+    VALID_STATUS_TRANSITIONS = {
+        ApplicationStatus.PENDING: {
+            ApplicationStatus.ACCEPTED,
+            ApplicationStatus.REJECTED,
+            ApplicationStatus.WITHDRAWN,
+        },
+        ApplicationStatus.REVIEWING: {
+            ApplicationStatus.ACCEPTED,
+            ApplicationStatus.REJECTED,
+            ApplicationStatus.WITHDRAWN,
+        },
+        ApplicationStatus.ACCEPTED: set(),
+        ApplicationStatus.REJECTED: set(),
+        ApplicationStatus.WITHDRAWN: set(),
+    }
+
+    @staticmethod
+    def _validate_status_transition(
+        current: ApplicationStatus,
+        new: ApplicationStatus,
+    ) -> None:
+        if new not in ApplicationService.VALID_STATUS_TRANSITIONS[current]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Cannot change application status "
+                    f"from '{current.value}' to '{new.value}'."
+                ),
+            )
 
     @staticmethod
     def create_application(
@@ -139,17 +168,42 @@ class ApplicationService:
         db_application: Application,
     ) -> Application:
 
-        db_application.status = ApplicationStatus.ACCEPTED
+        ApplicationService._validate_status_transition(
+            db_application.status,
+            ApplicationStatus.ACCEPTED,
+        )
 
+        db_application.status = ApplicationStatus.ACCEPTED
         db.flush()
         db.refresh(db_application)
 
-        # Trigger notification
         project_title = (
             db_application.project.title if db_application.project else "Project"
         )
         owner_id = db_application.project.owner_id if db_application.project else None
 
+        # Create ProjectMember record for applicant if not already present
+        from app.models.project_member import ProjectMember, MemberRole
+        existing_pm = db.scalar(
+            select(ProjectMember).where(
+                ProjectMember.project_id == db_application.project_id,
+                ProjectMember.user_id == db_application.applicant_id,
+            )
+        )
+        if not existing_pm:
+            pm = ProjectMember(
+                project_id=db_application.project_id,
+                user_id=db_application.applicant_id,
+                role=MemberRole.MEMBER,
+                is_active=True,
+            )
+            db.add(pm)
+        else:
+            existing_pm.is_active = True
+
+        db.commit()
+
+        # Trigger notification
         notification_data = NotificationCreate(
             recipient_id=db_application.applicant_id,
             type=NotificationType.APPLICATION_ACCEPTED,
@@ -166,6 +220,22 @@ class ApplicationService:
             notification=notification_data,
         )
 
+        # Record activity for joining project
+        from app.models.activity import ActivityType
+        from app.services.activity_service import ActivityService
+
+        ActivityService.record_activity(
+            db=db,
+            actor_id=db_application.applicant_id,
+            activity_type=ActivityType.PROJECT_JOINED,
+            title="Joined project",
+            description=f"Joined project '{project_title}'",
+            target_id=db_application.project_id,
+            target_type="project",
+            icon="user-check",
+            color="success",
+        )
+
         return db_application
 
     @staticmethod
@@ -173,6 +243,11 @@ class ApplicationService:
         db: Session,
         db_application: Application,
     ) -> Application:
+
+        ApplicationService._validate_status_transition(
+            db_application.status,
+            ApplicationStatus.REJECTED,
+        )
 
         db_application.status = ApplicationStatus.REJECTED
 
@@ -209,8 +284,12 @@ class ApplicationService:
         db_application: Application,
     ) -> Application:
 
-        db_application.status = ApplicationStatus.WITHDRAWN
+        ApplicationService._validate_status_transition(
+            db_application.status,
+            ApplicationStatus.WITHDRAWN,
+        )
 
+        db_application.status = ApplicationStatus.WITHDRAWN
         db.flush()
         db.refresh(db_application)
 

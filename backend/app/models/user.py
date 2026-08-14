@@ -2,18 +2,33 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     DateTime,
+    ForeignKey,
     String,
     Text,
     func,
 )
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
+
+
+class UserRole(str, Enum):
+    """Application-level user role."""
+
+    USER = "user"
+    ADMIN = "admin"
+    DEVELOPER = "developer"
+    MEMBER = "member"
+    VIEWER = "viewer"
+    MODERATOR = "moderator"
+
 
 
 class User(Base):
@@ -63,14 +78,40 @@ class User(Base):
         nullable=False,
     )
 
-    password_hash: Mapped[str] = mapped_column(
+    password_hash: Mapped[str | None] = mapped_column(
         String(255),
+        nullable=True,
+    )
+
+    reputation_score: Mapped[int] = mapped_column(
+        default=0,
+        index=True,
         nullable=False,
     )
 
     # ------------------------------------------------------------------
     # Profile
     # ------------------------------------------------------------------
+
+    badges: Mapped[list[str]] = mapped_column(
+        ARRAY(String).with_variant(JSON, "sqlite"),
+        default=list,
+        # '{}' is the empty-array literal for a Postgres text[]. This said
+        # '[]', which Postgres rejects outright:
+        #
+        #     psycopg.errors.InvalidTextRepresentation:
+        #     malformed array literal: "[]"
+        #
+        # so Base.metadata.create_all() could not build the schema on Postgres
+        # at all. It went unnoticed because the tests create_all against
+        # SQLite, where this column is JSON and '[]' is valid.
+        #
+        # The migration that adds the column (1a2b3c4d5e6f) already uses '{}',
+        # so this aligns the model with the schema that actually exists rather
+        # than changing it.
+        server_default="{}",
+        nullable=False,
+    )
 
     headline: Mapped[str | None] = mapped_column(
         String(150),
@@ -102,12 +143,28 @@ class User(Base):
         nullable=True,
     )
 
+    availability: Mapped[list] = mapped_column(
+        JSON,
+        nullable=True,
+        default=list,
+    )
+
     website: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
     )
 
+    resume_url: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+
     portfolio_url: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+
+    public_email: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
     )
@@ -141,11 +198,58 @@ class User(Base):
         nullable=True,
     )
 
+    experience: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    education: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    certifications: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
     open_to_work: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
         nullable=False,
     )
+
+    is_private: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    privacy_settings: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
+        default=lambda: {
+            "email": "private",
+            "github": "public",
+            "resume": "public",
+            "social_links": "public",
+            "availability": "public",
+        },
+    )
+
+    def get_privacy_settings(self) -> dict:
+        defaults = {
+            "email": "private",
+            "github": "public",
+            "resume": "public",
+            "social_links": "public",
+            "availability": "public",
+        }
+        if not self.privacy_settings:
+            return defaults
+        res = dict(defaults)
+        res.update(self.privacy_settings)
+        return res
 
     # ------------------------------------------------------------------
     # Authentication
@@ -165,10 +269,54 @@ class User(Base):
         index=True,
     )
 
+    premium: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+        index=True,
+    )
+
     is_superuser: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
         nullable=False,
+    )
+
+    # ------------------------------------------------------------------
+    # Multi-Factor Authentication (MFA)
+    # ------------------------------------------------------------------
+
+    mfa_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+
+    mfa_secret: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+
+    mfa_backup_codes: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    # System-level RBAC role (issue #357).
+    # Controls platform-wide permissions independent of org/project membership.
+    # Values: admin, maintainer, organization_owner, project_owner, contributor, user
+    system_role: Mapped[str] = mapped_column(
+        String(50),
+        default="user",
+        nullable=False,
+        index=True,
+    )
+
+    verification_status: Mapped[str] = mapped_column(
+        String(20), default="unverified", nullable=False
+    )
+    verified_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
 
     email_verified_at: Mapped[datetime | None] = mapped_column(
@@ -181,9 +329,25 @@ class User(Base):
         nullable=True,
     )
 
+    last_seen: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    last_active_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        default=datetime.utcnow,
+        nullable=True,
+    )
     # ------------------------------------------------------------------
     # OAuth
     # ------------------------------------------------------------------
+
+    microsoft_id: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        unique=True,
+    )
 
     github_id: Mapped[str | None] = mapped_column(
         String(100),
@@ -195,6 +359,42 @@ class User(Base):
         String(100),
         nullable=True,
         unique=True,
+    )
+
+    linkedin_id: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        unique=True,
+    )
+
+    gitlab_id: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+        unique=True,
+    )
+
+    # ------------------------------------------------------------------
+    # Soft Delete
+    # ------------------------------------------------------------------
+
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
+    )
+
+    deleted_by_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+        index=True,
+    )
+
+    deleted_by: Mapped[User | None] = relationship(
+        "User",
+        foreign_keys=[deleted_by_id],
+        remote_side="User.id",
     )
 
     # ------------------------------------------------------------------
@@ -215,8 +415,33 @@ class User(Base):
     )
 
     # ------------------------------------------------------------------
+    # Properties
+    # ------------------------------------------------------------------
+
+    @property
+    def is_online(self) -> bool:
+        """
+        Check if the user is currently online.
+
+        Returns True if the user was active within the online threshold
+        (defaults to 300 seconds, customizable via _online_threshold).
+        """
+        if not self.last_seen:
+            return False
+        threshold = getattr(self, "_online_threshold", 300)
+        from datetime import datetime, timezone
+
+        now = datetime.now(timezone.utc)
+
+        last_seen = self.last_seen
+        if last_seen.tzinfo is None:
+            last_seen = last_seen.replace(tzinfo=timezone.utc)
+
+        return (now - last_seen).total_seconds() < threshold
+
+    # ------------------------------------------------------------------
     # Representation
     # ------------------------------------------------------------------
 
     def __repr__(self) -> str:
-        return f"<User(" f"username='{self.username}', " f"email='{self.email}'" f")>"
+        return f"<User(username='{self.username}', email='{self.email}')>"
