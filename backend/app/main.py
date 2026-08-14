@@ -16,8 +16,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # pyrefly: ignore [missing-import]
 
-from fastapi.responses import JSONResponse
-from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
@@ -27,19 +25,15 @@ from app.middleware.structured_logging import StructuredLoggingMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.middleware.activity import ActivityTrackingMiddleware
 from app.middleware.maintenance import MaintenanceMiddleware
-from app.middleware.rate_limit import limiter
 
 # pyrefly: ignore [missing-import]
 
-from slowapi.errors import RateLimitExceeded
 
 # pyrefly: ignore [missing-import]
 
-from slowapi.middleware import SlowAPIMiddleware
 
 # pyrefly: ignore [missing-import]
 
-from slowapi import _rate_limit_exceeded_handler
 
 from app.routers import (
     activities,
@@ -428,7 +422,6 @@ app.add_middleware(
     ],
 )
 
-from pathlib import Path
 
 Path("uploads").mkdir(exist_ok=True)
 
@@ -484,37 +477,10 @@ app.include_router(api_v1_router)
 # Include Legacy Unversioned API Routers (/api) for Backward Compatibility
 
 from app.routers import (
-    activities,
     analytics,
-    applications,
-    auth,
     blocks,
-    bookmark_collections,
-    bookmarks,
-    builder_flares,
-    contributor_matching,
-    conversation_starters,
-    conversations,
-    export,
-    followers,
     hackathons,
-    health,
-    issues,
-    media,
-    messages,
     notification_templates,
-    notifications,
-    organizations,
-    profile_summary,
-    project_tags,
-    projects,
-    recommendations,
-    repositories,
-    repository_quality,
-    saved_searches,
-    search,
-    skills,
-    users,
     verification,
     websockets,
     graph,

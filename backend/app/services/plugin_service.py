@@ -23,9 +23,7 @@ from app.schemas.plugin import (
     PluginDispatchItem,
     PluginEventDispatchResult,
     PluginInstallationCreate,
-    PluginInstallationResponse,
     PluginInstallationUpdate,
-    PluginResponse,
     PluginUpdate,
 )
 

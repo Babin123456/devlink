@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import math
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List
 
@@ -292,7 +291,6 @@ class AnalyticsService:
         entity_id: Optional[uuid.UUID] = None,
         user_id: Optional[uuid.UUID] = None,
     ) -> None:
-        import uuid
         from app.models.centralized_analytics import CentralizedAnalyticsEvent
 
         event = CentralizedAnalyticsEvent(
@@ -311,9 +309,7 @@ class AnalyticsService:
         db: Session,
         user_id: uuid.UUID,
     ) -> ProfileAnalyticsResponse:
-        import uuid
         from datetime import datetime, timedelta, timezone
-        from typing import Optional
         from app.models.profile_view import ProfileView
         from app.models.centralized_analytics import CentralizedAnalyticsEvent
         from app.models.follower import Follower

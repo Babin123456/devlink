@@ -18,15 +18,14 @@ Tests cover:
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone, timedelta
-from unittest.mock import MagicMock, patch, PropertyMock
+from datetime import datetime, timezone
+from unittest.mock import MagicMock
 
 import pytest
 
 from app.models.audit_log import AuditAction, AuditLog
 from app.services.security_dashboard_service import (
     SecurityDashboardService,
-    BLOCKED_IP_THRESHOLD,
     SEVERITY_MAP,
     _export_csv,
     _to_item,
@@ -368,7 +367,6 @@ class TestRequireAdmin:
 
     def test_admin_role_passes(self):
         from app.routers.security_dashboard import require_admin
-        from fastapi import HTTPException
 
         user = MagicMock()
         user.system_role = "user"

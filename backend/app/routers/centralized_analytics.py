@@ -1,4 +1,3 @@
-import uuid
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.orm import Session

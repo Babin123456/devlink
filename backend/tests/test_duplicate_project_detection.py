@@ -12,9 +12,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.project import Project
-from app.models.user import User
 from app.schemas.duplicate_detection import (
-    DuplicateProjectCheckRequest,
     DuplicateProjectCheckResponse,
 )
 from app.schemas.project import ProjectCreate

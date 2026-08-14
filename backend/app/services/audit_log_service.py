@@ -55,7 +55,6 @@ class AuditLogService:
         def _sanitize_json(d: dict | None) -> dict | None:
             if not d:
                 return d
-            import json
 
             # A quick way to stringify complex objects like UUID or HttpUrl
             res = {}

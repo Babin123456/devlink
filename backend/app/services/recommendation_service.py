@@ -220,22 +220,17 @@ Recommendation factors (per the issue)
 
 import logging
 import math
-import uuid
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Optional
 
 # pyrefly: ignore [missing-import]
-from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.core.cache import cache_manager
 from app.models.application import Application, ApplicationStatus
-from app.models.follower import Follower
-from app.models.project import Project
-from app.models.project_skill import ProjectSkill
 from app.models.skill import Skill
 from app.models.user import User
-from app.models.user_skill import SkillLevel, UserSkill
+from app.models.user_skill import SkillLevel
 from app.schemas.recommendation import (
     ProjectContext,
     RecommendationWeights,

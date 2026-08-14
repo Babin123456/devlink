@@ -4,8 +4,7 @@ import uuid
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import selectinload
 
 from app.core.cache import cached
 from app.models.activity import ActivityType

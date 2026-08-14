@@ -7,7 +7,7 @@ import json
 import httpx
 import structlog
 from datetime import datetime, timezone, timedelta
-from typing import Optional, List, Dict, Any
+from typing import Optional, Dict, Any
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import Session
 

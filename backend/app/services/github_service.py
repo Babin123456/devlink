@@ -1,10 +1,8 @@
-import asyncio
 import httpx
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from app.core.config import settings
 from fastapi import HTTPException
-from datetime import datetime, timezone
 
 
 class GitHubService:

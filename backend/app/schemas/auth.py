@@ -112,9 +112,6 @@ class TokenPayload(BaseModel):
 # ==========================================================
 
 
-from app.schemas.user import UserResponse  # noqa: E402
-
-
 class AuthResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

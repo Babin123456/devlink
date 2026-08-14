@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Optional, Union, List
+from typing import Optional, Union
 from pydantic import BaseModel, Field, ConfigDict
 
 from app.models.project_member import MemberRole

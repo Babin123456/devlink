@@ -496,7 +496,6 @@ class NotificationService:
         user_id: uuid.UUID,
         update_in: Any,
     ):
-        from app.models.notification import NotificationPreference
 
         pref = NotificationService.get_preferences(db, user_id)
         data = update_in.model_dump(exclude_unset=True)

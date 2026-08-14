@@ -4,7 +4,7 @@ import hashlib
 import struct
 import time
 import secrets
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 

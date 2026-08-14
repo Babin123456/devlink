@@ -4,7 +4,7 @@ import re
 import uuid
 from typing import Optional
 
-from sqlalchemy import select, func, or_, desc, asc
+from sqlalchemy import select, func, or_, desc
 from sqlalchemy.orm import Session
 
 from app.models.project import Project

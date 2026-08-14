@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from sqlalchemy import select, and_, or_
+from sqlalchemy import select, or_
 from sqlalchemy.orm import Session
 
 from app.models.global_announcement import GlobalAnnouncement, TargetAudience

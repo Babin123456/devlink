@@ -1,6 +1,4 @@
-import pytest
-from app.models.badge import Badge, UserBadge
-from app.models.user import User
+from app.models.badge import Badge
 from app.services.badge_service import BadgeService
 
 

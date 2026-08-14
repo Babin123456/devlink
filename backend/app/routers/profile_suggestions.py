@@ -4,10 +4,9 @@ API Router for AI-Powered Profile Improvement Suggestions (#619)
 
 from __future__ import annotations
 
-import uuid
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_current_user, get_database

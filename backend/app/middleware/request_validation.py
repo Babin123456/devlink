@@ -2,8 +2,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from app.core.tracing import get_request_id
 
-import json
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from fastapi import Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse

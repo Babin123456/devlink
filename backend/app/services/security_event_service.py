@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import logging
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
 
 import structlog
 from fastapi import HTTPException, status
@@ -24,7 +22,6 @@ from app.models.security_event import (
 from app.models.user import User
 from app.schemas.security_event import (
     PaginatedSecurityEventsResponse,
-    SecurityEventCreate,
     SecurityEventResponse,
     SecurityEventSummaryResponse,
     TopOffendingIPItem,

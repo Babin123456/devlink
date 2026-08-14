@@ -10,7 +10,6 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.config import settings
 from app.models.user import User
 from app.models.user_skill import UserSkill
-from app.models.skill import Skill
 from app.schemas.conversation_starter import ConversationStarterSuggestion
 
 logger = logging.getLogger(__name__)

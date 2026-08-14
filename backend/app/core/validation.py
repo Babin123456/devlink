@@ -1,5 +1,4 @@
 from typing import Annotated
-import re
 
 from pydantic import BeforeValidator, Field, EmailStr, HttpUrl
 

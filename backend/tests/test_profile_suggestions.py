@@ -8,14 +8,11 @@ import uuid
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-import pytest
 from sqlalchemy.orm import Session
 
-from app.models.profile_suggestion import ProfileSuggestionDismissal
 from app.models.user import User
 from app.schemas.profile_suggestion import (
     DismissSuggestionResponse,
-    ProfileSuggestionItem,
     ProfileSuggestionsResponse,
     RefreshSuggestionsResponse,
 )

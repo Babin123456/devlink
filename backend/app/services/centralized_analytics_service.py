@@ -6,7 +6,6 @@ from sqlalchemy import func
 
 from app.models.centralized_analytics import (
     CentralizedAnalyticsEvent,
-    AnalyticsEventType,
 )
 from app.schemas.centralized_analytics import AnalyticsMetricsSummary
 

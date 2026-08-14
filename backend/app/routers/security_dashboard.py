@@ -37,7 +37,6 @@ from app.models.user import User
 from app.schemas.security_dashboard import (
     BlockedIPEntry,
     PaginatedSecurityLogs,
-    SecurityAlertItem,
     SecurityDashboardSummary,
 )
 from app.services.security_dashboard_service import SecurityDashboardService

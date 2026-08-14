@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
@@ -14,12 +14,10 @@ from sqlalchemy.orm import Session
 
 from app.models.milestone import Milestone
 from app.models.project import Project
-from app.models.project_member import MemberRole, ProjectMember
 from app.models.user import User
 from app.schemas.milestone import (
     MilestoneCreate,
     MilestoneProgressResponse,
-    MilestoneResponse,
     MilestoneTimelineResponse,
     MilestoneUpdate,
 )

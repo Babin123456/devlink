@@ -6,7 +6,6 @@ from sqlalchemy import select, delete
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.user_skill import UserSkill, SkillLevel
-from app.models.skill import Skill
 from app.utils.skill_names import clean_skill_name, normalize_skill_name
 from app.services.skill_service import SkillService
 from app.schemas.skill import SkillCreate

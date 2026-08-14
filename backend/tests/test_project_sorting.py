@@ -1,6 +1,4 @@
-import pytest
 from app.models.user import User
-from app.models.project import Project
 from app.services.project_service import ProjectService
 
 

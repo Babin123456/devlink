@@ -1,6 +1,5 @@
 import asyncio
 import logging
-from celery.exceptions import MaxRetriesExceededError
 from app.celery_app.celery import celery_app
 from app.core.email import email_service
 

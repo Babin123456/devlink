@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Tuple
+from typing import List
 from sqlalchemy.orm import Session
 
 from app.models.badge import Badge, UserBadge
@@ -7,7 +7,7 @@ from app.models.project import Project
 from app.models.project_member import ProjectMember
 from app.models.follower import Follower
 from app.models.feedback import UserFeedback
-from app.schemas.badge import BadgeResponse, UserBadgeResponse, BadgeEvaluationResponse
+from app.schemas.badge import BadgeResponse, BadgeEvaluationResponse
 
 DEFAULT_BADGES = [
     {

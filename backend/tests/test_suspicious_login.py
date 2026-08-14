@@ -1,7 +1,5 @@
 import pytest
 from uuid import uuid4
-from datetime import datetime, timezone, timedelta
-from fastapi.testclient import TestClient
 
 from app.models.user import User
 from app.models.audit_log import AuditLog, AuditAction

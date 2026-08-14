@@ -1,6 +1,4 @@
-import pytest
 from app.models.centralized_analytics import (
-    CentralizedAnalyticsEvent,
     AnalyticsEventType,
 )
 from app.services.centralized_analytics_service import CentralizedAnalyticsService

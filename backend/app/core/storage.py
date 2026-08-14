@@ -1,8 +1,6 @@
 import logging
 import os
 import uuid
-from io import BytesIO
-from typing import Optional
 
 import boto3  # type: ignore
 from botocore.exceptions import ClientError  # type: ignore

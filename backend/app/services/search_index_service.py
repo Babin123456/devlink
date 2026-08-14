@@ -1,10 +1,9 @@
 import time
 import re
-import math
 from collections import defaultdict, Counter
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import select, or_, func
+from sqlalchemy import or_
 
 from app.models.user import User
 from app.models.project import Project

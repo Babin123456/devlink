@@ -5,8 +5,8 @@ Unit & Integration Tests for Security Event Monitoring (#613)
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock, patch
+from datetime import datetime, timezone
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
@@ -19,9 +19,6 @@ from app.models.security_event import (
 )
 from app.models.user import User
 from app.schemas.security_event import (
-    PaginatedSecurityEventsResponse,
-    SecurityEventCreate,
-    SecurityEventResponse,
     SecurityEventSummaryResponse,
 )
 from app.services.security_event_service import SecurityEventService

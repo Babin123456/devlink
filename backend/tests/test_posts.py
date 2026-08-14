@@ -9,7 +9,6 @@ from app.database.base import Base
 from app.main import app
 from app.dependencies import get_database, get_current_user
 from app.models.user import User
-from app.models.post import Post
 
 DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(

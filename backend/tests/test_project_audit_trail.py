@@ -8,19 +8,14 @@ import uuid
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-import pytest
 from sqlalchemy.orm import Session
 
 from app.models.audit_log import AuditAction, AuditLog
 from app.models.project import Project, ProjectStage, ProjectVisibility
 from app.models.project_member import MemberRole, ProjectMember
 from app.models.user import User
-from app.schemas.project import ProjectCreate, ProjectUpdate
-from app.schemas.project_audit import PaginatedProjectAuditLogsResponse
-from app.schemas.project_member import UpdateProjectMemberRoleRequest
 from app.services.audit_log_service import AuditLogService
 from app.services.project_member_service import ProjectMemberService
-from app.services.project_service import ProjectService
 
 
 def _make_mock_user(username: str = "audituser") -> MagicMock:

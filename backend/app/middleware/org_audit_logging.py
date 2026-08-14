@@ -5,8 +5,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
-from app.database.session import SessionLocal
-from app.models.audit_log import AuditAction, AuditLog
+from app.models.audit_log import AuditAction
 from app.services.audit_log_service import AuditLogService
 
 # Organization path regex: /api/v1/organizations/{org_id}/...

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import uuid
-from typing import List, Optional, Dict, Any
-from sqlalchemy import select, and_
+from typing import List, Dict, Any
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
@@ -17,7 +17,6 @@ from app.models.audit_log import AuditAction
 from app.core.rbac import (
     has_project_permission,
     PROJECT_MANAGE_ROLES,
-    PROJECT_TRANSFER_OWNERSHIP,
     PROJECT_REMOVE_MEMBERS,
 )
 

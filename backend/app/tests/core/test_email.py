@@ -1,6 +1,6 @@
 import pytest
 from fastapi import BackgroundTasks
-from app.core.email import EmailService, email_service
+from app.core.email import email_service
 
 pytestmark = pytest.mark.skip(reason="Tests hanging")
 

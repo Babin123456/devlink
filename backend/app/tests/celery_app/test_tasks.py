@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from app.celery_app.tasks.email_tasks import send_verification_email_task
 from app.celery_app.tasks.digest_tasks import send_daily_digest
