@@ -41,8 +41,10 @@ from app.services.user_service import UserService
 from app.utils.uploads import (
     save_image_upload,
     save_resume_upload,
+    save_voice_introduction_upload,
     validate_image_upload,
     validate_resume_upload,
+    validate_voice_introduction_upload,
 )
 from app.utils.validators import validate_username
 
@@ -387,7 +389,7 @@ async def parse_resume(
     db: Session = Depends(get_database),
 ):
     from app.services.resume_parser_service import ResumeParserService
-    
+
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
 
@@ -398,7 +400,6 @@ async def parse_resume(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return ResumeParserService.parse_resume(contents, file.filename)
-
 
 
 @router.post(
@@ -432,6 +433,43 @@ async def upload_avatar(
     full_avatar_url = str(request.base_url).rstrip("/") + str(saved["image_url"])
     return UserService.update_profile_image(db, current_user, full_avatar_url)
 
+@router.post(
+    "/me/voice-introduction",
+    response_model=UserResponse,
+    summary="Upload user voice introduction",
+)
+async def upload_voice_introduction(
+    request: Request,
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+
+    contents = await file.read()
+
+    try:
+        validate_voice_introduction_upload(
+            file.filename,
+            file.content_type,
+            len(contents),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    voice_url = save_voice_introduction_upload(
+        contents,
+        file.filename,
+        current_user.id,
+    )
+    full_voice_url = str(request.base_url).rstrip("/") + voice_url
+
+    return UserService.update_voice_introduction_url(
+        db,
+        current_user,
+        full_voice_url,
+    )
 
 @router.delete(
     "/me",
