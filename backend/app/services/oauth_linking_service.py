@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 from fastapi import HTTPException, status
 
 from app.models.user import User

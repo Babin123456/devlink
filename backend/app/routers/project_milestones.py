@@ -5,12 +5,12 @@ API Router for Project Milestone Management (#618)
 from __future__ import annotations
 
 import uuid
-from typing import Any, Optional
+from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_current_active_user, get_current_user, get_database
+from app.dependencies import get_current_active_user, get_database
 from app.models.user import User
 from app.schemas.milestone import (
     MilestoneCreate,

@@ -5,12 +5,10 @@ Unit & Integration Tests for Project Templates Marketplace (#596)
 from __future__ import annotations
 
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import pytest
 from sqlalchemy.orm import Session
 
-from app.models.project import Project
 from app.models.project_template import ProjectTemplate, ProjectTemplateFavorite
 from app.models.user import User
 from app.schemas.project_template import (

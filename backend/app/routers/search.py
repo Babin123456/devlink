@@ -1,10 +1,9 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException, status
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 
 from app.dependencies import (
     get_database,
-    get_current_user_optional,
     get_current_user,
     get_optional_current_user,
 )
@@ -14,8 +13,6 @@ from app.schemas.search import (
     SearchResponse,
 )
 from app.models.centralized_analytics import CentralizedAnalyticsEvent
-from app.dependencies import get_database, get_current_user_optional, get_current_user
-from app.schemas.search import SearchAutocompleteResponse
 from app.schemas.search_index import (
     SearchIndexedResponse,
     SearchAnalyticsMetric,

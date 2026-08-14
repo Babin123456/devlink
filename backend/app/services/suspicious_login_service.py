@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import re
-import uuid
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel

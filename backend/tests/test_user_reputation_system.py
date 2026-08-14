@@ -6,22 +6,12 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import pytest
-from fastapi.testclient import TestClient
 
-from app.main import app
 from app.models.reputation import ReputationLog
 from app.models.user import User
-from app.schemas.reputation import (
-    LeaderboardResponse,
-    ReputationAwardRequest,
-    ReputationLogResponse,
-    ReputationSummaryResponse,
-)
 from app.services.reputation_service import (
-    ACTION_POINTS,
     ReputationService,
     calculate_rank_tier,
 )

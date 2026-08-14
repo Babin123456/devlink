@@ -1,6 +1,3 @@
-import pytest
-from app.models.user_skill import UserSkill, SkillLevel
-from app.models.skill import Skill
 
 
 def test_get_skill_matrix(client, register_and_login):

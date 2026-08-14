@@ -10,14 +10,9 @@ Covers:
 - Mutual followers
 """
 
-import uuid
 
-import pytest
 from fastapi.testclient import TestClient
 
-from app.database.base import Base
-from app.dependencies import get_current_user, get_database
-from app.main import app
 from app.models.follower import Follower  # noqa: F401
 from app.models.user import User
 from app.services.follower_service import FollowerService

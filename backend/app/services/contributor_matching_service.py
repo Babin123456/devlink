@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -11,7 +11,6 @@ from app.core.config import settings
 from app.models.project import Project
 from app.models.user import User
 from app.models.user_skill import UserSkill
-from app.models.skill import Skill
 
 logger = logging.getLogger(__name__)
 

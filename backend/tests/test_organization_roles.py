@@ -1,4 +1,3 @@
-import pytest
 from app.services.organization_service import OrganizationService
 from app.models.organization_member import OrgMemberRole
 

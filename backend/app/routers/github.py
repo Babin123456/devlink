@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from app.dependencies import get_database, get_current_user
+from fastapi import APIRouter, Depends
+from app.dependencies import get_current_user
 from app.models.user import User
 from app.services.github_service import GitHubService
 from typing import Any, List, Dict

@@ -2,7 +2,6 @@
 Tests for Project Status Transitions (#232)
 """
 
-import uuid
 import pytest
 from fastapi import HTTPException
 

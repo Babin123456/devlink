@@ -1,5 +1,3 @@
-import pytest
-from datetime import datetime, timedelta
 
 
 def test_get_active_announcements(client, register_and_login):

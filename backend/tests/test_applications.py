@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from app.models.project import ProjectStage, ProjectVisibility
 from app.schemas.project import ProjectCreate
 from app.services.project_service import ProjectService
-from app.models.application import ApplicationStatus
 
 from app.models.builder_flare import BuilderFlare
 

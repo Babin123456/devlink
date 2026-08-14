@@ -13,13 +13,11 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models.conversation_member import ConversationMember
 from app.models.message import Message
-from app.models.notification import NotificationType
 from app.models.user import User
 from app.schemas.message import (
     MessageCreate,
     MessageUpdate,
 )
-from app.schemas.notification import NotificationCreate
 from app.services.notification_service import NotificationService
 
 

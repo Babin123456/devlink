@@ -1,4 +1,3 @@
-import pytest
 
 
 def test_submit_feedback_success(db, client, register_and_login):

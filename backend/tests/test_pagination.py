@@ -1,13 +1,10 @@
-import pytest
 from app.schemas.pagination import (
     PaginationParams,
-    PaginatedResponse,
     encode_cursor,
     decode_cursor,
 )
 from app.core.pagination import build_paginated_response, paginate_query
 from app.models.skill import Skill
-from app.models.user import User
 
 
 def test_encode_decode_cursor():

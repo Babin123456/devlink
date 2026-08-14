@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
@@ -23,9 +23,7 @@ from app.schemas.plugin import (
     PluginCreate,
     PluginEventDispatchResult,
     PluginInstallationCreate,
-    PluginInstallationUpdate,
     PluginManifestSchema,
-    PluginResponse,
     PluginUpdate,
 )
 from app.services.plugin_service import PluginService

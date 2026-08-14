@@ -5,10 +5,8 @@ Unit & Integration Tests for Project Version History (#606)
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-import pytest
 from sqlalchemy.orm import Session
 
 from app.models.audit_log import AuditAction

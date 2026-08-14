@@ -1,5 +1,3 @@
-import pytest
-import uuid
 
 
 def test_notification_delivery_analytics(client, register_and_login):

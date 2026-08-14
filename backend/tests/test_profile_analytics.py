@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from fastapi.testclient import TestClient
 import pytest
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -14,7 +14,6 @@ from app.main import app
 from app.models.user import User
 from app.models.profile_view import ProfileView
 from app.models.follower import Follower
-from app.models.centralized_analytics import CentralizedAnalyticsEvent
 from app.services.analytics_service import AnalyticsService
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"

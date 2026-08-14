@@ -9,7 +9,6 @@ from app.main import app
 from app.dependencies import get_database, get_current_user
 from app.models.user import User
 from app.services.search_service import search_users
-from app.services.search_index_service import SearchIndexService
 
 # Setup in-memory SQLite database for tests
 DATABASE_URL = "sqlite:///:memory:"

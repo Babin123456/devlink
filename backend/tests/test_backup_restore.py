@@ -23,7 +23,6 @@ import pytest
 from app.schemas.backup import (
     BackupCreateResponse,
     RestoreResponse,
-    RestoreValidationResponse,
 )
 from app.services.backup_service import BackupService, _sha256
 
@@ -144,7 +143,8 @@ class TestCreateBackup:
 
     @patch("app.services.backup_service.ExportService.collect_user_data")
     def test_zip_contains_json(self, mock_collect):
-        import io, zipfile
+        import io
+        import zipfile
 
         mock_collect.return_value = _make_minimal_export_data()
         db = MagicMock()
@@ -163,7 +163,8 @@ class TestCreateBackup:
 
     @patch("app.services.backup_service.ExportService.collect_user_data")
     def test_checksum_valid_in_payload(self, mock_collect):
-        import io, zipfile
+        import io
+        import zipfile
 
         mock_collect.return_value = _make_minimal_export_data()
         db = MagicMock()
@@ -180,7 +181,8 @@ class TestCreateBackup:
 
     @patch("app.services.backup_service.ExportService.collect_user_data")
     def test_metadata_contains_username(self, mock_collect):
-        import io, zipfile
+        import io
+        import zipfile
 
         mock_collect.return_value = _make_minimal_export_data()
         db = MagicMock()

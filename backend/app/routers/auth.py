@@ -1,4 +1,3 @@
-from uuid import UUID
 
 # pyrefly: ignore [missing-import]
 import uuid
@@ -194,9 +193,7 @@ def logout(
 oauth_redis = redis.from_url(settings.REDIS_URL, decode_responses=True)
 
 
-import httpx  # noqa: E402
 from app.schemas.auth import (
-    GitHubLoginRequest,
     LinkedInLoginRequest,
     OAuthStateResponse,
 )  # noqa: E402
@@ -225,11 +222,9 @@ async def github_authorize():
     return OAuthStateResponse(state=state)
 
 
-import httpx  # noqa: E402
 import redis
 import secrets
 from app.schemas.auth import (
-    GitHubLoginRequest,
     OAuthStateResponse,
     MicrosoftLoginRequest,
     GoogleLoginRequest,
@@ -673,14 +668,7 @@ def logout_all_sessions(
 # Forgot Password
 # ==========================================================
 from app.schemas.auth import (  # noqa: E402
-    ChangePasswordRequest,
-    ForgotPasswordResponse,
-    ResetPasswordRequest,
-    SuccessResponse,
-    VerifyEmailRequest,
-    VerifyEmailResponse,
     VerifyRecoveryTokenResponse,
-    ResendVerificationEmailRequest,
 )
 
 # ==========================================================

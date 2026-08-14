@@ -37,7 +37,6 @@ from app.core.security import (
 )
 from app.models.user import User
 from app.models.password_history import PasswordHistory
-from app.models.refresh_token import RefreshToken
 from app.services.refresh_token_service import RefreshTokenService
 from app.schemas.auth import (
     LoginRequest,

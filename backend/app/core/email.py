@@ -4,7 +4,6 @@ from typing import Any, Dict
 
 from fastapi import BackgroundTasks
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
-from pydantic import EmailStr
 
 from app.core.config import settings
 

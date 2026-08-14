@@ -1,4 +1,3 @@
-import pytest
 
 
 def test_portfolio_export_markdown(db, client, register_and_login):

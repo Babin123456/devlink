@@ -22,7 +22,6 @@ from app.dependencies import get_current_active_user, get_database
 from app.models.user import User
 from app.schemas.backup import (
     BackupCreateResponse,
-    RestoreRequest,
     RestoreResponse,
     RestoreValidationResponse,
 )
