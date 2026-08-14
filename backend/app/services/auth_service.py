@@ -28,6 +28,8 @@ from sqlalchemy.orm import Session
 
 from app.core.events import event_bus
 from app.core.security import (
+    InvalidTokenType,
+    TokenType,
     create_access_token,
     create_refresh_token,
     hash_password,
@@ -289,9 +291,15 @@ class AuthService:
         self.db.flush()
 
         if user.mfa_enabled:
-            mfa_token = create_access_token(
-                str(user.id),
-                {"type": "mfa_pending"},
+            # Not an access token: this only gets the caller as far as
+            # `/api/auth/mfa/verify`. It used to be minted by
+            # `create_access_token` with `extra={"type": "mfa_pending"}`,
+            # relying on `extra` overwriting the type the creator had just
+            # set -- which now raises. Same lifetime, stated outright.
+            mfa_token = _create_token(
+                subject=str(user.id),
+                expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+                token_type=TokenType.MFA_PENDING,
             )
             self.db.commit()
             return {
@@ -343,15 +351,9 @@ class AuthService:
         ip_address: Optional[str] = None,
     ):
         try:
-            payload = decode_token(mfa_token)
-            if payload.get("type") != "mfa_pending":
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid MFA session token.",
-                )
-            user_id_str = payload.get("sub")
-            user_id = UUID(user_id_str)
-        except Exception:
+            payload = decode_token(mfa_token, expected_type=TokenType.MFA_PENDING)
+            user_id = UUID(payload.get("sub"))
+        except (ValueError, TypeError):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid or expired MFA session token.",
@@ -1148,13 +1150,13 @@ class AuthService:
         from app.models.password_reset_token import PasswordResetToken
 
         try:
-            payload = decode_token(token)
-            if payload.get("type") not in ("reset", "reset_password"):
-                return {"valid": False, "message": "Invalid token type."}
+            payload = decode_token(token, expected_type=TokenType.RESET_PASSWORD)
             user_id = payload.get("sub")
             jti = payload.get("jti")
             hash_frag = payload.get("hash_frag")
-        except Exception:
+        except InvalidTokenType:
+            return {"valid": False, "message": "Invalid token type."}
+        except ValueError:
             return {"valid": False, "message": "Invalid or expired recovery token."}
 
         user = self.db.get(User, UUID(user_id)) if user_id else None
@@ -1189,13 +1191,11 @@ class AuthService:
         from app.models.password_reset_token import PasswordResetToken
 
         try:
-            payload = decode_token(token)
-            if payload.get("type") not in ("reset", "reset_password"):
-                raise ValueError("Invalid token type")
+            payload = decode_token(token, expected_type=TokenType.RESET_PASSWORD)
             user_id = payload.get("sub")
             jti = payload.get("jti")
             hash_frag = payload.get("hash_frag")
-        except Exception:
+        except ValueError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid or expired reset token.",

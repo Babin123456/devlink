@@ -15,9 +15,10 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import httpx
 from app.core.config import settings
 from app.core.security import (
-    decode_token,
-    is_refresh_token,
+    TokenType,
     create_verification_token,
+    decode_access_token,
+    decode_token,
 )
 
 # pyrefly: ignore [missing-import]
@@ -152,15 +153,21 @@ def get_current_user_id(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> str:
     """
-    Extract the current user's ID from the JWT.
+    Extract the current user's ID from the JWT access token.
+
+    Only an access token is accepted. This dependency previously decoded
+    without checking the ``type`` claim, so a refresh token -- or the token
+    from a verification or password-reset email -- authenticated here,
+    including on the endpoints below that change the password and revoke
+    sessions.
     """
 
     try:
-        payload = decode_token(credentials.credentials)
+        payload = decode_access_token(credentials.credentials)
 
         return payload["sub"]
 
-    except Exception:
+    except (ValueError, KeyError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials.",
@@ -476,16 +483,13 @@ def refresh(
     db: Session = Depends(get_database),
 ):
 
+    # Decoding with the expected type folds the signature, expiry and type
+    # checks into one pass. Previously this decoded once and then called
+    # `is_refresh_token`, which decoded the same token a second time.
     try:
-        token_payload = decode_token(payload.refresh_token)
+        decode_token(payload.refresh_token, expected_type=TokenType.REFRESH)
 
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token.",
-        )
-
-    if not is_refresh_token(payload.refresh_token):
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token.",
@@ -793,11 +797,11 @@ def verify_email(
 ):
 
     try:
-        token_payload = decode_token(payload.token)
-        if token_payload.get("type") != "verification":
-            raise ValueError("Invalid verification token type.")
+        token_payload = decode_token(
+            payload.token, expected_type=TokenType.VERIFICATION
+        )
 
-    except Exception:
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid verification token.",
