@@ -711,6 +711,9 @@ app.include_router(reputation.router, prefix="/api", tags=["User Reputation Syst
 from app.routers import email_templates
 app.include_router(email_templates.router, prefix="/api", tags=["Email Notification Templates"])
 
+from app.routers import developer_insights
+app.include_router(developer_insights.router, prefix="/api", tags=["Developer Insights"])
+
 from app.routers import project_collaboration_metrics
 app.include_router(project_collaboration_metrics.router, prefix="/api", tags=["Project Collaboration Metrics"])
 from app.routers import team_activity
