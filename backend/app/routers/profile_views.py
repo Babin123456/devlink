@@ -93,4 +93,6 @@ def update_privacy_settings(
     setattr(current_user, "hide_profile_views", settings.hide_profile_views)
     db.commit()
     db.refresh(current_user)
-    return ProfileViewPrivacySettings(hide_profile_views=current_user.hide_profile_views)
+    return ProfileViewPrivacySettings(
+        hide_profile_views=current_user.hide_profile_views
+    )

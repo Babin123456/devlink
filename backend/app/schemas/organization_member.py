@@ -6,11 +6,14 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from app.models.organization_member import OrgMemberRole
 
+
 class OrganizationMemberBase(BaseModel):
     role: OrgMemberRole
 
+
 class OrganizationMemberUpdate(BaseModel):
     role: OrgMemberRole
+
 
 class OrganizationMemberResponse(OrganizationMemberBase):
     model_config = ConfigDict(from_attributes=True)

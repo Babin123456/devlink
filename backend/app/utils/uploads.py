@@ -27,18 +27,22 @@ def scan_file_for_malware(contents: bytes, filename: str) -> None:
     # Placeholder for enterprise antivirus scanner hook (e.g., ClamAV / VirusTotal API)
     if not contents:
         raise ValueError("Uploaded file is empty.")
-    
+
     # Basic heuristic check for executable scripts disguised as uploads
     suspicious_signatures = [b"<?php", b"<script", b"MZ", b"\x7fELF"]
     for sig in suspicious_signatures:
         if contents.startswith(sig):
-            raise ValueError(f"Security violation: Prohibited file signature detected in {filename}.")
+            raise ValueError(
+                f"Security violation: Prohibited file signature detected in {filename}."
+            )
 
 
 def validate_resume_upload(
     filename: str | None, content_type: str | None, size_bytes: int
 ) -> None:
-    if not filename or not (filename.lower().endswith(".pdf") or filename.lower().endswith(".docx")):
+    if not filename or not (
+        filename.lower().endswith(".pdf") or filename.lower().endswith(".docx")
+    ):
         raise ValueError("Please upload a PDF or DOCX file.")
     normalized_content_type = (content_type or "").lower()
     if normalized_content_type not in ALLOWED_RESUME_MIME_TYPES:

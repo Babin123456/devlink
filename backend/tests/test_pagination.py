@@ -52,7 +52,14 @@ def test_build_paginated_response():
 def test_paginate_query_basic(db):
     # Add dummy skill objects
     for i in range(5):
-        db.add(Skill(name=f"PaginationSkill_{i}", normalized_name=f"paginationskill_{i}", slug=f"paginationskill_{i}", category="Test"))
+        db.add(
+            Skill(
+                name=f"PaginationSkill_{i}",
+                normalized_name=f"paginationskill_{i}",
+                slug=f"paginationskill_{i}",
+                category="Test",
+            )
+        )
     db.commit()
 
     query = db.query(Skill).filter(Skill.category == "Test")

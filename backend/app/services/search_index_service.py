@@ -224,7 +224,6 @@ search_index_engine = GlobalSearchIndex()
 
 
 class SearchIndexService:
-
     @classmethod
     def reindex_all(cls, db: Session):
         engine = search_index_engine
@@ -249,7 +248,9 @@ class SearchIndexService:
                     "headline": (u.headline, 2.0),
                     "bio": (u.bio, 1.0),
                 },
-                popularity_boost=2.0 if (u.is_verified and getattr(u, "premium", False)) else (1.0 if u.is_verified else 0.0),
+                popularity_boost=2.0
+                if (u.is_verified and getattr(u, "premium", False))
+                else (1.0 if u.is_verified else 0.0),
                 metadata={
                     "user_id": str(u.id),
                     "username": u.username,

@@ -2,7 +2,12 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_database, get_current_user_optional, get_current_user, get_optional_current_user
+from app.dependencies import (
+    get_database,
+    get_current_user_optional,
+    get_current_user,
+    get_optional_current_user,
+)
 from app.schemas.search import (
     SearchAutocompleteResponse,
     SearchRequest,
@@ -55,13 +60,21 @@ def full_search(
     """Full-text paginated search across Users, Projects, Organizations, Skills, and Tags."""
     start_time = time.time()
 
-    results = SearchService.search_legacy_full(  # or SearchService.search depending on your base wrapper
-        db=db,
-        q=q,
-        category=category,
-        page=page,
-        limit=limit,
-    ) if hasattr(SearchService, "search_legacy_full") else SearchService.search_full(db=db, q=q, category=category, page=page, limit=limit) if hasattr(SearchService, "search_full") else SearchService.search(db=db, q=q, category=category, page=page, limit=limit)
+    results = (
+        SearchService.search_legacy_full(  # or SearchService.search depending on your base wrapper
+            db=db,
+            q=q,
+            category=category,
+            page=page,
+            limit=limit,
+        )
+        if hasattr(SearchService, "search_legacy_full")
+        else SearchService.search_full(
+            db=db, q=q, category=category, page=page, limit=limit
+        )
+        if hasattr(SearchService, "search_full")
+        else SearchService.search(db=db, q=q, category=category, page=page, limit=limit)
+    )
 
     latency_ms = (time.time() - start_time) * 1000
 
@@ -242,7 +255,9 @@ def get_analytics_dashboard(
     db: Session = Depends(get_database),
     current_user: User = Depends(get_current_user),
 ):
-    if getattr(current_user, "role", None) != UserRole.ADMIN and not getattr(current_user, "is_admin", False):
+    if getattr(current_user, "role", None) != UserRole.ADMIN and not getattr(
+        current_user, "is_admin", False
+    ):
         raise HTTPException(status_code=403, detail="Admin only")
 
     return SearchAnalyticsService.get_dashboard_metrics(db, days=days)

@@ -524,6 +524,7 @@ from app.routers import (
 # Router inclusions
 app.include_router(skill_matrix.router, prefix="/api", tags=["Skill Matrix"])
 from app.routers import github
+
 app.include_router(github.router, prefix="/api", tags=["GitHub Insights"])
 
 app.include_router(media.router, prefix="/api", tags=["Media"])
@@ -534,7 +535,9 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 from app.routers import mfa
 
 app.include_router(mfa.router, prefix="/api")
-app.include_router(global_announcements.router, prefix="/api", tags=["Global Announcements"])
+app.include_router(
+    global_announcements.router, prefix="/api", tags=["Global Announcements"]
+)
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
 from app.routers import testimonials
@@ -559,11 +562,16 @@ from app.routers import project_milestones
 app.include_router(
     project_milestones.router, prefix="/api", tags=["Project Milestones"]
 )
-app.include_router(project_milestones.router, prefix="/api", tags=["Project Milestones"])
+app.include_router(
+    project_milestones.router, prefix="/api", tags=["Project Milestones"]
+)
 from app.routers import project_time_logs
 
-app.include_router(project_time_logs.router, prefix="/api", tags=["Project Time Tracking"])
+app.include_router(
+    project_time_logs.router, prefix="/api", tags=["Project Time Tracking"]
+)
 from app.routers import calendar as calendar_router
+
 app.include_router(calendar_router.router, prefix="/api", tags=["Calendar"])
 app.include_router(analytics.router, prefix="/api", tags=["Analytics"])
 from app.routers import project_releases
@@ -596,8 +604,11 @@ app.include_router(
     conversations.router, prefix="/api/conversations", tags=["Conversations"]
 )
 from app.routers import moderation
+
 app.include_router(moderation.router, prefix="/api", tags=["Moderation"])
-app.include_router(conversations.router, prefix="/api/conversations", tags=["Conversations"])
+app.include_router(
+    conversations.router, prefix="/api/conversations", tags=["Conversations"]
+)
 from app.routers import audit
 
 app.include_router(audit.router, prefix="/api", tags=["Audit"])
@@ -682,41 +693,59 @@ app.include_router(
     notification_templates.router, prefix="/api", tags=["Notification Templates"]
 )
 app.include_router(verification.router, prefix="/api", tags=["Verification"])
-app.include_router(centralized_analytics.router, prefix="/api", tags=["Centralized Analytics"])
+app.include_router(
+    centralized_analytics.router, prefix="/api", tags=["Centralized Analytics"]
+)
 app.include_router(posts.router, prefix="/api/posts", tags=["Posts"])
 
 from app.routers import project_templates
-app.include_router(project_templates.router, prefix="/api", tags=["Project Templates Marketplace"])
+
+app.include_router(
+    project_templates.router, prefix="/api", tags=["Project Templates Marketplace"]
+)
 
 from app.routers import background_jobs
+
 app.include_router(background_jobs.router, prefix="/api")
 
 from app.routers import badges
+
 app.include_router(badges.router, prefix="/api", tags=["Badges"])
 
 
 from app.routers import api_keys
+
 app.include_router(api_keys.router, prefix="/api/v1")
 app.include_router(api_keys.org_api_keys_router, prefix="/api/v1")
 
 from app.routers import background_jobs
+
 app.include_router(background_jobs.router, prefix="/api")
 
 from app.routers import feature_flags
+
 app.include_router(feature_flags.router, prefix="/api", tags=["Feature Flags"])
 
 from app.routers import reputation
+
 app.include_router(reputation.router, prefix="/api", tags=["User Reputation System"])
 
 from app.routers import developer_insights
-app.include_router(developer_insights.router, prefix="/api", tags=["Developer Insights"])
+
+app.include_router(
+    developer_insights.router, prefix="/api", tags=["Developer Insights"]
+)
 
 from app.routers import project_collaboration_metrics
-app.include_router(project_collaboration_metrics.router, prefix="/api", tags=["Project Collaboration Metrics"])
+
+app.include_router(
+    project_collaboration_metrics.router,
+    prefix="/api",
+    tags=["Project Collaboration Metrics"],
+)
 from app.routers import team_activity
+
 app.include_router(team_activity.router, prefix="/api", tags=["Team Activity Timeline"])
-
-
 
 
 # The generated OpenAPI document only lists the responses each handler declares

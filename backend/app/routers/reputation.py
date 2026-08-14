@@ -1,6 +1,7 @@
 """
 Reputation System Router (#597)
 """
+
 from __future__ import annotations
 
 import uuid

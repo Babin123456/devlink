@@ -90,18 +90,18 @@ class ConversationStarterService:
         prompt = f"""Generate 3-5 natural, engaging conversation starters for a developer to message another developer on a collaboration platform.
 
 Target person's profile:
-- Name: {target_user_context['name']}
-- Headline: {target_user_context['headline']}
-- Bio: {target_user_context['bio'][:200]}
-- Role: {target_user_context['role']}
-- Company: {target_user_context['company']}
-- Location: {target_user_context['location']}
+- Name: {target_user_context["name"]}
+- Headline: {target_user_context["headline"]}
+- Bio: {target_user_context["bio"][:200]}
+- Role: {target_user_context["role"]}
+- Company: {target_user_context["company"]}
+- Location: {target_user_context["location"]}
 - {skills_text}
-- Open to work: {target_user_context['open_to_work']}
+- Open to work: {target_user_context["open_to_work"]}
 
 Your profile:
-- Name: {current_user_context['name']}
-- Headline: {current_user_context['headline']}
+- Name: {current_user_context["name"]}
+- Headline: {current_user_context["headline"]}
 - {current_skills_text}
 
 Requirements:
@@ -118,7 +118,9 @@ Return as a JSON array of objects with a "text" field and a "confidence" field (
         return prompt
 
     @staticmethod
-    def _parse_suggestions(raw: object) -> Optional[list[ConversationStarterSuggestion]]:
+    def _parse_suggestions(
+        raw: object,
+    ) -> Optional[list[ConversationStarterSuggestion]]:
         """Parse the OpenAI response into suggestions, accepting several shapes."""
         if not isinstance(raw, list) or not raw:
             return None
@@ -139,7 +141,9 @@ Return as a JSON array of objects with a "text" field and a "confidence" field (
                     confidence = 0.5
                 confidence = max(0.0, min(1.0, confidence))
                 suggestions.append(
-                    ConversationStarterSuggestion(text=text.strip(), confidence=confidence)
+                    ConversationStarterSuggestion(
+                        text=text.strip(), confidence=confidence
+                    )
                 )
 
         if len(suggestions) < 3:

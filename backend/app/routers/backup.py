@@ -9,6 +9,7 @@ GET    /api/v1/users/me/backup/validate   Validate an uploaded backup JSON
 POST   /api/v1/users/me/backup/preview    Preview what would be restored
 POST   /api/v1/users/me/backup/restore    Restore from an uploaded backup JSON
 """
+
 from __future__ import annotations
 
 import json
@@ -33,6 +34,7 @@ router = APIRouter(prefix="/users/me/backup", tags=["Backup & Restore"])
 # ---------------------------------------------------------------------------
 # POST /users/me/backup
 # ---------------------------------------------------------------------------
+
 
 @router.post(
     "",
@@ -68,6 +70,7 @@ def create_backup(
 # POST /users/me/backup/meta  (JSON metadata only, no file download)
 # ---------------------------------------------------------------------------
 
+
 @router.post(
     "/meta",
     response_model=BackupCreateResponse,
@@ -88,6 +91,7 @@ def create_backup_meta(
 # ---------------------------------------------------------------------------
 # POST /users/me/backup/validate
 # ---------------------------------------------------------------------------
+
 
 @router.post(
     "/validate",
@@ -116,6 +120,7 @@ async def validate_backup(
 # ---------------------------------------------------------------------------
 # POST /users/me/backup/preview
 # ---------------------------------------------------------------------------
+
 
 @router.post(
     "/preview",
@@ -155,6 +160,7 @@ async def preview_restore(
 # ---------------------------------------------------------------------------
 # POST /users/me/backup/restore
 # ---------------------------------------------------------------------------
+
 
 @router.post(
     "/restore",

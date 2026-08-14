@@ -40,6 +40,7 @@ def setup_db():
     Base.metadata.drop_all(bind=engine)
     app.dependency_overrides.clear()
 
+
 # ==================== Helper ====================
 def _register_and_login(
     client: TestClient, email: str, username: str
@@ -56,7 +57,9 @@ def _register_and_login(
             "password": "Vermilion-Kestrel97!",
         },
     )
-    r = client.post("/api/auth/login", json={"email": email, "password": "Vermilion-Kestrel97!"})
+    r = client.post(
+        "/api/auth/login", json={"email": email, "password": "Vermilion-Kestrel97!"}
+    )
     token = r.json()["access_token"]
     me = client.get("/api/users/me", headers={"Authorization": f"Bearer {token}"})
     return me.json()["id"], token

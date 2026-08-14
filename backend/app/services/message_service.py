@@ -73,6 +73,7 @@ class MessageService:
         # Delete any existing draft for this user and conversation
         from app.models.message_draft import MessageDraft
         from sqlalchemy import delete
+
         db.execute(
             delete(MessageDraft).where(
                 MessageDraft.user_id == sender_id,
@@ -97,20 +98,15 @@ class MessageService:
 
         for member in members:
             if member.user_id != sender_id:
-                notification_data = NotificationCreate(
+                NotificationService.create_message_notification(
+                    db=db,
                     recipient_id=member.user_id,
-                    type=NotificationType.MESSAGE,
+                    actor_id=sender_id,
                     title="New Message",
                     message=notification_message,
                     action_url=f"/messages/{conversation_id}",
                     conversation_id=conversation_id,
                     message_id=db_message.id,
-                )
-                NotificationService.create_notification(
-                    db=db,
-                    recipient_id=member.user_id,
-                    sender_id=sender_id,
-                    notification=notification_data,
                 )
 
         return db_message
@@ -374,6 +370,7 @@ class MessageService:
 
         read_time = utcnow()
         from sqlalchemy import update
+
         result = db.execute(
             update(Message)
             .where(
@@ -408,6 +405,7 @@ class MessageService:
 
         read_time = utcnow()
         from sqlalchemy import update
+
         result = db.execute(
             update(Message)
             .where(
@@ -419,4 +417,3 @@ class MessageService:
         )
         db.flush()
         return result.rowcount, read_time
-

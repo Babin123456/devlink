@@ -49,7 +49,9 @@ class FollowerService:
         db.refresh(relationship)
 
         following_user = db.get(User, following_id)
-        following_username = following_user.username if following_user else str(following_id)
+        following_username = (
+            following_user.username if following_user else str(following_id)
+        )
 
         ActivityService.record_activity(
             db=db,
@@ -70,18 +72,13 @@ class FollowerService:
         )
         follower_username = follower.username if follower else ""
 
-        notification_data = NotificationCreate(
+        NotificationService.create_follow_notification(
+            db=db,
             recipient_id=following_id,
-            type=NotificationType.FOLLOW,
+            actor_id=follower_id,
             title="New Follower",
             message=f"{follower_name} started following you.",
             action_url=f"/profile/{follower_username}" if follower_username else None,
-        )
-        NotificationService.create_notification(
-            db=db,
-            recipient_id=following_id,
-            sender_id=follower_id,
-            notification=notification_data,
         )
 
         return relationship

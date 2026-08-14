@@ -1,6 +1,7 @@
 """
 Pydantic schemas for the Backup & Restore system (Issue #635).
 """
+
 from __future__ import annotations
 
 import uuid
@@ -13,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 # ---------------------------------------------------------------------------
 # Backup metadata
 # ---------------------------------------------------------------------------
+
 
 class BackupMetadata(BaseModel):
     """Header section included in every backup file."""
@@ -29,6 +31,7 @@ class BackupMetadata(BaseModel):
 # Backup payload (same structure as UserExportData but with checksum)
 # ---------------------------------------------------------------------------
 
+
 class BackupPayload(BaseModel):
     """Full serialisable backup payload written to disk / returned to client."""
 
@@ -40,6 +43,7 @@ class BackupPayload(BaseModel):
 # ---------------------------------------------------------------------------
 # API responses
 # ---------------------------------------------------------------------------
+
 
 class BackupCreateResponse(BaseModel):
     """Returned when a backup is successfully generated."""
@@ -76,6 +80,7 @@ class RestoreRequest(BaseModel):
 # ---------------------------------------------------------------------------
 # Import / validation errors
 # ---------------------------------------------------------------------------
+
 
 class RestoreValidationError(BaseModel):
     field: str

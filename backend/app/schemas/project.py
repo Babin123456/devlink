@@ -97,7 +97,7 @@ class ProjectCreate(ProjectBase):
                 "hiring": True,
                 "is_opensource": True,
                 "repository_url": "https://github.com/nensii21/devlink",
-                "tech_stack": "React, FastAPI, PostgreSQL"
+                "tech_stack": "React, FastAPI, PostgreSQL",
             }
         }
     )
@@ -128,6 +128,7 @@ class ProjectUpdate(BaseModel):
             return _parse_status_enum(v)
         except ValueError:
             return v
+
     tech_stack: Optional[str] = None
     requirements: Optional[str] = None
     repository_url: Optional[str] = None

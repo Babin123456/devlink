@@ -67,4 +67,6 @@ def list_events(
     event_type: Optional[str] = Query(None),
     db: Session = Depends(get_database),
 ):
-    return CentralizedAnalyticsService.list_events(db=db, limit=limit, event_type=event_type)
+    return CentralizedAnalyticsService.list_events(
+        db=db, limit=limit, event_type=event_type
+    )

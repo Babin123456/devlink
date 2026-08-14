@@ -1,6 +1,7 @@
 """
 Unit & Integration Tests for User Reputation System (#597)
 """
+
 from __future__ import annotations
 
 import uuid

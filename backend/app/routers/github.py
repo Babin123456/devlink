@@ -10,6 +10,7 @@ router = APIRouter(
     tags=["GitHub Insights"],
 )
 
+
 @router.get(
     "/{username}/profile",
     summary="Get GitHub profile",
@@ -19,6 +20,7 @@ async def get_github_profile(
     current_user: User = Depends(get_current_user),
 ) -> Dict[str, Any]:
     return await GitHubService.get_profile(username)
+
 
 @router.get(
     "/{username}/repositories",
@@ -30,6 +32,7 @@ async def get_github_repositories(
 ) -> List[Dict[str, Any]]:
     return await GitHubService.get_repositories(username)
 
+
 @router.get(
     "/{username}/stats",
     summary="Get GitHub stats",
@@ -39,6 +42,7 @@ async def get_github_stats(
     current_user: User = Depends(get_current_user),
 ) -> Dict[str, Any]:
     return await GitHubService.get_stats(username)
+
 
 @router.get(
     "/{username}/contributions",

@@ -1,6 +1,7 @@
 """
 Unit & Integration Tests for API Key Management for Third-Party Integrations (#605)
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -119,10 +120,15 @@ class TestApiKeyManagement:
             )
 
             assert new_raw_key.startswith("dlk_live_")
-            assert regenerated.hashed_key == hashlib.sha256(new_raw_key.encode("utf-8")).hexdigest()
+            assert (
+                regenerated.hashed_key
+                == hashlib.sha256(new_raw_key.encode("utf-8")).hexdigest()
+            )
             assert regenerated.last_used_at is None
             mock_audit.assert_called_once()
-            assert mock_audit.call_args.kwargs["action"] == AuditAction.API_KEY_REGENERATED
+            assert (
+                mock_audit.call_args.kwargs["action"] == AuditAction.API_KEY_REGENERATED
+            )
 
     def test_revoke_api_key_sets_inactive(self):
         db = MagicMock(spec=Session)

@@ -68,7 +68,7 @@ class ContributorMatchingService:
         tech_text = project.tech_stack or "Not specified"
 
         return f"""Project: {project.title}
-Description: {(project.description or '')[:500]}
+Description: {(project.description or "")[:500]}
 Stage: {project.stage.value}
 Tech Stack: {tech_text}
 Required Skills: {skills_text}

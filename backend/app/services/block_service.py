@@ -13,7 +13,6 @@ from app.models.user_block import UserBlock
 
 
 class BlockService:
-
     @staticmethod
     def block_user(
         db: Session,

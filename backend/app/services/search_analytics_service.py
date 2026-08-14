@@ -9,7 +9,6 @@ from app.models.search_analytics import SearchQueryLog, SearchClickLog
 
 
 class SearchAnalyticsService:
-
     @staticmethod
     def log_search(
         db: Session,

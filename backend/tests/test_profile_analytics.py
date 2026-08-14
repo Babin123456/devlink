@@ -87,7 +87,9 @@ def test_profile_analytics_with_data():
 
     # 1. Profile Views
     v1 = ProfileView(viewed_user_id=user.id, viewer_id=viewer.id, created_at=now)
-    v2 = ProfileView(viewed_user_id=user.id, viewer_id=viewer.id, created_at=now - timedelta(days=8))
+    v2 = ProfileView(
+        viewed_user_id=user.id, viewer_id=viewer.id, created_at=now - timedelta(days=8)
+    )
     db.add_all([v1, v2])
 
     # 2. Follower (Connection Request)
@@ -95,8 +97,12 @@ def test_profile_analytics_with_data():
     db.add(f1)
 
     # 3. Clicks (logged via service)
-    AnalyticsService.log_profile_click(db=db, click_type="repository", target_user_id=user.id, user_id=viewer.id)
-    AnalyticsService.log_profile_click(db=db, click_type="project", target_user_id=user.id, user_id=viewer.id)
+    AnalyticsService.log_profile_click(
+        db=db, click_type="repository", target_user_id=user.id, user_id=viewer.id
+    )
+    AnalyticsService.log_profile_click(
+        db=db, click_type="project", target_user_id=user.id, user_id=viewer.id
+    )
 
     db.commit()
 

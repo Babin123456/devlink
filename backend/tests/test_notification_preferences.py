@@ -1,6 +1,7 @@
 """
 Unit & Integration Tests for Notification Preferences Center (#586)
 """
+
 from __future__ import annotations
 
 import uuid

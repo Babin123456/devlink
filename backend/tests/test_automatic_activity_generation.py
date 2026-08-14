@@ -79,6 +79,7 @@ def test_automatic_activity_project_joined(db):
     )
 
     from app.models.builder_flare import BuilderFlare
+
     flare = BuilderFlare(
         project_id=project.id,
         created_by=owner.id,

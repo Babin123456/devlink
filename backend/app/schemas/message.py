@@ -61,4 +61,3 @@ class BulkReadRequest(BaseModel):
 class BulkReadResponse(BaseModel):
     updated_count: int
     read_at: datetime
-

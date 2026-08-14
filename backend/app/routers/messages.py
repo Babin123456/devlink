@@ -413,4 +413,3 @@ def mark_conversation_as_read(
         user_id=current_user.id,
     )
     return BulkReadResponse(updated_count=count, read_at=read_at)
-

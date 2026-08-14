@@ -1,6 +1,7 @@
 """
 API Router for AI-Powered Profile Improvement Suggestions (#619)
 """
+
 from __future__ import annotations
 
 import uuid
@@ -68,7 +69,9 @@ def get_profile_suggestions(
 )
 def dismiss_suggestion(
     suggestion_id: str,
-    category: Optional[str] = Query("general", description="Optional category of suggestion"),
+    category: Optional[str] = Query(
+        "general", description="Optional category of suggestion"
+    ),
     db: Session = Depends(get_database),
     current_user: User = Depends(get_current_user),
 ) -> DismissSuggestionResponse:

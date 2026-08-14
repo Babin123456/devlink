@@ -147,7 +147,7 @@ def test_search_prioritization(db_session):
     # 3. Unverified + Premium (Eva) -> matches is_verified=False, premium=True
     # 4. Unverified + Free (Bobby) -> matches is_verified=False, premium=False
     usernames = [u.username for u in results]
-    
+
     # We find indices of each user in search results to verify they are in correct priority order
     idx_david = usernames.index("david_prem")
     idx_charlie = usernames.index("charlie_ver")

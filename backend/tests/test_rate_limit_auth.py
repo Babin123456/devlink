@@ -1,6 +1,7 @@
 """
 Unit & Integration Tests for Rate Limiting on Authentication Endpoints (#590)
 """
+
 from __future__ import annotations
 
 import os

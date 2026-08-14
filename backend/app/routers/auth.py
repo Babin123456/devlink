@@ -228,7 +228,12 @@ async def github_authorize():
 import httpx  # noqa: E402
 import redis
 import secrets
-from app.schemas.auth import GitHubLoginRequest, OAuthStateResponse, MicrosoftLoginRequest, GoogleLoginRequest  # noqa: E402
+from app.schemas.auth import (
+    GitHubLoginRequest,
+    OAuthStateResponse,
+    MicrosoftLoginRequest,
+    GoogleLoginRequest,
+)  # noqa: E402
 from app.core.config import settings
 
 
@@ -876,6 +881,7 @@ def resend_verification(
 # Microsoft OAuth
 # ==========================================================
 
+
 @router.get(
     "/microsoft/authorize",
     response_model=OAuthStateResponse,
@@ -932,7 +938,7 @@ async def microsoft_login(
     # 1. Exchange code for access token
     tenant_id = settings.MICROSOFT_TENANT_ID or "common"
     token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
-    
+
     data = {
         "client_id": settings.MICROSOFT_CLIENT_ID,
         "client_secret": settings.MICROSOFT_CLIENT_SECRET,
@@ -947,7 +953,9 @@ async def microsoft_login(
             token_error = token_res.json() if token_res.text else {}
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=token_error.get("error_description", "Failed to exchange code for Microsoft token."),
+                detail=token_error.get(
+                    "error_description", "Failed to exchange code for Microsoft token."
+                ),
             )
 
         token_data = token_res.json()
@@ -988,6 +996,7 @@ async def microsoft_login(
 # Google OAuth
 # ==========================================================
 
+
 @router.get(
     "/google/authorize",
     response_model=OAuthStateResponse,
@@ -1017,7 +1026,11 @@ async def google_login(
     """
     Authenticate a user via Google OAuth.
     """
-    if not settings.GOOGLE_CLIENT_ID or not settings.GOOGLE_CLIENT_SECRET or not settings.GOOGLE_REDIRECT_URI:
+    if (
+        not settings.GOOGLE_CLIENT_ID
+        or not settings.GOOGLE_CLIENT_SECRET
+        or not settings.GOOGLE_REDIRECT_URI
+    ):
         raise HTTPException(
             status_code=status.HTTP_501_NOT_IMPLEMENTED,
             detail="Google OAuth is not configured.",
@@ -1042,7 +1055,7 @@ async def google_login(
 
     # 1. Exchange code for access token
     token_url = "https://oauth2.googleapis.com/token"
-    
+
     data = {
         "client_id": settings.GOOGLE_CLIENT_ID,
         "client_secret": settings.GOOGLE_CLIENT_SECRET,
@@ -1057,7 +1070,9 @@ async def google_login(
             token_error = token_res.json() if token_res.text else {}
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=token_error.get("error_description", "Failed to exchange code for Google token."),
+                detail=token_error.get(
+                    "error_description", "Failed to exchange code for Google token."
+                ),
             )
 
         token_data = token_res.json()
@@ -1092,4 +1107,3 @@ async def google_login(
     # 3. Call AuthService to handle the login/linking
     auth_service = AuthService(db)
     return auth_service.google_login(google_user, primary_email)
-

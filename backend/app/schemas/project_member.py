@@ -7,7 +7,10 @@ from app.models.project_member import MemberRole
 
 
 class UpdateProjectMemberRoleRequest(BaseModel):
-    role: MemberRole = Field(..., description="New project team role: owner, maintainer, contributor, reviewer, viewer")
+    role: MemberRole = Field(
+        ...,
+        description="New project team role: owner, maintainer, contributor, reviewer, viewer",
+    )
 
 
 class TransferProjectOwnershipRequest(BaseModel):
