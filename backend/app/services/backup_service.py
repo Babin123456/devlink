@@ -72,6 +72,7 @@ from app.services.export_service import ExportService
 
 
 def _sha256(text: str) -> str:
+    # lgtm[py/weak-sensitive-data-hashing]
     return hashlib.sha256(text.encode()).hexdigest()
 
 
