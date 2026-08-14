@@ -34,7 +34,7 @@ class WorkspaceApiTokenService:
         prefix = raw_token[:12]
 
         # Compute SHA-256 hash to store securely
-        # codeql[py/weak-cryptographic-algorithm] API tokens are high entropy, not passwords
+        # lgtm[py/weak-cryptographic-algorithm]
         hashed_token = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
         # Calculate expiration date
@@ -135,7 +135,7 @@ class WorkspaceApiTokenService:
             return None
 
         # Compute SHA-256 hash of the incoming token
-        # codeql[py/weak-cryptographic-algorithm] API tokens are high entropy, not passwords
+        # lgtm[py/weak-cryptographic-algorithm]
         hashed_token = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
         # Query active token

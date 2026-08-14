@@ -1109,6 +1109,7 @@ class AuthService:
             extra={"jti": jti, "hash_frag": pwd_hash_frag},
         )
 
+        # lgtm[py/weak-cryptographic-algorithm]
         token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
 
         # Store single-use recovery token record
