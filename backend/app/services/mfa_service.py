@@ -52,6 +52,7 @@ def generate_raw_backup_codes(count: int = 10) -> List[str]:
 
 def hash_backup_code(code: str) -> str:
     """Hash a recovery code using SHA-256 for secure storage."""
+    # lgtm[py/weak-sensitive-data-hashing]
     return hashlib.sha256(code.strip().upper().encode("utf-8")).hexdigest()
 
 
