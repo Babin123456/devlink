@@ -1,18 +1,18 @@
 # Backend API Unit Tests Documentation (#388)
 
-Comprehensive unit test suite for backend API endpoints using Pytest, covering success/failure scenarios, status codes, authentication, authorization, and error handling.
+Comprehensive unit test suite for backend API endpoints using Pytest, covering happy paths, negative error paths, security authorization paths (401/403/404/422), duplicate operation prevention, and cross-user resource protection.
 
 ---
 
-## Endpoint Test Coverage Scope
+## Technical Test Coverage & HTTP Status Code Matrix
 
-| Feature / Domain | Test File | Covered Endpoints & Actions | Status Code Assertions |
-|---|---|---|---|
-| **Authentication** | `backend/tests/test_auth.py` | Signup (`POST /api/auth/signup`), Login (`POST /api/auth/login`), Token Refresh, Invalid Credentials, Duplicate User, Invalid Payload | `201 Created`, `200 OK`, `400 Bad Request`, `401 Unauthorized`, `422 Unprocessable` |
-| **User Profiles** | `backend/tests/test_users.py` | Get Me (`GET /api/users/me`), Get Profile (`GET /api/users/{username}`), Update Profile (`PUT /api/users/me`), User Search, 404 Non-existent Profile | `200 OK`, `404 Not Found`, `401 Unauthorized`, `422 Unprocessable` |
-| **Projects** | `backend/tests/test_projects.py` | Create Project (`POST /api/projects/`), Get Project (`GET /api/projects/{id}`), List Projects (`GET /api/projects/`), Update Project (`PUT /api/projects/{id}`), Status Transitions, Delete/Archive | `201 Created`, `200 OK`, `400 Bad Request`, `404 Not Found`, `422 Unprocessable` |
-| **Applications** | `backend/tests/test_applications.py` | Create Application (`POST /api/applications/`), Get Application (`GET /api/applications/{id}`), My Applications (`GET /api/applications/me`), Project Applications (`GET /api/applications/project/{id}`), Accept (`PATCH /accept`), Reject (`PATCH /reject`), Withdraw (`PATCH /withdraw`), Delete (`DELETE /{id}`) | `201 Created`, `200 OK`, `204 No Content`, `404 Not Found`, `422 Unprocessable` |
-| **Notifications** | `backend/tests/test_notifications.py` | List Notifications (`GET /api/notifications/`), Unread Count (`GET /api/notifications/unread-count`), Mark Read (`PATCH /api/notifications/{id}/read`), Mark All Read (`POST /api/notifications/mark-all-read`), Delete (`DELETE /{id}`) | `200 OK`, `204 No Content`, `404 Not Found`, `401 Unauthorized` |
+| Feature / Domain | Test Suite | Happy Paths | Negative & Authorization Paths Covered | Status Codes Asserted |
+|---|---|---|---|---|
+| **Authentication** | `tests/test_auth.py` | Signup, Login, Me, Token Refresh, Password Reset, Resend Verification | Invalid Credentials (`401`), Refresh Invalid Token (`401`), Wrong Current Password (`401`), Duplicate Email Registration (`409`), Missing Fields / Validation (`422`) | `200`, `201`, `401`, `409`, `422` |
+| **User Profiles** | `tests/test_users.py` | Get Me, Get Profile, Update Profile, List Users, User Search, Activate/Deactivate/Verify User | Unauthenticated Get Me (`401`), Unauthenticated Update Me (`401`), Non-existent User ID (`404`), Invalid Website URL Payload (`422`), Duplicate Username / Email (`409`) | `200`, `401`, `404`, `409`, `422` |
+| **Projects** | `tests/test_projects.py` | Create Project, Get Project, List Projects, Update Details, Status Transitions, Star/Bookmark, Invites | Unauthenticated Project Creation (`401`), Non-owner Update Attempt (`403`), Non-owner Delete Attempt (`403`), Non-existent Project (`404`), Invalid/Empty Title (`422`), Duplicate Invite (`400`) | `200`, `201`, `204`, `400`, `401`, `403`, `404`, `422` |
+| **Applications** | `tests/test_applications.py` | Create Application, Get Application, My Applications, Project Applications, Accept/Reject, Withdraw, Delete | Unauthenticated Application (`401`), Non-owner Accept Attempt (`403`), Non-applicant Withdraw Attempt (`403`), Non-applicant Delete Attempt (`403`), Application Not Found (`404`), Missing Project ID (`422`) | `200`, `201`, `204`, `401`, `403`, `404`, `422` |
+| **Notifications** | `tests/test_notifications.py` | Create Notification, Get Notification, List Notifications, Unread Count, Mark Read, Mark All Read, Delete | Unauthenticated Access (`401`), Non-recipient Delete Attempt (`403`), Notification Not Found (`404`), Mark Read Non-existent (`404`) | `200`, `201`, `204`, `401`, `403`, `404` |
 
 ---
 
@@ -22,4 +22,4 @@ Comprehensive unit test suite for backend API endpoints using Pytest, covering s
 cd backend && ./venv/bin/python -m pytest tests/test_auth.py tests/test_users.py tests/test_projects.py tests/test_applications.py tests/test_notifications.py -v
 ```
 
-All 80 unit tests pass cleanly.
+**Total Suite Verification**: **94 passed out of 94 tests (100% SUCCESS)** ✅
