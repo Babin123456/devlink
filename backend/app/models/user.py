@@ -158,6 +158,11 @@ class User(Base):
         nullable=True,
     )
 
+    voice_introduction_url: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+
     portfolio_url: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
@@ -444,3 +449,5 @@ class User(Base):
 
     def __repr__(self) -> str:
         return f"<User(username='{self.username}', email='{self.email}')>"
+
+
