@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { TypoCard } from "@/components/shared/Typography";
-import { EmptySearchState } from "@/components/shared/EmptySearchState";
 
 export interface FilterOption {
   label: string;
@@ -134,8 +133,8 @@ export function FilterDrawer({
   }, [open, onOpenChange]);
 
   // Track search queries per section for pills display
-  const [searchQueries, setSearchQueries] = React.useState<Record<string, string>>(
-    Object.fromKeys(sections.map((s) => [s.id, ""]))
+  const [searchQueries, setSearchQueries] = React.useState<Record<string, string>>(() =>
+    Object.fromEntries(sections.map((s) => [s.id, ""])),
   );
 
   // Update search query state
@@ -176,7 +175,7 @@ export function FilterDrawer({
   const handleReset = () => {
     onReset();
     setDraftValues({});
-    setSearchQueries(Object.fromKeys(sections.map((s) => [s.id, ""])));
+    setSearchQueries(Object.fromEntries(sections.map((s) => [s.id, ""])));
     onOpenChange(false);
   };
 
@@ -186,7 +185,7 @@ export function FilterDrawer({
     optionValue: string,
     label: string,
     isSelected: boolean,
-    hasSearchQuery: boolean
+    hasSearchQuery: boolean,
   ) => {
     const isSearchMode = sections.find((s) => s.id === sectionId)?.type === "search";
 
@@ -201,18 +200,16 @@ export function FilterDrawer({
             ? "border-primary bg-primary/10 text-primary font-semibold"
             : "border-border bg-surface text-muted-foreground hover:border-foreground/30 hover:text-foreground",
           // Show pill as "active search" when there's a search query
-          hasSearchMode && isSelected
+          isSearchMode && isSelected
             ? "border-primary bg-primary/10 text-primary font-semibold"
-            : ""
+            : "",
         )}
         aria-pressed={isSelected}
         aria-label={`${sectionId}: ${optionLabel(sectionId, optionValue)}`}
       >
         {isSelected && <Check size={12} className="shrink-0" />}
         <span>{label}</span>
-        {hasSearchQuery && (
-          <span className="ml-1 text-[10px] opacity-70">🔍 active</span>
-        )}
+        {hasSearchQuery && <span className="ml-1 text-[10px] opacity-70">🔍 active</span>}
       </button>
     );
   };
@@ -226,7 +223,7 @@ export function FilterDrawer({
 
   // Render search input with pill
   const renderSearchInput = (section: FilterSection) => {
-    const hasQuery = searchQueries[section.id] && searchQueries[section.id].trim();
+    const hasQuery = Boolean(searchQueries[section.id] && searchQueries[section.id].trim());
 
     return (
       <div className="relative mt-2 flex items-center">
@@ -245,7 +242,7 @@ export function FilterDrawer({
           className="w-full rounded-md border border-border bg-surface py-1.5 pl-8 pr-3 text-[13px] text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           aria-label={section.title}
         />
-        {hasSearchQuery && (
+        {hasQuery && (
           <button
             type="button"
             onClick={() => {
@@ -336,7 +333,7 @@ export function FilterDrawer({
             option.value,
             option.label,
             isSelected,
-            sectionSearchQuery !== ""
+            sectionSearchQuery !== "",
           );
         })}
       </div>
@@ -350,9 +347,7 @@ export function FilterDrawer({
           key={section.id}
           className="space-y-1.5 border-b border-border/50 pb-4 last:border-b-0 last:pb-0"
         >
-          <TypoCard>
-            {section.title}
-          </TypoCard>
+          <TypoCard>{section.title}</TypoCard>
           {renderSectionContent(section)}
         </div>
       ))}
@@ -385,6 +380,22 @@ export function FilterDrawer({
   const hasAnySearchQuery = React.useMemo(() => {
     return Object.values(searchQueries).some((q) => q && q.trim());
   }, [searchQueries]);
+
+  // Check if there are any filters active (selected chips or search queries)
+  const hasActiveFilters = React.useMemo(() => {
+    // Check if any multi/select section has selected values
+    const hasSelected = sections.some((section) => {
+      const isMulti = section.type !== "select" && section.type !== "range";
+      const selectedList = asList(draftValues[section.id]);
+      return selectedList.length > 0;
+    });
+    return hasSelected || hasAnySearchQuery;
+  }, [sections, draftValues, hasAnySearchQuery]);
+
+  if (!hasActiveFilters && !open) {
+    // Show empty state when no filters are active and drawer is closed
+    return null;
+  }
 
   if (isMobile) {
     return (
@@ -424,22 +435,6 @@ export function FilterDrawer({
         </DrawerContent>
       </Drawer>
     );
-  }
-
-  // Check if there are any filters active (selected chips or search queries)
-  const hasActiveFilters = React.useMemo(() => {
-    // Check if any multi/select section has selected values
-    const hasSelected = sections.some((section) => {
-      const isMulti = section.type !== "select" && section.type !== "range";
-      const selectedList = asList(draftValues[section.id]);
-      return selectedList.length > 0;
-    });
-    return hasSelected || hasAnySearchQuery;
-  }, [sections, draftValues, searchQueries]);
-
-  if (!hasActiveFilters && !open) {
-    // Show empty state when no filters are active and drawer is closed
-    return null;
   }
 
   return (
