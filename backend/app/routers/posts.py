@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -70,7 +69,7 @@ def list_posts(
         db.query(Post)
         .filter(
             Post.status == "published",
-            (Post.publish_at.is_(None)) | (Post.publish_at <= now)
+            (Post.publish_at.is_(None)) | (Post.publish_at <= now),
         )
         .order_by(Post.created_at.desc())
         .all()
@@ -86,8 +85,7 @@ def list_drafts(
     db_posts = (
         db.query(Post)
         .filter(
-            Post.author_id == current_user.id,
-            Post.status.in_(["draft", "scheduled"])
+            Post.author_id == current_user.id, Post.status.in_(["draft", "scheduled"])
         )
         .order_by(Post.created_at.desc())
         .all()
@@ -171,7 +169,9 @@ def delete_post(
     if not db_post:
         raise HTTPException(status_code=404, detail="Post not found")
     if db_post.author_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to delete this post")
+        raise HTTPException(
+            status_code=403, detail="Not authorized to delete this post"
+        )
 
     db.delete(db_post)
     db.commit()

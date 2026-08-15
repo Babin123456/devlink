@@ -30,7 +30,6 @@ class UserRole(str, Enum):
     MODERATOR = "moderator"
 
 
-
 class User(Base):
     """
     DevLink User Model

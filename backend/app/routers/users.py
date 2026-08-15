@@ -387,7 +387,7 @@ async def parse_resume(
     db: Session = Depends(get_database),
 ):
     from app.services.resume_parser_service import ResumeParserService
-    
+
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
 
@@ -398,7 +398,6 @@ async def parse_resume(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return ResumeParserService.parse_resume(contents, file.filename)
-
 
 
 @router.post(

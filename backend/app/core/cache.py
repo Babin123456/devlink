@@ -109,7 +109,6 @@ def cached(ttl: int = 300, key_prefix: str = ""):
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            import sys
 
             if cache_manager._is_testing:
                 return func(*args, **kwargs)

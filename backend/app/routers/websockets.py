@@ -409,6 +409,30 @@ async def websocket_collab(websocket: WebSocket, token: str = ""):
                     ),
                 )
 
+            elif msg_type == "chat.delivered" and data.get("conversation_id"):
+                conv_id = data["conversation_id"]
+                await manager.broadcast_to_room(
+                    conv_id,
+                    _event(
+                        "chat.message.delivered",
+                        conversation_id=conv_id,
+                        user_id=user_id,
+                        message_ids=data.get("message_ids", []),
+                    ),
+                )
+
+            elif msg_type == "chat.read" and data.get("conversation_id"):
+                conv_id = data["conversation_id"]
+                await manager.broadcast_to_room(
+                    conv_id,
+                    _event(
+                        "chat.message.read",
+                        conversation_id=conv_id,
+                        user_id=user_id,
+                        message_ids=data.get("message_ids", []),
+                    ),
+                )
+
             # ── Project update ───────────────────────────────────────────
             elif msg_type == "project_update" and project_id:
                 await manager.broadcast_to_room(
