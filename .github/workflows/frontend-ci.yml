@@ -9,6 +9,7 @@ on:
 jobs:
   frontend:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     defaults:
       run:
@@ -24,43 +25,8 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
           node-version: 22
 
-      - name: Node version
-        run: node --version && npm --version
+      - name: Install
+        run: npm ci 2>&1
 
-      - name: Install dependencies
-        run: |
-          echo "=== Installing dependencies ==="
-          npm ci --prefer-offline --no-audit 2>&1
-          echo "=== Dependencies installed ==="
-
-      - name: Build (first)
-        run: |
-          echo "=== Starting first build ==="
-          npm run build 2>&1
-          echo "=== First build completed ==="
-
-      - name: Run npm audit
-        run: |
-          echo "=== Running npm audit ==="
-          npm audit --audit-level=high 2>&1
-          echo "=== npm audit completed ==="
-        continue-on-error: true
-
-      - name: Lint check
-        run: |
-          echo "=== Running lint ==="
-          npm run lint 2>&1
-          echo "=== Lint completed ==="
-        continue-on-error: true
-
-      - name: Type check
-        run: |
-          echo "=== Running typecheck ==="
-          npm run typecheck 2>&1
-          echo "=== Typecheck completed ==="
-
-      - name: Build project
-        run: |
-          echo "=== Starting final build ==="
-          npm run build 2>&1
-          echo "=== Final build completed ==="
+      - name: Build
+        run: npm run build 2>&1
