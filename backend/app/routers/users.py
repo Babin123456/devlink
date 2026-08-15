@@ -18,6 +18,7 @@ from fastapi import (
 from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
+from app.core.cache import cache_manager, cached
 from app.dependencies import get_current_user, get_database
 from app.middleware.rate_limit import SEARCH_LIMIT, limiter
 from app.models.user import User
@@ -119,6 +120,7 @@ def create_user(
     "/me",
     response_model=CurrentUser,
 )
+@cached(ttl=300, key_prefix="user")
 def get_me(
     online_threshold: int | None = Query(
         None, description="Online threshold in seconds"
@@ -211,6 +213,7 @@ from app.services.block_service import BlockService
     "/{user_id}",
     response_model=UserResponse,
 )
+@cached(ttl=300, key_prefix="user")
 def get_user(
     user_id: uuid.UUID,
     online_threshold: int | None = Query(
@@ -331,6 +334,8 @@ def update_me(
         description="User updated their profile",
     )
 
+    cache_manager.delete_pattern(f"user:*{updated_user.id}*")
+
     return updated_user
 
 
@@ -429,7 +434,9 @@ async def upload_avatar(
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     full_avatar_url = str(request.base_url).rstrip("/") + str(saved["image_url"])
-    return UserService.update_profile_image(db, current_user, full_avatar_url)
+    result = UserService.update_profile_image(db, current_user, full_avatar_url)
+    cache_manager.delete_pattern(f"user:*{current_user.id}*")
+    return result
 
 
 @router.delete(
@@ -446,6 +453,7 @@ def delete_me(
         current_user,
         deleted_by_id=current_user.id,
     )
+    cache_manager.delete_pattern(f"user:*{current_user.id}*")
 
 
 @router.patch(
