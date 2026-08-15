@@ -30,7 +30,6 @@ class UserRole(str, Enum):
     MODERATOR = "moderator"
 
 
-
 class User(Base):
     """
     DevLink User Model
@@ -169,6 +168,11 @@ class User(Base):
         nullable=True,
     )
 
+    voice_introduction_url: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+
     portfolio_url: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
@@ -227,6 +231,13 @@ class User(Base):
         Boolean,
         default=True,
         nullable=False,
+    )
+
+    collaboration_status: Mapped[str | None] = mapped_column(
+        String(40),
+        nullable=True,
+        default="available",
+        server_default="available",
     )
 
     is_private: Mapped[bool] = mapped_column(
@@ -455,3 +466,5 @@ class User(Base):
 
     def __repr__(self) -> str:
         return f"<User(username='{self.username}', email='{self.email}')>"
+
+
