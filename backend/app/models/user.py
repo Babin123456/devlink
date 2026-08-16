@@ -1,23 +1,21 @@
 from __future__ import annotations
 
-
 import uuid
 from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     DateTime,
     ForeignKey,
     String,
     Text,
-    JSON,
     func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from enum import Enum
 from app.database.base import Base
 
 
@@ -30,12 +28,6 @@ class UserRole(str, Enum):
     MEMBER = "member"
     VIEWER = "viewer"
     MODERATOR = "moderator"
-
-
-class UserRole(str, Enum):
-    USER = "user"
-    DEVELOPER = "developer"
-    ADMIN = "admin"
 
 
 class User(Base):
@@ -140,6 +132,16 @@ class User(Base):
         nullable=True,
     )
 
+    video_introduction_url: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+
+    video_introduction_thumbnail_url: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+
     location: Mapped[str | None] = mapped_column(
         String(150),
         nullable=True,
@@ -162,6 +164,11 @@ class User(Base):
     )
 
     resume_url: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
+    )
+
+    voice_introduction_url: Mapped[str | None] = mapped_column(
         String(500),
         nullable=True,
     )
@@ -205,10 +212,32 @@ class User(Base):
         nullable=True,
     )
 
+    experience: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    education: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    certifications: Mapped[list | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
     open_to_work: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
         nullable=False,
+    )
+
+    collaboration_status: Mapped[str | None] = mapped_column(
+        String(40),
+        nullable=True,
+        default="available",
+        server_default="available",
     )
 
     is_private: Mapped[bool] = mapped_column(
@@ -437,3 +466,5 @@ class User(Base):
 
     def __repr__(self) -> str:
         return f"<User(username='{self.username}', email='{self.email}')>"
+
+

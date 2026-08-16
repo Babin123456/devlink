@@ -3,18 +3,24 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, time
 from enum import Enum
-from typing import Optional
 
 # pyrefly: ignore [missing-import]
 from pydantic import (
     BaseModel,
     ConfigDict,
-    EmailStr,
     Field,
-    HttpUrl,
     model_validator,
 )
-from app.core.validation import NameStr, UsernameStr, ValidEmail, HeadlineStr, BioStr, ValidURL, SanitizedStr
+
+from app.core.validation import (
+    BioStr,
+    HeadlineStr,
+    NameStr,
+    SanitizedStr,
+    UsernameStr,
+    ValidEmail,
+    ValidURL,
+)
 
 
 class AvailabilitySlot(BaseModel):
@@ -36,6 +42,19 @@ class PrivacyVisibility(str, Enum):
     PRIVATE = "private"
 
 
+class CollaborationStatus(str, Enum):
+    """Live collaboration presence status a user can set."""
+
+    CODING = "coding"
+    REVIEWING_PR = "reviewing_pr"
+    IN_MEETING = "in_meeting"
+    LOOKING_FOR_PROJECT = "looking_for_project"
+    AVAILABLE = "available"
+
+
+COLLABORATION_STATUSES = tuple(status.value for status in CollaborationStatus)
+
+
 class PrivacySettings(BaseModel):
     email: PrivacyVisibility = PrivacyVisibility.PRIVATE
     github: PrivacyVisibility = PrivacyVisibility.PUBLIC
@@ -45,11 +64,11 @@ class PrivacySettings(BaseModel):
 
 
 class PrivacySettingsUpdate(BaseModel):
-    email: Optional[PrivacyVisibility] = None
-    github: Optional[PrivacyVisibility] = None
-    resume: Optional[PrivacyVisibility] = None
-    social_links: Optional[PrivacyVisibility] = None
-    availability: Optional[PrivacyVisibility] = None
+    email: PrivacyVisibility | None = None
+    github: PrivacyVisibility | None = None
+    resume: PrivacyVisibility | None = None
+    social_links: PrivacyVisibility | None = None
+    availability: PrivacyVisibility | None = None
 
 
 # ==========================================================
@@ -63,29 +82,37 @@ class UserBase(BaseModel):
 
     username: UsernameStr
 
-    public_email: Optional[ValidEmail] = None
+    public_email: ValidEmail | None = None
 
-    headline: Optional[HeadlineStr] = None
+    headline: HeadlineStr | None = None
 
-    bio: Optional[BioStr] = None
+    bio: BioStr | None = None
 
-    location: Optional[SanitizedStr] = None
-    timezone: Optional[SanitizedStr] = None
+    location: SanitizedStr | None = None
+    timezone: SanitizedStr | None = None
 
-    website: Optional[ValidURL] = None
-    resume_url: Optional[ValidURL] = None
-    portfolio_url: Optional[ValidURL] = None
-    github_url: Optional[ValidURL] = None
-    linkedin_url: Optional[ValidURL] = None
+    website: ValidURL | None = None
+    resume_url: ValidURL | None = None
+      voice_introduction_url: ValidURL | None = None
+    portfolio_url: ValidURL | None = None
+    github_url: ValidURL | None = None
+    linkedin_url: ValidURL | None = None
 
-    role: Optional[SanitizedStr] = None
-    experience_level: Optional[SanitizedStr] = None
-    company: Optional[SanitizedStr] = None
+    role: SanitizedStr | None = None
+    experience_level: SanitizedStr | None = None
+    company: SanitizedStr | None = None
+
+    experience: list | None = None
+    education: list | None = None
+    certifications: list | None = None
 
     open_to_work: bool = True
     is_private: bool = False
-    privacy_settings: Optional[PrivacySettings] = Field(default_factory=PrivacySettings)
+    is_active: bool = True
+    is_verified: bool = False
+    privacy_settings: PrivacySettings | None = Field(default_factory=PrivacySettings)
     availability: list[AvailabilitySlot] = Field(default_factory=list)
+    collaboration_status: CollaborationStatus | None = CollaborationStatus.AVAILABLE
 
 
 # ==========================================================
@@ -109,7 +136,7 @@ class UserCreate(UserBase):
                 "username": "janedoe",
                 "email": "jane.doe@example.com",
                 "password": "StrongPassword123!",
-                "open_to_work": True
+                "open_to_work": True,
             }
         }
     )
@@ -121,30 +148,36 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    first_name: Optional[NameStr] = None
-    last_name: Optional[NameStr] = None
+    first_name: NameStr | None = None
+    last_name: NameStr | None = None
 
-    headline: Optional[HeadlineStr] = None
-    bio: Optional[BioStr] = None
+    headline: HeadlineStr | None = None
+    bio: BioStr | None = None
 
-    location: Optional[SanitizedStr] = None
-    timezone: Optional[SanitizedStr] = None
-    public_email: Optional[ValidEmail] = None
+    location: SanitizedStr | None = None
+    timezone: SanitizedStr | None = None
+    public_email: ValidEmail | None = None
 
-    website: Optional[ValidURL] = None
-    resume_url: Optional[ValidURL] = None
-    portfolio_url: Optional[ValidURL] = None
-    github_url: Optional[ValidURL] = None
-    linkedin_url: Optional[ValidURL] = None
+    website: ValidURL | None = None
+    resume_url: ValidURL | None = None
+      voice_introduction_url: ValidURL | None = None
+    portfolio_url: ValidURL | None = None
+    github_url: ValidURL | None = None
+    linkedin_url: ValidURL | None = None
 
-    role: Optional[SanitizedStr] = None
-    experience_level: Optional[SanitizedStr] = None
-    company: Optional[SanitizedStr] = None
+    role: SanitizedStr | None = None
+    experience_level: SanitizedStr | None = None
+    company: SanitizedStr | None = None
 
-    open_to_work: Optional[bool] = None
-    is_private: Optional[bool] = None
-    privacy_settings: Optional[PrivacySettingsUpdate] = None
-    availability: Optional[list[AvailabilitySlot]] = None
+    experience: list | None = None
+    education: list | None = None
+    certifications: list | None = None
+
+    open_to_work: bool | None = None
+    is_private: bool | None = None
+    privacy_settings: PrivacySettingsUpdate | None = None
+    availability: list[AvailabilitySlot] | None = None
+    collaboration_status: CollaborationStatus | None = None
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -154,7 +187,7 @@ class UserUpdate(BaseModel):
                 "headline": "Senior Full-Stack Developer",
                 "bio": "I love building scalable web applications.",
                 "location": "San Francisco, CA",
-                "github_url": "https://github.com/janesmith"
+                "github_url": "https://github.com/janesmith",
             }
         }
     )
@@ -164,36 +197,24 @@ class UserUpdate(BaseModel):
 # Public User Response
 # ==========================================================
 
-
 class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+    video_introduction_url: ValidURL | None = None
+    video_introduction_thumbnail_url: ValidURL | None = None
 
-    profile_image: Optional[str] = None
-    cover_image: Optional[str] = None
-    badges: list[str] = Field(default_factory=list)
+# ==========================================================
+# Resume Parse Response
+# ==========================================================
 
-    is_active: bool
-    is_verified: bool
-    premium: bool = False
-    is_superuser: bool
 
-    last_seen: Optional[datetime] = Field(
-        default=None,
-        description="The date and time when the user was last active.",
-    )
-    is_online: bool = Field(
-        default=False,
-        description="Whether the user is currently online based on the active threshold.",
-    )
-    last_active_at: Optional[datetime] = None
-
-    created_at: datetime
-    updated_at: datetime
-
-    deleted_at: Optional[datetime] = None
-    deleted_by_id: Optional[uuid.UUID] = None
+class ResumeParseResponse(BaseModel):
+    skills: list[str] = Field(default_factory=list)
+    technologies: list[str] = Field(default_factory=list)
+    experience: list[dict] = Field(default_factory=list)
+    education: list[dict] = Field(default_factory=list)
+    certifications: list[dict] = Field(default_factory=list)
 
 
 # ==========================================================
@@ -203,8 +224,8 @@ class UserResponse(UserBase):
 
 class CurrentUser(UserResponse):
     email: ValidEmail
-    email_verified_at: Optional[datetime] = None
-    last_login: Optional[datetime] = None
+    email_verified_at: datetime | None = None
+    last_login: datetime | None = None
 
 
 # ==========================================================
@@ -273,7 +294,7 @@ class ProfileCompletionResponse(BaseModel):
         default=False,
         description="Whether the profile completion reward is unlocked",
     )
-    reward_badge: Optional[str] = Field(
+    reward_badge: str | None = Field(
         default=None,
         description="Badge awarded for 100% profile completion",
     )

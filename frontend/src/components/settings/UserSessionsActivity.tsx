@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { sessionsApi, type UserSession } from "@/api";
 import { LoadingButton } from "@/components/shared/LoadingButton";
+import { TypoCaption, TypoHeading } from "@/components/shared/Typography";
 
 function maskIpAddress(ip?: string | null): string {
   if (!ip) return "Unknown IP";
@@ -113,12 +114,12 @@ export function UserSessionsActivity() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-[16px] font-semibold text-foreground flex items-center gap-2">
+          <TypoHeading as="h2">
             <Shield className="h-4 w-4 text-primary" /> Active Login Sessions
-          </h2>
-          <p className="text-[13px] text-muted-foreground mt-0.5">
+          </TypoHeading>
+          <TypoCaption as="p">
             Review and manage devices currently signed into your account.
-          </p>
+          </TypoCaption>
         </div>
 
         <div className="flex items-center gap-2">
@@ -223,9 +224,9 @@ export function UserSessionsActivity() {
 
           {otherSessionsCount > 0 && (
             <div className="flex items-center justify-between pt-2">
-              <p className="text-xs text-muted-foreground">
+              <TypoCaption as="p">
                 You have {otherSessionsCount} other active session{otherSessionsCount > 1 ? "s" : ""}.
-              </p>
+              </TypoCaption>
 
               {!confirmRevokeOthersOpen ? (
                 <Button
