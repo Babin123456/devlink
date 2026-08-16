@@ -375,32 +375,6 @@ function ProjectsPage() {
               opensource: boolOrUndefined(newValues.opensource),
             });
           }}
-          initialFilters={{
-            language: filters.language ? filters.language : [],
-            experience: filters.experience,
-            remote: filters.remote ? "true" : "false",
-            paid: filters.paid ? "true" : "false",
-            opensource: filters.opensource ? "true" : "false",
-          }}
-
-          onApply={(newValues) => {
-            // const selectedLangs = Array.isArray(newValues.language)
-            // ? newValues.language.join(",")
-            // : newValues.language;
-            setFilters({
-              ...filters,
-              language: Array.isArray(newValues.language)
-                ? newValues.language
-                : newValues.language
-                  ? [newValues.language]
-                  : undefined,
-              experience: newValues.experience || "",
-              remote: newValues.remote || "",
-              paid: newValues.paid || "",
-              openSource: newValues.opensource || "",
-              techStack: techStack || "",
-            });
-          }}
           onReset={clearFilters}
         />
       </Card>
