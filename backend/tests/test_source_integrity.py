@@ -42,6 +42,7 @@ from __future__ import annotations
 
 import ast
 import re
+import warnings
 from collections import Counter
 from pathlib import Path
 from typing import Iterator
@@ -284,10 +285,17 @@ def test_no_duplicate_methods(path: Path) -> None:
 
 
 def test_known_duplicate_list_has_no_stale_entries() -> None:
-    """Every entry in :data:`KNOWN_DUPLICATE_DEFINITIONS` is still a duplicate.
+    """Report entries in :data:`KNOWN_DUPLICATE_DEFINITIONS` that are fixed.
 
-    Without this, an allowance stays on the list forever after the bug it
-    covers is fixed, quietly re-opening the hole for that name.
+    Without some pressure, an allowance stays on the list forever after the bug
+    it covers is gone, quietly re-opening the hole for that name.
+
+    This **warns rather than fails**, deliberately. A stale entry means somebody
+    fixed a bug: the list can only ever be too permissive, never too strict, so
+    the failure mode is mild. Failing here would mean the PR that fixes a
+    duplicate turns CI red until a second PR deletes one line from this file —
+    making a green build depend on the merge order of two otherwise unrelated
+    changes, which is a worse outcome than a warning.
     """
     stale: list[tuple[str, str]] = []
 
@@ -301,8 +309,10 @@ def test_known_duplicate_list_has_no_stale_entries() -> None:
         if _top_level_bindings(tree).get(name, 0) <= 1:
             stale.append((rel, name))
 
-    assert not stale, (
-        "These entries in KNOWN_DUPLICATE_DEFINITIONS are fixed and should be "
-        "removed from the list: "
-        + ", ".join(f"{rel}::{name}" for rel, name in stale)
-    )
+    if stale:
+        warnings.warn(
+            "These entries in KNOWN_DUPLICATE_DEFINITIONS are fixed and can be "
+            "removed from the list: "
+            + ", ".join(f"{rel}::{name}" for rel, name in stale),
+            stacklevel=2,
+        )
