@@ -93,7 +93,7 @@ class UserBase(BaseModel):
 
     website: ValidURL | None = None
     resume_url: ValidURL | None = None
-      voice_introduction_url: ValidURL | None = None
+    voice_introduction_url: ValidURL | None = None
     portfolio_url: ValidURL | None = None
     github_url: ValidURL | None = None
     linkedin_url: ValidURL | None = None
@@ -160,7 +160,7 @@ class UserUpdate(BaseModel):
 
     website: ValidURL | None = None
     resume_url: ValidURL | None = None
-      voice_introduction_url: ValidURL | None = None
+    voice_introduction_url: ValidURL | None = None
     portfolio_url: ValidURL | None = None
     github_url: ValidURL | None = None
     linkedin_url: ValidURL | None = None
@@ -197,12 +197,14 @@ class UserUpdate(BaseModel):
 # Public User Response
 # ==========================================================
 
+
 class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
     video_introduction_url: ValidURL | None = None
     video_introduction_thumbnail_url: ValidURL | None = None
+
 
 # ==========================================================
 # Resume Parse Response
