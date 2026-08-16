@@ -91,3 +91,9 @@ from .global_announcement import GlobalAnnouncement, AnnouncementSeverity, Targe
 from .post import Post  # noqa: F401
 
 from .project_comment import ProjectComment  # noqa: F401
+from .feature_announcement import (  # noqa: F401
+    FeatureAnnouncement,
+    FeatureAnnouncementRead,
+    AnnouncementCategory,
+)
+

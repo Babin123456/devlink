@@ -23,7 +23,9 @@ import {
   fallbackTechStack,
   searchApi,
   issuesApi,
+  featureAnnouncementsApi,
 } from "@/api";
+
 import type {
   BookmarkCollection,
   BookmarkCollectionWithBookmarks,
@@ -222,6 +224,16 @@ export const flaresService = {
     withFallback<void>(async () => {
       await postsApi.remove(id);
     }, undefined),
+};
+
+export const featureAnnouncementsService = {
+  list: (params?: Parameters<typeof featureAnnouncementsApi.list>[0]) =>
+    featureAnnouncementsApi.list(params),
+  get: (id: string) => featureAnnouncementsApi.get(id),
+  markAsRead: (id: string) => featureAnnouncementsApi.markAsRead(id),
+  markAllAsRead: () => featureAnnouncementsApi.markAllAsRead(),
+  create: (body: Parameters<typeof featureAnnouncementsApi.create>[0]) =>
+    featureAnnouncementsApi.create(body),
 };
 
 export const messagesService = {

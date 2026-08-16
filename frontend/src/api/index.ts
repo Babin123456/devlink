@@ -111,3 +111,10 @@ export type {
   ProjectTemplateListResponse,
   ProjectTemplateCreateInput,
 } from "./modules/projectTemplates";
+export { featureAnnouncementsApi } from "./modules/featureAnnouncements";
+export type {
+  FeatureAnnouncement,
+  FeatureAnnouncementListResponse,
+  CreateAnnouncementInput,
+  AnnouncementCategory,
+} from "./modules/featureAnnouncements";
