@@ -11,7 +11,11 @@ import {
   User,
   Sparkles,
   TrendingUp,
+  BrainCircuit,
+  ArrowRight,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { recommendationsApi } from "@/api";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
@@ -126,11 +130,8 @@ export function CurrentProjects() {
   );
 }
 
-import { useQuery } from "@tanstack/react-query";
-import { recommendationsApi } from "@/api";
-import { UserCheck, Sparkles, ArrowRight, UserPlus, BrainCircuit, AlertCircle } from "lucide-react";
-
 // 2. AI Suggestions / Recommendation Panel (#738)
+
 export function AISuggestions() {
   const { data: recData, isLoading } = useQuery({
     queryKey: ["dashboardAIRecommendations"],
