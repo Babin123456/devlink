@@ -21,7 +21,7 @@ from app.services.activity_service import ActivityService
 from app.core.cache import cached
 
 router = APIRouter(
-    prefix="/activities",
+    prefix="",
     tags=["Activities"],
 )
 
@@ -72,7 +72,8 @@ def get_activity(
     response_model=list[ActivityResponse],
 )
 @cached(ttl=60, key_prefix="feed")
-def get_feed(    limit: int = Query(50, ge=1, le=100),
+def get_feed(
+    limit: int = Query(50, ge=1, le=100),
     cursor: datetime | None = Query(
         None, description="Cursor for pagination (created_at timestamp)"
     ),

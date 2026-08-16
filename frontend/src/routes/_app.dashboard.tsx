@@ -32,7 +32,6 @@ function Dashboard() {
       <GreetingHero />
 
       <StatsRow />
-
       {/* Main Grid Grouping (2-column layout on desktop) */}
       <div className="grid gap-6 lg:grid-cols-12 items-start">
         {/* Left/Main Column - 9 cols */}

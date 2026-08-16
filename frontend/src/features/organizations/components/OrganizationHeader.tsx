@@ -1,4 +1,6 @@
+import { TypoHeading } from "@/components/shared/Typography";
 import React from "react";
+import { Twitter, Linkedin, Github } from "lucide-react";
 
 interface OrganizationHeaderProps {
   name: string;
@@ -9,6 +11,11 @@ interface OrganizationHeaderProps {
   isHiring: boolean;
   isVerified?: boolean;
   onVerifyClick?: () => void;
+  socialLinks?: {
+    twitter?: string;
+    linkedin?: string;
+    github?: string;
+  };
 }
 
 export const OrganizationHeader: React.FC<OrganizationHeaderProps> = ({
@@ -20,6 +27,7 @@ export const OrganizationHeader: React.FC<OrganizationHeaderProps> = ({
   isHiring,
   isVerified = false,
   onVerifyClick,
+  socialLinks,
 }) => {
   return (
     <div className="relative rounded-xl border border-gray-800 bg-gray-900/50 overflow-hidden mb-6">
@@ -43,7 +51,7 @@ export const OrganizationHeader: React.FC<OrganizationHeaderProps> = ({
           </div>
 
           <div className="mb-2">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-2 flex-wrap">
+            <TypoHeading as="h1">
               {name}
               {isVerified && (
                 <span
@@ -58,7 +66,7 @@ export const OrganizationHeader: React.FC<OrganizationHeaderProps> = ({
                   Hiring
                 </span>
               )}
-            </h1>
+            </TypoHeading>
             {location && <p className="text-sm text-gray-400">{location}</p>}
           </div>
         </div>
@@ -72,6 +80,37 @@ export const OrganizationHeader: React.FC<OrganizationHeaderProps> = ({
             >
               Apply for Verification
             </button>
+          )}
+
+          {socialLinks?.twitter && (
+            <a
+              href={socialLinks.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-gray-400 hover:text-white transition-colors"
+            >
+              <Twitter className="w-5 h-5" />
+            </a>
+          )}
+          {socialLinks?.github && (
+            <a
+              href={socialLinks.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-gray-400 hover:text-white transition-colors"
+            >
+              <Github className="w-5 h-5" />
+            </a>
+          )}
+          {socialLinks?.linkedin && (
+            <a
+              href={socialLinks.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-gray-400 hover:text-white transition-colors"
+            >
+              <Linkedin className="w-5 h-5" />
+            </a>
           )}
 
           {website && (

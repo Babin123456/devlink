@@ -10,9 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.models.activity import ActivityType
 from app.models.follower import Follower
-from app.models.notification import NotificationType
 from app.models.user import User
-from app.schemas.notification import NotificationCreate
 from app.services.activity_service import ActivityService
 from app.services.notification_service import NotificationService
 
@@ -48,12 +46,19 @@ class FollowerService:
         db.flush()
         db.refresh(relationship)
 
+        following_user = db.get(User, following_id)
+        following_username = (
+            following_user.username if following_user else str(following_id)
+        )
+
         ActivityService.record_activity(
             db=db,
             actor_id=follower_id,
             activity_type=ActivityType.FOLLOWED_USER,
             title="Followed a builder",
-            description=str(following_id),
+            description=f"Started following @{following_username}",
+            target_id=following_id,
+            target_type="user",
             icon="user-plus",
             color="success",
         )
@@ -65,18 +70,13 @@ class FollowerService:
         )
         follower_username = follower.username if follower else ""
 
-        notification_data = NotificationCreate(
+        NotificationService.create_follow_notification(
+            db=db,
             recipient_id=following_id,
-            type=NotificationType.FOLLOW,
+            actor_id=follower_id,
             title="New Follower",
             message=f"{follower_name} started following you.",
             action_url=f"/profile/{follower_username}" if follower_username else None,
-        )
-        NotificationService.create_notification(
-            db=db,
-            recipient_id=following_id,
-            sender_id=follower_id,
-            notification=notification_data,
         )
 
         return relationship

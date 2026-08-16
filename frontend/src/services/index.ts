@@ -32,7 +32,7 @@ import type {
   IssueUpdateInput,
   TechStackResponse,
 } from "@/api";
-import type { Hackathon, Flare } from "@/mocks/seed";
+import type { Hackathon, Flare, Message } from "@/mocks/seed";
 
 const delay = 120;
 const mock = <T>(v: T): Promise<T> => new Promise((r) => setTimeout(() => r(v), delay));
@@ -86,6 +86,31 @@ export interface BackendActivity {
   created_at: string;
 }
 
+export const organizationService = {
+  get: () =>
+    withFallback<typeof seed.organization>(async () => seed.organization, seed.organization),
+  members: () =>
+    withFallback<typeof seed.organization.team>(
+      async () => seed.organization.team,
+      seed.organization.team,
+    ),
+  openings: () =>
+    withFallback<typeof seed.organization.openings>(
+      async () => seed.organization.openings,
+      seed.organization.openings,
+    ),
+  projects: () =>
+    withFallback<typeof seed.organization.projects>(
+      async () => seed.organization.projects,
+      seed.organization.projects,
+    ),
+  activity: () =>
+    withFallback<typeof seed.organization.activity>(
+      async () => seed.organization.activity,
+      seed.organization.activity,
+    ),
+};
+
 export const projectsService = {
   list: (params?: Record<string, unknown>) =>
     withFallback(() => projectsApi.list(params), seed.projects),
@@ -96,6 +121,11 @@ export const projectsService = {
       () => projectsApi.trending(),
       [...seed.projects].sort((a, b) => b.stars - a.stars).slice(0, 5),
     ),
+
+  createDraft: (body: any) => withFallback(() => projectsApi.createDraft(body as any), {} as any),
+
+  updateDraft: (id: string, body: any) =>
+    withFallback(() => projectsApi.updateDraft(id, body as any), {} as any),
 };
 
 export const buildersService = {
@@ -264,9 +294,10 @@ export const messagesService = {
           attachment_name: m.attachment_name,
           attachment_size: m.attachment_size,
           mime_type: m.mime_type,
-        }),
-      );
-    }, seed.messages[id] ?? []);
+        }));
+      },
+      seed.messages[id] ?? [],
+    );
   },
   send: (
     conversationId: string,

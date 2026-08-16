@@ -164,5 +164,17 @@ class Message(Base):
         nullable=True,
     )
 
+    delivered_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
+    )
+
+    read_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True,
+    )
+
     def __repr__(self):
         return f"<Message(id={self.id}, type='{self.type.value}')>"
