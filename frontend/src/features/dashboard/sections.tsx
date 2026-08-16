@@ -353,7 +353,7 @@ export function RecentActivity() {
               <div className={cn("h-2 w-2 rounded-full shrink-0", act.bulletColor)} />
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-foreground truncate">{act.text}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{act.time}</p>
+                <TypoCaption as="p">{act.time}</TypoCaption>
               </div>
             </div>
             <ChevronRight size={14} className="text-muted-foreground shrink-0" />
@@ -411,7 +411,7 @@ export function Upcoming() {
               </div>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-foreground truncate">{item.title}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{item.time}</p>
+                <TypoCaption as="p">{item.time}</TypoCaption>
               </div>
             </div>
           );
@@ -459,7 +459,7 @@ export function NotificationsWidget() {
             <div className={cn("h-2.5 w-2.5 rounded-full shrink-0 mt-1", n.dotColor)} />
             <div className="min-w-0">
               <p className="text-xs font-semibold text-foreground leading-tight">{n.text}</p>
-              <p className="text-[10px] text-muted-foreground mt-1">{n.time}</p>
+              <TypoCaption as="p">{n.time}</TypoCaption>
             </div>
           </div>
         ))}
@@ -507,7 +507,7 @@ export function UpcomingEventsWidget() {
             </div>
             <div className="min-w-0">
               <p className="text-xs font-bold text-foreground truncate">{e.title}</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{e.time}</p>
+              <TypoCaption as="p">{e.time}</TypoCaption>
             </div>
           </div>
         ))}
@@ -528,10 +528,10 @@ export function UpgradePlanCTA() {
       </div>
 
       <div className="min-w-0 flex-1 relative z-10">
-        <h4 className="text-sm font-bold text-foreground">Upgrade your plan</h4>
-        <p className="text-[11px] text-muted-foreground mt-1 leading-normal">
+        <TypoCard>Upgrade your plan</TypoCard>
+        <TypoCaption as="p">
           Unlock premium features and boost your productivity.
-        </p>
+        </TypoCaption>
         <Link
           to="/dashboard"
           className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline mt-2 cursor-pointer"

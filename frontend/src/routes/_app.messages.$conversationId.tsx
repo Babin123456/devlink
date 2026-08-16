@@ -25,6 +25,7 @@ import { conversationStartersApi, type ConversationStarterResponse } from "@/api
 import { useAuth } from "@/contexts/auth-context";
 import { useChatWebSocket } from "@/hooks/useChatWebSocket";
 import { toast } from "sonner";
+import { TypoCaption } from "@/components/shared/Typography";
 
 export const Route = createFileRoute("/_app/messages/$conversationId")({
   head: () => ({ meta: [{ title: "Chat — DevLink" }] }),
@@ -260,18 +261,18 @@ function Thread() {
         <Avatar src={conv.with.avatar} alt={conv.with.name} size={36} online={conv.with.online} />
         <div>
           <p className="text-[13px] font-semibold text-foreground">{conv.with.name}</p>
-          <p className="text-[11px] text-muted-foreground">
+          <TypoCaption as="p">
             {conv.with.online ? "Online" : "Offline"}
-          </p>
+          </TypoCaption>
         </div>
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto p-4">
         {data.length === 0 && (
           <div className="space-y-4">
-            <p className="text-center text-[12px] text-muted-foreground">
+            <TypoCaption as="p">
               No messages yet — say hello 👋
-            </p>
+            </TypoCaption>
 
             {!starters && !startersMutation.isPending && !startersError && (
               <button
@@ -309,9 +310,9 @@ function Thread() {
 
             {starters && (
               <div className="space-y-2">
-                <p className="text-center text-[11px] text-muted-foreground">
+                <TypoCaption as="p">
                   Suggestions for {starters.target_user_name}
-                </p>
+                </TypoCaption>
                 {starters.suggestions.map((suggestion, i) => (
                   <button
                     key={i}
@@ -319,9 +320,9 @@ function Thread() {
                     className="flex w-full items-center justify-between gap-2 rounded-md border border-border bg-surface px-3 py-2 text-left text-[13px] text-foreground hover:bg-muted/50"
                   >
                     <span>{suggestion.text}</span>
-                    <span className="shrink-0 rounded-sm bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                    <TypoCaption>
                       {Math.round(suggestion.confidence * 100)}%
-                    </span>
+                    </TypoCaption>
                   </button>
                 ))}
               </div>
@@ -445,9 +446,9 @@ function Thread() {
       {/* Uploading progress bar */}
       {uploading && (
         <div className="px-4 py-2 bg-muted/30 border-t border-border flex items-center justify-between gap-4">
-          <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+          <TypoCaption>
             <Clock size={12} className="animate-spin text-primary" /> Uploading file...
-          </span>
+          </TypoCaption>
           <div className="flex-1 max-w-xs h-1.5 bg-primary/10 rounded-full overflow-hidden">
             <div
               className="h-full bg-primary transition-all duration-300"
@@ -469,7 +470,7 @@ function Thread() {
               <p className="text-xs font-medium text-foreground truncate max-w-[200px] sm:max-w-md">
                 {attachment.name}
               </p>
-              <p className="text-[10px] text-muted-foreground">{formatFileSize(attachment.size)}</p>
+              <TypoCaption as="p">{formatFileSize(attachment.size)}</TypoCaption>
             </div>
           </div>
           <button

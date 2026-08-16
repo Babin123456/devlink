@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Sparkles, X, ChevronRight, CheckCircle2, Circle, Trophy, Award, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
+import { TypoSection, TypoCaption } from "@/components/shared/Typography";
 
 export interface UserProfileData {
   avatar?: string;
@@ -89,17 +90,17 @@ export function ProfileCompletionChecklist({
           </div>
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+              <TypoSection>
                 100% Profile Complete!
-              </h3>
+              </TypoSection>
               <span className="rounded-full bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 text-[10px] font-bold text-amber-500 flex items-center gap-1">
                 <Award size={10} /> Profile Master Unlocked
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <TypoCaption as="p">
               Congratulations! Your profile is fully complete. You have earned the exclusive{" "}
               <strong className="text-amber-500 font-semibold">Profile Master</strong> badge!
-            </p>
+            </TypoCaption>
           </div>
         </div>
 
@@ -130,14 +131,14 @@ export function ProfileCompletionChecklist({
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-sm font-semibold text-foreground">Complete your profile</h3>
+              <TypoSection>Complete your profile</TypoSection>
               <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary">
                 {percentage}%
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <TypoCaption as="p">
               Stand out to other builders and unlock the <strong className="text-primary font-medium">Profile Master</strong> reward badge. ({completedCount}/{totalItems} factors complete)
-            </p>
+            </TypoCaption>
             <div className="mt-2 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-primary/10">
               <div
                 className="h-full bg-primary transition-all duration-500 ease-out"
