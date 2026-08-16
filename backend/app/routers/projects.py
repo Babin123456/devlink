@@ -5,21 +5,17 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 # pyrefly: ignore [missing-import]
-
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_database, get_current_user, require_project_permission
-from app.middleware.rate_limit import limiter, PROJECT_LIMIT
+from app.core.cache import cache_manager, cached
+from app.dependencies import get_current_user, get_database, require_project_permission
+from app.middleware.idempotency import IdempotentRoute
+from app.middleware.rate_limit import PROJECT_LIMIT, limiter
 from app.models.user import User
-from app.schemas.project_audit import (
-    PaginatedProjectAuditLogsResponse,
-    ProjectAuditLogResponse,
-)
-from app.schemas.project_version import (
-    PaginatedProjectVersionsResponse,
-    ProjectVersionCompareResponse,
-    ProjectVersionResponse,
+from app.schemas.ai import (
+    ProjectDescriptionGenerateRequest,
+    ProjectDescriptionGenerateResponse,
 )
 from app.schemas.duplicate_detection import (
     DuplicateProjectCheckRequest,
@@ -32,15 +28,33 @@ from app.schemas.project import (
     ProjectUpdate,
     SimilarProjectWarning,
 )
+from app.schemas.project_audit import (
+    PaginatedProjectAuditLogsResponse,
+    ProjectAuditLogResponse,
+)
+from app.services.ai_service import AIService
 from app.services.project_service import ProjectService
-from app.core.cache import cached
-
-from app.middleware.idempotency import IdempotentRoute
 
 router = APIRouter(
     tags=["Projects"],
     route_class=IdempotentRoute,
 )
+
+
+@router.post(
+    "/generate-description",
+    response_model=ProjectDescriptionGenerateResponse,
+    summary="Generate AI project description",
+    description="Generates a comprehensive project description based on a short prompt.",
+)
+@limiter.limit(PROJECT_LIMIT)
+def generate_project_description(
+    request: Request,
+    body: ProjectDescriptionGenerateRequest,
+    current_user: User = Depends(get_current_user),
+) -> ProjectDescriptionGenerateResponse:
+    """Generate a project description using AI."""
+    return AIService.generate_project_description(body)
 
 
 @router.post(
@@ -68,8 +82,8 @@ def create_project(
         project=project,
     )
 
-    from app.services.audit_log_service import AuditLogService
     from app.models.audit_log import AuditAction
+    from app.services.audit_log_service import AuditLogService
 
     AuditLogService.create_log(
         db=db,
@@ -81,6 +95,7 @@ def create_project(
         new_values=project.model_dump(exclude_unset=True),
     )
 
+    cache_manager.delete_pattern("projects:*")
     return new_project
 
 
@@ -95,6 +110,7 @@ def check_duplicate_project(
     db: Session = Depends(get_database),
 ) -> DuplicateProjectCheckResponse:
     from app.services.duplicate_detection_service import DuplicateDetectionService
+
     return DuplicateDetectionService.find_duplicate_projects(
         db,
         title=req.title,
@@ -122,10 +138,9 @@ def check_project_similarity(
 
 
 from app.dependencies import (
-    get_database,
     get_current_user,
+    get_database,
     get_optional_current_user,
-    require_project_permission,
 )
 from app.schemas.project_analytics import ProjectAnalyticsResponse
 from app.services.project_analytics_service import ProjectAnalyticsService
@@ -239,7 +254,10 @@ def list_projects(
     paid: bool | None = Query(None),
     opensource: bool | None = Query(None),
     tech: str | None = Query(None),
-    sort_by: str | None = Query("newest", description="Sorting option: newest, oldest, most_active, most_bookmarked, most_applications, recently_updated, ai_match_score"),
+    sort_by: str | None = Query(
+        "newest",
+        description="Sorting option: newest, oldest, most_active, most_bookmarked, most_applications, recently_updated, ai_match_score",
+    ),
     db: Session = Depends(get_database),
 ):
 
@@ -308,9 +326,10 @@ def update_project(
         project,
     )
 
-    from app.services.audit_log_service import AuditLogService
-    from app.models.audit_log import AuditAction
     from enum import Enum
+
+    from app.models.audit_log import AuditAction
+    from app.services.audit_log_service import AuditLogService
 
     # 1. Title update event
     if "title" in new_values and old_values.get("title") != new_values["title"]:
@@ -326,7 +345,10 @@ def update_project(
         )
 
     # 2. Description update event
-    if "description" in new_values and old_values.get("description") != new_values["description"]:
+    if (
+        "description" in new_values
+        and old_values.get("description") != new_values["description"]
+    ):
         AuditLogService.create_log(
             db=db,
             actor_id=current_user.id,
@@ -341,8 +363,20 @@ def update_project(
     # 3. Status/Stage change event
     status_keys = {"stage", "visibility", "is_published", "hiring"}
     if any(k in new_values for k in status_keys):
-        changed_old = {k: str(old_values[k]) if isinstance(old_values.get(k), Enum) else old_values.get(k) for k in status_keys if k in new_values}
-        changed_new = {k: str(new_values[k]) if isinstance(new_values.get(k), Enum) else new_values.get(k) for k in status_keys if k in new_values}
+        changed_old = {
+            k: str(old_values[k])
+            if isinstance(old_values.get(k), Enum)
+            else old_values.get(k)
+            for k in status_keys
+            if k in new_values
+        }
+        changed_new = {
+            k: str(new_values[k])
+            if isinstance(new_values.get(k), Enum)
+            else new_values.get(k)
+            for k in status_keys
+            if k in new_values
+        }
         AuditLogService.create_log(
             db=db,
             actor_id=current_user.id,
@@ -365,6 +399,7 @@ def update_project(
         new_values=new_values,
     )
 
+    cache_manager.delete_pattern("projects:*")
     return updated_project
 
 
@@ -376,14 +411,19 @@ def update_project(
 )
 def get_project_audit_trail(
     project_id: uuid.UUID,
-    event_type: Optional[str] = Query(None, description="Filter by event type substring"),
-    user_id: Optional[uuid.UUID] = Query(None, description="Filter by actor or target user ID"),
+    event_type: Optional[str] = Query(
+        None, description="Filter by event type substring"
+    ),
+    user_id: Optional[uuid.UUID] = Query(
+        None, description="Filter by actor or target user ID"
+    ),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_database),
     current_user: User = Depends(require_project_permission("project:read")),
 ) -> PaginatedProjectAuditLogsResponse:
     from app.services.audit_log_service import AuditLogService
+
     result = AuditLogService.search_project_audit_logs(
         db,
         project_id=project_id,
@@ -430,8 +470,8 @@ def archive_project(
         project,
     )
 
-    from app.services.audit_log_service import AuditLogService
     from app.models.audit_log import AuditAction
+    from app.services.audit_log_service import AuditLogService
 
     AuditLogService.create_log(
         db=db,
@@ -473,8 +513,8 @@ def restore_project(
         project,
     )
 
-    from app.services.audit_log_service import AuditLogService
     from app.models.audit_log import AuditAction
+    from app.services.audit_log_service import AuditLogService
 
     AuditLogService.create_log(
         db=db,
@@ -627,8 +667,8 @@ def delete_project(
         deleted_by_id=current_user.id,
     )
 
-    from app.services.audit_log_service import AuditLogService
     from app.models.audit_log import AuditAction
+    from app.services.audit_log_service import AuditLogService
 
     AuditLogService.create_log(
         db=db,
@@ -638,6 +678,8 @@ def delete_project(
         entity_id=str(project_id),
         project_id=project_id,
     )
+
+    cache_manager.delete_pattern("projects:*")
 
 
 @router.post(
@@ -665,8 +707,9 @@ def invite_user(
             detail="Only the project owner can invite members",
         )
 
-    from app.models.project_member import ProjectMember, MemberRole
     from sqlalchemy import and_, select
+
+    from app.models.project_member import MemberRole, ProjectMember
 
     existing_member = db.scalar(
         select(ProjectMember).where(
@@ -692,27 +735,20 @@ def invite_user(
     db.commit()
     db.refresh(new_member)
 
-    from app.models.notification import NotificationType
-    from app.schemas.notification import NotificationCreate
     from app.services.notification_service import NotificationService
 
-    notification_data = NotificationCreate(
+    NotificationService.create_project_invitation(
+        db=db,
         recipient_id=user_id,
-        type=NotificationType.PROJECT_INVITE,
+        actor_id=current_user.id,
+        project_id=project_id,
         title="Project Invitation",
         message=f"You have been invited to join the project '{project.title}'.",
         action_url=f"/projects/{project_id}",
-        project_id=project_id,
-    )
-    NotificationService.create_notification(
-        db=db,
-        recipient_id=user_id,
-        sender_id=current_user.id,
-        notification=notification_data,
     )
 
-    from app.services.audit_log_service import AuditLogService
     from app.models.audit_log import AuditAction
+    from app.services.audit_log_service import AuditLogService
 
     AuditLogService.create_log(
         db=db,
@@ -724,6 +760,7 @@ def invite_user(
         target_user_id=user_id,
     )
 
+    cache_manager.delete_pattern("projects:*")
     return {"message": "User invited successfully"}
 
 
