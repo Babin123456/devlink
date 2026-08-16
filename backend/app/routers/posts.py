@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.core.cache import cache_manager, cached
 from app.dependencies import get_current_user, get_database
 from app.models.post import Post
 from app.models.user import User
@@ -61,6 +62,7 @@ def map_db_to_response(db_post: Post) -> PostResponse:
 
 
 @router.get("/", response_model=list[PostResponse])
+@cached(ttl=120, key_prefix="post_list")
 def list_posts(
     db: Session = Depends(get_database),
 ):
@@ -78,6 +80,7 @@ def list_posts(
 
 
 @router.get("/drafts", response_model=list[PostResponse])
+@cached(ttl=120, key_prefix="post_drafts")
 def list_drafts(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_database),
@@ -120,6 +123,7 @@ def create_post(
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
+    cache_manager.delete_pattern("post_*")
     return map_db_to_response(new_post)
 
 
@@ -156,6 +160,7 @@ def update_post(
 
     db.commit()
     db.refresh(db_post)
+    cache_manager.delete_pattern("post_*")
     return map_db_to_response(db_post)
 
 
@@ -175,6 +180,7 @@ def delete_post(
 
     db.delete(db_post)
     db.commit()
+    cache_manager.delete_pattern("post_*")
     return
 
 
@@ -189,6 +195,7 @@ def like_post(
         raise HTTPException(status_code=404, detail="Post not found")
     db_post.likes_count += 1
     db.commit()
+    cache_manager.delete_pattern("post_*")
     return {"likes": db_post.likes_count}
 
 
@@ -203,6 +210,7 @@ def unlike_post(
         raise HTTPException(status_code=404, detail="Post not found")
     db_post.likes_count = max(0, db_post.likes_count - 1)
     db.commit()
+    cache_manager.delete_pattern("post_*")
     return {"likes": db_post.likes_count}
 
 
@@ -222,4 +230,5 @@ def comment_post(
         raise HTTPException(status_code=404, detail="Post not found")
     db_post.comments_count += 1
     db.commit()
+    cache_manager.delete_pattern("post_*")
     return {"comments": db_post.comments_count}

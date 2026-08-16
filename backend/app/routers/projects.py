@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 # pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
-from app.core.cache import cached
+from app.core.cache import cache_manager, cached
 from app.dependencies import get_current_user, get_database, require_project_permission
 from app.middleware.idempotency import IdempotentRoute
 from app.middleware.rate_limit import PROJECT_LIMIT, limiter
@@ -95,6 +95,7 @@ def create_project(
         new_values=project.model_dump(exclude_unset=True),
     )
 
+    cache_manager.delete_pattern("projects:*")
     return new_project
 
 
@@ -398,6 +399,7 @@ def update_project(
         new_values=new_values,
     )
 
+    cache_manager.delete_pattern("projects:*")
     return updated_project
 
 
@@ -677,6 +679,8 @@ def delete_project(
         project_id=project_id,
     )
 
+    cache_manager.delete_pattern("projects:*")
+
 
 @router.post(
     "/{project_id}/invite/{user_id}",
@@ -756,6 +760,7 @@ def invite_user(
         target_user_id=user_id,
     )
 
+    cache_manager.delete_pattern("projects:*")
     return {"message": "User invited successfully"}
 
 

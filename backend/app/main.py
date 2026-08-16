@@ -468,6 +468,7 @@ async def health_simple():
 # ------------------------------------------------------------------
 
 
+from app.routers import connections
 from app.api.v1.router import api_v1_router
 
 # Include Versioned API v1 Router (/api/v1)
@@ -509,6 +510,7 @@ app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
 from app.routers import testimonials
 
 app.include_router(testimonials.router, prefix="/api", tags=["Testimonials"])
+app.include_router(connections.router, prefix="/api/connections", tags=["Connections"])
 app.include_router(export.router, prefix="/api/users", tags=["Export"])
 from app.routers import pinned_projects
 

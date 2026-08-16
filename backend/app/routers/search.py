@@ -1,6 +1,7 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
+from app.core.cache import cached
 
 from app.dependencies import (
     get_database,
@@ -46,6 +47,7 @@ async def semantic_search(
 
 
 @router.get("", summary="Full multi-category search")
+@cached(ttl=60, key_prefix="search")
 def full_search(
     q: str = Query("", max_length=200),
     category: Optional[str] = Query(None),
