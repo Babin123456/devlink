@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { projectsApi } from "@/api/modules/projects";
 import { Card, SectionHeader, Avatar } from "@/components/shared/primitives";
 import {
   Plus,
@@ -16,7 +15,6 @@ import {
   BrainCircuit,
   ArrowRight,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { recommendationsApi } from "@/api";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
@@ -121,8 +119,9 @@ export function CurrentProjects() {
                   </div>
                 )}
               </div>
-            </Link>
-          ))}
+            </div>
+          </div>
+        ))}
       </div>
     </Card>
   );
