@@ -530,6 +530,19 @@ class UserService:
         return user
 
     @staticmethod
+    def update_voice_introduction_url(
+        db: Session,
+        user: User,
+        voice_introduction_url: str,
+    ) -> User:
+        user.voice_introduction_url = voice_introduction_url
+
+        db.commit()
+        db.refresh(user)
+
+        return user
+
+    @staticmethod
     def create_user_report(
         db: Session,
         reporter_id: uuid.UUID,
@@ -549,3 +562,19 @@ class UserService:
         db.refresh(db_report)
 
         return db_report
+
+
+    @staticmethod
+    def update_video_introduction_url(
+       db: Session,
+       user: User,
+       video_introduction_url: str,
+       video_introduction_thumbnail_url: str | None = None,
+    ) -> User:
+       user.video_introduction_url = video_introduction_url
+       user.video_introduction_thumbnail_url = video_introduction_thumbnail_url
+
+       db.commit()
+       db.refresh(user)
+
+       return user
