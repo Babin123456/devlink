@@ -65,7 +65,7 @@ function asNumber(value: FilterValue, fallback: number): number {
 export interface FilterSection {
   id: string;
   title: string;
-  type?: "multi" | "single" | "select" | "range" | "search";
+  type?: "multi" | "multi-select" | "single" | "select" | "range" | "search" | "chip";
   options?: FilterOption[];
   placeholder?: string;
   min?: number;
@@ -187,13 +187,16 @@ export function FilterDrawer({
     isSelected: boolean,
     hasSearchQuery: boolean,
   ) => {
-    const isSearchMode = sections.find((s) => s.id === sectionId)?.type === "search";
+    const section = sections.find((s) => s.id === sectionId);
+    const isSearchMode = section?.type === "search";
+    const isMulti =
+      section?.type === "multi" || section?.type === "multi-select" || section?.type === "chip";
 
     return (
       <button
         key={optionValue}
         type="button"
-        onClick={() => handleOptionToggle(sectionId, optionValue, false)}
+        onClick={() => handleOptionToggle(sectionId, optionValue, isMulti)}
         className={cn(
           "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[12px] font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer",
           isSelected
@@ -314,7 +317,7 @@ export function FilterDrawer({
     }
 
     // Default multi or single - render chips/buttons
-    const isMulti = type === "multi";
+    const isMulti = type === "multi" || type === "multi-select" || type === "chip";
     const selectedList = asList(draftValues[section.id]);
     const selectedText = asText(draftValues[section.id]);
 

@@ -43,9 +43,11 @@ from app.services.user_service import UserService
 from app.utils.uploads import (
     save_image_upload,
     save_resume_upload,
+    save_video_introduction_upload,
     save_voice_introduction_upload,
     validate_image_upload,
     validate_resume_upload,
+    validate_video_introduction_upload,
     validate_voice_introduction_upload,
 )
 from app.utils.validators import validate_username
@@ -518,13 +520,59 @@ async def upload_voice_introduction(
         file.filename,
         current_user.id,
     )
+
     full_voice_url = str(request.base_url).rstrip("/") + voice_url
 
-    return UserService.update_voice_introduction_url(
+    result = UserService.update_voice_introduction_url(
         db,
         current_user,
         full_voice_url,
     )
+    cache_manager.delete_pattern(f"user:*{current_user.id}*")
+    return result
+
+
+@router.post(
+    "/me/video-introduction",
+    response_model=UserResponse,
+    summary="Upload user video introduction",
+)
+async def upload_video_introduction(
+    request: Request,
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_database),
+):
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+
+    contents = await file.read()
+
+    try:
+        validate_video_introduction_upload(
+            file.filename,
+            file.content_type,
+            len(contents),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    video_url = save_video_introduction_upload(
+        contents,
+        file.filename,
+        current_user.id,
+    )
+
+    full_video_url = str(request.base_url).rstrip("/") + video_url
+
+    result = UserService.update_video_introduction_url(
+        db,
+        current_user,
+        full_video_url,
+    )
+    cache_manager.delete_pattern(f"user:*{current_user.id}*")
+    return result
+
 
 @router.delete(
     "/me",
