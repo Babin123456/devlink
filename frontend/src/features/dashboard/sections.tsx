@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+import { projectsApi } from "@/api/modules/projects";
 import { Card, SectionHeader, Avatar } from "@/components/shared/primitives";
 import {
   Plus,
@@ -119,13 +121,8 @@ export function CurrentProjects() {
                   </div>
                 )}
               </div>
-
-              <TypoCaption>
-                {p.dueText}
-              </TypoCaption>
-            </div>
-          </div>
-        ))}
+            </Link>
+          ))}
       </div>
     </Card>
   );
@@ -609,9 +606,7 @@ export function UpgradePlanCTA() {
 
       <div className="min-w-0 flex-1 relative z-10">
         <TypoCard>Upgrade your plan</TypoCard>
-        <TypoCaption as="p">
-          Unlock premium features and boost your productivity.
-        </TypoCaption>
+        <TypoCaption as="p">Unlock premium features and boost your productivity.</TypoCaption>
         <Link
           to="/dashboard"
           className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline mt-2 cursor-pointer"
