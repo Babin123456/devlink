@@ -66,7 +66,7 @@ function asNumber(value: FilterValue, fallback: number): number {
 export interface FilterSection {
   id: string;
   title: string;
-  type?: "multi" | "single" | "select" | "range" | "search";
+  type?: "multi" | "multi-select" | "single" | "select" | "range" | "search" | "chip";
   options?: FilterOption[];
   placeholder?: string;
   min?: number;
