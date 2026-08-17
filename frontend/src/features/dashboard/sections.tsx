@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { projectsApi } from "@/api/modules/projects";
 import { Card, SectionHeader, Avatar } from "@/components/shared/primitives";
 import {
   Plus,
@@ -14,7 +13,6 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { messagesService } from "@/services";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { Link } from "@tanstack/react-router";
@@ -120,8 +118,9 @@ export function CurrentProjects() {
                   </div>
                 )}
               </div>
-            </Link>
-          ))}
+            </div>
+          </div>
+        ))}
       </div>
     </Card>
   );
