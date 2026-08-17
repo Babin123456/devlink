@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, notFound } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { projectsService } from "@/services";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
@@ -40,13 +41,9 @@ import { ApplyModal } from "@/features/projects/components/ApplyModal";
 
 export const Route = createFileRoute("/_app/projects/$projectId")({
   loader: async ({ params }) => {
-    try {
-      const project = await projectsService.get(params.projectId);
-      if (!project) throw notFound();
-      return { project };
-    } catch (e) {
-      throw notFound();
-    }
+    const project = await projectsService.get(params.projectId).catch(() => null);
+    if (!project) throw notFound();
+    return { project };
   },
   head: ({ loaderData, params }) => {
     const p = loaderData?.project;
