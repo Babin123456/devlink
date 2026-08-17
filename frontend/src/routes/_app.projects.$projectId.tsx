@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, Outlet } from "@tanstack/react-router";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { projectsService } from "@/services";
 import { Card, TagChip, Avatar, Skeleton } from "@/components/shared/primitives";
@@ -218,7 +218,7 @@ function ProjectDetail() {
     // project data is unavailable (backend offline / not found), render the
     // child outlet so sub-pages can display their own standalone content
     // instead of crashing the whole route tree.
-    return <Outlet />;  
+    return <Outlet />;
   }
 
   const tabs = dashboard
