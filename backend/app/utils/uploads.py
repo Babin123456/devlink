@@ -115,6 +115,24 @@ def validate_video_introduction_upload(
 
 
 def save_video_introduction_upload(
+    contents: bytes,
+    filename: str,
+    user_id: uuid.UUID | str,
+) -> str:
+    scan_file_for_malware(contents, filename)
+
+    upload_dir = Path(settings.UPLOAD_DIR) / "video_introductions"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    extension = Path(filename).suffix.lower()
+    safe_name = f"{user_id}-{uuid.uuid4().hex}{extension}"
+
+    destination = upload_dir / safe_name
+    destination.write_bytes(contents)
+
+    return f"/uploads/video_introductions/{safe_name}"
+
+
 def validate_voice_introduction_upload(
     filename: str | None, content_type: str | None, size_bytes: int
 ) -> None:
@@ -147,7 +165,6 @@ def save_voice_introduction_upload(
 ) -> str:
     scan_file_for_malware(contents, filename)
 
-    upload_dir = Path(settings.UPLOAD_DIR) / "video_introductions"
     upload_dir = Path(settings.UPLOAD_DIR) / "voice_introductions"
     upload_dir.mkdir(parents=True, exist_ok=True)
 
@@ -157,7 +174,6 @@ def save_voice_introduction_upload(
     destination = upload_dir / safe_name
     destination.write_bytes(contents)
 
-    return f"/uploads/video_introductions/{safe_name}"
     return f"/uploads/voice_introductions/{safe_name}"
 
 def validate_image_upload(
