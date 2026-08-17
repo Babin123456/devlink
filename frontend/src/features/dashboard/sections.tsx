@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { projectsApi } from "@/api/modules/projects";
 import { Card, SectionHeader, Avatar } from "@/components/shared/primitives";
 import {
   Plus,
@@ -14,10 +13,10 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { projectsService } from "@/services";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { TypoCaption, TypoCard } from "@/components/shared/Typography";
 import type { Project } from "@/mocks/seed";
 
 // 1. Current Projects
