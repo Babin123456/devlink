@@ -1,7 +1,7 @@
 """advanced messaging features: scheduling, pinning, voice type
 
 Revision ID: f3a7b1c2d9e0
-Revises: ffff00000099
+Revises: zzzz00000001
 Create Date: 2026-08-16 12:05:00.000000
 
 Adds the schema needed for the advanced messaging features (issue #973):
@@ -25,7 +25,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 # revision identifiers, used by Alembic.
 revision: str = "f3a7b1c2d9e0"
-down_revision: Union[str, Sequence[str], None] = "ffff00000099"
+down_revision: Union[str, Sequence[str], None] = "zzzz00000001"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
