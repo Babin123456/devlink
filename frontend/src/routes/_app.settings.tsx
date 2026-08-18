@@ -5,9 +5,7 @@ import { Card } from "@/components/shared/primitives";
 import { UserAvatar } from "@/components/user-avatar";
 import { ImageCropUploadModal } from "@/components/shared/ImageCropUploadModal";
 import { DeleteAccountModal } from "@/components/settings/DeleteAccountModal";
-import { OAuthAccountsSection } from "@/components/settings/OAuthAccountsSection";
-import { MFASection } from "@/features/settings/components/MFASection";
-import { UserSessionsActivity } from "@/components/settings/UserSessionsActivity";
+import { SecurityDashboard } from "@/features/settings/components/security/SecurityDashboard";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -26,6 +24,7 @@ import {
   Save,
   ChevronRight,
   ExternalLink,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -60,10 +59,7 @@ export const Route = createFileRoute("/_app/settings")({
 
 function SettingsPage() {
   const [tab, setTab] = useState<TabId>("account");
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
   const [savingAccount, setSavingAccount] = useState(false);
-  const [savingPassword, setSavingPassword] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
@@ -96,9 +92,7 @@ function SettingsPage() {
     <div className="mx-auto max-w-5xl space-y-6 py-6">
       <div className="px-0">
         <TypoHeading as="h1">Settings</TypoHeading>
-        <TypoCaption as="p">
-          Manage your account settings and preferences
-        </TypoCaption>
+        <TypoCaption as="p">Manage your account settings and preferences</TypoCaption>
       </div>
 
       <Separator />
@@ -113,7 +107,7 @@ function SettingsPage() {
                 className={cn(
                   "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-[13px] font-medium transition-all",
                   tab === t.id
-                    ? "bg-primary-soft text-primary"
+                    ? "bg-primary-soft text-primary font-semibold"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
@@ -121,6 +115,24 @@ function SettingsPage() {
                 {t.label}
               </button>
             ))}
+
+            <div className="pt-6">
+              <div className="rounded-xl border border-border/70 bg-primary/5 p-4 space-y-2.5">
+                <p className="text-xs font-semibold text-foreground">Need help?</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Visit our help center for security guides and FAQs.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs font-medium border-border hover:bg-muted justify-between h-8 px-2.5"
+                  onClick={() => toast.info("Help center guides opening...")}
+                >
+                  <span>Visit Help Center</span>
+                  <ExternalLink size={12} className="text-muted-foreground" />
+                </Button>
+              </div>
+            </div>
           </nav>
         </aside>
 
@@ -130,15 +142,11 @@ function SettingsPage() {
               <div className="p-6 space-y-6">
                 <div>
                   <TypoHeading as="h2">Profile</TypoHeading>
-                  <TypoCaption as="p">
-                    Manage your public profile information
-                  </TypoCaption>
+                  <TypoCaption as="p">Manage your public profile information</TypoCaption>
                 </div>
 
                 <div className="rounded-lg border border-border bg-muted/30 p-5 space-y-4">
-                  <TypoSection>
-                    Profile Media
-                  </TypoSection>
+                  <TypoSection>Profile Media</TypoSection>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-5 text-center">
                       <UserAvatar
@@ -152,9 +160,7 @@ function SettingsPage() {
                         <p className="text-sm font-medium text-foreground">Avatar</p>
                         <TypoCaption as="p">Recommended: 400x400px</TypoCaption>
                         <p className="text-xs font-semibold text-foreground">Avatar Photo</p>
-                        <TypoCaption as="p">
-                          Drag & drop or crop before upload
-                        </TypoCaption>
+                        <TypoCaption as="p">Drag & drop or crop before upload</TypoCaption>
                       </div>
                       <Button
                         type="button"
@@ -183,9 +189,7 @@ function SettingsPage() {
                         <p className="text-sm font-medium text-foreground">Banner</p>
                         <TypoCaption as="p">Recommended: 1200x400px</TypoCaption>
                         <p className="text-xs font-semibold text-foreground">Header Banner</p>
-                        <TypoCaption as="p">
-                          3:1 aspect ratio landscape
-                        </TypoCaption>
+                        <TypoCaption as="p">3:1 aspect ratio landscape</TypoCaption>
                       </div>
                       <Button
                         type="button"
@@ -250,9 +254,7 @@ function SettingsPage() {
                       defaultValue="Product engineer. React / Postgres / Rust."
                       placeholder="Tell us about yourself"
                     />
-                    <TypoCaption as="p">
-                      Brief description for your profile
-                    </TypoCaption>
+                    <TypoCaption as="p">Brief description for your profile</TypoCaption>
                   </div>
                   <div className="flex items-center gap-3 pt-2">
                     <Button type="submit" className="gap-2" disabled={savingAccount}>
@@ -314,18 +316,14 @@ function SettingsPage() {
               <div className="p-6 space-y-6">
                 <div>
                   <TypoHeading as="h2">Appearance</TypoHeading>
-                  <TypoCaption as="p">
-                    Customize how DevLink looks for you
-                  </TypoCaption>
+                  <TypoCaption as="p">Customize how DevLink looks for you</TypoCaption>
                 </div>
 
                 <div className="space-y-5">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-foreground">Theme</p>
-                      <TypoCaption as="p">
-                        Select your preferred color scheme
-                      </TypoCaption>
+                      <TypoCaption as="p">Select your preferred color scheme</TypoCaption>
                     </div>
                     <div className="flex gap-2">
                       <Button variant="default" size="sm" className="gap-2">
@@ -345,9 +343,7 @@ function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-foreground">Reduced motion</p>
-                      <TypoCaption as="p">
-                        Minimize animations across the interface
-                      </TypoCaption>
+                      <TypoCaption as="p">Minimize animations across the interface</TypoCaption>
                     </div>
                     <Switch />
                   </div>
@@ -355,9 +351,7 @@ function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-foreground">Compact mode</p>
-                      <TypoCaption as="p">
-                        Reduce spacing for a denser layout
-                      </TypoCaption>
+                      <TypoCaption as="p">Reduce spacing for a denser layout</TypoCaption>
                     </div>
                     <Switch />
                   </div>
@@ -369,16 +363,12 @@ function SettingsPage() {
               <div className="p-6 space-y-6">
                 <div>
                   <TypoHeading as="h2">Notifications</TypoHeading>
-                  <TypoCaption as="p">
-                    Choose what notifications you receive
-                  </TypoCaption>
+                  <TypoCaption as="p">Choose what notifications you receive</TypoCaption>
                 </div>
 
                 <div className="space-y-5">
                   <div>
-                    <TypoSection>
-                      Push notifications
-                    </TypoSection>
+                    <TypoSection>Push notifications</TypoSection>
                     <div className="space-y-4">
                       {[
                         {
@@ -429,9 +419,7 @@ function SettingsPage() {
                   <Separator />
 
                   <div>
-                    <TypoSection>
-                      Email notifications
-                    </TypoSection>
+                    <TypoSection>Email notifications</TypoSection>
                     <div className="space-y-4">
                       {[
                         {
@@ -479,96 +467,13 @@ function SettingsPage() {
               </div>
             )}
 
-            {tab === "security" && (
-              <div className="p-6 space-y-6">
-                <div>
-                  <TypoHeading as="h2">Security</TypoHeading>
-                  <TypoCaption as="p">
-                    Manage your password and account security
-                  </TypoCaption>
-                </div>
-
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    if (savingPassword) return;
-                    setSavingPassword(true);
-                    try {
-                      await new Promise((r) => setTimeout(r, 800));
-                      toast.success("Password updated successfully");
-                    } finally {
-                      setSavingPassword(false);
-                    }
-                  }}
-                  className="max-w-md space-y-5"
-                >
-                  <div>
-                    <label className={lbl}>Current password</label>
-                    <div className="relative">
-                      <input
-                        type={showCurrentPassword ? "text" : "password"}
-                        className={`${inp} pr-10`}
-                        placeholder="Enter current password"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        aria-label={showCurrentPassword ? "Hide password" : "Show password"}
-                      >
-                        {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={lbl}>New password</label>
-                    <div className="relative">
-                      <input
-                        type={showNewPassword ? "text" : "password"}
-                        className={`${inp} pr-10`}
-                        placeholder="Enter new password"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowNewPassword(!showNewPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        aria-label={showNewPassword ? "Hide password" : "Show password"}
-                      >
-                        {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                    <Button type="submit" disabled={savingPassword} className="gap-2">
-                      <Save size={15} />
-                      {savingPassword ? "Updating..." : "Update password"}
-                    </Button>
-                  </div>
-                </form>
-
-                <Separator />
-
-                <OAuthAccountsSection />
-
-                <Separator />
-
-                <MFASection />
-
-                <Separator />
-
-                <UserSessionsActivity />
-              </div>
-            )}
+            {tab === "security" && <SecurityDashboard userEmail="nancy@example.com" />}
 
             {tab === "billing" && (
               <div className="p-6 space-y-6">
                 <div>
                   <TypoHeading as="h2">Billing</TypoHeading>
-                  <TypoCaption as="p">
-                    Manage your subscription and payment methods
-                  </TypoCaption>
+                  <TypoCaption as="p">Manage your subscription and payment methods</TypoCaption>
                 </div>
 
                 <div className="rounded-lg border border-border p-5 space-y-4">
@@ -610,9 +515,7 @@ function SettingsPage() {
               <div className="p-6 space-y-6">
                 <div>
                   <TypoHeading as="h2">Export Data</TypoHeading>
-                  <TypoCaption as="p">
-                    Download a copy of your DevLink data
-                  </TypoCaption>
+                  <TypoCaption as="p">Download a copy of your DevLink data</TypoCaption>
                 </div>
 
                 <div className="rounded-lg border border-border p-5 space-y-4">
