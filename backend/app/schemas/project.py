@@ -216,3 +216,13 @@ class ProjectDraftCreate(ProjectBase):
 
 class ProjectDraftUpdate(ProjectUpdate):
     pass
+
+
+class ProjectCloneRequest(BaseModel):
+    title: Optional[str] = None
+    tagline: Optional[str] = None
+    description: Optional[str] = None
+    visibility: Optional[ProjectVisibility] = None
+    include_milestones: bool = False
+    include_tags: bool = True
+
