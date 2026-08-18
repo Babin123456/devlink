@@ -126,6 +126,9 @@ export const projectsService = {
 
   updateDraft: (id: string, body: any) =>
     withFallback(() => projectsApi.updateDraft(id, body as any), {} as any),
+
+  clone: (id: string, body?: any) =>
+    projectsApi.clone(id, body),
 };
 
 export const buildersService = {
