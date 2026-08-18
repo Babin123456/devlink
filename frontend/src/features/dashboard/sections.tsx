@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { projectsApi } from "@/api/modules/projects";
-import { Card, SectionHeader, Avatar } from "@/components/shared/primitives";
+import { Card, EmptyState, SectionHeader, Avatar } from "@/components/shared/primitives";
 import {
   Plus,
   Flame,
@@ -44,16 +44,13 @@ export function CurrentProjects() {
           </div>
         )}
         {!isLoading && !error && projects?.length === 0 && (
-          <div className="flex-1 flex flex-col items-center justify-center py-8 text-center gap-2">
-            <p className="text-sm font-semibold text-foreground">No projects yet</p>
-            <TypoCaption as="p">Start building something amazing.</TypoCaption>
-            <Link
-              to="/projects"
-              className="mt-2 text-xs font-semibold text-primary hover:underline"
-            >
-              Create Project
-            </Link>
-          </div>
+          <EmptyState
+            icon={Rocket}
+            title="No projects yet"
+            desc="Start building something amazing with your next collaboration."
+            action={<Link to="/projects" className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90">Create project</Link>}
+            className="py-8"
+          />
         )}
         {!isLoading &&
           !error &&

@@ -1,13 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { activitiesService } from "@/services";
-import { Card, Skeleton } from "@/components/shared/primitives";
+import { Card, EmptyState, Skeleton } from "@/components/shared/primitives";
 import { formatDistanceToNow } from "date-fns";
 import { UserPlus, Edit3, FolderPlus, Award, Clock, MessageCircle, FileText, Github } from "lucide-react";
 import type { BackendActivity } from "@/services";
 import { TypoCaption } from "@/components/shared/Typography";
+import type { ReactNode } from "react";
 
 interface ActivityTimelineProps {
   userId: string;
+  emptyAction?: ReactNode;
 }
 
 function getActivityIcon(type: string) {
@@ -34,7 +36,7 @@ function getActivityIcon(type: string) {
   }
 }
 
-export function ActivityTimeline({ userId }: ActivityTimelineProps) {
+export function ActivityTimeline({ userId, emptyAction }: ActivityTimelineProps) {
   const { data: activities, isLoading, isError } = useQuery({
     queryKey: ["user-activities", userId],
     queryFn: () => activitiesService.user(userId),
@@ -65,9 +67,13 @@ export function ActivityTimeline({ userId }: ActivityTimelineProps) {
       )}
 
       {!isLoading && !isError && activities?.length === 0 && (
-        <TypoCaption as="p">
-          No recent activity to show.
-        </TypoCaption>
+        <EmptyState
+          icon={Clock}
+          title="No activity yet"
+          desc="Projects, profile updates, and community contributions will appear here."
+          action={emptyAction}
+          className="py-8"
+        />
       )}
 
       {!isLoading && !isError && activities && activities.length > 0 && (
