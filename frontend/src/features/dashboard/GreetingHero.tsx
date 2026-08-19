@@ -26,9 +26,7 @@ export function GreetingHero() {
           <TypoHeading as="h1">
             {greeting}, {first}! 👋
           </TypoHeading>
-          <TypoCaption as="p">
-            Here's what's happening with your workspace today.
-          </TypoCaption>
+          <TypoCaption as="p">Here's what's happening with your workspace today.</TypoCaption>
         </div>
 
         {/* Inline Stats Badges Row */}

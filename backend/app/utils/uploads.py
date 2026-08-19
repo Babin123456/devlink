@@ -28,6 +28,7 @@ ALLOWED_VOICE_MIME_TYPES: Final[set[str]] = {
 
 MAX_VOICE_SIZE_BYTES: Final[int] = 10 * 1024 * 1024
 
+
 def scan_file_for_malware(contents: bytes, filename: str) -> None:
     """
     Malware scanning hook for uploaded files.
@@ -83,6 +84,7 @@ def save_resume_upload(contents: bytes, filename: str, user_id: uuid.UUID | str)
     destination.write_bytes(contents)
 
     return f"/uploads/resumes/{safe_name}"
+
 
 ALLOWED_VIDEO_EXTENSIONS: Final[set[str]] = {
     ".mp4",
@@ -165,16 +167,12 @@ def validate_voice_introduction_upload(
     allowed_exts = {".mp3", ".wav", ".webm", ".ogg"}
 
     if ext not in allowed_exts:
-        raise ValueError(
-            "Unsupported audio format. Allowed: MP3, WAV, WebM, OGG."
-        )
+        raise ValueError("Unsupported audio format. Allowed: MP3, WAV, WebM, OGG.")
 
     normalized_content_type = (content_type or "").lower()
 
     if normalized_content_type not in ALLOWED_VOICE_MIME_TYPES:
-        raise ValueError(
-            "Please upload a valid audio file."
-        )
+        raise ValueError("Please upload a valid audio file.")
 
     if size_bytes > MAX_VOICE_SIZE_BYTES:
         raise ValueError("Voice introduction must be smaller than 10MB.")
