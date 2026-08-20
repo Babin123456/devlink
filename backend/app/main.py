@@ -68,6 +68,7 @@ from app.routers import (
     maintenance,
     message_drafts,
     global_announcements,
+    feature_announcements,
     posts,
 )
 
@@ -502,9 +503,8 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 from app.routers import mfa
 
 app.include_router(mfa.router, prefix="/api")
-app.include_router(
-    global_announcements.router, prefix="/api", tags=["Global Announcements"]
-)
+app.include_router(global_announcements.router, prefix="/api", tags=["Global Announcements"])
+app.include_router(feature_announcements.router, prefix="/api", tags=["Feature Announcement Center"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(blocks.router, prefix="/api/blocks", tags=["User Blocks"])
 from app.routers import testimonials
