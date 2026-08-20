@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, SectionHeader, Avatar } from "@/components/shared/primitives";
+import { projectsApi } from "@/api/modules/projects";
+import { Card, EmptyState, SectionHeader, Avatar } from "@/components/shared/primitives";
 import {
   Plus,
   Flame,
@@ -132,34 +133,47 @@ export function CurrentProjects() {
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
       <SectionHeader title="Current Projects" action="View All" actionTo="/projects" />
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-4">
-        {projectsList.map((p) => (
-          <div
-            key={p.id}
-            className="flex items-center justify-between gap-4 p-3 rounded-xl border border-border/40 hover:bg-muted/10 transition-colors"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div
-                className={cn(
-                  "flex items-center justify-center h-10 w-10 shrink-0 rounded-lg text-sm font-bold",
-                  p.iconBg,
-                )}
-              >
-                {p.iconText}
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
-                <TypoCaption as="p">{p.status}</TypoCaption>
-              </div>
-            </div>
-
-            {/* Progress bar stack */}
-            <div className="flex items-center gap-4 shrink-0">
-              <div className="hidden sm:flex flex-col items-end gap-1">
-                <div className="h-1.5 w-24 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full"
-                    style={{ width: `${p.progress}%` }}
-                  />
+        {isLoading && (
+          <div className="flex-1 flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+          </div>
+        )}
+        {error && !isLoading && (
+          <div className="flex-1 flex items-center justify-center py-8 text-destructive text-sm">
+            Failed to load projects.
+          </div>
+        )}
+        {!isLoading && !error && projects?.length === 0 && (
+          <EmptyState
+            icon={Rocket}
+            title="No projects yet"
+            desc="Start building something amazing with your next collaboration."
+            action={<Link to="/projects" className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90">Create project</Link>}
+            className="py-8"
+          />
+        )}
+        {!isLoading &&
+          !error &&
+          projects &&
+          projects.length > 0 &&
+          projects.slice(0, 3).map((p) => (
+            <Link
+              key={p.id}
+              to="/projects/$projectId"
+              params={{ projectId: p.id }}
+              className="flex items-center justify-between gap-4 p-3 rounded-xl border border-border/40 hover:bg-muted/10 transition-colors"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center justify-center h-10 w-10 shrink-0 rounded-lg text-sm font-bold bg-primary/10 text-primary border border-primary/20">
+                  {(p.name || "P").charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate hover:text-primary transition-colors">
+                    {p.name}
+                  </p>
+                  <TypoCaption as="p">
+                    {(p.status || p.stage || "Active").replace("_", " ")}
+                  </TypoCaption>
                 </div>
                 <span className="text-[10px] font-semibold text-muted-foreground">
                   {p.progress}%
