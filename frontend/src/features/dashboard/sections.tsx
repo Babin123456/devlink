@@ -13,6 +13,8 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react";
+import { messagesService } from "@/services";
+import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import { projectsService } from "@/services";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
@@ -21,6 +23,47 @@ import type { Project } from "@/mocks/seed";
 
 // 1. Current Projects
 export function CurrentProjects() {
+  const projectsList = [
+    {
+      id: "p1",
+      name: "DevLink Platform",
+      status: "In Progress",
+      progress: 80,
+      dueText: "Due in 5 days",
+      iconText: "D",
+      iconBg: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
+      avatars: [
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Alex",
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
+      ],
+      extraAvatars: 3,
+    },
+    {
+      id: "p2",
+      name: "AI Matching Engine",
+      status: "In Progress",
+      progress: 60,
+      dueText: "Due in 12 days",
+      iconText: "A",
+      iconBg: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
+      avatars: [
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Priya",
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=John",
+      ],
+      extraAvatars: 2,
+    },
+    {
+      id: "p3",
+      name: "Mobile App",
+      status: "Planning",
+      progress: 25,
+      dueText: "Due in 18 days",
+      iconText: "M",
+      iconBg: "bg-violet-500/10 text-violet-500 border border-violet-500/20",
+      avatars: ["https://api.dicebear.com/9.x/notionists-neutral/svg?seed=David"],
+      extraAvatars: 1,
+    },
+  ];
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ["dashboardCurrentProjects"],
     queryFn: () => projectsService.list(),
@@ -85,6 +128,39 @@ export function CurrentProjects() {
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
       <SectionHeader title="Current Projects" action="View All" actionTo="/projects" />
+      <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-4">
+        {projectsList.map((p) => (
+          <div
+            key={p.id}
+            className="flex items-center justify-between gap-4 p-3 rounded-xl border border-border/40 hover:bg-muted/10 transition-colors"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className={cn(
+                  "flex items-center justify-center h-10 w-10 shrink-0 rounded-lg text-sm font-bold",
+                  p.iconBg,
+                )}
+              >
+                {p.iconText}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">{p.name}</p>
+                <TypoCaption as="p">{p.status}</TypoCaption>
+              </div>
+            </div>
+
+            {/* Progress bar stack */}
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="hidden sm:flex flex-col items-end gap-1">
+                <div className="h-1.5 w-24 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full"
+                    style={{ width: `${p.progress}%` }}
+                  />
+                </div>
+                <span className="text-[10px] font-semibold text-muted-foreground">
+                  {p.progress}%
+                </span>
       <div className="flex-1 px-4 sm:px-5 pb-5 pt-1 flex flex-col gap-3.5">
         {isLoading
           ? Array.from({ length: 3 }).map((_, i) => (
@@ -106,6 +182,26 @@ export function CurrentProjects() {
               };
               const statusBadge = statusMap[p.status] || statusMap["in-progress"];
 
+              {/* Avatar stack */}
+              <div className="flex -space-x-1.5 items-center shrink-0">
+                {p.avatars.map((av, idx) => (
+                  <Avatar
+                    key={idx}
+                    src={av}
+                    alt="Team"
+                    size={24}
+                    className="border border-card ring-1 ring-border/20"
+                  />
+                ))}
+                {p.extraAvatars > 0 && (
+                  <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted border border-card text-[9px] font-semibold text-muted-foreground ring-1 ring-border/20">
+                    +{p.extraAvatars}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
               return (
                 <div
                   key={p.id}
@@ -422,7 +518,146 @@ export function Upcoming() {
   );
 }
 
-// 6. Notifications (Sidebar Widget)
+// 6. Compact Messaging Widget (Sidebar Widget - #741)
+export function CompactMessagingWidget() {
+  const { data: conversations = [], isLoading } = useQuery({
+    queryKey: ["compactMessagingWidget"],
+    queryFn: () => messagesService.conversations(),
+  });
+
+  const fallbackConversations = [
+    {
+      id: "c1",
+      with: {
+        name: "Sarah Chen",
+        avatar: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
+        online: true,
+      },
+      preview: "Sounds great! Let's sync tomorrow.",
+      unread: 2,
+      ago: "5m",
+      isTyping: true,
+    },
+    {
+      id: "c2",
+      with: {
+        name: "Alex Rivera",
+        avatar: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Alex",
+        online: true,
+      },
+      preview: "Merged the latest PR for auth.",
+      unread: 0,
+      ago: "25m",
+      isTyping: false,
+    },
+    {
+      id: "c3",
+      with: {
+        name: "David Kim",
+        avatar: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=David",
+        online: false,
+      },
+      preview: "Can you review the wireframes?",
+      unread: 1,
+      ago: "2h",
+      isTyping: false,
+    },
+  ];
+
+  const displayConversations =
+    conversations.length > 0
+      ? conversations.slice(0, 3).map((c, idx) => ({
+          ...c,
+          isTyping: idx === 0,
+        }))
+      : fallbackConversations;
+
+  return (
+    <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
+      <SectionHeader title="Messages" action="Open Chat" actionTo="/messages" />
+      <div className="px-3.5 pb-4 pt-1 flex flex-col gap-1.5">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-2.5 p-2 rounded-xl border border-transparent animate-pulse"
+            >
+              <div className="h-8 w-8 rounded-full bg-muted shrink-0" />
+              <div className="space-y-1.5 flex-1">
+                <div className="h-3 w-1/3 bg-muted rounded" />
+                <div className="h-2 w-2/3 bg-muted rounded" />
+              </div>
+            </div>
+          ))
+        ) : displayConversations.length === 0 ? (
+          <div className="py-6 text-center text-xs text-muted-foreground">
+            <MessageSquare size={20} className="mx-auto mb-1 opacity-50" />
+            No active conversations
+          </div>
+        ) : (
+          displayConversations.map((c) => (
+            <Link
+              key={c.id}
+              to="/messages/$conversationId"
+              params={{ conversationId: c.id }}
+              className="group flex items-center gap-2.5 p-2 rounded-xl hover:bg-muted/40 transition-colors border border-transparent hover:border-border/40"
+            >
+              {/* Compact 32px Avatar with live online dot */}
+              <div className="relative shrink-0">
+                <Avatar
+                  src={c.with.avatar}
+                  alt={c.with.name}
+                  size={32}
+                  className="rounded-full border border-border/30"
+                />
+                {c.with.online && (
+                  <span
+                    className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-card"
+                    title="Online"
+                  />
+                )}
+              </div>
+
+              {/* Message text and sender name */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-1">
+                  <p className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+                    {c.with.name}
+                  </p>
+                  <span className="text-[10px] text-muted-foreground shrink-0">{c.ago}</span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 mt-0.5">
+                  {c.isTyping ? (
+                    <div className="flex items-center text-primary text-[11px] font-medium">
+                      <TypingIndicator
+                        className="p-0 text-primary scale-90 origin-left"
+                        label="typing..."
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground truncate group-hover:text-foreground/80 transition-colors">
+                      {c.preview}
+                    </p>
+                  )}
+
+                  {/* Unread badge */}
+                  {c.unread > 0 && (
+                    <span className="grid place-items-center h-4 min-w-[16px] px-1 rounded-full bg-primary text-[9px] font-bold text-primary-foreground shrink-0">
+                      {c.unread}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </Link>
+          ))
+        )}
+      </div>
+    </Card>
+  );
+}
+
+// Notifications (Sidebar Widget)
 export function NotificationsWidget() {
   const notifications = [
     {
