@@ -1,23 +1,16 @@
-import { recommendationsApi } from "@/api";
-import { TypingIndicator } from "@/components/chat/TypingIndicator";
-import { Avatar, Card, EmptyState, SectionHeader } from "@/components/shared/primitives";
-import { TypoCaption, TypoCard } from "@/components/shared/Typography";
-import { cn } from "@/lib/utils";
-import type { Project } from "@/mocks/seed";
-import { messagesService, projectsService } from "@/services";
 import { useQuery } from "@tanstack/react-query";
 import { projectsApi } from "@/api/modules/projects";
 import { Card, EmptyState, SectionHeader, Avatar } from "@/components/shared/primitives";
 import {
-  ArrowRight,
-  BrainCircuit,
-  Calendar,
-  ChevronRight,
-  Clock,
-  Flame,
-  MessageSquare,
   Plus,
+  Flame,
+  Users2,
+  MessageSquare,
+  ChevronRight,
+  Calendar,
+  Clock,
   Rocket,
+  User,
   Sparkles,
   TrendingUp,
   BrainCircuit,
@@ -32,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { TypoCaption, TypoCard } from "@/components/shared/Typography";
 import type { Project } from "@/mocks/seed";
 
+// 1. Current Projects
 export function CurrentProjects() {
   const projectsList = [
     {
@@ -137,24 +131,14 @@ export function CurrentProjects() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
-      <SectionHeader
-        title="Current Projects"
-        action="View All"
-        actionTo="/projects"
-      />
-
-      <div className="flex-1 px-4 sm:px-5 pb-5 pt-1 flex flex-col gap-3.5">
-        {isLoading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="p-4 rounded-xl border border-border/40 space-y-2 animate-pulse bg-muted/20"
-            >
-              <div className="h-4 w-1/3 bg-muted rounded" />
-              <div className="h-2 w-full bg-muted rounded-full" />
-            </div>
-          ))
-        ) : error ? (
+      <SectionHeader title="Current Projects" action="View All" actionTo="/projects" />
+      <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-4">
+        {isLoading && (
+          <div className="flex-1 flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+          </div>
+        )}
+        {error && !isLoading && (
           <div className="flex-1 flex items-center justify-center py-8 text-destructive text-sm">
             Failed to load projects.
           </div>
@@ -183,23 +167,13 @@ export function CurrentProjects() {
                 <div className="flex items-center justify-center h-10 w-10 shrink-0 rounded-lg text-sm font-bold bg-primary/10 text-primary border border-primary/20">
                   {(p.name || "P").charAt(0).toUpperCase()}
                 </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-muted-foreground font-medium">
-                      Completion
-                    </span>
-                    <span className="font-bold text-foreground">
-                      {progressVal}%
-                    </span>
-                  </div>
-
-                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full transition-all duration-300"
-                      style={{ width: `${progressVal}%` }}
-                    />
-                  </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate hover:text-primary transition-colors">
+                    {p.name}
+                  </p>
+                  <TypoCaption as="p">
+                    {(p.status || p.stage || "Active").replace("_", " ")}
+                  </TypoCaption>
                 </div>
                 <span className="text-[10px] font-semibold text-muted-foreground">
                   {p.progress}%
@@ -409,12 +383,9 @@ export function AISuggestions() {
         ) : results.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-6 text-center text-xs text-muted-foreground">
             <BrainCircuit size={28} className="text-primary/60 mb-2" />
-            <p className="font-semibold text-foreground">
-              No recommendations available
-            </p>
+            <p className="font-semibold text-foreground">No recommendations available</p>
             <p className="mt-0.5">
-              Add skills to your profile to get personalized AI collaborator
-              matches.
+              Add skills to your profile to get personalized AI collaborator matches.
             </p>
           </div>
         ) : (
@@ -505,6 +476,7 @@ export function AISuggestions() {
   );
 }
 
+// 3. Quick Actions
 export function QuickActions() {
   const actions = [
     {
@@ -543,14 +515,10 @@ export function QuickActions() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
-      <div className="px-5 pt-5 pb-2 font-semibold text-sm text-foreground">
-        Quick Actions
-      </div>
-
+      <div className="px-5 pt-5 pb-2 font-semibold text-sm text-foreground">Quick Actions</div>
       <div className="grid grid-cols-2 gap-3 p-4 pt-1 flex-1">
         {actions.map((act) => {
           const Icon = act.icon;
-
           return (
             <Link
               key={act.label}
@@ -569,10 +537,7 @@ export function QuickActions() {
               >
                 <Icon size={20} />
               </div>
-
-              <span className="text-xs font-bold text-foreground">
-                {act.label}
-              </span>
+              <span className="text-xs font-bold text-foreground">{act.label}</span>
             </Link>
           );
         })}
@@ -581,6 +546,7 @@ export function QuickActions() {
   );
 }
 
+// 4. Recent Activity
 export function RecentActivity() {
   const activities = [
     {
@@ -611,12 +577,7 @@ export function RecentActivity() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
-      <SectionHeader
-        title="Recent Activity"
-        action="View All"
-        actionTo="/dashboard"
-      />
-
+      <SectionHeader title="Recent Activity" action="View All" actionTo="/dashboard" />
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-3">
         {activities.map((act) => (
           <Link
@@ -625,25 +586,13 @@ export function RecentActivity() {
             className="flex items-center justify-between gap-4 p-2.5 rounded-lg border border-transparent hover:border-border/40 hover:bg-muted/10 transition-colors"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div
-                className={cn(
-                  "h-2 w-2 rounded-full shrink-0",
-                  act.bulletColor,
-                )}
-              />
-
+              <div className={cn("h-2 w-2 rounded-full shrink-0", act.bulletColor)} />
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-foreground truncate">
-                  {act.text}
-                </p>
+                <p className="text-xs font-semibold text-foreground truncate">{act.text}</p>
                 <TypoCaption as="p">{act.time}</TypoCaption>
               </div>
             </div>
-
-            <ChevronRight
-              size={14}
-              className="text-muted-foreground shrink-0"
-            />
+            <ChevronRight size={14} className="text-muted-foreground shrink-0" />
           </Link>
         ))}
       </div>
@@ -651,6 +600,7 @@ export function RecentActivity() {
   );
 }
 
+// 5. Upcoming (Center list widget)
 export function Upcoming() {
   const upcomingList = [
     {
@@ -678,16 +628,10 @@ export function Upcoming() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
-      <SectionHeader
-        title="Upcoming"
-        action="View All"
-        actionTo="/dashboard"
-      />
-
+      <SectionHeader title="Upcoming" action="View All" actionTo="/dashboard" />
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-3">
         {upcomingList.map((item) => {
           const Icon = item.icon;
-
           return (
             <div
               key={item.id}
@@ -701,11 +645,8 @@ export function Upcoming() {
               >
                 <Icon size={16} />
               </div>
-
               <div className="min-w-0">
-                <p className="text-xs font-bold text-foreground truncate">
-                  {item.title}
-                </p>
+                <p className="text-xs font-bold text-foreground truncate">{item.title}</p>
                 <TypoCaption as="p">{item.time}</TypoCaption>
               </div>
             </div>
@@ -886,26 +827,13 @@ export function NotificationsWidget() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
-      <SectionHeader
-        title="Notifications"
-        action="View All"
-        actionTo="/dashboard"
-      />
-
+      <SectionHeader title="Notifications" action="View All" actionTo="/dashboard" />
       <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5">
         {notifications.map((n) => (
           <div key={n.id} className="flex items-start gap-3 min-w-0">
-            <div
-              className={cn(
-                "h-2.5 w-2.5 rounded-full shrink-0 mt-1",
-                n.dotColor,
-              )}
-            />
-
+            <div className={cn("h-2.5 w-2.5 rounded-full shrink-0 mt-1", n.dotColor)} />
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-foreground leading-tight">
-                {n.text}
-              </p>
+              <p className="text-xs font-semibold text-foreground leading-tight">{n.text}</p>
               <TypoCaption as="p">{n.time}</TypoCaption>
             </div>
           </div>
@@ -915,6 +843,7 @@ export function NotificationsWidget() {
   );
 }
 
+// 7. Upcoming Events (Sidebar Widget)
 export function UpcomingEventsWidget() {
   const events = [
     {
@@ -939,12 +868,7 @@ export function UpcomingEventsWidget() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
-      <SectionHeader
-        title="Upcoming Events"
-        action="View All"
-        actionTo="/dashboard"
-      />
-
+      <SectionHeader title="Upcoming Events" action="View All" actionTo="/dashboard" />
       <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5">
         {events.map((e) => (
           <div key={e.id} className="flex items-center gap-3">
@@ -956,11 +880,8 @@ export function UpcomingEventsWidget() {
             >
               <Calendar size={16} />
             </div>
-
             <div className="min-w-0">
-              <p className="text-xs font-bold text-foreground truncate">
-                {e.title}
-              </p>
+              <p className="text-xs font-bold text-foreground truncate">{e.title}</p>
               <TypoCaption as="p">{e.time}</TypoCaption>
             </div>
           </div>
@@ -970,9 +891,11 @@ export function UpcomingEventsWidget() {
   );
 }
 
+// 8. Upgrade Plan CTA Card (Sidebar Card)
 export function UpgradePlanCTA() {
   return (
     <Card className="border-border/60 rounded-2xl bg-blue-50/50 dark:bg-blue-950/10 shadow-xs p-5 relative overflow-hidden flex items-center gap-4">
+      {/* Background radial glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,183,215,0.04),transparent_60%)] pointer-events-none" />
 
       <div className="flex items-center justify-center h-12 w-12 rounded-xl shrink-0 bg-primary/10 text-primary relative z-10">
@@ -981,17 +904,12 @@ export function UpgradePlanCTA() {
 
       <div className="min-w-0 flex-1 relative z-10">
         <TypoCard>Upgrade your plan</TypoCard>
-
-        <TypoCaption as="p">
-          Unlock premium features and boost your productivity.
-        </TypoCaption>
-
+        <TypoCaption as="p">Unlock premium features and boost your productivity.</TypoCaption>
         <Link
           to="/dashboard"
           className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline mt-2 cursor-pointer"
         >
-          Upgrade Now
-          <ChevronRight size={12} />
+          Upgrade Now <ChevronRight size={12} />
         </Link>
       </div>
     </Card>
