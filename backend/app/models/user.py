@@ -9,6 +9,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Integer,
     String,
     Text,
     func,
@@ -230,6 +231,12 @@ class User(Base):
     open_to_work: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
+        nullable=False,
+    )
+
+    version: Mapped[int] = mapped_column(
+        Integer,
+        default=1,
         nullable=False,
     )
 

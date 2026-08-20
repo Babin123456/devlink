@@ -698,6 +698,9 @@ from app.routers import reputation
 
 app.include_router(reputation.router, prefix="/api", tags=["User Reputation System"])
 
+from app.routers import email_templates
+app.include_router(email_templates.router, prefix="/api", tags=["Email Notification Templates"])
+
 from app.routers import developer_insights
 
 app.include_router(
