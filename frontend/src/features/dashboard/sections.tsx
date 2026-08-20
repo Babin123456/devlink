@@ -16,9 +16,13 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { recommendationsApi } from "@/api";
+import { messagesService } from "@/services";
+import { TypingIndicator } from "@/components/chat/TypingIndicator";
+import { projectsService } from "@/services";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { TypoCaption, TypoCard } from "@/components/shared/Typography";
+import type { Project } from "@/mocks/seed";
 
 // 1. Current Projects
 export function CurrentProjects() {
@@ -63,6 +67,66 @@ export function CurrentProjects() {
       extraAvatars: 1,
     },
   ];
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ["dashboardCurrentProjects"],
+    queryFn: () => projectsService.list(),
+  });
+
+  const fallbackProjects = [
+    {
+      id: "p1",
+      name: "DevLink Platform",
+      status: "in-progress" as const,
+      progress: 80,
+      completionPercentage: 80,
+      deadlineText: "Due in 5 days",
+      members: 4,
+      maxMembers: 5,
+      stars: 42,
+      forks: 12,
+      icon: "⚡",
+      description: "Developer collaboration platform & showcase hub.",
+      stack: ["React", "FastAPI", "TailwindCSS"],
+      owner: "Alex",
+      views: 120,
+    },
+    {
+      id: "p2",
+      name: "AI Matching Engine",
+      status: "in-progress" as const,
+      progress: 60,
+      completionPercentage: 60,
+      deadlineText: "Due in 12 days",
+      members: 3,
+      maxMembers: 4,
+      stars: 28,
+      forks: 7,
+      icon: "🤖",
+      description: "Match scoring engine for developers and teams.",
+      stack: ["Python", "PyTorch", "Redis"],
+      owner: "Priya",
+      views: 85,
+    },
+    {
+      id: "p3",
+      name: "Mobile Collaboration App",
+      status: "recruiting" as const,
+      progress: 25,
+      completionPercentage: 25,
+      deadlineText: "Due in 18 days",
+      members: 2,
+      maxMembers: 5,
+      stars: 15,
+      forks: 3,
+      icon: "📱",
+      description: "Cross-platform mobile client for DevLink messages.",
+      stack: ["React Native", "TypeScript", "Expo"],
+      owner: "David",
+      views: 54,
+    },
+  ];
+
+  const displayProjects: Project[] = projects.length > 0 ? projects.slice(0, 3) : fallbackProjects;
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
@@ -100,7 +164,26 @@ export function CurrentProjects() {
                 <span className="text-[10px] font-semibold text-muted-foreground">
                   {p.progress}%
                 </span>
+      <div className="flex-1 px-4 sm:px-5 pb-5 pt-1 flex flex-col gap-3.5">
+        {isLoading
+          ? Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="p-4 rounded-xl border border-border/40 space-y-2 animate-pulse bg-muted/20"
+              >
+                <div className="h-4 w-1/3 bg-muted rounded" />
+                <div className="h-2 w-full bg-muted rounded-full" />
               </div>
+            ))
+          : displayProjects.map((p: Project) => {
+              const progressVal = p.progress ?? 0;
+              const statusMap: Record<string, string> = {
+                recruiting: "bg-primary/10 text-primary border-primary/20",
+                "in-progress": "bg-warning/10 text-warning border-warning/30",
+                completed: "bg-success/10 text-success border-success/30",
+                archived: "bg-muted text-muted-foreground border-border",
+              };
+              const statusBadge = statusMap[p.status] || statusMap["in-progress"];
 
               {/* Avatar stack */}
               <div className="flex -space-x-1.5 items-center shrink-0">
@@ -122,6 +205,69 @@ export function CurrentProjects() {
             </div>
           </div>
         ))}
+              return (
+                <div
+                  key={p.id}
+                  className="group relative flex flex-col gap-2.5 p-3.5 rounded-xl border border-border/50 hover:border-primary/40 bg-surface/50 hover:bg-muted/20 transition-all"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary text-base font-bold border border-primary/20">
+                        {p.icon || "🚀"}
+                      </span>
+                      <div className="min-w-0">
+                        <Link
+                          to="/projects/$projectId"
+                          params={{ projectId: p.id }}
+                          className="text-xs sm:text-sm font-bold text-foreground hover:text-primary transition-colors truncate block"
+                        >
+                          {p.name}
+                        </Link>
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          {p.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span
+                      className={cn(
+                        "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border shrink-0",
+                        statusBadge,
+                      )}
+                    >
+                      {p.status.replace("-", " ")}
+                    </span>
+                  </div>
+
+                  {/* Progress bar + Completion percentage */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-muted-foreground font-medium">Completion</span>
+                      <span className="font-bold text-foreground">{progressVal}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all duration-300"
+                        style={{ width: `${progressVal}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Actionable info row: Team size & Deadline */}
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+                    <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                      <Users2 size={12} className="text-primary" /> {p.members || 1} builders
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-muted-foreground">
+                      <Calendar size={12} />{" "}
+                      {"deadlineText" in p && typeof p.deadlineText === "string"
+                        ? p.deadlineText
+                        : "Due in 10 days"}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
       </div>
     </Card>
   );
@@ -497,7 +643,146 @@ export function Upcoming() {
   );
 }
 
-// 6. Notifications (Sidebar Widget)
+// 6. Compact Messaging Widget (Sidebar Widget - #741)
+export function CompactMessagingWidget() {
+  const { data: conversations = [], isLoading } = useQuery({
+    queryKey: ["compactMessagingWidget"],
+    queryFn: () => messagesService.conversations(),
+  });
+
+  const fallbackConversations = [
+    {
+      id: "c1",
+      with: {
+        name: "Sarah Chen",
+        avatar: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
+        online: true,
+      },
+      preview: "Sounds great! Let's sync tomorrow.",
+      unread: 2,
+      ago: "5m",
+      isTyping: true,
+    },
+    {
+      id: "c2",
+      with: {
+        name: "Alex Rivera",
+        avatar: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Alex",
+        online: true,
+      },
+      preview: "Merged the latest PR for auth.",
+      unread: 0,
+      ago: "25m",
+      isTyping: false,
+    },
+    {
+      id: "c3",
+      with: {
+        name: "David Kim",
+        avatar: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=David",
+        online: false,
+      },
+      preview: "Can you review the wireframes?",
+      unread: 1,
+      ago: "2h",
+      isTyping: false,
+    },
+  ];
+
+  const displayConversations =
+    conversations.length > 0
+      ? conversations.slice(0, 3).map((c, idx) => ({
+          ...c,
+          isTyping: idx === 0,
+        }))
+      : fallbackConversations;
+
+  return (
+    <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
+      <SectionHeader title="Messages" action="Open Chat" actionTo="/messages" />
+      <div className="px-3.5 pb-4 pt-1 flex flex-col gap-1.5">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-2.5 p-2 rounded-xl border border-transparent animate-pulse"
+            >
+              <div className="h-8 w-8 rounded-full bg-muted shrink-0" />
+              <div className="space-y-1.5 flex-1">
+                <div className="h-3 w-1/3 bg-muted rounded" />
+                <div className="h-2 w-2/3 bg-muted rounded" />
+              </div>
+            </div>
+          ))
+        ) : displayConversations.length === 0 ? (
+          <div className="py-6 text-center text-xs text-muted-foreground">
+            <MessageSquare size={20} className="mx-auto mb-1 opacity-50" />
+            No active conversations
+          </div>
+        ) : (
+          displayConversations.map((c) => (
+            <Link
+              key={c.id}
+              to="/messages/$conversationId"
+              params={{ conversationId: c.id }}
+              className="group flex items-center gap-2.5 p-2 rounded-xl hover:bg-muted/40 transition-colors border border-transparent hover:border-border/40"
+            >
+              {/* Compact 32px Avatar with live online dot */}
+              <div className="relative shrink-0">
+                <Avatar
+                  src={c.with.avatar}
+                  alt={c.with.name}
+                  size={32}
+                  className="rounded-full border border-border/30"
+                />
+                {c.with.online && (
+                  <span
+                    className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-card"
+                    title="Online"
+                  />
+                )}
+              </div>
+
+              {/* Message text and sender name */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-1">
+                  <p className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+                    {c.with.name}
+                  </p>
+                  <span className="text-[10px] text-muted-foreground shrink-0">{c.ago}</span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 mt-0.5">
+                  {c.isTyping ? (
+                    <div className="flex items-center text-primary text-[11px] font-medium">
+                      <TypingIndicator
+                        className="p-0 text-primary scale-90 origin-left"
+                        label="typing..."
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground truncate group-hover:text-foreground/80 transition-colors">
+                      {c.preview}
+                    </p>
+                  )}
+
+                  {/* Unread badge */}
+                  {c.unread > 0 && (
+                    <span className="grid place-items-center h-4 min-w-[16px] px-1 rounded-full bg-primary text-[9px] font-bold text-primary-foreground shrink-0">
+                      {c.unread}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </Link>
+          ))
+        )}
+      </div>
+    </Card>
+  );
+}
+
+// Notifications (Sidebar Widget)
 export function NotificationsWidget() {
   const notifications = [
     {

@@ -83,27 +83,8 @@ def full_search(
 
     skills_list = [s.strip() for s in skills.split(",") if s.strip()] if skills else None
 
-    results = SearchService.search_legacy_full(  # or SearchService.search depending on your base wrapper
-        db=db,
-        q=q,
-        category=category,
-        page=page,
-        limit=limit,
-    ) if hasattr(SearchService, "search_legacy_full") else SearchService.search_full(db=db, q=q, category=category, page=page, limit=limit) if hasattr(SearchService, "search_full") else SearchService.search(
-        db=db,
-        q=q,
-        category=category,
-        page=page,
-        limit=limit,
-        skills_filter=skills_list,
-        location=location,
-        experience=experience,
-        availability=availability,
-        organization=organization,
-        remote=remote,
-        sort=sort,
     results = (
-        SearchService.search_legacy_full(  # or SearchService.search depending on your base wrapper
+        SearchService.search_legacy_full(
             db=db,
             q=q,
             category=category,
@@ -115,7 +96,20 @@ def full_search(
             db=db, q=q, category=category, page=page, limit=limit
         )
         if hasattr(SearchService, "search_full")
-        else SearchService.search(db=db, q=q, category=category, page=page, limit=limit)
+        else SearchService.search(
+            db=db,
+            q=q,
+            category=category,
+            page=page,
+            limit=limit,
+            skills_filter=skills_list,
+            location=location,
+            experience=experience,
+            availability=availability,
+            organization=organization,
+            remote=remote,
+            sort=sort,
+        )
     )
 
     latency_ms = (time.time() - start_time) * 1000
