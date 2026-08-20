@@ -712,10 +712,7 @@ def verify_user(
     db: Session = Depends(get_database),
 ):
 
-    user = UserService.get_user(
-        db,
-        user_id,
-    )
+    user = UserService.get_user(db, user_id)
 
     if user is None:
         raise HTTPException(

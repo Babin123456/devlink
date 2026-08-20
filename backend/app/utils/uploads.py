@@ -141,9 +141,7 @@ def save_video_introduction_upload(
 
     Kept deliberately parallel to :func:`save_voice_introduction_upload`: the
     two differ only in the directory they write to and the extension set their
-    validator allows. They were briefly a single tangled function after the
-    video (#978) and voice (#977) branches were merged into each other, which
-    is what took the module out of compilation.
+    validator allows.
     """
     scan_file_for_malware(contents, filename)
 
