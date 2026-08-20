@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/shared/primitives";
@@ -25,18 +25,21 @@ import {
   ChevronRight,
   ExternalLink,
   HelpCircle,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { currentUser } from "@/mocks/seed";
 import { LoadingButton } from "@/components/shared/LoadingButton";
-import { exportApi } from "@/api";
+import { exportApi, authApi } from "@/api";
+import { usersService } from "@/services";
 import { TypoSection, TypoCaption, TypoHeading } from "@/components/shared/Typography";
 
 const tabs = [
   { id: "account", label: "Account", icon: User },
   { id: "appearance", label: "Appearance", icon: Palette },
   { id: "notifications", label: "Notifications", icon: Bell },
+  { id: "privacy", label: "Privacy", icon: Lock },
   { id: "security", label: "Security", icon: Shield },
   { id: "billing", label: "Billing", icon: CreditCard },
   { id: "export", label: "Export Data", icon: Download },
@@ -76,6 +79,54 @@ function SettingsPage() {
     weeklyDigest: true,
     marketingEmails: false,
   });
+
+  // Profile Privacy States
+  const [isPrivateProfile, setIsPrivateProfile] = useState(false);
+  const [privacySettings, setPrivacySettings] = useState({
+    email: "private",
+    github: "public",
+    resume: "public",
+    social_links: "public",
+    availability: "public",
+    activity: "public",
+  });
+  const [loadingPrivacy, setLoadingPrivacy] = useState(false);
+  const [savingPrivacy, setSavingPrivacy] = useState(false);
+
+  useEffect(() => {
+    async function loadPrivacy() {
+      setLoadingPrivacy(true);
+      try {
+        const settings = await usersService.getPrivacySettings();
+        if (settings) {
+          setPrivacySettings((prev) => ({ ...prev, ...settings }));
+        }
+        const user = await authApi.me();
+        if (user) {
+          setIsPrivateProfile(!!(user as any).is_private);
+        }
+      } catch (err) {
+        console.error("Failed to load privacy settings:", err);
+      } finally {
+        setLoadingPrivacy(false);
+      }
+    }
+    loadPrivacy();
+  }, []);
+
+  const handleSavePrivacy = async () => {
+    setSavingPrivacy(true);
+    try {
+      await usersService.updatePrivacySettings(privacySettings);
+      await usersService.updateMe({ is_private: isPrivateProfile });
+      toast.success("Privacy settings updated successfully");
+    } catch (err) {
+      toast.error("Failed to update privacy settings");
+      console.error(err);
+    } finally {
+      setSavingPrivacy(false);
+    }
+  };
 
   const handleConfirmDelete = async () => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -468,6 +519,139 @@ function SettingsPage() {
             )}
 
             {tab === "security" && <SecurityDashboard userEmail="nancy@example.com" />}
+
+            {tab === "privacy" && (
+              <div className="p-6 space-y-6">
+                <div>
+                  <TypoHeading as="h2">Privacy Settings</TypoHeading>
+                  <TypoCaption as="p">Control who can view your profile and activities</TypoCaption>
+                </div>
+
+                {loadingPrivacy ? (
+                  <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+                    Loading privacy settings...
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Public/Private Profile Toggle */}
+                    <div className="rounded-lg border border-border bg-muted/30 p-5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5 pr-4">
+                          <Label className="text-sm font-semibold text-foreground">
+                            Private Profile
+                          </Label>
+                          <TypoCaption as="p">
+                            When enabled, your profile details will only be visible to you and followers.
+                          </TypoCaption>
+                        </div>
+                        <Switch
+                          checked={isPrivateProfile}
+                          onCheckedChange={setIsPrivateProfile}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Visibility Dropdowns */}
+                    <div className="space-y-4">
+                      <TypoSection>Visibility Controls</TypoSection>
+
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        {/* Email Visibility */}
+                        <div className="flex flex-col space-y-1.5">
+                          <label className={lbl}>Email Visibility</label>
+                          <select
+                            className={inp}
+                            value={privacySettings.email}
+                            onChange={(e) =>
+                              setPrivacySettings((prev) => ({
+                                ...prev,
+                                email: e.target.value,
+                              }))
+                            }
+                          >
+                            <option value="public">Public</option>
+                            <option value="authenticated">Authenticated Users</option>
+                            <option value="followers">Followers Only</option>
+                            <option value="private">Private (Only Me)</option>
+                          </select>
+                          <TypoCaption>Who can see your public contact email address.</TypoCaption>
+                        </div>
+
+                        {/* Activity Visibility */}
+                        <div className="flex flex-col space-y-1.5">
+                          <label className={lbl}>Activity & Contribution History</label>
+                          <select
+                            className={inp}
+                            value={privacySettings.activity}
+                            onChange={(e) =>
+                              setPrivacySettings((prev) => ({
+                                ...prev,
+                                activity: e.target.value,
+                              }))
+                            }
+                          >
+                            <option value="public">Public</option>
+                            <option value="authenticated">Authenticated Users</option>
+                            <option value="followers">Followers Only</option>
+                            <option value="private">Private (Only Me)</option>
+                          </select>
+                          <TypoCaption>Who can view your reputation log & contribution heatmap.</TypoCaption>
+                        </div>
+
+                        {/* GitHub Visibility */}
+                        <div className="flex flex-col space-y-1.5">
+                          <label className={lbl}>GitHub Connection</label>
+                          <select
+                            className={inp}
+                            value={privacySettings.github}
+                            onChange={(e) =>
+                              setPrivacySettings((prev) => ({
+                                ...prev,
+                                github: e.target.value,
+                              }))
+                            }
+                          >
+                            <option value="public">Public</option>
+                            <option value="authenticated">Authenticated Users</option>
+                            <option value="followers">Followers Only</option>
+                            <option value="private">Private (Only Me)</option>
+                          </select>
+                          <TypoCaption>Visibility of your linked GitHub profile info.</TypoCaption>
+                        </div>
+
+                        {/* Resume Visibility */}
+                        <div className="flex flex-col space-y-1.5">
+                          <label className={lbl}>Resume / CV</label>
+                          <select
+                            className={inp}
+                            value={privacySettings.resume}
+                            onChange={(e) =>
+                              setPrivacySettings((prev) => ({
+                                ...prev,
+                                resume: e.target.value,
+                              }))
+                            }
+                          >
+                            <option value="public">Public</option>
+                            <option value="authenticated">Authenticated Users</option>
+                            <option value="followers">Followers Only</option>
+                            <option value="private">Private (Only Me)</option>
+                          </select>
+                          <TypoCaption>Who is allowed to view or download your uploaded resume.</TypoCaption>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-4">
+                      <Button onClick={handleSavePrivacy} className="gap-2" disabled={savingPrivacy}>
+                        <Save size={15} />
+                        {savingPrivacy ? "Saving..." : "Save Privacy Settings"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {tab === "billing" && (
               <div className="p-6 space-y-6">
