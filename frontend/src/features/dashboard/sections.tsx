@@ -244,7 +244,8 @@ return (
       )}
     </div>
   </Card>
-);
+ );
+}
 
 // 2. AI Suggestions / Recommendation Panel (#738)
 
