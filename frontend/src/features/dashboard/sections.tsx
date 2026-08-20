@@ -1,83 +1,37 @@
-import { useQuery } from "@tanstack/react-query";
-import { projectsApi } from "@/api/modules/projects";
-import { Card, EmptyState, SectionHeader, Avatar } from "@/components/shared/primitives";
-import {
-  Plus,
-  Flame,
-  Users2,
-  MessageSquare,
-  ChevronRight,
-  Calendar,
-  Clock,
-  Rocket,
-  User,
-  Sparkles,
-  TrendingUp,
-  BrainCircuit,
-  ArrowRight,
-} from "lucide-react";
 import { recommendationsApi } from "@/api";
-import { messagesService } from "@/services";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
-import { projectsService } from "@/services";
-import { Link } from "@tanstack/react-router";
-import { cn } from "@/lib/utils";
+import { Avatar, Card, EmptyState, SectionHeader } from "@/components/shared/primitives";
 import { TypoCaption, TypoCard } from "@/components/shared/Typography";
+import { cn } from "@/lib/utils";
 import type { Project } from "@/mocks/seed";
+import { messagesService, projectsService } from "@/services";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import {
+  ArrowRight,
+  BrainCircuit,
+  Calendar,
+  ChevronRight,
+  Clock,
+  Flame,
+  MessageSquare,
+  Plus,
+  Rocket,
+  Sparkles,
+  Users2,
+} from "lucide-react";
 
-// 1. Current Projects
 export function CurrentProjects() {
-  const projectsList = [
-    {
-      id: "p1",
-      name: "DevLink Platform",
-      status: "In Progress",
-      progress: 80,
-      dueText: "Due in 5 days",
-      iconText: "D",
-      iconBg: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
-      avatars: [
-        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Alex",
-        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
-      ],
-      extraAvatars: 3,
-    },
-    {
-      id: "p2",
-      name: "AI Matching Engine",
-      status: "In Progress",
-      progress: 60,
-      dueText: "Due in 12 days",
-      iconText: "A",
-      iconBg: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
-      avatars: [
-        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Priya",
-        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=John",
-      ],
-      extraAvatars: 2,
-    },
-    {
-      id: "p3",
-      name: "Mobile App",
-      status: "Planning",
-      progress: 25,
-      dueText: "Due in 18 days",
-      iconText: "M",
-      iconBg: "bg-violet-500/10 text-violet-500 border border-violet-500/20",
-      avatars: ["https://api.dicebear.com/9.x/notionists-neutral/svg?seed=David"],
-      extraAvatars: 1,
-    },
-  ];
-  const { data: projects = [], isLoading } = useQuery({
+  const { data: projects = [], isLoading, error } = useQuery({
     queryKey: ["dashboardCurrentProjects"],
     queryFn: () => projectsService.list(),
   });
 
-  const fallbackProjects = [
+  const fallbackProjects: Project[] = [
     {
       id: "p1",
       name: "DevLink Platform",
-      status: "in-progress" as const,
+      status: "in-progress",
       progress: 80,
       completionPercentage: 80,
       deadlineText: "Due in 5 days",
@@ -94,7 +48,7 @@ export function CurrentProjects() {
     {
       id: "p2",
       name: "AI Matching Engine",
-      status: "in-progress" as const,
+      status: "in-progress",
       progress: 60,
       completionPercentage: 60,
       deadlineText: "Due in 12 days",
@@ -111,7 +65,7 @@ export function CurrentProjects() {
     {
       id: "p3",
       name: "Mobile Collaboration App",
-      status: "recruiting" as const,
+      status: "recruiting",
       progress: 25,
       completionPercentage: 25,
       deadlineText: "Due in 18 days",
@@ -127,167 +81,141 @@ export function CurrentProjects() {
     },
   ];
 
-  const displayProjects: Project[] = projects.length > 0 ? projects.slice(0, 3) : fallbackProjects;
+  const displayProjects: Project[] =
+    projects.length > 0 ? projects.slice(0, 3) : fallbackProjects;
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
-      <SectionHeader title="Current Projects" action="View All" actionTo="/projects" />
-      <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-4">
-        {isLoading && (
-          <div className="flex-1 flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
-          </div>
-        )}
-        {error && !isLoading && (
+      <SectionHeader
+        title="Current Projects"
+        action="View All"
+        actionTo="/projects"
+      />
+
+      <div className="flex-1 px-4 sm:px-5 pb-5 pt-1 flex flex-col gap-3.5">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="p-4 rounded-xl border border-border/40 space-y-2 animate-pulse bg-muted/20"
+            >
+              <div className="h-4 w-1/3 bg-muted rounded" />
+              <div className="h-2 w-full bg-muted rounded-full" />
+            </div>
+          ))
+        ) : error ? (
           <div className="flex-1 flex items-center justify-center py-8 text-destructive text-sm">
             Failed to load projects.
           </div>
-        )}
-        {!isLoading && !error && projects?.length === 0 && (
+        ) : projects.length === 0 ? (
           <EmptyState
             icon={Rocket}
             title="No projects yet"
             desc="Start building something amazing with your next collaboration."
-            action={<Link to="/projects" className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90">Create project</Link>}
+            action={
+              <Link
+                to="/projects"
+                className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
+              >
+                Create project
+              </Link>
+            }
             className="py-8"
           />
-        )}
-        {!isLoading &&
-          !error &&
-          projects &&
-          projects.length > 0 &&
-          projects.slice(0, 3).map((p) => (
-            <Link
-              key={p.id}
-              to="/projects/$projectId"
-              params={{ projectId: p.id }}
-              className="flex items-center justify-between gap-4 p-3 rounded-xl border border-border/40 hover:bg-muted/10 transition-colors"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="flex items-center justify-center h-10 w-10 shrink-0 rounded-lg text-sm font-bold bg-primary/10 text-primary border border-primary/20">
-                  {(p.name || "P").charAt(0).toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate hover:text-primary transition-colors">
-                    {p.name}
-                  </p>
-                  <TypoCaption as="p">
-                    {(p.status || p.stage || "Active").replace("_", " ")}
-                  </TypoCaption>
-                </div>
-                <span className="text-[10px] font-semibold text-muted-foreground">
-                  {p.progress}%
-                </span>
-      <div className="flex-1 px-4 sm:px-5 pb-5 pt-1 flex flex-col gap-3.5">
-        {isLoading
-          ? Array.from({ length: 3 }).map((_, i) => (
+        ) : (
+          displayProjects.map((p: Project) => {
+            const progressVal = p.progress ?? p.completionPercentage ?? 0;
+
+            const statusMap: Record<string, string> = {
+              recruiting:
+                "bg-primary/10 text-primary border-primary/20",
+              "in-progress":
+                "bg-warning/10 text-warning border-warning/30",
+              completed:
+                "bg-success/10 text-success border-success/30",
+              archived:
+                "bg-muted text-muted-foreground border-border",
+            };
+
+            const statusBadge =
+              statusMap[p.status] || statusMap["in-progress"];
+
+            return (
               <div
-                key={i}
-                className="p-4 rounded-xl border border-border/40 space-y-2 animate-pulse bg-muted/20"
+                key={p.id}
+                className="group relative flex flex-col gap-2.5 p-3.5 rounded-xl border border-border/50 hover:border-primary/40 bg-surface/50 hover:bg-muted/20 transition-all"
               >
-                <div className="h-4 w-1/3 bg-muted rounded" />
-                <div className="h-2 w-full bg-muted rounded-full" />
-              </div>
-            ))
-          : displayProjects.map((p: Project) => {
-              const progressVal = p.progress ?? 0;
-              const statusMap: Record<string, string> = {
-                recruiting: "bg-primary/10 text-primary border-primary/20",
-                "in-progress": "bg-warning/10 text-warning border-warning/30",
-                completed: "bg-success/10 text-success border-success/30",
-                archived: "bg-muted text-muted-foreground border-border",
-              };
-              const statusBadge = statusMap[p.status] || statusMap["in-progress"];
-
-              {/* Avatar stack */}
-              <div className="flex -space-x-1.5 items-center shrink-0">
-                {p.avatars.map((av, idx) => (
-                  <Avatar
-                    key={idx}
-                    src={av}
-                    alt="Team"
-                    size={24}
-                    className="border border-card ring-1 ring-border/20"
-                  />
-                ))}
-                {p.extraAvatars > 0 && (
-                  <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted border border-card text-[9px] font-semibold text-muted-foreground ring-1 ring-border/20">
-                    +{p.extraAvatars}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-              return (
-                <div
-                  key={p.id}
-                  className="group relative flex flex-col gap-2.5 p-3.5 rounded-xl border border-border/50 hover:border-primary/40 bg-surface/50 hover:bg-muted/20 transition-all"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary text-base font-bold border border-primary/20">
-                        {p.icon || "🚀"}
-                      </span>
-                      <div className="min-w-0">
-                        <Link
-                          to="/projects/$projectId"
-                          params={{ projectId: p.id }}
-                          className="text-xs sm:text-sm font-bold text-foreground hover:text-primary transition-colors truncate block"
-                        >
-                          {p.name}
-                        </Link>
-                        <p className="text-[11px] text-muted-foreground truncate">
-                          {p.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    <span
-                      className={cn(
-                        "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border shrink-0",
-                        statusBadge,
-                      )}
-                    >
-                      {p.status.replace("-", " ")}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary text-base font-bold border border-primary/20">
+                      {p.icon || "🚀"}
                     </span>
-                  </div>
 
-                  {/* Progress bar + Completion percentage */}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground font-medium">Completion</span>
-                      <span className="font-bold text-foreground">{progressVal}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary rounded-full transition-all duration-300"
-                        style={{ width: `${progressVal}%` }}
-                      />
+                    <div className="min-w-0">
+                      <Link
+                        to="/projects/$projectId"
+                        params={{ projectId: p.id }}
+                        className="text-xs sm:text-sm font-bold text-foreground hover:text-primary transition-colors truncate block"
+                      >
+                        {p.name}
+                      </Link>
+
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {p.description}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Actionable info row: Team size & Deadline */}
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40">
-                    <span className="inline-flex items-center gap-1 font-medium text-foreground">
-                      <Users2 size={12} className="text-primary" /> {p.members || 1} builders
+                  <span
+                    className={cn(
+                      "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border shrink-0",
+                      statusBadge,
+                    )}
+                  >
+                    {p.status.replace("-", " ")}
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-muted-foreground font-medium">
+                      Completion
                     </span>
-                    <span className="inline-flex items-center gap-1 text-muted-foreground">
-                      <Calendar size={12} />{" "}
-                      {"deadlineText" in p && typeof p.deadlineText === "string"
-                        ? p.deadlineText
-                        : "Due in 10 days"}
+                    <span className="font-bold text-foreground">
+                      {progressVal}%
                     </span>
+                  </div>
+
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-300"
+                      style={{ width: `${progressVal}%` }}
+                    />
                   </div>
                 </div>
-              );
-            })}
+
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+                  <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                    <Users2 size={12} className="text-primary" />
+                    {p.members || 1} builders
+                  </span>
+
+                  <span className="inline-flex items-center gap-1 text-muted-foreground">
+                    <Calendar size={12} />
+                    {"deadlineText" in p &&
+                    typeof p.deadlineText === "string"
+                      ? p.deadlineText
+                      : "Due in 10 days"}
+                  </span>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </Card>
   );
 }
-
-// 2. AI Suggestions / Recommendation Panel (#738)
 
 export function AISuggestions() {
   const { data: recData, isLoading } = useQuery({
@@ -302,8 +230,10 @@ export function AISuggestions() {
       last_name: "Verma",
       username: "rahulv",
       role: "Backend Architect",
-      headline: "Specializes in FastAPI, Distributed Systems & PostgreSQL",
-      profile_image: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Rahul",
+      headline:
+        "Specializes in FastAPI, Distributed Systems & PostgreSQL",
+      profile_image:
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Rahul",
       score: 0.94,
       matched_skills: ["FastAPI", "Python", "PostgreSQL"],
       missing_skills: ["GraphQL", "Docker"],
@@ -316,7 +246,8 @@ export function AISuggestions() {
       username: "elenar",
       role: "AI / ML Engineer",
       headline: "Building LLM agents & RAG pipelines with PyTorch",
-      profile_image: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Elena",
+      profile_image:
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Elena",
       score: 0.88,
       matched_skills: ["Python", "PyTorch", "LangChain"],
       missing_skills: ["Kubernetes"],
@@ -329,7 +260,8 @@ export function AISuggestions() {
       username: "sarahj",
       role: "Fullstack Developer",
       headline: "React 19 & Tailwind CSS enthusiast with 4y exp",
-      profile_image: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
+      profile_image:
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
       score: 0.82,
       matched_skills: ["React", "TypeScript"],
       missing_skills: ["Next.js", "Redis"],
@@ -339,31 +271,41 @@ export function AISuggestions() {
 
   const results =
     recData?.results && recData.results.length > 0
-      ? (recData.results as Array<Record<string, unknown>>).map((b, idx) => ({
-          user_id: String(b.user_id || `b-${idx}`),
-          first_name: String(b.first_name || "Developer"),
-          last_name: String(b.last_name || ""),
-          username: String(b.username || "builder"),
-          role: String(b.role || "Software Engineer"),
-          headline: String(b.headline || "Active open-source contributor"),
-          profile_image:
-            typeof b.profile_image === "string"
-              ? b.profile_image
-              : `https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${b.username || idx}`,
-          score: typeof b.score === "number" ? b.score : 0.85,
-          matched_skills: Array.isArray(b.matched_skills)
-            ? (b.matched_skills as string[])
-            : ["React", "TypeScript"],
-          missing_skills: Array.isArray(b.missing_skills)
-            ? (b.missing_skills as string[])
-            : ["Redis"],
-          suggested_action: idx === 0 ? "Invite to Team" : "Connect",
-        }))
+      ? (recData.results as Array<Record<string, unknown>>).map(
+          (b, idx) => ({
+            user_id: String(b.user_id || `b-${idx}`),
+            first_name: String(b.first_name || "Developer"),
+            last_name: String(b.last_name || ""),
+            username: String(b.username || "builder"),
+            role: String(b.role || "Software Engineer"),
+            headline: String(
+              b.headline || "Active open-source contributor",
+            ),
+            profile_image:
+              typeof b.profile_image === "string"
+                ? b.profile_image
+                : `https://api.dicebear.com/9.x/notionists-neutral/svg?seed=${b.username || idx}`,
+            score: typeof b.score === "number" ? b.score : 0.85,
+            matched_skills: Array.isArray(b.matched_skills)
+              ? (b.matched_skills as string[])
+              : ["React", "TypeScript"],
+            missing_skills: Array.isArray(b.missing_skills)
+              ? (b.missing_skills as string[])
+              : ["Redis"],
+            suggested_action:
+              idx === 0 ? "Invite to Team" : "Connect",
+          }),
+        )
       : fallbackRecommendations;
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
-      <SectionHeader title="AI Recommendations" action="View Matches" actionTo="/builders" />
+      <SectionHeader
+        title="AI Recommendations"
+        action="View Matches"
+        actionTo="/builders"
+      />
+
       <div className="flex-1 px-4 sm:px-5 pb-5 pt-1 flex flex-col gap-3.5">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
@@ -383,14 +325,18 @@ export function AISuggestions() {
         ) : results.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-6 text-center text-xs text-muted-foreground">
             <BrainCircuit size={28} className="text-primary/60 mb-2" />
-            <p className="font-semibold text-foreground">No recommendations available</p>
+            <p className="font-semibold text-foreground">
+              No recommendations available
+            </p>
             <p className="mt-0.5">
-              Add skills to your profile to get personalized AI collaborator matches.
+              Add skills to your profile to get personalized AI collaborator
+              matches.
             </p>
           </div>
         ) : (
           results.map((rec) => {
             const matchPercentage = Math.round(rec.score * 100);
+
             const matchBadgeClass =
               matchPercentage >= 90
                 ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
@@ -403,7 +349,6 @@ export function AISuggestions() {
                 key={rec.user_id}
                 className="group p-3.5 rounded-xl border border-border/50 hover:border-primary/40 bg-surface/50 hover:bg-muted/20 transition-all flex flex-col gap-2.5"
               >
-                {/* Builder Row: Avatar, Name, Role, Match % */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
                     <Avatar
@@ -412,6 +357,7 @@ export function AISuggestions() {
                       size={36}
                       className="border border-border/40 shrink-0"
                     />
+
                     <div className="min-w-0">
                       <Link
                         to="/profile/$username"
@@ -420,22 +366,24 @@ export function AISuggestions() {
                       >
                         {rec.first_name} {rec.last_name}
                       </Link>
-                      <p className="text-[11px] text-muted-foreground truncate">{rec.role}</p>
+
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {rec.role}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Match Percentage Badge */}
                   <span
                     className={cn(
                       "text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 flex items-center gap-1",
                       matchBadgeClass,
                     )}
                   >
-                    <Sparkles size={11} /> {matchPercentage}% Match
+                    <Sparkles size={11} />
+                    {matchPercentage}% Match
                   </span>
                 </div>
 
-                {/* Skills Insights: Matched vs Missing */}
                 <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
                   {rec.matched_skills.slice(0, 2).map((sk: string) => (
                     <span
@@ -445,6 +393,7 @@ export function AISuggestions() {
                       ✓ {sk}
                     </span>
                   ))}
+
                   {rec.missing_skills.slice(0, 2).map((sk: string) => (
                     <span
                       key={sk}
@@ -455,16 +404,17 @@ export function AISuggestions() {
                   ))}
                 </div>
 
-                {/* Actionable button footer */}
                 <div className="flex items-center justify-between pt-2 border-t border-border/40 text-[11px]">
                   <span className="text-muted-foreground truncate max-w-[180px]">
                     {rec.headline}
                   </span>
+
                   <Link
                     to="/builders"
                     className="inline-flex items-center gap-1 font-semibold text-primary hover:underline shrink-0 cursor-pointer"
                   >
-                    {rec.suggested_action} <ArrowRight size={11} />
+                    {rec.suggested_action}
+                    <ArrowRight size={11} />
                   </Link>
                 </div>
               </div>
@@ -476,7 +426,6 @@ export function AISuggestions() {
   );
 }
 
-// 3. Quick Actions
 export function QuickActions() {
   const actions = [
     {
@@ -515,10 +464,14 @@ export function QuickActions() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
-      <div className="px-5 pt-5 pb-2 font-semibold text-sm text-foreground">Quick Actions</div>
+      <div className="px-5 pt-5 pb-2 font-semibold text-sm text-foreground">
+        Quick Actions
+      </div>
+
       <div className="grid grid-cols-2 gap-3 p-4 pt-1 flex-1">
         {actions.map((act) => {
           const Icon = act.icon;
+
           return (
             <Link
               key={act.label}
@@ -537,7 +490,10 @@ export function QuickActions() {
               >
                 <Icon size={20} />
               </div>
-              <span className="text-xs font-bold text-foreground">{act.label}</span>
+
+              <span className="text-xs font-bold text-foreground">
+                {act.label}
+              </span>
             </Link>
           );
         })}
@@ -546,7 +502,6 @@ export function QuickActions() {
   );
 }
 
-// 4. Recent Activity
 export function RecentActivity() {
   const activities = [
     {
@@ -577,7 +532,12 @@ export function RecentActivity() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
-      <SectionHeader title="Recent Activity" action="View All" actionTo="/dashboard" />
+      <SectionHeader
+        title="Recent Activity"
+        action="View All"
+        actionTo="/dashboard"
+      />
+
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-3">
         {activities.map((act) => (
           <Link
@@ -586,13 +546,25 @@ export function RecentActivity() {
             className="flex items-center justify-between gap-4 p-2.5 rounded-lg border border-transparent hover:border-border/40 hover:bg-muted/10 transition-colors"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className={cn("h-2 w-2 rounded-full shrink-0", act.bulletColor)} />
+              <div
+                className={cn(
+                  "h-2 w-2 rounded-full shrink-0",
+                  act.bulletColor,
+                )}
+              />
+
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-foreground truncate">{act.text}</p>
+                <p className="text-xs font-semibold text-foreground truncate">
+                  {act.text}
+                </p>
                 <TypoCaption as="p">{act.time}</TypoCaption>
               </div>
             </div>
-            <ChevronRight size={14} className="text-muted-foreground shrink-0" />
+
+            <ChevronRight
+              size={14}
+              className="text-muted-foreground shrink-0"
+            />
           </Link>
         ))}
       </div>
@@ -600,7 +572,6 @@ export function RecentActivity() {
   );
 }
 
-// 5. Upcoming (Center list widget)
 export function Upcoming() {
   const upcomingList = [
     {
@@ -628,10 +599,16 @@ export function Upcoming() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
-      <SectionHeader title="Upcoming" action="View All" actionTo="/dashboard" />
+      <SectionHeader
+        title="Upcoming"
+        action="View All"
+        actionTo="/dashboard"
+      />
+
       <div className="flex-1 px-5 pb-5 pt-1 flex flex-col gap-3">
         {upcomingList.map((item) => {
           const Icon = item.icon;
+
           return (
             <div
               key={item.id}
@@ -645,8 +622,11 @@ export function Upcoming() {
               >
                 <Icon size={16} />
               </div>
+
               <div className="min-w-0">
-                <p className="text-xs font-bold text-foreground truncate">{item.title}</p>
+                <p className="text-xs font-bold text-foreground truncate">
+                  {item.title}
+                </p>
                 <TypoCaption as="p">{item.time}</TypoCaption>
               </div>
             </div>
@@ -657,7 +637,6 @@ export function Upcoming() {
   );
 }
 
-// 6. Compact Messaging Widget (Sidebar Widget - #741)
 export function CompactMessagingWidget() {
   const { data: conversations = [], isLoading } = useQuery({
     queryKey: ["compactMessagingWidget"],
@@ -669,7 +648,8 @@ export function CompactMessagingWidget() {
       id: "c1",
       with: {
         name: "Sarah Chen",
-        avatar: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
+        avatar:
+          "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
         online: true,
       },
       preview: "Sounds great! Let's sync tomorrow.",
@@ -681,7 +661,8 @@ export function CompactMessagingWidget() {
       id: "c2",
       with: {
         name: "Alex Rivera",
-        avatar: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Alex",
+        avatar:
+          "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Alex",
         online: true,
       },
       preview: "Merged the latest PR for auth.",
@@ -693,7 +674,8 @@ export function CompactMessagingWidget() {
       id: "c3",
       with: {
         name: "David Kim",
-        avatar: "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=David",
+        avatar:
+          "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=David",
         online: false,
       },
       preview: "Can you review the wireframes?",
@@ -713,7 +695,12 @@ export function CompactMessagingWidget() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
-      <SectionHeader title="Messages" action="Open Chat" actionTo="/messages" />
+      <SectionHeader
+        title="Messages"
+        action="Open Chat"
+        actionTo="/messages"
+      />
+
       <div className="px-3.5 pb-4 pt-1 flex flex-col gap-1.5">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
@@ -722,6 +709,7 @@ export function CompactMessagingWidget() {
               className="flex items-center gap-2.5 p-2 rounded-xl border border-transparent animate-pulse"
             >
               <div className="h-8 w-8 rounded-full bg-muted shrink-0" />
+
               <div className="space-y-1.5 flex-1">
                 <div className="h-3 w-1/3 bg-muted rounded" />
                 <div className="h-2 w-2/3 bg-muted rounded" />
@@ -730,7 +718,10 @@ export function CompactMessagingWidget() {
           ))
         ) : displayConversations.length === 0 ? (
           <div className="py-6 text-center text-xs text-muted-foreground">
-            <MessageSquare size={20} className="mx-auto mb-1 opacity-50" />
+            <MessageSquare
+              size={20}
+              className="mx-auto mb-1 opacity-50"
+            />
             No active conversations
           </div>
         ) : (
@@ -741,7 +732,6 @@ export function CompactMessagingWidget() {
               params={{ conversationId: c.id }}
               className="group flex items-center gap-2.5 p-2 rounded-xl hover:bg-muted/40 transition-colors border border-transparent hover:border-border/40"
             >
-              {/* Compact 32px Avatar with live online dot */}
               <div className="relative shrink-0">
                 <Avatar
                   src={c.with.avatar}
@@ -749,6 +739,7 @@ export function CompactMessagingWidget() {
                   size={32}
                   className="rounded-full border border-border/30"
                 />
+
                 {c.with.online && (
                   <span
                     className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-card"
@@ -757,13 +748,15 @@ export function CompactMessagingWidget() {
                 )}
               </div>
 
-              {/* Message text and sender name */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-1">
                   <p className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors truncate">
                     {c.with.name}
                   </p>
-                  <span className="text-[10px] text-muted-foreground shrink-0">{c.ago}</span>
+
+                  <span className="text-[10px] text-muted-foreground shrink-0">
+                    {c.ago}
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between gap-2 mt-0.5">
@@ -780,7 +773,6 @@ export function CompactMessagingWidget() {
                     </p>
                   )}
 
-                  {/* Unread badge */}
                   {c.unread > 0 && (
                     <span className="grid place-items-center h-4 min-w-[16px] px-1 rounded-full bg-primary text-[9px] font-bold text-primary-foreground shrink-0">
                       {c.unread}
@@ -796,7 +788,6 @@ export function CompactMessagingWidget() {
   );
 }
 
-// Notifications (Sidebar Widget)
 export function NotificationsWidget() {
   const notifications = [
     {
@@ -827,13 +818,26 @@ export function NotificationsWidget() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
-      <SectionHeader title="Notifications" action="View All" actionTo="/dashboard" />
+      <SectionHeader
+        title="Notifications"
+        action="View All"
+        actionTo="/dashboard"
+      />
+
       <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5">
         {notifications.map((n) => (
           <div key={n.id} className="flex items-start gap-3 min-w-0">
-            <div className={cn("h-2.5 w-2.5 rounded-full shrink-0 mt-1", n.dotColor)} />
+            <div
+              className={cn(
+                "h-2.5 w-2.5 rounded-full shrink-0 mt-1",
+                n.dotColor,
+              )}
+            />
+
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-foreground leading-tight">{n.text}</p>
+              <p className="text-xs font-semibold text-foreground leading-tight">
+                {n.text}
+              </p>
               <TypoCaption as="p">{n.time}</TypoCaption>
             </div>
           </div>
@@ -843,7 +847,6 @@ export function NotificationsWidget() {
   );
 }
 
-// 7. Upcoming Events (Sidebar Widget)
 export function UpcomingEventsWidget() {
   const events = [
     {
@@ -868,7 +871,12 @@ export function UpcomingEventsWidget() {
 
   return (
     <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col">
-      <SectionHeader title="Upcoming Events" action="View All" actionTo="/dashboard" />
+      <SectionHeader
+        title="Upcoming Events"
+        action="View All"
+        actionTo="/dashboard"
+      />
+
       <div className="px-5 pb-5 pt-1 flex flex-col gap-3.5">
         {events.map((e) => (
           <div key={e.id} className="flex items-center gap-3">
@@ -880,8 +888,11 @@ export function UpcomingEventsWidget() {
             >
               <Calendar size={16} />
             </div>
+
             <div className="min-w-0">
-              <p className="text-xs font-bold text-foreground truncate">{e.title}</p>
+              <p className="text-xs font-bold text-foreground truncate">
+                {e.title}
+              </p>
               <TypoCaption as="p">{e.time}</TypoCaption>
             </div>
           </div>
@@ -891,11 +902,9 @@ export function UpcomingEventsWidget() {
   );
 }
 
-// 8. Upgrade Plan CTA Card (Sidebar Card)
 export function UpgradePlanCTA() {
   return (
     <Card className="border-border/60 rounded-2xl bg-blue-50/50 dark:bg-blue-950/10 shadow-xs p-5 relative overflow-hidden flex items-center gap-4">
-      {/* Background radial glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(6,183,215,0.04),transparent_60%)] pointer-events-none" />
 
       <div className="flex items-center justify-center h-12 w-12 rounded-xl shrink-0 bg-primary/10 text-primary relative z-10">
@@ -904,12 +913,17 @@ export function UpgradePlanCTA() {
 
       <div className="min-w-0 flex-1 relative z-10">
         <TypoCard>Upgrade your plan</TypoCard>
-        <TypoCaption as="p">Unlock premium features and boost your productivity.</TypoCaption>
+
+        <TypoCaption as="p">
+          Unlock premium features and boost your productivity.
+        </TypoCaption>
+
         <Link
           to="/dashboard"
           className="inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:underline mt-2 cursor-pointer"
         >
-          Upgrade Now <ChevronRight size={12} />
+          Upgrade Now
+          <ChevronRight size={12} />
         </Link>
       </div>
     </Card>
