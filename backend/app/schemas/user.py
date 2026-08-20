@@ -177,6 +177,7 @@ class UserUpdate(BaseModel):
     is_private: bool | None = None
     privacy_settings: PrivacySettingsUpdate | None = None
     availability: list[AvailabilitySlot] | None = None
+    version: int | None = None
     collaboration_status: CollaborationStatus | None = None
 
     model_config = ConfigDict(
@@ -197,12 +198,20 @@ class UserUpdate(BaseModel):
 # Public User Response
 # ==========================================================
 
+
 class UserResponse(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
+
+    is_active: bool
+    is_verified: bool
+    premium: bool = False
+    is_superuser: bool
+    version: int = 1
     video_introduction_url: ValidURL | None = None
     video_introduction_thumbnail_url: ValidURL | None = None
+
 
 # ==========================================================
 # Resume Parse Response
