@@ -254,73 +254,155 @@ function SettingsPage() {
                       </Button>
                     </div>
                   </div>
-                </div>
+                </div>                {loadingProfile ? (
+                  <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+                    Loading profile details...
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Conflict Resolution Banner */}
+                    {saveStatus === "conflict" && (
+                      <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 space-y-3">
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold text-destructive animate-pulse">Version Conflict Detected</p>
+                          <p className="text-[13px] text-muted-foreground">
+                            This profile has been modified on another device or session. What would you like to do?
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            className="text-xs h-8"
+                            onClick={() => performSave(true)}
+                          >
+                            Keep My Changes (Force Overwrite)
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-8"
+                            onClick={async () => {
+                              const user = await usersService.getMe();
+                              if (user) {
+                                const loadedData = {
+                                  first_name: user.first_name || "",
+                                  last_name: user.last_name || "",
+                                  username: user.username || user.handle || "",
+                                  email: user.email || "",
+                                  bio: user.bio || "",
+                                  version: user.version || 1,
+                                };
+                                setProfileData(loadedData);
+                                setOriginalProfileData(loadedData);
+                                setFullNameInput(`${loadedData.first_name} ${loadedData.last_name}`.trim());
+                                setSaveStatus("saved");
+                                setErrorMessage("");
+                                toast.success("Profile reloaded from server");
+                              }
+                            }}
+                          >
+                            Discard & Reload Latest
+                          </Button>
+                        </div>
+                      </div>
+                    )}
 
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    if (savingAccount) return;
-                    setSavingAccount(true);
-                    try {
-                      await new Promise((r) => setTimeout(r, 800));
-                      toast.success("Profile saved successfully");
-                    } finally {
-                      setSavingAccount(false);
-                    }
-                  }}
-                  className="space-y-5"
-                >
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <div>
-                      <label className={lbl}>Full name</label>
-                      <input
-                        className={inp}
-                        defaultValue={currentUser.name}
-                        placeholder="Your full name"
-                      />
+                    {/* Auto-Save Settings Row */}
+                    <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-muted/20 p-4">
+                      <div className="flex items-center gap-3">
+                        <Switch
+                          id="auto-save"
+                          checked={isAutoSaveEnabled}
+                          onCheckedChange={setIsAutoSaveEnabled}
+                        />
+                        <div>
+                          <Label htmlFor="auto-save" className="text-sm font-semibold text-foreground">
+                            Enable Auto-Save
+                          </Label>
+                          <TypoCaption as="p">Changes save automatically after typing stops</TypoCaption>
+                        </div>
+                      </div>
+                      {renderSaveStatusIndicator()}
                     </div>
-                    <div>
-                      <label className={lbl}>Username</label>
-                      <input
-                        className={inp}
-                        defaultValue={currentUser.handle}
-                        placeholder="username"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className={lbl}>Email</label>
-                    <input
-                      className={inp}
-                      defaultValue="nancy@devlink.io"
-                      type="email"
-                      placeholder="email@example.com"
-                    />
-                  </div>
-                  <div>
-                    <label className={lbl}>Bio</label>
-                    <textarea
-                      rows={3}
-                      className={inp}
-                      defaultValue="Product engineer. React / Postgres / Rust."
-                      placeholder="Tell us about yourself"
-                    />
-                    <TypoCaption as="p">Brief description for your profile</TypoCaption>
-                  </div>
-                  <div className="flex items-center gap-3 pt-2">
-                    <Button type="submit" className="gap-2" disabled={savingAccount}>
-                      <Save size={15} />
-                      {savingAccount ? "Saving..." : "Save changes"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={() => toast.success("Changes discarded")}
+
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        if (saveStatus === "saving") return;
+                        await performSave(false);
+                      }}
+                      className="space-y-5"
                     >
-                      Cancel
-                    </Button>
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        <div>
+                          <label className={lbl}>Full name</label>
+                          <input
+                            className={inp}
+                            value={fullNameInput}
+                            onChange={(e) => handleNameChange(e.target.value)}
+                            placeholder="Your full name"
+                          />
+                        </div>
+                        <div>
+                          <label className={lbl}>Username</label>
+                          <input
+                            className={inp}
+                            value={profileData.username}
+                            onChange={(e) =>
+                              setProfileData((prev) => ({ ...prev, username: e.target.value }))
+                            }
+                            placeholder="username"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className={lbl}>Email</label>
+                        <input
+                          className={inp}
+                          value={profileData.email}
+                          onChange={(e) =>
+                            setProfileData((prev) => ({ ...prev, email: e.target.value }))
+                          }
+                          type="email"
+                          placeholder="email@example.com"
+                        />
+                      </div>
+                      <div>
+                        <label className={lbl}>Bio</label>
+                        <textarea
+                          rows={3}
+                          className={inp}
+                          value={profileData.bio}
+                          onChange={(e) =>
+                            setProfileData((prev) => ({ ...prev, bio: e.target.value }))
+                          }
+                          placeholder="Tell us about yourself"
+                        />
+                        <TypoCaption as="p">Brief description for your profile</TypoCaption>
+                      </div>
+
+                      {errorMessage && (
+                        <p className="text-xs font-medium text-destructive">{errorMessage}</p>
+                      )}
+
+                      <div className="flex items-center gap-3 pt-2">
+                        <Button type="submit" className="gap-2" disabled={saveStatus === "saving" || saveStatus === "saved" || saveStatus === "conflict"}>
+                          <Save size={15} />
+                          {saveStatus === "saving" ? "Saving..." : "Save changes"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={handleDiscardChanges}
+                          disabled={saveStatus === "saving" || saveStatus === "saved"}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
                   </div>
-                </form>
+                )}
 
                 <Separator />
 
