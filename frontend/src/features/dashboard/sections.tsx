@@ -27,48 +27,7 @@ import type { Project } from "@/mocks/seed";
 
 // 1. Current Projects
 export function CurrentProjects() {
-  const projectsList = [
-    {
-      id: "p1",
-      name: "DevLink Platform",
-      status: "In Progress",
-      progress: 80,
-      dueText: "Due in 5 days",
-      iconText: "D",
-      iconBg: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
-      avatars: [
-        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Alex",
-        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
-      ],
-      extraAvatars: 3,
-    },
-    {
-      id: "p2",
-      name: "AI Matching Engine",
-      status: "In Progress",
-      progress: 60,
-      dueText: "Due in 12 days",
-      iconText: "A",
-      iconBg: "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20",
-      avatars: [
-        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Priya",
-        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=John",
-      ],
-      extraAvatars: 2,
-    },
-    {
-      id: "p3",
-      name: "Mobile App",
-      status: "Planning",
-      progress: 25,
-      dueText: "Due in 18 days",
-      iconText: "M",
-      iconBg: "bg-violet-500/10 text-violet-500 border border-violet-500/20",
-      avatars: ["https://api.dicebear.com/9.x/notionists-neutral/svg?seed=David"],
-      extraAvatars: 1,
-    },
-  ];
-  const { data: projects = [], isLoading } = useQuery({
+  const { data: projects = [], isLoading, error } = useQuery({
     queryKey: ["dashboardCurrentProjects"],
     queryFn: () => projectsService.list(),
   });
@@ -90,6 +49,11 @@ export function CurrentProjects() {
       stack: ["React", "FastAPI", "TailwindCSS"],
       owner: "Alex",
       views: 120,
+      avatars: [
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Alex",
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Sarah",
+      ],
+      extraAvatars: 3,
     },
     {
       id: "p2",
@@ -107,6 +71,11 @@ export function CurrentProjects() {
       stack: ["Python", "PyTorch", "Redis"],
       owner: "Priya",
       views: 85,
+      avatars: [
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=Priya",
+        "https://api.dicebear.com/9.x/notionists-neutral/svg?seed=John",
+      ],
+      extraAvatars: 2,
     },
     {
       id: "p3",
@@ -124,127 +93,122 @@ export function CurrentProjects() {
       stack: ["React Native", "TypeScript", "Expo"],
       owner: "David",
       views: 54,
+      avatars: ["https://api.dicebear.com/9.x/notionists-neutral/svg?seed=David"],
+      extraAvatars: 1,
     },
   ];
 
-const displayProjects: Project[] = projects.length > 0 ? projects.slice(0, 3) : fallbackProjects;
+  const displayProjects: any[] = projects.length > 0 ? projects.slice(0, 3) : fallbackProjects;
 
-return (
-  <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
-    <SectionHeader title="Current Projects" action="View All" actionTo="/projects" />
-    <div className="flex-1 px-4 sm:px-5 pb-5 pt-1 flex flex-col gap-3.5">
-      {isLoading ? (
-        Array.from({ length: 3 }).map((_, i) => (
-          <div
-            key={i}
-            className="p-4 rounded-xl border border-border/40 space-y-2 animate-pulse bg-muted/20"
-          >
-            <div className="h-4 w-1/3 bg-muted rounded" />
-            <div className="h-2 w-full bg-muted rounded-full" />
-          </div>
-        ))
-      ) : displayProjects.length === 0 ? (
-        <EmptyState
-          icon={Rocket}
-          title="No projects yet"
-          desc="Start building something amazing with your next collaboration."
-          action={
-            <Link
-              to="/projects"
-              className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90"
-            >
-              Create project
-            </Link>
-          }
-          className="py-8"
-        />
-      ) : (
-        displayProjects.map((p: Project) => {
-          const progressVal = p.progress ?? 0;
-          const statusMap: Record<string, string> = {
-            recruiting: "bg-primary/10 text-primary border-primary/20",
-            "in-progress": "bg-warning/10 text-warning border-warning/30",
-            completed: "bg-success/10 text-success border-success/30",
-            archived: "bg-muted text-muted-foreground border-border",
-          };
-          const statusBadge =
-            statusMap[p.status] || statusMap["in-progress"];
+  return (
+    <Card className="border-border/60 rounded-2xl bg-card shadow-xs flex flex-col h-full">
+      <SectionHeader title="Current Projects" action="View All" actionTo="/projects" />
+      <div className="flex-1 px-4 sm:px-5 pb-5 pt-1 flex flex-col gap-3.5">
+        {isLoading
+          ? Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="p-4 rounded-xl border border-border/40 space-y-2 animate-pulse bg-muted/20"
+              >
+                <div className="h-4 w-1/3 bg-muted rounded" />
+                <div className="h-2 w-full bg-muted rounded-full" />
+              </div>
+            ))
+          : displayProjects.map((p) => {
+              const progressVal = p.progress ?? 0;
+              const statusMap: Record<string, string> = {
+                recruiting: "bg-primary/10 text-primary border-primary/20",
+                "in-progress": "bg-warning/10 text-warning border-warning/30",
+                completed: "bg-success/10 text-success border-success/30",
+                archived: "bg-muted text-muted-foreground border-border",
+              };
+              const statusBadge = statusMap[p.status] || statusMap["in-progress"];
+              const avatars = p.avatars || [];
+              const extraAvatars = p.extraAvatars || 0;
 
-          return (
-            <div
-              key={p.id}
-              className="group relative flex flex-col gap-2.5 p-3.5 rounded-xl border border-border/50 hover:border-primary/40 bg-surface/50 hover:bg-muted/20 transition-all"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary text-base font-bold border border-primary/20">
-                    {p.icon || "🚀"}
-                  </span>
+              return (
+                <div
+                  key={p.id}
+                  className="group relative flex flex-col gap-2.5 p-3.5 rounded-xl border border-border/50 hover:border-primary/40 bg-surface/50 hover:bg-muted/20 transition-all"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary text-base font-bold border border-primary/20">
+                        {p.icon || "🚀"}
+                      </span>
+                      <div className="min-w-0">
+                        <Link
+                          to="/projects/$projectId"
+                          params={{ projectId: p.id }}
+                          className="text-xs sm:text-sm font-bold text-foreground hover:text-primary transition-colors truncate block"
+                        >
+                          {p.name}
+                        </Link>
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          {p.description}
+                        </p>
+                      </div>
+                    </div>
 
-                  <div className="min-w-0">
-                    <Link
-                      to="/projects/$projectId"
-                      params={{ projectId: p.id }}
-                      className="text-xs sm:text-sm font-bold text-foreground hover:text-primary transition-colors truncate block"
+                    <span
+                      className={cn(
+                        "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border shrink-0",
+                        statusBadge,
+                      )}
                     >
-                      {p.name}
-                    </Link>
+                      {(p.status || "Active").replace("-", " ")}
+                    </span>
+                  </div>
 
-                    <p className="text-[11px] text-muted-foreground truncate">
-                      {p.description}
-                    </p>
+                  {/* Progress bar + Completion percentage */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-muted-foreground font-medium">Completion</span>
+                      <span className="font-bold text-foreground">{progressVal}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all duration-300"
+                        style={{ width: `${progressVal}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Actionable info row: Team size & Deadline & Avatars */}
+                  <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40 animate-fade-in">
+                    <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                      <Users2 size={12} className="text-primary" /> {p.members || 1} builders
+                    </span>
+
+                    {/* Avatar stack */}
+                    <div className="flex -space-x-1.5 items-center shrink-0">
+                      {avatars.map((av: string, idx: number) => (
+                        <Avatar
+                          key={idx}
+                          src={av}
+                          alt="Team"
+                          size={24}
+                          className="border border-card ring-1 ring-border/20"
+                        />
+                      ))}
+                      {extraAvatars > 0 && (
+                        <div className="flex items-center justify-center h-6 w-6 rounded-full bg-muted border border-card text-[9px] font-semibold text-muted-foreground ring-1 ring-border/20">
+                          +{extraAvatars}
+                        </div>
+                      )}
+                    </div>
+
+                    <span className="inline-flex items-center gap-1 text-muted-foreground">
+                      <Calendar size={12} />{" "}
+                      {p.deadlineText || "Due in 10 days"}
+                    </span>
                   </div>
                 </div>
-
-                <span
-                  className={cn(
-                    "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border shrink-0",
-                    statusBadge,
-                  )}
-                >
-                  {p.status.replace("-", " ")}
-                </span>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-muted-foreground font-medium">
-                    Completion
-                  </span>
-                  <span className="font-bold text-foreground">
-                    {progressVal}%
-                  </span>
-                </div>
-
-                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary rounded-full transition-all duration-300"
-                    style={{ width: `${progressVal}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40">
-                <span className="inline-flex items-center gap-1 font-medium text-foreground">
-                  <Users2 size={12} className="text-primary" />
-                  {p.members || 1} builders
-                </span>
-
-                <span className="inline-flex items-center gap-1 text-muted-foreground">
-                  <Calendar size={12} />
-                  {"deadlineText" in p &&
-                  typeof p.deadlineText === "string"
-                    ? p.deadlineText
-                    : "Due in 10 days"}
-                </span>
-              </div>
-            </div>
-          );
-        })
-      )}
-    </div>
-  </Card>
- );
+              );
+            })}
+      </div>
+    </Card>
+  );
 }
 
 // 2. AI Suggestions / Recommendation Panel (#738)
