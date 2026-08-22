@@ -213,19 +213,6 @@ export const usersService = {
       () => usersApi.updateMe(body),
       {}
     ),
-  getMe: () =>
-    withFallback(
-      () => usersApi.getMe(),
-      {
-        ...seed.currentUser,
-        first_name: "Nancy",
-        last_name: "Drew",
-        username: seed.currentUser.handle,
-        email: "nancy@devlink.io",
-        bio: "Product engineer. React / Postgres / Rust.",
-        version: 1,
-      }
-    ),
 };
 
 export const activitiesService = {
